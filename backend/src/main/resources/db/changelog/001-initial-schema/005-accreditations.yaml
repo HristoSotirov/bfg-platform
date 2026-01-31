@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 005-accreditations
+      author: bfg
+      changes:
+        - createTable:
+            tableName: accreditations
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: athlete_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: club_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: accreditation_number
+                  type: VARCHAR(6)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: year
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: status
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: accreditations
+            columnNames: athlete_id, club_id, year
+            constraintName: uq_accreditations_athlete_club_year
+        - addForeignKeyConstraint:
+            baseTableName: accreditations
+            baseColumnNames: athlete_id
+            referencedTableName: athletes
+            referencedColumnNames: id
+            constraintName: fk_accreditations_athlete_id
+            deleteRestrict: true
+        - addForeignKeyConstraint:
+            baseTableName: accreditations
+            baseColumnNames: club_id
+            referencedTableName: clubs
+            referencedColumnNames: id
+            constraintName: fk_accreditations_club_id
+            deleteRestrict: true

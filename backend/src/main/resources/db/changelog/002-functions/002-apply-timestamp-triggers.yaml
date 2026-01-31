@@ -1,0 +1,37 @@
+databaseChangeLog:
+  - changeSet:
+      id: 002-apply-timestamp-triggers
+      author: bfg
+      changes:
+        # Users table triggers
+        - sql:
+            sql: |
+              CREATE TRIGGER set_users_modified_at
+                BEFORE INSERT OR UPDATE ON users
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        
+        # Clubs table triggers
+        - sql:
+            sql: |
+              CREATE TRIGGER set_clubs_modified_at
+                BEFORE INSERT OR UPDATE ON clubs
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        
+        # Athletes table triggers (only modified_at, no created_at)
+        - sql:
+            sql: |
+              CREATE TRIGGER set_athletes_modified_at
+                BEFORE INSERT OR UPDATE ON athletes
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        
+        # Accreditations table triggers
+        - sql:
+            sql: |
+              CREATE TRIGGER set_accreditations_modified_at
+                BEFORE INSERT OR UPDATE ON accreditations
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+

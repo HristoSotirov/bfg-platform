@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: 001-timestamp-triggers
+      author: bfg
+      changes:
+        - sql:
+            splitStatements: false
+            endDelimiter: $$
+            sql: |
+              CREATE OR REPLACE FUNCTION set_created_at()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                IF NEW.created_at IS NULL THEN
+                  NEW.created_at := CURRENT_TIMESTAMP;
+                END IF;
+                RETURN NEW;
+              END;
+              $$ LANGUAGE plpgsql;
+        - sql:
+            splitStatements: false
+            endDelimiter: $$
+            sql: |
+              CREATE OR REPLACE FUNCTION set_modified_at()
+              RETURNS TRIGGER AS $$
+              BEGIN
+                NEW.modified_at := CURRENT_TIMESTAMP;
+                RETURN NEW;
+              END;
+              $$ LANGUAGE plpgsql;

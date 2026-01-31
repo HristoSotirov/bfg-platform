@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - include:
+      file: db/changelog/001-initial-schema/001-users.yaml
+  - include:
+      file: db/changelog/001-initial-schema/002-clubs.yaml
+  - include:
+      file: db/changelog/001-initial-schema/003-athletes.yaml
+  - include:
+      file: db/changelog/001-initial-schema/004-club-coaches.yaml
+  - include:
+      file: db/changelog/001-initial-schema/005-accreditations.yaml
+  - include:
+      file: db/changelog/001-initial-schema/006-athlete-photo-history.yaml
+  - include:
+      file: db/changelog/002-functions/001-timestamp-triggers.yaml
+  - include:
+      file: db/changelog/002-functions/002-apply-timestamp-triggers.yaml

@@ -1,0 +1,227 @@
+ClubDto:
+  type: object
+  description: Data Transfer Object representing a rowing club with all its details
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      description: Unique identifier of the club
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    name:
+      type: string
+      description: Full name of the club
+      example: "Rowing Club Sofia"
+    shortName:
+      type: string
+      description: Short name of the club (unique)
+      example: "RC Sofia"
+    logoUrl:
+      type: string
+      description: URL of the club logo image
+      example: "https://bfg-platform.bg/logos/clubsofia.png"
+    cardPrefix:
+      type: string
+      description: Prefix for athlete card numbers (unique)
+      example: "03"
+    clubEmail:
+      type: string
+      format: email
+      description: Official club email address
+      example: "club@bfg-platform.bg"
+    isActive:
+      type: boolean
+      description: Whether the club is active
+      example: true
+    clubAdminId:
+      type: string
+      format: uuid
+      description: UUID of the club administrator user
+      example: "550e8400-e29b-41d4-a716-446655440001"
+    clubAdminName:
+      type: string
+      description: Display name of the club administrator (firstName + lastName)
+      example: "Ivan Petrov"
+    clubAdmin:
+      $ref: "../users/schemas.yaml#/UserDto"
+      description: Full club administrator details
+
+ClubFacets:
+  type: object
+  description: Available filter facets for clubs
+  properties:
+    isActive:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+
+ClubCreateRequest:
+  type: object
+  description: Request payload for creating a new rowing club
+  x-class-extra-annotation: '@NotNull(message = "{club.createRequest.required}")'
+  required:
+    - name
+    - shortName
+    - clubEmail
+    - clubAdminId
+  properties:
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{club.name.required}")'
+      example: "Rowing Club Sofia"
+    shortName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{club.shortName.required}")'
+      example: "RC Sofia"
+    cardPrefix:
+      type: string
+      minLength: 2
+      maxLength: 2
+      description: Prefix for athlete card numbers (ignored - always auto-generated for new clubs)
+      x-field-extra-annotation: |-
+        @Pattern(regexp = "^[0-9]{2}$", message = "{club.cardPrefix.format}")
+        @Size(min = 2, max = 2, message = "{club.cardPrefix.length}")
+      example: "03"
+    clubEmail:
+      type: string
+      format: email
+      minLength: 1
+      x-field-extra-annotation: |-
+        @NotBlank(message = "{club.email.required}")
+        @Email(message = "{club.email.invalid}")
+      example: "club@bfg-platform.bg"
+    clubAdminId:
+      type: string
+      format: uuid
+      description: UUID of the club administrator user
+      x-field-extra-annotation: '@NotNull(message = "{club.admin.required}")'
+      example: "550e8400-e29b-41d4-a716-446655440001"
+
+ClubUpdateRequest:
+  type: object
+  description: Request payload for updating an existing rowing club
+  x-class-extra-annotation: '@NotNull(message = "{club.updateRequest.required}")'
+  properties:
+    name:
+      type: string
+      example: "Rowing Club Sofia Updated"
+    shortName:
+      type: string
+      example: "RCS"
+    isActive:
+      type: boolean
+      description: Whether the club is active
+    clubAdminId:
+      type: string
+      format: uuid
+      description: UUID of the club administrator user
+      example: "550e8400-e29b-41d4-a716-446655440001"
+
+ClubBatchCreateRequestItem:
+  type: object
+  description: Single club item for batch creation
+  required:
+    - name
+    - shortName
+    - cardPrefix
+    - clubEmail
+    - adminEmail
+  properties:
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{club.name.required}")'
+      example: "Rowing Club Sofia"
+    shortName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{club.shortName.required}")'
+      example: "RC Sofia"
+    cardPrefix:
+      type: string
+      minLength: 2
+      maxLength: 2
+      description: Prefix for athlete card numbers (must be exactly 2 digits, 01-99)
+      x-field-extra-annotation: |-
+        @NotBlank(message = "{club.cardPrefix.required}")
+        @Pattern(regexp = "^[0-9]{2}$", message = "{club.cardPrefix.format}")
+        @Size(min = 2, max = 2, message = "{club.cardPrefix.length}")
+      example: "03"
+    clubEmail:
+      type: string
+      format: email
+      minLength: 1
+      x-field-extra-annotation: |-
+        @NotBlank(message = "{club.email.required}")
+        @Email(message = "{club.email.invalid}")
+      example: "club@bfg-platform.bg"
+    adminEmail:
+      type: string
+      format: email
+      minLength: 1
+      description: Email address of the club administrator user
+      x-field-extra-annotation: |-
+        @NotBlank(message = "{club.adminEmail.required}")
+        @Email(message = "{club.adminEmail.invalid}")
+      example: "admin@bfg-platform.bg"
+
+ClubBatchCreateRequest:
+  type: object
+  description: Request payload for batch creating clubs with admin email
+  x-class-extra-annotation: '@NotNull(message = "{club.batchCreateRequest.required}")'
+  required:
+    - clubs
+  properties:
+    clubs:
+      type: array
+      minItems: 1
+      items:
+        $ref: "#/ClubBatchCreateRequestItem"
+      x-field-extra-annotation: '@NotEmpty(message = "{club.batchClubs.required}")'
+      example:
+        - name: "Rowing Club Sofia"
+          shortName: "RC Sofia"
+          cardPrefix: "01"
+          clubEmail: "club@bfg-platform.bg"
+          adminEmail: "admin@bfg-platform.bg"
+        - name: "Rowing Club Plovdiv"
+          shortName: "RC Plovdiv"
+          cardPrefix: "02"
+          clubEmail: "club2@bfg-platform.bg"
+          adminEmail: "admin2@bfg-platform.bg"
+
+ClubBatchCreateResponse:
+  type: object
+  description: Response for batch club creation
+  properties:
+    created:
+      type: array
+      description: Successfully created clubs
+      items:
+        $ref: "#/ClubDto"
+    skipped:
+      type: array
+      description: Clubs that were skipped due to errors
+      items:
+        type: object
+        properties:
+          club:
+            $ref: "#/ClubBatchCreateRequestItem"
+          reason:
+            type: string
+            description: Reason why the club was skipped
+            example: "Club with this name already exists"
+
+ClubLogoUpdateRequest:
+  type: object
+  description: Request payload for uploading a club logo (multipart/form-data)
+  required:
+    - file
+  properties:
+    file:
+      type: string
+      format: binary
+      description: Logo image file to upload (JPEG, PNG, max 10MB)
+      x-field-extra-annotation: '@NotNull(message = "{club.logo.required}")'
+

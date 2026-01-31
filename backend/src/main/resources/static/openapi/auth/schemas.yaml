@@ -1,0 +1,47 @@
+LoginRequest:
+  type: object
+  description: Credentials used for login
+  required:
+    - username
+    - password
+  properties:
+    username:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{auth.username.required}")'
+      example: "admin"
+    password:
+      type: string
+      format: password
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{auth.password.required}")'
+      example: "admin123"
+
+RefreshRequest:
+  type: object
+  description: Refresh token request
+  required:
+    - refreshToken
+  properties:
+    refreshToken:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{auth.refreshToken.required}")'
+
+TokenResponse:
+  type: object
+  description: Access/refresh token response
+  required:
+    - accessToken
+    - refreshToken
+    - tokenType
+  properties:
+    accessToken:
+      type: string
+    refreshToken:
+      type: string
+    tokenType:
+      type: string
+      example: Bearer
+
+

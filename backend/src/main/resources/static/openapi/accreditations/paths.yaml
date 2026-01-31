@@ -1,0 +1,208 @@
+/accreditations:
+  get:
+    tags:
+      - Accreditations
+    summary: Get all accreditations
+    operationId: getAllAccreditations
+    parameters:
+      - name: filter
+        in: query
+        description: |
+          Filter expression (e.g., clubId eq 'xxx' and year eq 2025 and dateOfBirth gt '1990-01-01')
+
+          **Available Fields:**
+          - `athleteId`, `clubId` (UUID)
+          - `year` or `accreditationYear`
+          - `status` or `accreditationStatus`
+          - `accreditationNumber`
+          - `dateOfBirth` or `athleteDateOfBirth` (athlete date of birth)
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across athlete names/date of birth, club name, and accreditation number (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - athlete `firstName`, `middleName`, `lastName`
+          - athlete `dateOfBirth` when a token is a date (yyyy-MM-dd)
+          - club `name`
+          - `accreditationNumber`
+
+          **Examples:**
+          - `Ivanov 1990-01-15 RC Sofia 000123`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (comma-separated for multi-sort)
+        schema:
+          type: string
+          enum:
+            - year_asc
+            - year_desc
+            - accreditationNumber_asc
+            - accreditationNumber_desc
+            - createdAt_asc
+            - createdAt_desc
+          default: year_desc
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of accreditations retrieved
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/AccreditationListResponse"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+
+/accreditations/renew/{athleteId}:
+  post:
+    tags:
+      - Accreditations
+    summary: Renew accreditation for an athlete
+    description: Renews accreditation for the current year. Uses the same card number if the athlete already has an accreditation for this club, otherwise generates a new one. Club ID is taken from the current user's context.
+    operationId: renewAccreditation
+    parameters:
+      - name: athleteId
+        in: path
+        required: true
+        description: UUID of the athlete
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+    responses:
+      "201":
+        description: Accreditation renewed successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../accreditations/schemas.yaml#/AccreditationDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "409":
+        description: Conflict - accreditation for this year already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/accreditations/migrate:
+  post:
+    tags:
+      - Accreditations
+    summary: Batch migrate athletes from old card number format
+    operationId: batchMigrateAthletes
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../athletes/schemas.yaml#/AthleteBatchMigrationRequest"
+    responses:
+      "200":
+        description: Migration completed (some athletes may have been skipped)
+        content:
+          application/json:
+            schema:
+              $ref: "../athletes/schemas.yaml#/AthleteBatchMigrationResponse"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/accreditations/{accreditationUuid}:
+  parameters:
+    - name: accreditationUuid
+      in: path
+      required: true
+      description: UUID of the accreditation
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{accreditation.uuid.required}")'
+
+  get:
+    tags:
+      - Accreditations
+    summary: Get accreditation by UUID
+    operationId: getAccreditationByUuid
+    responses:
+      "200":
+        description: Accreditation details retrieved
+        content:
+          application/json:
+            schema:
+              $ref: "../accreditations/schemas.yaml#/AccreditationDto"
+      "404":
+        description: Accreditation not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  patch:
+    tags:
+      - Accreditations
+    summary: Update accreditation status
+    description: Updates only the status of an accreditation. Only FEDERATION_ADMIN and APP_ADMIN can update accreditation status.
+    operationId: patchAccreditationByUuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../accreditations/schemas.yaml#/AccreditationStatus"
+          x-request-body-extra-annotation: '@NotNull(message = "{accreditation.status.required}")'
+    responses:
+      "200":
+        description: Accreditation status updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../accreditations/schemas.yaml#/AccreditationDto"
+      "400":
+        description: Bad request - validation error (status is required)
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Accreditation not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+

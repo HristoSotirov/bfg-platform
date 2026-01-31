@@ -1,0 +1,273 @@
+AthleteDto:
+  type: object
+  description: Data Transfer Object representing an athlete with all their details
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      example: "123e4567-e89b-12d3-a456-426614174000"
+    firstName:
+      type: string
+      example: "Ivan"
+    middleName:
+      type: string
+      example: "Petrov"
+    lastName:
+      type: string
+      example: "Ivanov"
+    dateOfBirth:
+      type: string
+      format: date
+      example: "1990-05-01"
+    gender:
+      type: string
+      example: "male"
+    medicalExaminationDue:
+      type: string
+      format: date
+      example: "2024-12-31"
+    insuranceFrom:
+      type: string
+      format: date
+      example: "2024-01-01"
+    insuranceTo:
+      type: string
+      format: date
+      example: "2024-12-31"
+    registeredOn:
+      type: string
+      format: date-time
+      example: "2024-01-15T10:30:00Z"
+
+AthleteFacets:
+  type: object
+  description: Available filter facets for athletes
+  properties:
+    gender:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+    dateOfBirthMin:
+      type: string
+      format: date
+    dateOfBirthMax:
+      type: string
+      format: date
+
+AthleteCreateRequest:
+  type: object
+  description: Request payload for creating a new athlete (used by athletes themselves)
+  x-class-extra-annotation: '@NotNull(message = "{athlete.createRequest.required}")'
+  required:
+    - firstName
+    - middleName
+    - lastName
+    - gender
+    - dateOfBirth
+  properties:
+    firstName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.firstName.required}")'
+    middleName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.middleName.required}")'
+    lastName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.lastName.required}")'
+    gender:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.gender.required}")'
+    dateOfBirth:
+      type: string
+      format: date
+      x-field-extra-annotation: '@NotNull(message = "{athlete.dateOfBirth.required}")'
+
+AthleteCreateRequestFromAdmin:
+  type: object
+  description: Request payload for creating athletes in bulk (used by administrators)
+  x-class-extra-annotation: '@NotNull(message = "{athlete.createRequestFromAdmin.required}")'
+  required:
+    - firstName
+    - lastName
+    - gender
+    - dateOfBirth
+  properties:
+    firstName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.firstName.required}")'
+    middleName:
+      type: string
+    lastName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.lastName.required}")'
+    gender:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.gender.required}")'
+    dateOfBirth:
+      type: string
+      format: date
+      x-field-extra-annotation: '@NotNull(message = "{athlete.dateOfBirth.required}")'
+    medicalExaminationDue:
+      type: string
+      format: date
+    insuranceFrom:
+      type: string
+      format: date
+    insuranceTo:
+      type: string
+      format: date
+
+AthleteUpdateRequest:
+  type: object
+  description: Request payload for updating an existing athlete's information
+  x-class-extra-annotation: '@NotNull(message = "{athlete.updateRequest.required}")'
+  properties:
+    firstName:
+      type: string
+    middleName:
+      type: string
+    lastName:
+      type: string
+    gender:
+      type: string
+    dateOfBirth:
+      type: string
+      format: date
+    medicalExaminationDue:
+      type: string
+      format: date
+    insuranceFrom:
+      type: string
+      format: date
+    insuranceTo:
+      type: string
+      format: date
+
+AthleteBatchMigrationRequest:
+  type: object
+  description: Request payload for batch migration of athletes from old card number format
+  x-class-extra-annotation: '@NotNull(message = "{athlete.migration.request.required}")'
+  required:
+    - year
+    - athletes
+  properties:
+    year:
+      type: integer
+      description: Year for which to create accreditations
+      x-field-extra-annotation: '@NotNull(message = "{athlete.migration.year.required}")'
+      example: 2024
+    athletes:
+      type: array
+      description: List of athletes to migrate
+      minItems: 1
+      x-field-extra-annotation: '@NotEmpty(message = "{athlete.migration.athletes.required}")'
+      items:
+        $ref: "#/AthleteBatchMigrationRequestItem"
+
+AthleteBatchMigrationRequestItem:
+  type: object
+  description: Single athlete migration item with old card number
+  required:
+    - oldCardNumber
+    - firstName
+    - middleName
+    - lastName
+    - gender
+    - dateOfBirth
+  properties:
+    oldCardNumber:
+      type: string
+      description: Old card number (4, 5, or 6 digits). 6-digit cards are used directly without transformation.
+      pattern: '^[0-9]{4,6}$'
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.migration.cardNumber.required}") @Pattern(regexp = "^[0-9]{4,6}$", message = "{athlete.migration.cardNumber.invalid}")'
+      example: "1233"
+    firstName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.firstName.required}")'
+    middleName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.middleName.required}")'
+    lastName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.lastName.required}")'
+    gender:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.gender.required}")'
+    dateOfBirth:
+      type: string
+      format: date
+      x-field-extra-annotation: '@NotNull(message = "{athlete.dateOfBirth.required}")'
+
+AthleteBatchMedicalUpdateRequest:
+  type: object
+  description: Request payload for batch update of medical and insurance information
+  x-class-extra-annotation: '@NotNull(message = "{athlete.batchMedical.request.required}")'
+  required:
+    - athleteIds
+    - insuranceFrom
+    - insuranceTo
+    - medicalExaminationStartDate
+    - medicalExaminationDurationMonths
+  properties:
+    athleteIds:
+      type: array
+      description: List of athlete UUIDs to update
+      minItems: 1
+      items:
+        type: string
+        format: uuid
+      x-field-extra-annotation: '@NotEmpty(message = "{athlete.batchMedical.athletes.required}")'
+    insuranceFrom:
+      type: string
+      format: date
+      description: Insurance start date
+      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.insuranceFrom.required}")'
+    insuranceTo:
+      type: string
+      format: date
+      description: Insurance end date
+      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.insuranceTo.required}")'
+    medicalExaminationStartDate:
+      type: string
+      format: date
+      description: Medical examination start date
+      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.medicalExaminationStartDate.required}")'
+    medicalExaminationDurationMonths:
+      type: integer
+      description: Medical examination duration in months
+      minimum: 1
+      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.medicalExaminationDurationMonths.required}")'
+      example: 12
+
+AthleteBatchMigrationResponse:
+  type: object
+  description: Response for batch athlete migration
+  properties:
+    migrated:
+      type: array
+      description: Successfully migrated athletes
+      items:
+        $ref: "#/AthleteDto"
+    skipped:
+      type: array
+      description: Athletes that were skipped due to errors
+      items:
+        type: object
+        properties:
+          athlete:
+            $ref: "#/AthleteBatchMigrationRequestItem"
+          reason:
+            type: string
+            description: Reason why the athlete was skipped
+            example: "Accreditation for this athlete, club, and year already exists"

@@ -1,0 +1,214 @@
+/athletes:
+  get:
+    tags:
+      - Athletes
+    summary: Get all athletes
+    operationId: getAllAthletes
+    parameters:
+      - name: filter
+        in: query
+        required: false
+        description: |
+          Filter expression to filter athletes by various criteria. Supports AND, OR operators and parentheses for grouping.
+
+          **Syntax:** `field operator value [and|or field operator value ...]`
+
+          **Operators:**
+          - `eq` - Equals
+          - `ne` - Not equals
+          - `gt` - Greater than
+          - `ge` - Greater than or equal
+          - `lt` - Less than
+          - `le` - Less than or equal
+
+          **Logical Operators:**
+          - `and` - All conditions must be true
+          - `or` - At least one condition must be true
+
+          **Available Fields:**
+          - String fields: `firstName`, `middleName`, `lastName`, `gender`
+          - Date fields: `dateOfBirth` (operators: eq, ne, gt, ge, lt, le)
+          - DateTime: `registeredOn` (operators: eq, ne, gt, ge, lt, le)
+
+          **Examples:**
+          - `lastName eq 'Ivanov' and gender eq 'male'`
+          - `dateOfBirth gt '1990-01-01' and dateOfBirth lt '2000-01-01'`
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across athlete names and date of birth (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `firstName`, `middleName`, `lastName`
+          - `dateOfBirth` when a token is a date (yyyy-MM-dd)
+
+          **Examples:**
+          - `Ivan Ivanov 1990-01-15`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (comma-separated for multi-sort)
+        schema:
+          type: string
+          enum:
+            - lastName_asc
+            - lastName_desc
+            - firstName_asc
+            - firstName_desc
+            - dateOfBirth_asc
+            - dateOfBirth_desc
+            - registeredOn_asc
+            - registeredOn_desc
+          default: lastName_asc
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of athletes retrieved
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/AthleteListResponse"
+
+/athletes/{athleteUuid}:
+  get:
+    tags:
+      - Athletes
+    summary: Get athlete by UUID
+    operationId: getAthleteByUuid
+    parameters:
+      - name: athleteUuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+    responses:
+      "200":
+        description: Athlete details retrieved
+        content:
+          application/json:
+            schema:
+              $ref: "../athletes/schemas.yaml#/AthleteDto"
+      "404":
+        description: Athlete not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  delete:
+    tags:
+      - Athletes
+    summary: Delete athlete by UUID
+    operationId: deleteAthlete
+    parameters:
+      - name: athleteUuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+    responses:
+      "204":
+        description: Athlete deleted successfully
+      "400":
+        description: Bad request - athlete has accreditations
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Athlete not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  patch:
+    tags:
+      - Athletes
+    summary: Update athlete details
+    operationId: patchAthleteByUuid
+    parameters:
+      - name: athleteUuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../athletes/schemas.yaml#/AthleteUpdateRequest"
+    responses:
+      "200":
+        description: Athlete updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../athletes/schemas.yaml#/AthleteDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Athlete not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/athletes/batch-medical:
+  patch:
+    tags:
+      - Athletes
+    summary: Batch update medical and insurance information for multiple athletes
+    operationId: batchUpdateMedicalInfo
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../athletes/schemas.yaml#/AthleteBatchMedicalUpdateRequest"
+    responses:
+      "200":
+        description: Medical information updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/AthleteListResponse"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"

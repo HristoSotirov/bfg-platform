@@ -1,0 +1,189 @@
+SystemRole:
+  type: string
+  description: Enumeration of user system roles
+  enum:
+    - APP_ADMIN
+    - FEDERATION_ADMIN
+    - CLUB_ADMIN
+    - COACH
+
+UserDto:
+  type: object
+  description: Data Transfer Object representing a system user
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      description: Unique identifier of the user
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    firstName:
+      type: string
+      description: First name of the user
+      example: "Ivan"
+    lastName:
+      type: string
+      description: Last name of the user
+      example: "Petrov"
+    dateOfBirth:
+      type: string
+      format: date
+      description: Date of birth
+      example: "1980-01-15"
+    username:
+      type: string
+      description: Username (email)
+      example: "ivan.petrov@example.com"
+    isActive:
+      type: boolean
+      description: Whether the user account is active
+      example: true
+    role:
+      $ref: "#/SystemRole"
+      description: System role of the user
+      example: "CLUB_ADMIN"
+    createdAt:
+      type: string
+      format: date-time
+      description: Account creation timestamp
+    updatedAt:
+      type: string
+      format: date-time
+      description: Last modification timestamp
+
+UserFacets:
+  type: object
+  description: Available filter facets for users
+  properties:
+    isActive:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+
+UserCreateRequest:
+  type: object
+  description: Request payload for creating a new user
+  x-class-extra-annotation: '@NotNull(message = "{user.createRequest.required}")'
+  required:
+    - firstName
+    - lastName
+    - dateOfBirth
+    - username
+    - password
+    - role
+  properties:
+    firstName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{user.firstName.required}")'
+      example: "Ivan"
+    lastName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{user.lastName.required}")'
+      example: "Petrov"
+    dateOfBirth:
+      type: string
+      format: date
+      x-field-extra-annotation: '@NotNull(message = "{user.dateOfBirth.required}")'
+      example: "1980-01-15"
+    username:
+      type: string
+      format: email
+      minLength: 1
+      x-field-extra-annotation: |-
+        @NotBlank(message = "{user.username.required}")
+        @Email(message = "{user.username.email}")
+      example: "ivan.petrov@example.com"
+    password:
+      type: string
+      format: password
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{user.password.required}")'
+      example: "SecurePassword123!"
+    role:
+      $ref: "#/SystemRole"
+      x-field-extra-annotation: '@NotNull(message = "{user.role.required}")'
+      example: "CLUB_ADMIN"
+
+UserUpdateRequest:
+  type: object
+  description: Request payload for updating an existing user (partial update)
+  x-class-extra-annotation: '@NotNull(message = "{user.updateRequest.required}")'
+  properties:
+    firstName:
+      type: string
+    lastName:
+      type: string
+    isActive:
+      type: boolean
+
+ClubCoachDto:
+  type: object
+  description: Data Transfer Object representing a coach assignment to a club
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      description: Unique identifier of the coach assignment
+      example: "550e8400-e29b-41d4-a716-446655440001"
+    userId:
+      type: string
+      format: uuid
+      description: UUID of the user (coach)
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    clubId:
+      type: string
+      format: uuid
+      description: UUID of the club
+      example: "550e8400-e29b-41d4-a716-446655440002"
+    assignmentDate:
+      type: string
+      format: date-time
+      description: Timestamp when the coach was assigned to the club
+      example: "2024-01-15T10:30:00Z"
+    userName:
+      type: string
+      description: Display name of the coach user (firstName + lastName)
+      example: "Ivan Petrov"
+      nullable: true
+    clubShortName:
+      type: string
+      description: Club short name
+      example: "RC Sofia"
+      nullable: true
+    coach:
+      $ref: "../users/schemas.yaml#/UserDto"
+      description: Full coach user details
+    club:
+      $ref: "../clubs/schemas.yaml#/ClubDto"
+      description: Full club details
+
+ClubCoachFacets:
+  type: object
+  description: Available filter facets for club coach assignments
+  properties:
+    clubId:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+
+ClubCoachCreateRequest:
+  type: object
+  description: Request payload for assigning a coach to a club
+  x-class-extra-annotation: '@NotNull(message = "{clubCoach.createRequest.required}")'
+  required:
+    - coachId
+    - clubId
+  properties:
+    coachId:
+      type: string
+      format: uuid
+      description: UUID of the user to assign as coach
+      x-field-extra-annotation: '@NotNull(message = "{clubCoach.coachId.required}")'
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    clubId:
+      type: string
+      format: uuid
+      description: UUID of the club to assign the coach to
+      x-field-extra-annotation: '@NotNull(message = "{clubCoach.clubId.required}")'
+      example: "550e8400-e29b-41d4-a716-446655440001"

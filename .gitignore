@@ -1,0 +1,86 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+.mvn/wrapper/maven-wrapper.properties
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.iws
+out/
+
+# Environment files and secrets
+*.env
+.env
+.env.*
+.env.local
+.env.*.local
+.env.production
+.env.staging
+.env.development
+
+# Application secret configuration files
+application-secret.yaml
+application-*-secret.yaml
+application-local-secret.yaml
+application-prod-secret.yaml
+application-staging-secret.yaml
+**/application-secret*.yaml
+**/application-*-secret.yaml
+
+# JWT keys and certificates
+*.pem
+*.key
+*.crt
+*.cert
+jwt-*.pem
+private_key.pem
+public_key.pem
+*.jks
+*.p12
+*.pfx
+
+# Logs
+logs/
+*.log
+
+# Spring Boot
+spring.log
+
+# Temporary files
+*.tmp
+*.temp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Database dumps and backups
+*.sql
+*.dump
+*.backup
+*.bak
+
+# IDE and editor files
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Compiled classes
+*.class
+
+# Package files
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+frontend/node_modules/
+frontend/dist/
+frontend/build/

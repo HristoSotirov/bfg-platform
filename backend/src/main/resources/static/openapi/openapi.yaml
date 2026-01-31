@@ -1,0 +1,172 @@
+openapi: 3.0.3
+
+info:
+  title: BFG API
+  version: 1.0.0
+  description: Bulgarian Rowing Federation platform
+
+servers:
+  - url: http://localhost:8080
+
+security:
+  - bearerAuth: []
+
+tags:
+  - name: Auth
+    description: Authentication and token management
+  - name: Clubs
+    description: Operations related to rowing clubs
+  - name: Athletes
+    description: Operations related to athletes
+  - name: Users
+    description: Operations related to system users
+  - name: Club Coaches
+    description: Operations related to club coach assignments
+  - name: Athlete Photos
+    description: Operations related to athlete photo uploads
+  - name: Accreditations
+    description: Operations related to athlete accreditations
+
+paths:
+  /auth/login:
+    $ref: "./auth/paths.yaml#/~1auth~1login"
+  /auth/refresh:
+    $ref: "./auth/paths.yaml#/~1auth~1refresh"
+  /auth/logout:
+    $ref: "./auth/paths.yaml#/~1auth~1logout"
+
+  /clubs:
+    $ref: "./clubs/paths.yaml#/~1clubs"
+  /admins/{adminId}/club:
+    $ref: "./clubs/paths.yaml#/~1admins~1{adminId}~1club"
+  /clubs/migrate:
+    $ref: "./clubs/paths.yaml#/~1clubs~1migrate"
+  /clubs/{clubUuid}:
+    $ref: "./clubs/paths.yaml#/~1clubs~1{clubUuid}"
+  /clubs/{clubUuid}/logo:
+    $ref: "./clubs/paths.yaml#/~1clubs~1{clubUuid}~1logo"
+  /clubs/{clubUuid}/coaches:
+    $ref: "./users/paths.yaml#/~1clubs~1{clubUuid}~1coaches"
+  /clubs/coaches:
+    $ref: "./users/paths.yaml#/~1clubs~1coaches"
+  /coaches/{coachId}/club:
+    $ref: "./users/paths.yaml#/~1coaches~1{coachId}~1club"
+  /clubs/coaches/{clubCoachId}:
+    $ref: "./users/paths.yaml#/~1clubs~1coaches~1{clubCoachId}"
+
+  /athletes:
+    $ref: "./athletes/paths.yaml#/~1athletes"
+  /athletes/batch-medical:
+    $ref: "./athletes/paths.yaml#/~1athletes~1batch-medical"
+  /athletes/{athleteUuid}:
+    $ref: "./athletes/paths.yaml#/~1athletes~1{athleteUuid}"
+  /athletes/{athleteUuid}/photos:
+    $ref: "./athletes/photo-paths.yaml#/~1athletes~1{athleteUuid}~1photos"
+  /athletes/{athleteUuid}/photos/{photoUuid}:
+    $ref: "./athletes/photo-paths.yaml#/~1athletes~1{athleteUuid}~1photos~1{photoUuid}"
+
+  /users:
+    $ref: "./users/paths.yaml#/~1users"
+  /users/{userUuid}:
+    $ref: "./users/paths.yaml#/~1users~1{userUuid}"
+
+  /accreditations:
+    $ref: "./accreditations/paths.yaml#/~1accreditations"
+  /accreditations/migrate:
+    $ref: "./accreditations/paths.yaml#/~1accreditations~1migrate"
+  /accreditations/renew/{athleteId}:
+    $ref: "./accreditations/paths.yaml#/~1accreditations~1renew~1{athleteId}"
+  /accreditations/{accreditationUuid}:
+    $ref: "./accreditations/paths.yaml#/~1accreditations~1{accreditationUuid}"
+
+components:
+  securitySchemes:
+    bearerAuth:
+      $ref: "./common/security.yaml#/bearerAuth"
+
+  schemas:
+    # Auth
+    LoginRequest:
+      $ref: "./auth/schemas.yaml#/LoginRequest"
+    RefreshRequest:
+      $ref: "./auth/schemas.yaml#/RefreshRequest"
+    TokenResponse:
+      $ref: "./auth/schemas.yaml#/TokenResponse"
+
+    # Common
+    ErrorResponse:
+      $ref: "./common/schemas.yaml#/ErrorResponse"
+    ClubListResponse:
+      $ref: "./common/schemas.yaml#/ClubListResponse"
+    AthleteListResponse:
+      $ref: "./common/schemas.yaml#/AthleteListResponse"
+    UserListResponse:
+      $ref: "./common/schemas.yaml#/UserListResponse"
+    ClubCoachListResponse:
+      $ref: "./common/schemas.yaml#/ClubCoachListResponse"
+    AthletePhotoListResponse:
+      $ref: "./common/schemas.yaml#/AthletePhotoListResponse"
+    AccreditationListResponse:
+      $ref: "./common/schemas.yaml#/AccreditationListResponse"
+
+    # Users
+    SystemRole:
+      $ref: "./users/schemas.yaml#/SystemRole"
+    UserDto:
+      $ref: "./users/schemas.yaml#/UserDto"
+    UserCreateRequest:
+      $ref: "./users/schemas.yaml#/UserCreateRequest"
+    UserUpdateRequest:
+      $ref: "./users/schemas.yaml#/UserUpdateRequest"
+    ClubCoachDto:
+      $ref: "./users/schemas.yaml#/ClubCoachDto"
+    ClubCoachCreateRequest:
+      $ref: "./users/schemas.yaml#/ClubCoachCreateRequest"
+
+    # Clubs
+    ClubDto:
+      $ref: "./clubs/schemas.yaml#/ClubDto"
+    ClubCreateRequest:
+      $ref: "./clubs/schemas.yaml#/ClubCreateRequest"
+    ClubBatchCreateRequest:
+      $ref: "./clubs/schemas.yaml#/ClubBatchCreateRequest"
+    ClubBatchCreateRequestItem:
+      $ref: "./clubs/schemas.yaml#/ClubBatchCreateRequestItem"
+    ClubBatchCreateResponse:
+      $ref: "./clubs/schemas.yaml#/ClubBatchCreateResponse"
+    ClubUpdateRequest:
+      $ref: "./clubs/schemas.yaml#/ClubUpdateRequest"
+    ClubLogoUpdateRequest:
+      $ref: "./clubs/schemas.yaml#/ClubLogoUpdateRequest"
+
+    # Athletes
+    AthleteDto:
+      $ref: "./athletes/schemas.yaml#/AthleteDto"
+    AthleteCreateRequest:
+      $ref: "./athletes/schemas.yaml#/AthleteCreateRequest"
+    AthleteCreateRequestFromAdmin:
+      $ref: "./athletes/schemas.yaml#/AthleteCreateRequestFromAdmin"
+    AthleteUpdateRequest:
+      $ref: "./athletes/schemas.yaml#/AthleteUpdateRequest"
+    AthleteBatchMigrationRequest:
+      $ref: "./athletes/schemas.yaml#/AthleteBatchMigrationRequest"
+    AthleteBatchMigrationRequestItem:
+      $ref: "./athletes/schemas.yaml#/AthleteBatchMigrationRequestItem"
+    AthleteBatchMigrationResponse:
+      $ref: "./athletes/schemas.yaml#/AthleteBatchMigrationResponse"
+    AthleteBatchMedicalUpdateRequest:
+      $ref: "./athletes/schemas.yaml#/AthleteBatchMedicalUpdateRequest"
+
+    # Athlete Photos
+    AthletePhotoDto:
+      $ref: "./athletes/photo-schemas.yaml#/AthletePhotoDto"
+    AthletePhotoUploadRequest:
+      $ref: "./athletes/photo-schemas.yaml#/AthletePhotoUploadRequest"
+
+    # Accreditations
+    AccreditationDto:
+      $ref: "./accreditations/schemas.yaml#/AccreditationDto"
+    AccreditationCreateRequest:
+      $ref: "./accreditations/schemas.yaml#/AccreditationCreateRequest"
+    AccreditationStatus:
+      $ref: "./accreditations/schemas.yaml#/AccreditationStatus"

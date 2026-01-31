@@ -1,0 +1,405 @@
+/users:
+  get:
+    tags:
+      - Users
+    summary: Get all users
+    operationId: getAllUsers
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., role eq 'CLUB_ADMIN' and status eq 'true')
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across user names and username (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `firstName`, `lastName`
+          - `username`
+
+          **Examples:**
+          - `Ivan Petrov`
+          - `ivan.petrov@example.com`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (comma-separated for multi-sort)
+        schema:
+          type: string
+          enum:
+            - lastName_asc
+            - lastName_desc
+            - firstName_asc
+            - firstName_desc
+            - username_asc
+            - username_desc
+            - role_asc
+            - role_desc
+            - createdAt_asc
+            - createdAt_desc
+          default: lastName_asc
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of users successfully retrieved
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/UserListResponse"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  post:
+    tags:
+      - Users
+    summary: Create a new user
+    operationId: createUser
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../users/schemas.yaml#/UserCreateRequest"
+    responses:
+      "201":
+        description: User created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../users/schemas.yaml#/UserDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "409":
+        description: Conflict - username already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/users/{userUuid}:
+  parameters:
+    - name: userUuid
+      in: path
+      required: true
+      description: UUID of the user
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
+
+  get:
+    tags:
+      - Users
+    summary: Get user by UUID
+    operationId: getUserByUuid
+    parameters:
+      - name: userUuid
+        in: path
+        required: true
+        description: UUID of the user
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: User details found
+        content:
+          application/json:
+            schema:
+              $ref: "../users/schemas.yaml#/UserDto"
+      "404":
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  patch:
+    tags:
+      - Users
+    summary: Update user by UUID
+    operationId: patchUserByUuid
+    parameters:
+      - name: userUuid
+        in: path
+        required: true
+        description: UUID of the user
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../users/schemas.yaml#/UserUpdateRequest"
+    responses:
+      "200":
+        description: User updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../users/schemas.yaml#/UserDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "409":
+        description: Conflict - username already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  delete:
+    tags:
+      - Users
+    summary: Delete user by UUID
+    operationId: deleteUserByUuid
+    parameters:
+      - name: userUuid
+        in: path
+        required: true
+        description: UUID of the user
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
+    responses:
+      "204":
+        description: User deleted successfully (no content)
+      "404":
+        description: User not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "409":
+        description: Conflict - user is assigned as club admin or coach
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/clubs/{clubUuid}/coaches:
+  parameters:
+    - name: clubUuid
+      in: path
+      required: true
+      description: UUID of the club
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
+
+  get:
+    tags:
+      - Club Coaches
+    summary: Get all coaches for a club
+    operationId: getClubCoaches
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., clubId eq '...') - optional when using clubUuid path
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (comma-separated for multi-sort)
+        schema:
+          type: string
+          enum:
+            - assignmentDate_asc
+            - assignmentDate_desc
+            - coachId_asc
+            - coachId_desc
+          default: assignmentDate_desc
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of coaches for the club
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ClubCoachListResponse"
+      "404":
+        description: Club not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/clubs/coaches:
+  post:
+    tags:
+      - Club Coaches
+    summary: Assign a coach to a club
+    description: |
+      Assigns a coach to a club. 
+      - FEDERATION_ADMIN and APP_ADMIN can assign to any club (only validation that coach and club exist)
+      - CLUB_ADMIN can only assign to their own club
+    operationId: assignCoachToClub
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../users/schemas.yaml#/ClubCoachCreateRequest"
+    responses:
+      "201":
+        description: Coach assigned successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../users/schemas.yaml#/ClubCoachDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "403":
+        description: Forbidden - only club admin can assign coaches
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Club or user not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "409":
+        description: Conflict - coach already assigned to this club
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/coaches/{coachId}/club:
+  parameters:
+    - name: coachId
+      in: path
+      required: true
+      description: UUID of the coach user
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{coach.uuid.required}")'
+
+  get:
+    tags:
+      - Club Coaches
+    summary: Get club for a coach
+    description: Returns the club where the coach is registered. Returns null if coach is not assigned to any club.
+    operationId: getClubByCoachId
+    responses:
+      "200":
+        description: Club found or null if coach is not assigned
+        content:
+          application/json:
+            schema:
+              $ref: "../clubs/schemas.yaml#/ClubDto"
+              nullable: true
+            example:
+              uuid: "550e8400-e29b-41d4-a716-446655440000"
+              name: "Rowing Club Sofia"
+              shortName: "RC Sofia"
+              cardPrefix: "03"
+              isActive: true
+      "404":
+        description: Coach not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/clubs/coaches/{clubCoachId}:
+  parameters:
+    - name: clubCoachId
+      in: path
+      required: true
+      description: UUID of the club coach assignment record
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{clubCoach.uuid.required}")'
+
+  delete:
+    tags:
+      - Club Coaches
+    summary: Remove a coach from a club
+    description: |
+      Removes a coach assignment by record ID.
+      - FEDERATION_ADMIN and APP_ADMIN can remove any assignment (only validation that record exists)
+      - CLUB_ADMIN can only remove assignments from their own club
+    operationId: removeCoachFromClub
+    responses:
+      "204":
+        description: Coach removed successfully (no content)
+      "403":
+        description: Forbidden - only club admin can remove coaches
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Club or coach assignment not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"

@@ -1,0 +1,46 @@
+databaseChangeLog:
+  - changeSet:
+      id: 004-club-coaches
+      author: bfg
+      changes:
+        - createTable:
+            tableName: club_coaches
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: coach_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: club_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: assignment_date
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: club_coaches
+            baseColumnNames: coach_id
+            referencedTableName: users
+            referencedColumnNames: id
+            constraintName: fk_club_coaches_coach_id
+            deleteRestrict: true
+        - addForeignKeyConstraint:
+            baseTableName: club_coaches
+            baseColumnNames: club_id
+            referencedTableName: clubs
+            referencedColumnNames: id
+            constraintName: fk_club_coaches_club_id
+            deleteRestrict: true

@@ -1,0 +1,130 @@
+ErrorResponse:
+  type: object
+  description: Standard error response format used across all API endpoints
+  properties:
+    code:
+      type: integer
+      description: HTTP status code of the error
+      example: 400
+    message:
+      type: string
+      description: Error message description
+      example: "Invalid request data"
+
+FacetOption:
+  type: object
+  description: Option for a facet with count
+  properties:
+    value:
+      type: string
+      description: Facet value
+    count:
+      type: integer
+      description: Number of items for this facet value
+ClubListResponse:
+  type: object
+  description: Paged list response for clubs
+  required:
+    - value
+    - count
+  properties:
+    count:
+      type: integer
+      description: Total number of items matching the query (ignoring pagination)
+      example: 123
+    facets:
+      $ref: "../clubs/schemas.yaml#/ClubFacets"
+    value:
+      type: array
+      items:
+        $ref: "../clubs/schemas.yaml#/ClubDto"
+
+AthleteListResponse:
+  type: object
+  description: Paged list response for athletes
+  required:
+    - value
+    - count
+  properties:
+    count:
+      type: integer
+      description: Total number of items matching the query (ignoring pagination)
+      example: 123
+    facets:
+      $ref: "../athletes/schemas.yaml#/AthleteFacets"
+    value:
+      type: array
+      items:
+        $ref: "../athletes/schemas.yaml#/AthleteDto"
+
+UserListResponse:
+  type: object
+  description: Paged list response for users
+  required:
+    - value
+    - count
+  properties:
+    count:
+      type: integer
+      description: Total number of items matching the query (ignoring pagination)
+      example: 123
+    facets:
+      $ref: "../users/schemas.yaml#/UserFacets"
+    value:
+      type: array
+      items:
+        $ref: "../users/schemas.yaml#/UserDto"
+
+ClubCoachListResponse:
+  type: object
+  description: Paged list response for club coach assignments
+  required:
+    - value
+    - count
+  properties:
+    count:
+      type: integer
+      description: Total number of items matching the query (ignoring pagination)
+      example: 123
+    facets:
+      $ref: "../users/schemas.yaml#/ClubCoachFacets"
+    value:
+      type: array
+      items:
+        $ref: "../users/schemas.yaml#/ClubCoachDto"
+
+AthletePhotoListResponse:
+  type: object
+  description: List response for athlete photo history
+  required:
+    - value
+    - count
+  properties:
+    count:
+      type: integer
+      description: Total number of items in the response
+      example: 3
+    facets:
+      $ref: "../athletes/photo-schemas.yaml#/AthletePhotoFacets"
+    value:
+      type: array
+      items:
+        $ref: "../athletes/photo-schemas.yaml#/AthletePhotoDto"
+
+AccreditationListResponse:
+  type: object
+  description: Paged list response for accreditations
+  required:
+    - value
+    - count
+  properties:
+    count:
+      type: integer
+      description: Total number of items matching the query (ignoring pagination)
+      example: 123
+    facets:
+      $ref: "../accreditations/schemas.yaml#/AccreditationFacets"
+    value:
+      type: array
+      items:
+        $ref: "../accreditations/schemas.yaml#/AccreditationDto"

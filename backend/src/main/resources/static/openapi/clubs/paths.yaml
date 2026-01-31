@@ -1,0 +1,421 @@
+/clubs:
+  get:
+    tags:
+      - Clubs
+    summary: Get all clubs
+    operationId: getAllClubs
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., isActive eq 'true' and name eq 'Sofia')
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across club name, short name, and card prefix (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `name`, `shortName`, `cardPrefix`
+
+          **Examples:**
+          - `sofia rc 03`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (comma-separated for multi-sort)
+        schema:
+          type: string
+          enum:
+            - name_asc
+            - name_desc
+            - shortName_asc
+            - shortName_desc
+            - isActive_asc
+            - isActive_desc
+            - cardPrefix_asc
+            - cardPrefix_desc
+            - createdAt_asc
+            - createdAt_desc
+          default: name_asc
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of clubs successfully retrieved
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ClubListResponse"
+            examples:
+              sample:
+                value:
+                  count: 1
+                  value:
+                    - uuid: "550e8400-e29b-41d4-a716-446655440000"
+                      name: "Rowing Club Sofia"
+                      shortName: "RC Sofia"
+                      logoUrl: "https://bfg-platform.bg/logos/clubsofia.png"
+                      cardPrefix: "03"
+                      isActive: true
+                      clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
+                      clubAdminName: "Ivan Petrov"
+                      createdBy: "550e8400-e29b-41d4-a716-446655440002"
+                      createdByName: "App Admin"
+                      updatedBy: "550e8400-e29b-41d4-a716-446655440002"
+                      updatedByName: "App Admin"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Clubs
+    summary: Create a new club
+    operationId: createClub
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../clubs/schemas.yaml#/ClubCreateRequest"
+          examples:
+            example-1:
+              value:
+                name: "Rowing Club Sofia"
+                shortName: "RC Sofia"
+                cardPrefix: "01"
+                clubEmail: "club@bfg-platform.bg"
+                clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
+    responses:
+      "201":
+        description: Club created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../clubs/schemas.yaml#/ClubDto"
+            example:
+              uuid: "550e8400-e29b-41d4-a716-446655440000"
+              name: "Rowing Club Sofia"
+              shortName: "RC Sofia"
+              logoUrl: "https://bfg-platform.bg/logos/clubsofia.png"
+              cardPrefix: "01"
+              status: "Active"
+              clubAdminId: null
+              clubAdminName: null
+              createdBy: "550e8400-e29b-41d4-a716-446655440002"
+              createdByName: "App Admin"
+              updatedBy: "550e8400-e29b-41d4-a716-446655440002"
+              updatedByName: "App Admin"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Club name, shortName and cardPrefix must be unique."
+
+/clubs/migrate:
+  post:
+    tags:
+      - Clubs
+    summary: Migrate clubs with admin email
+    description: Creates multiple clubs for migration. Each club is added if it doesn't already exist. Clubs that violate rules are skipped.
+    operationId: migrateClubs
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../clubs/schemas.yaml#/ClubBatchCreateRequest"
+          examples:
+            example-1:
+              value:
+                clubs:
+                  - name: "Rowing Club Sofia"
+                    shortName: "RC Sofia"
+                    cardPrefix: "01"
+                    clubEmail: "club@bfg-platform.bg"
+                    adminEmail: "admin@bfg-platform.bg"
+                  - name: "Rowing Club Plovdiv"
+                    shortName: "RC Plovdiv"
+                    cardPrefix: "02"
+                    clubEmail: "club2@bfg-platform.bg"
+                    adminEmail: "admin2@bfg-platform.bg"
+    responses:
+      "200":
+        description: Batch operation completed (some clubs may have been skipped)
+        content:
+          application/json:
+            schema:
+              $ref: "../clubs/schemas.yaml#/ClubBatchCreateResponse"
+            example:
+              created:
+                - uuid: "550e8400-e29b-41d4-a716-446655440000"
+                  name: "Rowing Club Sofia"
+                  shortName: "RC Sofia"
+                  cardPrefix: "01"
+                  status: "Active"
+              skipped:
+                - club:
+                    name: "Rowing Club Plovdiv"
+                    shortName: "RC Plovdiv"
+                    cardPrefix: "02"
+                    clubEmail: "club2@bfg-platform.bg"
+                    adminEmail: "admin2@bfg-platform.bg"
+                  reason: "Club with this name already exists"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid request data."
+
+/admins/{adminId}/club:
+  parameters:
+    - name: adminId
+      in: path
+      required: true
+      description: UUID of the club administrator user
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
+
+  get:
+    tags:
+      - Clubs
+    summary: Get club for an administrator
+    description: Returns the club where the administrator is registered as club admin. Returns null if admin is not assigned to any club.
+    operationId: getClubByAdminId
+    responses:
+      "200":
+        description: Club found or null if admin is not assigned
+        content:
+          application/json:
+            schema:
+              $ref: "../clubs/schemas.yaml#/ClubDto"
+              nullable: true
+            example:
+              uuid: "550e8400-e29b-41d4-a716-446655440000"
+              name: "Rowing Club Sofia"
+              shortName: "RC Sofia"
+              cardPrefix: "03"
+              isActive: true
+      "404":
+        description: Administrator not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/clubs/{clubUuid}:
+  parameters:
+    - name: clubUuid
+      in: path
+      required: true
+      description: UUID of the club
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
+
+  get:
+    tags:
+      - Clubs
+    summary: Get club by UUID
+    operationId: getClubByUuid
+    responses:
+      "200":
+        description: Club details found
+        content:
+          application/json:
+            schema:
+              $ref: "../clubs/schemas.yaml#/ClubDto"
+            example:
+              uuid: "550e8400-e29b-41d4-a716-446655440000"
+              name: "Rowing Club Sofia"
+              shortName: "RC Sofia"
+              logoUrl: "https://bfg-platform.bg/logos/clubsofia.png"
+              cardPrefix: "03"
+              status: "Active"
+              clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
+              clubAdminName: "Ivan Petrov"
+              createdBy: "550e8400-e29b-41d4-a716-446655440002"
+              createdByName: "App Admin"
+              updatedBy: "550e8400-e29b-41d4-a716-446655440002"
+              updatedByName: "App Admin"
+      "404":
+        description: Club not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Club with UUID '550e8400-e29b-41d4-a716-446655440000' not found."
+
+  patch:
+    tags:
+      - Clubs
+    summary: Update club by UUID
+    operationId: patchClubByUuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../clubs/schemas.yaml#/ClubUpdateRequest"
+          examples:
+            example-1:
+              value:
+                name: "Rowing Club Sofia Updated"
+                shortName: "RCS"
+                status: "Active"
+                clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
+    responses:
+      "200":
+        description: Club updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../clubs/schemas.yaml#/ClubDto"
+            example:
+              uuid: "550e8400-e29b-41d4-a716-446655440000"
+              name: "Rowing Club Sofia"
+              shortName: "RC Sofia"
+              logoUrl: "https://bfg-platform.bg/logos/newlogo.png"
+              cardPrefix: "03"
+              status: "Active"
+              clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
+              clubAdminName: "Ivan Petrov"
+              createdBy: "550e8400-e29b-41d4-a716-446655440002"
+              createdByName: "App Admin"
+              updatedBy: "550e8400-e29b-41d4-a716-446655440002"
+              updatedByName: "App Admin"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Club not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Club not found."
+      "409":
+        description: Conflict - name/shortName already exists for another club
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another club with the same name or short name already exists."
+
+  delete:
+    tags:
+      - Clubs
+    summary: Delete club by UUID
+    operationId: deleteClubByUuid
+    responses:
+      "204":
+        description: Club deleted successfully (no content)
+      "404":
+        description: Club not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Club with UUID '550e8400-e29b-41d4-a716-446655440000' not found."
+      "409":
+        description: Conflict - club is referenced by other records (coaches or accreditations)
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete club: club has assigned coaches"
+
+/clubs/{clubUuid}/logo:
+  parameters:
+    - name: clubUuid
+      in: path
+      required: true
+      description: UUID of the club
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
+
+  patch:
+    tags:
+      - Clubs
+    summary: Update club logo by UUID
+    operationId: patchClubLogoByUuid
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: "../clubs/schemas.yaml#/ClubLogoUpdateRequest"
+    responses:
+      "200":
+        description: Club logo updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../clubs/schemas.yaml#/ClubDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Club not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"

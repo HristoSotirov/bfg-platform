@@ -1,0 +1,65 @@
+/auth/login:
+  post:
+    tags:
+      - Auth
+    summary: Login and receive access/refresh tokens
+    operationId: login
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../auth/schemas.yaml#/LoginRequest"
+    responses:
+      "200":
+        description: Login successful
+        content:
+          application/json:
+            schema:
+              $ref: "../auth/schemas.yaml#/TokenResponse"
+      "401":
+        description: Invalid username or password
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/auth/refresh:
+  post:
+    tags:
+      - Auth
+    summary: Refresh access token using refresh token
+    operationId: refresh
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../auth/schemas.yaml#/RefreshRequest"
+    responses:
+      "200":
+        description: Token refreshed successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../auth/schemas.yaml#/TokenResponse"
+      "401":
+        description: Invalid refresh token
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/auth/logout:
+  post:
+    tags:
+      - Auth
+    summary: Logout (stateless - client should discard tokens)
+    operationId: logout
+    responses:
+      "204":
+        description: Logged out successfully
+
+

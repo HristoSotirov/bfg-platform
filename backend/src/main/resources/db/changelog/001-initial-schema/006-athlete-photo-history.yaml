@@ -1,0 +1,48 @@
+databaseChangeLog:
+  - changeSet:
+      id: 006-athlete-photo-history
+      author: bfg
+      changes:
+        - createTable:
+            tableName: athlete_photo_history
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: athlete_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: photo_url
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: uploaded_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: uploaded_by
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addForeignKeyConstraint:
+            baseTableName: athlete_photo_history
+            baseColumnNames: athlete_id
+            referencedTableName: athletes
+            referencedColumnNames: id
+            constraintName: fk_athlete_photo_history_athlete_id
+        - addForeignKeyConstraint:
+            baseTableName: athlete_photo_history
+            baseColumnNames: uploaded_by
+            referencedTableName: clubs
+            referencedColumnNames: id
+            constraintName: fk_athlete_photo_history_uploaded_by

@@ -1,0 +1,117 @@
+/athletes/{athleteUuid}/photos:
+  parameters:
+    - name: athleteUuid
+      in: path
+      required: true
+      description: UUID of the athlete
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+
+  get:
+    tags:
+      - Athlete Photos
+    summary: Get photo history for an athlete
+    operationId: getAthletePhotos
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., athleteId eq '...') - optional when using athleteUuid path
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (comma-separated for multi-sort)
+        schema:
+          type: string
+          enum:
+            - uploadedAt_asc
+            - uploadedAt_desc
+          default: uploadedAt_desc
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of athlete photos
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/AthletePhotoListResponse"
+      "404":
+        description: Athlete not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  post:
+    tags:
+      - Athlete Photos
+    summary: Upload a photo for an athlete
+    description: Uploads a photo file to S3 and creates a photo history entry
+    operationId: uploadAthletePhoto
+    requestBody:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            $ref: "../athletes/photo-schemas.yaml#/AthletePhotoUploadRequest"
+    responses:
+      "201":
+        description: Photo uploaded successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../athletes/photo-schemas.yaml#/AthletePhotoDto"
+      "400":
+        description: Bad request - invalid file format or size
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Athlete not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "500":
+        description: Server error - failed to upload to S3
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/athletes/{athleteUuid}/photos/{photoUuid}:
+  parameters:
+    - name: athleteUuid
+      in: path
+      required: true
+      description: UUID of the athlete
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+    - name: photoUuid
+      in: path
+      required: true
+      description: UUID of the photo history entry
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull(message = "{athletePhoto.uuid.required}")'
+

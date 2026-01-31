@@ -1,0 +1,57 @@
+AthletePhotoDto:
+  type: object
+  description: Data Transfer Object representing an athlete photo history entry
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      description: Unique identifier of the photo history entry
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    athleteId:
+      type: string
+      format: uuid
+      description: UUID of the athlete
+      example: "550e8400-e29b-41d4-a716-446655440001"
+    photoUrl:
+      type: string
+      description: URL of the photo stored in S3
+      example: "https://s3.example.com/bfg-platform/photos/athlete-001.jpg"
+    uploadedAt:
+      type: string
+      format: date-time
+      description: Timestamp when the photo was uploaded
+      example: "2024-01-15T10:30:00Z"
+    uploadedById:
+      type: string
+      format: uuid
+      description: UUID of the club that uploaded the photo
+      example: "550e8400-e29b-41d4-a716-446655440002"
+    uploadedByName:
+      type: string
+      description: Display name of the club that uploaded the photo
+      example: "FC Dynamo"
+      nullable: true
+    uploadedBy:
+      $ref: "../clubs/schemas.yaml#/ClubDto"
+      description: Full club details for uploadedBy
+
+AthletePhotoFacets:
+  type: object
+  description: Available filter facets for athlete photos
+  properties:
+    athleteId:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+
+AthletePhotoUploadRequest:
+  type: object
+  description: Request payload for uploading an athlete photo (multipart/form-data)
+  required:
+    - file
+  properties:
+    file:
+      type: string
+      format: binary
+      description: Photo file to upload (JPEG, PNG, max 10MB)
+      x-field-extra-annotation: '@NotNull(message = "{athletePhoto.file.required}")'

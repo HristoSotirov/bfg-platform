@@ -1,0 +1,133 @@
+AccreditationDto:
+  type: object
+  description: Data Transfer Object representing an athlete accreditation with all its details
+  properties:
+    uuid:
+      type: string
+      format: uuid
+      description: Unique identifier of the accreditation
+      example: "550e8400-e29b-41d4-a716-446655440000"
+    athleteId:
+      type: string
+      format: uuid
+      description: UUID of the athlete
+      example: "550e8400-e29b-41d4-a716-446655440001"
+    athleteName:
+      type: string
+      description: Display name of the athlete (firstName + middleName + lastName)
+      example: "Ivan Petrov Ivanov"
+    clubId:
+      type: string
+      format: uuid
+      description: UUID of the club
+      example: "550e8400-e29b-41d4-a716-446655440002"
+    clubName:
+      type: string
+      description: Name of the club
+      example: "Rowing Club Sofia"
+    clubShortName:
+      type: string
+      description: Short name of the club
+      example: "RCS"
+    club:
+      $ref: "../clubs/schemas.yaml#/ClubDto"
+      description: Full club details
+    athlete:
+      $ref: "../athletes/schemas.yaml#/AthleteDto"
+      description: Full athlete details
+    accreditationNumber:
+      type: string
+      description: Accreditation number
+      example: "2025-001"
+    year:
+      type: integer
+      description: Year of the accreditation
+      example: 2025
+    status:
+      $ref: "#/AccreditationStatus"
+      description: Status of the accreditation
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the accreditation was created
+      example: "2024-01-15T10:30:00Z"
+    updatedAt:
+      type: string
+      format: date-time
+      description: Timestamp when the accreditation was last modified
+      example: "2024-01-16T14:20:00Z"
+
+AccreditationFacets:
+  type: object
+  description: Available filter facets for accreditations
+  properties:
+    athleteId:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+    clubId:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+    accreditationYear:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+    accreditationStatus:
+      type: array
+      items:
+        $ref: "../common/schemas.yaml#/FacetOption"
+    dateOfBirthMin:
+      type: string
+      format: date
+    dateOfBirthMax:
+      type: string
+      format: date
+
+AccreditationCreateRequest:
+  type: object
+  description: Request payload for creating a new accreditation
+  x-class-extra-annotation: '@NotNull(message = "{accreditation.createRequest.required}")'
+  required:
+    - athleteId
+    - clubId
+    - accreditationNumber
+    - year
+  properties:
+    athleteId:
+      type: string
+      format: uuid
+      description: UUID of the athlete
+      x-field-extra-annotation: '@NotNull(message = "{accreditation.athleteId.required}")'
+      example: "550e8400-e29b-41d4-a716-446655440001"
+    clubId:
+      type: string
+      format: uuid
+      description: UUID of the club
+      x-field-extra-annotation: '@NotNull(message = "{accreditation.clubId.required}")'
+      example: "550e8400-e29b-41d4-a716-446655440002"
+    accreditationNumber:
+      type: string
+      description: Accreditation number
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{accreditation.number.required}")'
+      example: "2025-001"
+    year:
+      type: integer
+      description: Year of the accreditation
+      x-field-extra-annotation: '@NotNull(message = "{accreditation.year.required}")'
+      example: 2025
+    status:
+      $ref: "#/AccreditationStatus"
+      description: Status of the accreditation
+
+AccreditationStatus:
+  type: string
+  description: Enumeration of possible accreditation status values
+  enum:
+    - Active
+    - Pending validation
+    - Pending photo validation
+    - New Photo Required
+    - Expired
+    - Suspended
