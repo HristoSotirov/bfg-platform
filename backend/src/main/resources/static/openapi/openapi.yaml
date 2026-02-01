@@ -96,18 +96,8 @@ components:
     # Common
     ErrorResponse:
       $ref: "./common/schemas.yaml#/ErrorResponse"
-    ClubListResponse:
-      $ref: "./common/schemas.yaml#/ClubListResponse"
-    AthleteListResponse:
-      $ref: "./common/schemas.yaml#/AthleteListResponse"
-    UserListResponse:
-      $ref: "./common/schemas.yaml#/UserListResponse"
-    ClubCoachListResponse:
-      $ref: "./common/schemas.yaml#/ClubCoachListResponse"
-    AthletePhotoListResponse:
-      $ref: "./common/schemas.yaml#/AthletePhotoListResponse"
-    AccreditationListResponse:
-      $ref: "./common/schemas.yaml#/AccreditationListResponse"
+    Page:
+      $ref: "./common/schemas.yaml#/Page"
 
     # Users
     SystemRole:

@@ -5,12 +5,26 @@ import org.springframework.data.domain.Sort;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public final class SortParser {
     private SortParser() {
         throw new IllegalStateException("Utility class");
+    }
+
+    public static Sort parse(List<String> orderByList, Map<String, Sort.Order> allowed, Sort defaultSort) {
+        if (orderByList == null || orderByList.isEmpty()) {
+            return defaultSort;
+        }
+        
+        String orderByStr = orderByList.stream()
+                .filter(s -> s != null && !s.isBlank())
+                .collect(Collectors.joining(","));
+        
+        return parse(orderByStr, allowed, defaultSort);
     }
 
     public static Sort parse(String raw, Map<String, Sort.Order> allowed, Sort defaultSort) {

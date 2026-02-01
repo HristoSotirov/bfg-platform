@@ -7,6 +7,7 @@ import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.service.UserMapper;
 
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 public class ClubCoachMapper {
 
@@ -22,22 +23,31 @@ public class ClubCoachMapper {
     }
 
     public static ClubCoachDto toDto(ClubCoach clubCoach) {
+        return toDto(clubCoach, null);
+    }
+
+    public static ClubCoachDto toDto(ClubCoach clubCoach, java.util.Set<String> expand) {
         if (clubCoach == null) return null;
 
         ClubCoachDto dto = new ClubCoachDto();
         dto.setUuid(clubCoach.getId());
         dto.setUserId(clubCoach.getCoachId());
         dto.setClubId(clubCoach.getClubId());
-        dto.setAssignmentDate(OffsetDateTime.from(clubCoach.getAssignmentDate()));
+        dto.setAssignmentDate(OffsetDateTime.ofInstant(clubCoach.getAssignmentDate(), ZoneOffset.UTC));
 
-        dto.userName(displayName(clubCoach.getCoach()));
-        dto.clubShortName(clubCoach.getClub() != null ? clubCoach.getClub().getShortName() : null);
-        if (clubCoach.getCoach() != null) {
+        boolean expandCoach = expand != null && expand.contains("coach");
+        boolean expandClub = expand != null && expand.contains("club");
+        
+        if (expandCoach && clubCoach.getCoach() != null) {
+            dto.userName(displayName(clubCoach.getCoach()));
             dto.setCoach(UserMapper.toDto(clubCoach.getCoach()));
         }
-        if (clubCoach.getClub() != null) {
-            dto.setClub(ClubMapper.toDto(clubCoach.getClub()));
+        
+        if (expandClub && clubCoach.getClub() != null) {
+            dto.clubShortName(clubCoach.getClub().getShortName());
+            dto.setClub(ClubMapper.toDto(clubCoach.getClub(), expand));
         }
+        
         return dto;
     }
 

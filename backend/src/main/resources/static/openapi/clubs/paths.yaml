@@ -29,21 +29,25 @@
           type: string
       - name: orderBy
         in: query
-        description: Predefined ordering (comma-separated for multi-sort)
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: true
         schema:
-          type: string
-          enum:
-            - name_asc
-            - name_desc
-            - shortName_asc
-            - shortName_desc
-            - isActive_asc
-            - isActive_desc
-            - cardPrefix_asc
-            - cardPrefix_desc
-            - createdAt_asc
-            - createdAt_desc
-          default: name_asc
+          type: array
+          items:
+            type: string
+            enum:
+              - name_asc
+              - name_desc
+              - shortName_asc
+              - shortName_desc
+              - isActive_asc
+              - isActive_desc
+              - cardPrefix_asc
+              - cardPrefix_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["name_asc"]
       - name: top
         in: query
         description: Maximum number of items to return
@@ -59,13 +63,37 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: clubAdminUser
+          
+          When expanded, the full entity objects are included in the response.
+          Expanded fields can also be used in filter and sort expressions using dot notation.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - clubAdminUser
+          example: ["clubAdminUser"]
     responses:
       "200":
         description: List of clubs successfully retrieved
         content:
           application/json:
             schema:
-              $ref: "../common/schemas.yaml#/ClubListResponse"
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../clubs/schemas.yaml#/ClubDto"
             examples:
               sample:
                 value:
@@ -218,6 +246,22 @@
     summary: Get club for an administrator
     description: Returns the club where the administrator is registered as club admin. Returns null if admin is not assigned to any club.
     operationId: getClubByAdminId
+    parameters:
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: clubAdminUser
+          
+          When expanded, the full entity objects are included in the response.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - clubAdminUser
     responses:
       "200":
         description: Club found or null if admin is not assigned
@@ -255,6 +299,23 @@
       - Clubs
     summary: Get club by UUID
     operationId: getClubByUuid
+    parameters:
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: clubAdminUser
+          
+          When expanded, the full entity objects are included in the response.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - clubAdminUser
+          example: ["clubAdminUser"]
     responses:
       "200":
         description: Club details found

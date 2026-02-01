@@ -1,35 +1,32 @@
 package com.bfg.platform.athlete.service;
 
-import com.bfg.platform.common.dto.ListResult;
-import com.bfg.platform.gen.model.AccreditationCreateRequest;
 import com.bfg.platform.gen.model.AccreditationDto;
-import com.bfg.platform.gen.model.AccreditationFacets;
 import com.bfg.platform.gen.model.AccreditationStatus;
 import com.bfg.platform.gen.model.AthleteBatchMigrationRequest;
 import com.bfg.platform.gen.model.AthleteBatchMigrationResponse;
 import com.bfg.platform.gen.model.AthleteCreateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
+import org.springframework.data.domain.Page;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface AccreditationService {
-    // GET methods (Read)
-    ListResult<AccreditationDto, AccreditationFacets> getAllAccreditations(
+    Page<AccreditationDto> getAllAccreditations(
             String filter,
             String search,
-            String orderBy,
+            List<String> orderBy,
             Integer top,
-            Integer skip
+            Integer skip,
+            List<String> expand
     );
-    Optional<AccreditationDto> getAccreditationByUuid(UUID uuid);
+    Optional<AccreditationDto> getAccreditationByUuid(UUID uuid, List<String> expand);
     
-    // POST methods (Create)
     Optional<AccreditationDto> renewAccreditation(UUID athleteId);
     Optional<AthleteDto> createAthleteWithAccreditation(AthleteCreateRequest request);
     AthleteBatchMigrationResponse batchMigrateAthletes(AthleteBatchMigrationRequest request);
     
-    // PATCH methods (Update)
-    Optional<AccreditationDto> updateAccreditation(UUID uuid, AccreditationStatus status);
+    Optional<AccreditationDto> updateAccreditationStatus(UUID uuid, AccreditationStatus status);
 }
 

@@ -1,11 +1,11 @@
 package com.bfg.platform.user.service;
 
 import com.bfg.platform.user.entity.User;
-import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserDto;
 import com.bfg.platform.gen.model.UserUpdateRequest;
 
+import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
 public class UserMapper {
@@ -25,12 +25,8 @@ public class UserMapper {
         dto.setUsername(user.getUsername());
         dto.setIsActive(user.isActive());
         dto.setRole(user.getRole());
-        dto.setCreatedAt(user.getCreatedAt() != null 
-                ? user.getCreatedAt().atOffset(ZoneOffset.UTC) 
-                : null);
-        dto.setUpdatedAt(user.getModifiedAt() != null 
-                ? user.getModifiedAt().atOffset(ZoneOffset.UTC) 
-                : null);
+        dto.setCreatedAt(OffsetDateTime.ofInstant(user.getCreatedAt(), ZoneOffset.UTC));
+        dto.setUpdatedAt(OffsetDateTime.ofInstant(user.getModifiedAt(), ZoneOffset.UTC));
         return dto;
     }
 

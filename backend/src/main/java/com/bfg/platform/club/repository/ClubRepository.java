@@ -20,11 +20,9 @@ import java.util.UUID;
 public interface ClubRepository extends JpaRepository<Club, UUID>, JpaSpecificationExecutor<Club> {
 
     @Override
-    @EntityGraph(attributePaths = {"clubAdminUser"})
     @NonNull
     Page<Club> findAll(@NonNull Specification<Club> spec, @NonNull Pageable pageable);
 
-    @EntityGraph(attributePaths = {"clubAdminUser"})
     Optional<Club> findWithAdminById(@NonNull UUID id);
 
     Optional<Club> findByClubAdmin(@NonNull UUID clubAdmin);

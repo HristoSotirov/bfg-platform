@@ -1,12 +1,14 @@
 package com.bfg.platform.athlete.mapper;
 
 import com.bfg.platform.athlete.entity.Accreditation;
+import com.bfg.platform.athlete.entity.Athlete;
 import com.bfg.platform.club.mapper.ClubMapper;
 import com.bfg.platform.gen.model.AccreditationDto;
 import com.bfg.platform.gen.model.AccreditationCreateRequest;
 import com.bfg.platform.gen.model.AccreditationStatus;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Set;
 
 public class AccreditationMapper {
 
@@ -15,41 +17,44 @@ public class AccreditationMapper {
     }
 
     public static AccreditationDto toDto(Accreditation accreditation) {
+        return toDto(accreditation, null);
+    }
+
+    public static AccreditationDto toDto(Accreditation accreditation, Set<String> expand) {
         if (accreditation == null) return null;
 
         AccreditationDto dto = new AccreditationDto();
         dto.setUuid(accreditation.getId());
         dto.setAthleteId(accreditation.getAthleteId());
-        String athleteName = displayAthleteName(accreditation.getAthlete());
-        dto.setAthleteName(athleteName);
         dto.setClubId(accreditation.getClubId());
-        String clubName = accreditation.getClub() != null ? accreditation.getClub().getName() : null;
-        dto.setClubName(clubName);
-        String clubShortName = accreditation.getClub() != null ? accreditation.getClub().getShortName() : null;
-        dto.setClubShortName(clubShortName);
         dto.setAccreditationNumber(accreditation.getAccreditationNumber());
         dto.setYear(accreditation.getYear());
         dto.setStatus(accreditation.getStatus());
 
-        dto.setCreatedAt(accreditation.getCreatedAt() != null
-                ? OffsetDateTime.ofInstant(accreditation.getCreatedAt(), ZoneOffset.UTC)
-                : null);
-        dto.setUpdatedAt(accreditation.getModifiedAt() != null
-                ? OffsetDateTime.ofInstant(accreditation.getModifiedAt(), ZoneOffset.UTC)
-                : null);
+        dto.setCreatedAt(OffsetDateTime.ofInstant(accreditation.getCreatedAt(), ZoneOffset.UTC));
+        dto.setUpdatedAt(OffsetDateTime.ofInstant(accreditation.getModifiedAt(), ZoneOffset.UTC));
 
-        if (accreditation.getClub() != null) {
-            dto.setClub(ClubMapper.toDto(accreditation.getClub()));
-        }
-
-        if (accreditation.getAthlete() != null) {
+        boolean expandAthlete = expand != null && expand.contains("athlete");
+        boolean expandClub = expand != null && expand.contains("club");
+        
+        if (expandAthlete && accreditation.getAthlete() != null) {
+            String athleteName = displayAthleteName(accreditation.getAthlete());
+            dto.setAthleteName(athleteName);
             dto.setAthlete(AthleteMapper.toDto(accreditation.getAthlete()));
+        }
+        
+        if (expandClub && accreditation.getClub() != null) {
+            String clubName = accreditation.getClub().getName();
+            dto.setClubName(clubName);
+            String clubShortName = accreditation.getClub().getShortName();
+            dto.setClubShortName(clubShortName);
+            dto.setClub(ClubMapper.toDto(accreditation.getClub(), expand));
         }
 
         return dto;
     }
 
-    private static String displayAthleteName(com.bfg.platform.athlete.entity.Athlete athlete) {
+    private static String displayAthleteName(Athlete athlete) {
         if (athlete == null) return null;
         String first = athlete.getFirstName() != null ? athlete.getFirstName().trim() : "";
         String middle = athlete.getMiddleName() != null ? athlete.getMiddleName().trim() : "";

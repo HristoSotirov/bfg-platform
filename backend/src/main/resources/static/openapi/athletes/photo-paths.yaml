@@ -22,13 +22,17 @@
           type: string
       - name: orderBy
         in: query
-        description: Predefined ordering (comma-separated for multi-sort)
+        description: Predefined ordering (multiselect for multi-sort)
+        style: form
+        explode: true
         schema:
-          type: string
-          enum:
-            - uploadedAt_asc
-            - uploadedAt_desc
-          default: uploadedAt_desc
+          type: array
+          items:
+            type: string
+            enum:
+              - uploadedAt_asc
+              - uploadedAt_desc
+          default: [uploadedAt_desc]
       - name: top
         in: query
         description: Maximum number of items to return
@@ -44,13 +48,35 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: uploadedByClub
+          
+          When expanded, the full entity objects are included in the response.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - uploadedByClub
     responses:
       "200":
         description: List of athlete photos
         content:
           application/json:
             schema:
-              $ref: "../common/schemas.yaml#/AthletePhotoListResponse"
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../athletes/photo-schemas.yaml#/AthletePhotoDto"
       "404":
         description: Athlete not found
         content:
@@ -64,6 +90,15 @@
     summary: Upload a photo for an athlete
     description: Uploads a photo file to S3 and creates a photo history entry
     operationId: uploadAthletePhoto
+    parameters:
+      - name: athleteUuid
+        in: path
+        required: true
+        description: UUID of the athlete
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
     requestBody:
       required: true
       content:

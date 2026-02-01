@@ -37,7 +37,8 @@ public class SecurityConfig {
                     "/openapi/**",
                     "/webjars/**",
                     "/auth/login",
-                    "/auth/refresh"
+                    "/auth/refresh",
+                    "/test-photo.html"
                 ).permitAll()
                 .anyRequest().authenticated()
             )

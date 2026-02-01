@@ -8,14 +8,31 @@
       - name: filter
         in: query
         description: |
-          Filter expression (e.g., clubId eq 'xxx' and year eq 2025 and dateOfBirth gt '1990-01-01')
+          Filter expression. Supports expanded fields with dot notation, range operator, and in operator.
 
           **Available Fields:**
           - `athleteId`, `clubId` (UUID)
           - `year` or `accreditationYear`
           - `status` or `accreditationStatus`
           - `accreditationNumber`
-          - `dateOfBirth` or `athleteDateOfBirth` (athlete date of birth)
+          - `createdAt`
+          
+          **Expanded Fields (requires expand parameter):**
+          - `athlete.dateOfBirth`, `athlete.firstName`, `athlete.lastName`, `athlete.gender`
+          - `club.name`, `club.shortName`, `club.isActive`
+          
+          **Operators:**
+          - Comparison: `eq`, `ne`, `gt`, `ge`, `lt`, `le`
+          - Range: `field range 'min' to 'max'` (inclusive), `field range 'min' to ''` (after min), `field range '' to 'max'` (before max)
+          - In: `field in ('value1', 'value2', 'value3')`
+          
+          **Examples:**
+          - `clubId eq 'xxx' and year eq 2025`
+          - `athlete.dateOfBirth range '2002-01-01' to '2010-01-01'` (requires expand=athlete)
+          - `athlete.dateOfBirth range '2002-01-01' to ''` (after date, requires expand=athlete)
+          - `status in ('ACTIVE', 'PENDING')`
+          - `clubId in ('uuid1', 'uuid2', 'uuid3')`
+          - `club.name eq 'RC Sofia'` (requires expand=club)
         schema:
           type: string
       - name: search
@@ -40,17 +57,32 @@
           type: string
       - name: orderBy
         in: query
-        description: Predefined ordering (comma-separated for multi-sort)
+        description: |
+          Sort fields (multiselect). Supports expanded fields with dot notation.
+          
+          **Available Sorts:**
+          - `year_asc`, `year_desc`
+          - `accreditationNumber_asc`, `accreditationNumber_desc`
+          - `createdAt_asc`, `createdAt_desc`
+          
+          **Expanded Field Sorts (requires expand parameter):**
+          - `athlete.dateOfBirth_asc`, `athlete.dateOfBirth_desc`
+          - `athlete.firstName_asc`, `athlete.firstName_desc`
+          - `athlete.lastName_asc`, `athlete.lastName_desc`
+          - `club.name_asc`, `club.name_desc`
+          
+          **Examples:**
+          - `athlete.dateOfBirth_asc` (requires expand=athlete)
+          - `club.name_asc, year_desc` (requires expand=club)
+          
+          **Note:** Conflicting sorts (e.g., `name_asc,name_desc`) are not allowed.
+        style: form
+        explode: true
         schema:
-          type: string
-          enum:
-            - year_asc
-            - year_desc
-            - accreditationNumber_asc
-            - accreditationNumber_desc
-            - createdAt_asc
-            - createdAt_desc
-          default: year_desc
+          type: array
+          items:
+            type: string
+          default: ["year_desc"]
       - name: top
         in: query
         description: Maximum number of items to return
@@ -66,13 +98,38 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: athlete, club
+          
+          When expanded, the full entity objects are included in the response.
+          Expanded fields can also be used in filter and sort expressions using dot notation.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - athlete
+              - club
+          example: ["athlete", "club"]
     responses:
       "200":
         description: List of accreditations retrieved
         content:
           application/json:
             schema:
-              $ref: "../common/schemas.yaml#/AccreditationListResponse"
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../accreditations/schemas.yaml#/AccreditationDto"
       "400":
         description: Bad request - validation error
         content:
@@ -159,6 +216,24 @@
       - Accreditations
     summary: Get accreditation by UUID
     operationId: getAccreditationByUuid
+    parameters:
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: athlete, club
+          
+          When expanded, the full entity objects are included in the response.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - athlete
+              - club
+          example: ["athlete", "club"]
     responses:
       "200":
         description: Accreditation details retrieved
@@ -178,7 +253,7 @@
       - Accreditations
     summary: Update accreditation status
     description: Updates only the status of an accreditation. Only FEDERATION_ADMIN and APP_ADMIN can update accreditation status.
-    operationId: patchAccreditationByUuid
+    operationId: patchAccreditationStatus
     requestBody:
       required: true
       content:

@@ -8,17 +8,25 @@ import com.bfg.platform.athlete.mapper.AthleteMapper;
 import com.bfg.platform.athlete.repository.AthleteRepository;
 import com.bfg.platform.club.entity.Club;
 import com.bfg.platform.club.repository.ClubRepository;
-import com.bfg.platform.common.dto.ListResult;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.security.AuthorizationService;
 import com.bfg.platform.athlete.query.AccreditationQueryAdapter;
-import com.bfg.platform.common.query.DateRange;
-import com.bfg.platform.common.query.FacetQueryService;
+import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
+import com.bfg.platform.common.query.EnhancedSortParser;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.common.repository.DynamicEntityGraph;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import java.util.Set;
 import com.bfg.platform.gen.model.AccreditationDto;
-import com.bfg.platform.gen.model.AccreditationFacets;
 import com.bfg.platform.gen.model.AccreditationStatus;
 import com.bfg.platform.gen.model.AthleteBatchMigrationRequest;
 import com.bfg.platform.gen.model.AthleteBatchMigrationRequestItem;
@@ -31,6 +39,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -51,53 +60,83 @@ public class AccreditationServiceImpl implements AccreditationService {
     private final AthleteRepository athleteRepository;
     private final ClubRepository clubRepository;
     private final AuthorizationService authorizationService;
-    private final FacetQueryService facetQueryService;
     private final PlatformTransactionManager transactionManager;
+    private final EntityManager entityManager;
 
-    // GET methods (Read)
     @Override
-    public ListResult<AccreditationDto, AccreditationFacets> getAllAccreditations(
+    public Page<AccreditationDto> getAllAccreditations(
             String filter,
             String search,
-            String orderBy,
+            List<String> orderBy,
             Integer top,
-            Integer skip
+            Integer skip,
+            List<String> expand
     ) {
-        Specification<Accreditation> filterSpec = AccreditationQueryAdapter.parseFilter(filter);
+        Set<String> requestedExpand = ExpandQueryParser.parse(expand, Accreditation.class);
+        
+        EnhancedFilterExpressionParser.ParseResult<Accreditation> filterResult = 
+                AccreditationQueryAdapter.parseFilter(filter, requestedExpand);
+        Specification<Accreditation> filterSpec = filterResult.getSpecification();
+        Set<String> usedInFilter = filterResult.getUsedExpandFields();
+        
         Specification<Accreditation> searchSpec = AccreditationQueryAdapter.parseSearch(search);
+        
         Specification<Accreditation> spec = Specification.where(filterSpec).and(searchSpec);
-        Pageable pageable = OffsetBasedPageRequest.of(skip, top, AccreditationQueryAdapter.parseSort(orderBy));
-        Page<Accreditation> page = accreditationRepository.findAll(spec, pageable);
-
-        AccreditationFacets facets = buildFacets(spec);
-        return new ListResult<>(page.map(AccreditationMapper::toDto), facets);
+        
+        EnhancedSortParser.ParseResult sortResult = 
+                AccreditationQueryAdapter.parseSort(orderBy, requestedExpand);
+        Sort sort = sortResult.getSort();
+        Set<String> usedInSort = sortResult.getUsedExpandFields();
+        
+        Set<String> allExpandFields = new java.util.HashSet<>(requestedExpand);
+        allExpandFields.addAll(usedInFilter);
+        allExpandFields.addAll(usedInSort);
+        
+        Pageable pageable = OffsetBasedPageRequest.of(skip, top, sort);
+        
+        Page<Accreditation> page;
+        if (!allExpandFields.isEmpty()) {
+            EntityGraph<Accreditation> entityGraph = DynamicEntityGraph.create(entityManager, Accreditation.class, allExpandFields);
+            page = findAllWithEntityGraph(spec, pageable, entityGraph);
+        } else {
+            page = accreditationRepository.findAll(spec, pageable);
+        }
+        
+        return page.map(acc -> AccreditationMapper.toDto(acc, allExpandFields));
     }
 
     @Override
-    public Optional<AccreditationDto> getAccreditationByUuid(UUID uuid) {
+    public Optional<AccreditationDto> getAccreditationByUuid(UUID uuid, List<String> expand) {
         validateUuid(uuid);
-        return accreditationRepository.findWithRelationsById(uuid)
-                .map(AccreditationMapper::toDto);
+        Set<String> requestedExpand = ExpandQueryParser.parse(expand, Accreditation.class);
+        
+        Accreditation accreditation;
+        if (!requestedExpand.isEmpty()) {
+            EntityGraph<Accreditation> entityGraph = DynamicEntityGraph.create(entityManager, Accreditation.class, requestedExpand);
+            java.util.Map<String, Object> hints = new java.util.HashMap<>();
+            hints.put("jakarta.persistence.loadgraph", entityGraph);
+            accreditation = entityManager.find(Accreditation.class, uuid, hints);
+        } else {
+            accreditation = accreditationRepository.findById(uuid).orElse(null);
+        }
+        
+        return Optional.ofNullable(accreditation)
+                .map(acc -> AccreditationMapper.toDto(acc, requestedExpand));
     }
 
-    // POST methods (Create)
     @Override
     @Transactional
     public Optional<AccreditationDto> renewAccreditation(UUID athleteId) {
         try {
-            // Get club ID from context (current user's club)
             UUID clubId = authorizationService.requireCurrentUserClubId();
             authorizationService.requireCanManageAccreditations(clubId);
 
-            // Validate athlete exists
             athleteRepository.findById(athleteId)
                     .orElseThrow(() -> new ValidationException("Athlete not found"));
 
-            // Validate club exists
             Club club = clubRepository.findById(clubId)
                     .orElseThrow(() -> new ValidationException("Club not found"));
 
-            // Check if accreditation already exists for this year
             int currentYear = Year.now().getValue();
             boolean exists = accreditationRepository.existsByAthleteIdAndClubIdAndYear(athleteId, clubId, currentYear);
             
@@ -105,7 +144,6 @@ public class AccreditationServiceImpl implements AccreditationService {
                 throw new ConflictException("Accreditation for this athlete and year already exists");
             }
 
-            // Get existing card number if available, otherwise generate new one
             String cardNumber;
             Optional<String> existingCardNumber = accreditationRepository
                     .findExistingCardNumberForAthleteAndClub(athleteId, clubId);
@@ -116,7 +154,6 @@ public class AccreditationServiceImpl implements AccreditationService {
                 cardNumber = generateNextCardNumber(club.getCardPrefix(), clubId);
             }
 
-            // Create new accreditation for current year with PENDING_VALIDATION status
             Accreditation accreditation = AccreditationMapper.createNewAccreditation(
                     athleteId,
                     clubId,
@@ -126,9 +163,7 @@ public class AccreditationServiceImpl implements AccreditationService {
             );
 
             Accreditation saved = accreditationRepository.save(accreditation);
-            // Reload to get relations
-            return accreditationRepository.findWithRelationsById(saved.getId())
-                    .map(AccreditationMapper::toDto);
+            return Optional.of(AccreditationMapper.toDto(saved));
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(extractConflictReason(e));
         }
@@ -213,10 +248,9 @@ public class AccreditationServiceImpl implements AccreditationService {
         return response;
     }
 
-    // PATCH methods (Update)
     @Override
     @Transactional
-    public Optional<AccreditationDto> updateAccreditation(UUID uuid, AccreditationStatus status) {
+    public Optional<AccreditationDto> updateAccreditationStatus(UUID uuid, AccreditationStatus status) {
         validateUuid(uuid);
         
         if (status == null) {
@@ -226,34 +260,14 @@ public class AccreditationServiceImpl implements AccreditationService {
         try {
             return accreditationRepository.findById(uuid)
                     .map(accreditation -> {
-                        // Only status can be updated - update it directly
                         accreditation.setStatus(status);
                         
                         Accreditation saved = accreditationRepository.save(accreditation);
-                        // Reload to get relations
-                        return accreditationRepository.findWithRelationsById(saved.getId())
-                                .map(AccreditationMapper::toDto)
-                                .orElse(AccreditationMapper.toDto(saved));
+                        return AccreditationMapper.toDto(saved);
                     });
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(extractConflictReason(e));
         }
-    }
-
-    // Helper methods
-    private AccreditationFacets buildFacets(Specification<Accreditation> spec) {
-        DateRange dobRange = facetQueryService.buildDateRange(
-                Accreditation.class,
-                spec,
-                "athlete.dateOfBirth"
-        );
-        return new AccreditationFacets()
-                .athleteId(facetQueryService.buildFacetOptions(Accreditation.class, spec, "athleteId"))
-                .clubId(facetQueryService.buildFacetOptions(Accreditation.class, spec, "clubId"))
-                .accreditationYear(facetQueryService.buildFacetOptions(Accreditation.class, spec, "year"))
-                .accreditationStatus(facetQueryService.buildFacetOptions(Accreditation.class, spec, "status"))
-                .dateOfBirthMin(dobRange.min())
-                .dateOfBirthMax(dobRange.max());
     }
 
     private void validateUuid(UUID uuid) {
@@ -268,7 +282,6 @@ public class AccreditationServiceImpl implements AccreditationService {
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact constraint names from Liquibase
         if (lowerMessage.contains("uq_accreditations_athlete_club_year")) {
             return "Accreditation for this athlete, club, and year already exists";
         }
@@ -279,7 +292,6 @@ public class AccreditationServiceImpl implements AccreditationService {
             return "Cannot create accreditation: club does not exist";
         }
         
-        // Generic fallback
         if (lowerMessage.contains("unique") || lowerMessage.contains("duplicate")) {
             return "Accreditation with these details already exists";
         }
@@ -297,7 +309,6 @@ public class AccreditationServiceImpl implements AccreditationService {
                 "No club found with card prefix: " + newCardNumber.substring(0, 2)
         ));
 
-        // Find or create athlete
         Optional<Athlete> existingAthlete = athleteRepository.findByFirstNameAndMiddleNameAndLastNameAndDateOfBirth(
                 item.getFirstName(),
                 item.getMiddleName(),
@@ -337,7 +348,6 @@ public class AccreditationServiceImpl implements AccreditationService {
     }
 
     private String parseAndConvertCardNumber(String oldCardNumber) {
-        // If 6 digits, use directly without transformation
         if (oldCardNumber.length() == 6) {
             return oldCardNumber;
         }
@@ -346,11 +356,9 @@ public class AccreditationServiceImpl implements AccreditationService {
         String athleteSuffix;
         
         if (oldCardNumber.length() == 4) {
-            // 4 digits: first digit = club prefix, last 3 = athlete number
             clubPrefix = normalizeClubPrefix(oldCardNumber.substring(0, 1));
             athleteSuffix = oldCardNumber.substring(1);
         } else if (oldCardNumber.length() == 5) {
-            // 5 digits: first 2 digits = club prefix, last 3 = athlete number
             clubPrefix = normalizeClubPrefix(oldCardNumber.substring(0, 2));
             athleteSuffix = oldCardNumber.substring(2);
         } else {
@@ -403,7 +411,6 @@ public class AccreditationServiceImpl implements AccreditationService {
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact constraint names from Liquibase
         if (lowerMessage.contains("uk_athletes_full_name_dob")) {
             return "Athlete with these details already exists";
         }
@@ -419,7 +426,6 @@ public class AccreditationServiceImpl implements AccreditationService {
             return "Cannot create accreditation: club does not exist";
         }
         
-        // Generic fallback checks
         if (lowerMessage.contains("unique") || lowerMessage.contains("duplicate")) {
             return "A record with these details already exists";
         }
@@ -436,6 +442,64 @@ public class AccreditationServiceImpl implements AccreditationService {
         skippedItem.setAthlete(item);
         skippedItem.setReason(reason);
         skipped.add(skippedItem);
+    }
+
+    private Page<Accreditation> findAllWithEntityGraph(
+            Specification<Accreditation> spec, 
+            Pageable pageable, 
+            EntityGraph<Accreditation> entityGraph) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Accreditation> query = cb.createQuery(Accreditation.class);
+        Root<Accreditation> root = query.from(Accreditation.class);
+        
+        Predicate predicate = spec != null ? spec.toPredicate(root, query, cb) : cb.conjunction();
+        if (predicate != null) {
+            query.where(predicate);
+        }
+        
+        if (pageable.getSort().isSorted()) {
+            List<jakarta.persistence.criteria.Order> orders = new java.util.ArrayList<>();
+            pageable.getSort().forEach(order -> {
+                jakarta.persistence.criteria.Path<?> path = resolvePath(root, order.getProperty());
+                if (order.isAscending()) {
+                    orders.add(cb.asc(path));
+                } else {
+                    orders.add(cb.desc(path));
+                }
+            });
+            query.orderBy(orders);
+        }
+        
+        TypedQuery<Accreditation> typedQuery = entityManager.createQuery(query);
+        
+        if (entityGraph != null) {
+            typedQuery.setHint("jakarta.persistence.loadgraph", entityGraph);
+        }
+        
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        
+        List<Accreditation> content = typedQuery.getResultList();
+        
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Accreditation> countRoot = countQuery.from(Accreditation.class);
+        Predicate countPredicate = spec != null ? spec.toPredicate(countRoot, countQuery, cb) : cb.conjunction();
+        if (countPredicate != null) {
+            countQuery.where(countPredicate);
+        }
+        countQuery.select(cb.count(countRoot));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+        
+        return new org.springframework.data.domain.PageImpl<>(content, pageable, total);
+    }
+    
+    private jakarta.persistence.criteria.Path<?> resolvePath(Root<Accreditation> root, String property) {
+        String[] parts = property.split("\\.");
+        jakarta.persistence.criteria.Path<?> path = root;
+        for (String part : parts) {
+            path = path.get(part);
+        }
+        return path;
     }
 
 }

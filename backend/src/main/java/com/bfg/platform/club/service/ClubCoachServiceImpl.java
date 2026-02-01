@@ -7,18 +7,17 @@ import com.bfg.platform.club.mapper.ClubMapper;
 import com.bfg.platform.club.query.ClubCoachQueryAdapter;
 import com.bfg.platform.club.repository.ClubCoachRepository;
 import com.bfg.platform.club.repository.ClubRepository;
-import com.bfg.platform.common.dto.ListResult;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
-import com.bfg.platform.common.query.FacetQueryService;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.security.SecurityContextHelper;
 import com.bfg.platform.gen.model.ClubCoachCreateRequest;
 import com.bfg.platform.gen.model.ClubCoachDto;
-import com.bfg.platform.gen.model.ClubCoachFacets;
 import com.bfg.platform.gen.model.ClubDto;
+import org.springframework.data.domain.Page;
 import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -28,6 +27,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -39,39 +39,33 @@ public class ClubCoachServiceImpl implements ClubCoachService {
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
     private final SecurityContextHelper securityContextHelper;
-    private final FacetQueryService facetQueryService;
 
-    // GET methods (Read)
     @Override
-    public ListResult<ClubCoachDto, ClubCoachFacets> getCoachesByClubId(UUID clubId, String filter, String orderBy, Integer top, Integer skip) {
+    public Page<ClubCoachDto> getCoachesByClubId(UUID clubId, String filter, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
         clubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubId));
+
+        java.util.Set<String> requestedExpand = ExpandQueryParser.parse(expand, ClubCoach.class);
 
         Pageable pageable = OffsetBasedPageRequest.of(skip, top, ClubCoachQueryAdapter.parseSort(orderBy));
         Specification<ClubCoach> spec = Specification
                 .where(ClubCoachQueryAdapter.parseFilter(filter))
                 .and((root, query, cb) -> cb.equal(root.get("clubId"), clubId));
-        var page = clubCoachRepository.findAll(spec, pageable)
-                .map(ClubCoachMapper::toDto);
-
-        ClubCoachFacets facets = new ClubCoachFacets()
-                .clubId(facetQueryService.buildFacetOptions(
-                        com.bfg.platform.club.entity.ClubCoach.class,
-                        spec,
-                        "clubId"
-                ));
-        return new ListResult<>(page, facets);
+        
+        return clubCoachRepository.findAll(spec, pageable)
+                .map(clubCoach -> ClubCoachMapper.toDto(clubCoach, requestedExpand));
     }
 
     @Override
-    public Optional<ClubDto> getClubByCoachId(UUID coachId) {
+    public Optional<ClubDto> getClubByCoachId(UUID coachId, List<String> expand) {
+        java.util.Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
+        
         return clubCoachRepository.findByCoachId(coachId)
                 .map(ClubCoach::getClubId)
                 .flatMap(clubRepository::findById)
-                .map(ClubMapper::toDto);
+                .map(club -> ClubMapper.toDto(club, requestedExpand));
     }
 
-    // POST methods (Create)
     @Override
     @Transactional
     public Optional<ClubCoachDto> assignCoachToClub(ClubCoachCreateRequest request) {
@@ -92,7 +86,6 @@ public class ClubCoachServiceImpl implements ClubCoachService {
         }
     }
 
-    // DELETE methods
     @Override
     @Transactional
     public void removeCoachFromClub(UUID clubCoachId) {
@@ -108,7 +101,6 @@ public class ClubCoachServiceImpl implements ClubCoachService {
         }
     }
 
-    // Helper methods
     private void validateCoachRole(UUID coachId) {
         if (!userRepository.isCoach(coachId)) {
             throw new ValidationException("User is not assigned the COACH role оr does not exist");
@@ -121,7 +113,6 @@ public class ClubCoachServiceImpl implements ClubCoachService {
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact foreign key constraint names from Liquibase
         if (lowerMessage.contains("fk_club_coaches_coach_id")) {
             return "User does not exist or cannot be assigned as coach";
         }
@@ -129,13 +120,11 @@ public class ClubCoachServiceImpl implements ClubCoachService {
             return "Club does not exist";
         }
         
-        // Check unique constraint (coach_id is unique in club_coaches table)
         if (lowerMessage.contains("club_coaches_coach_id_key") || 
             (lowerMessage.contains("coach_id") && lowerMessage.contains("unique"))) {
             return "Coach is already assigned to this club";
         }
         
-        // Generic fallback
         if (lowerMessage.contains("unique") || lowerMessage.contains("duplicate")) {
             return "Coach is already assigned to this club";
         }
@@ -147,14 +136,13 @@ public class ClubCoachServiceImpl implements ClubCoachService {
     }
 
     private void validateAssignPermissions(ClubCoachCreateRequest request) {
-        com.bfg.platform.gen.model.SystemRole currentRole = securityContextHelper.getUserRole();
+        SystemRole currentRole = securityContextHelper.getUserRole();
         if (currentRole == null) {
             throw new ForbiddenException("Current user role is not available");
         }
 
         switch (currentRole) {
             case APP_ADMIN, FEDERATION_ADMIN -> {
-                // No additional checks needed
             }
             case CLUB_ADMIN -> {
                 UUID currentUserId = securityContextHelper.getUserId();
@@ -176,7 +164,6 @@ public class ClubCoachServiceImpl implements ClubCoachService {
 
         switch (currentRole) {
             case APP_ADMIN, FEDERATION_ADMIN -> {
-                // No additional checks needed
             }
             case CLUB_ADMIN -> {
                 UUID currentUserId = securityContextHelper.getUserId();

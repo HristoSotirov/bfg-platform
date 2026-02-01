@@ -31,21 +31,25 @@
           type: string
       - name: orderBy
         in: query
-        description: Predefined ordering (comma-separated for multi-sort)
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: true
         schema:
-          type: string
-          enum:
-            - lastName_asc
-            - lastName_desc
-            - firstName_asc
-            - firstName_desc
-            - username_asc
-            - username_desc
-            - role_asc
-            - role_desc
-            - createdAt_asc
-            - createdAt_desc
-          default: lastName_asc
+          type: array
+          items:
+            type: string
+            enum:
+              - lastName_asc
+              - lastName_desc
+              - firstName_asc
+              - firstName_desc
+              - username_asc
+              - username_desc
+              - role_asc
+              - role_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["lastName_asc"]
       - name: top
         in: query
         description: Maximum number of items to return
@@ -61,13 +65,31 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Currently no expandable fields available for users.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
     responses:
       "200":
         description: List of users successfully retrieved
         content:
           application/json:
             schema:
-              $ref: "../common/schemas.yaml#/UserListResponse"
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../users/schemas.yaml#/UserDto"
       "500":
         description: Server error
         content:
@@ -130,6 +152,17 @@
         schema:
           type: string
           format: uuid
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Currently no expandable fields available for users.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
     responses:
       "200":
         description: User details found
@@ -244,14 +277,18 @@
           type: string
       - name: orderBy
         in: query
-        description: Predefined ordering (comma-separated for multi-sort)
+        description: Predefined ordering (multiselect for multi-sort)
+        style: form
+        explode: true
         schema:
-          type: string
-          enum:
-            - assignmentDate_asc
-            - assignmentDate_desc
-            - coachId_asc
-            - coachId_desc
+          type: array
+          items:
+            type: string
+            enum:
+              - assignmentDate_asc
+              - assignmentDate_desc
+              - coachId_asc
+              - coachId_desc
           default: assignmentDate_desc
       - name: top
         in: query
@@ -268,13 +305,37 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: coach, club
+          
+          When expanded, the full entity objects are included in the response.
+          Expanded fields can also be used in filter and sort expressions using dot notation.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - coach
+              - club
     responses:
       "200":
         description: List of coaches for the club
         content:
           application/json:
             schema:
-              $ref: "../common/schemas.yaml#/ClubCoachListResponse"
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../users/schemas.yaml#/ClubCoachDto"
       "404":
         description: Club not found
         content:
@@ -347,6 +408,22 @@
     summary: Get club for a coach
     description: Returns the club where the coach is registered. Returns null if coach is not assigned to any club.
     operationId: getClubByCoachId
+    parameters:
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Available options: clubAdminUser
+          
+          When expanded, the full entity objects are included in the response.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - clubAdminUser
     responses:
       "200":
         description: Club found or null if coach is not assigned

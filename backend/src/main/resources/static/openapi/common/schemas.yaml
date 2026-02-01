@@ -21,6 +21,67 @@ FacetOption:
     count:
       type: integer
       description: Number of items for this facet value
+
+Page:
+  type: object
+  description: Spring Data Page response (generic)
+  required:
+    - content
+    - totalElements
+  properties:
+    content:
+      type: array
+      description: The list of items in the current page
+      items: {}
+    totalElements:
+      type: integer
+      format: int64
+      description: Total number of elements across all pages
+      example: 123
+    totalPages:
+      type: integer
+      format: int32
+      description: Total number of pages
+      example: 5
+    size:
+      type: integer
+      format: int32
+      description: Number of elements per page
+      example: 25
+    number:
+      type: integer
+      format: int32
+      description: Current page number (0-based)
+      example: 0
+    numberOfElements:
+      type: integer
+      format: int32
+      description: Number of elements in the current page
+      example: 25
+    first:
+      type: boolean
+      description: Whether this is the first page
+      example: true
+    last:
+      type: boolean
+      description: Whether this is the last page
+      example: false
+    empty:
+      type: boolean
+      description: Whether the page is empty
+      example: false
+    sort:
+      type: object
+      description: Sort information
+      properties:
+        sorted:
+          type: boolean
+        unsorted:
+          type: boolean
+        empty:
+          type: boolean
+
+
 ClubListResponse:
   type: object
   description: Paged list response for clubs
@@ -32,8 +93,6 @@ ClubListResponse:
       type: integer
       description: Total number of items matching the query (ignoring pagination)
       example: 123
-    facets:
-      $ref: "../clubs/schemas.yaml#/ClubFacets"
     value:
       type: array
       items:
@@ -50,8 +109,6 @@ AthleteListResponse:
       type: integer
       description: Total number of items matching the query (ignoring pagination)
       example: 123
-    facets:
-      $ref: "../athletes/schemas.yaml#/AthleteFacets"
     value:
       type: array
       items:
@@ -68,8 +125,6 @@ UserListResponse:
       type: integer
       description: Total number of items matching the query (ignoring pagination)
       example: 123
-    facets:
-      $ref: "../users/schemas.yaml#/UserFacets"
     value:
       type: array
       items:
@@ -86,8 +141,6 @@ ClubCoachListResponse:
       type: integer
       description: Total number of items matching the query (ignoring pagination)
       example: 123
-    facets:
-      $ref: "../users/schemas.yaml#/ClubCoachFacets"
     value:
       type: array
       items:
@@ -104,8 +157,6 @@ AthletePhotoListResponse:
       type: integer
       description: Total number of items in the response
       example: 3
-    facets:
-      $ref: "../athletes/photo-schemas.yaml#/AthletePhotoFacets"
     value:
       type: array
       items:
@@ -122,8 +173,6 @@ AccreditationListResponse:
       type: integer
       description: Total number of items matching the query (ignoring pagination)
       example: 123
-    facets:
-      $ref: "../accreditations/schemas.yaml#/AccreditationFacets"
     value:
       type: array
       items:

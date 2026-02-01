@@ -21,7 +21,7 @@ import java.util.UUID;
 public class AthletePhotoHistory {
 
     @Id
-    @Column(name = "id", updatable = false, insertable = false)
+    @Column(name = "id", updatable = false)
     @Setter(AccessLevel.NONE)
     private UUID id;
 

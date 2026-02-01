@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Photo Viewer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .container {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        input, button {
+            padding: 10px;
+            margin: 5px 0;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #photoContainer {
+            margin-top: 20px;
+            text-align: center;
+        }
+        #photoContainer img {
+            max-width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            background: white;
+        }
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+        .info {
+            color: #666;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Test Photo Viewer</h1>
+        <p class="info">Въведете токен и URL на снимката за визуализация</p>
+        
+        <label for="token">Access Token:</label>
+        <input type="text" id="token" placeholder="Въведете вашия JWT токен" />
+        
+        <label for="photoUrl">Photo URL:</label>
+        <input type="text" id="photoUrl" placeholder="http://localhost:8080/api/photos/bfg-platform-photos/athletes/..." />
+        
+        <button onclick="loadPhoto()">Зареди снимка</button>
+        
+        <div id="photoContainer"></div>
+        <div id="error"></div>
+    </div>
+
+    <script>
+        function loadPhoto() {
+            const token = document.getElementById('token').value.trim();
+            const photoUrl = document.getElementById('photoUrl').value.trim();
+            const photoContainer = document.getElementById('photoContainer');
+            const errorDiv = document.getElementById('error');
+            
+            // Clear previous content
+            photoContainer.innerHTML = '';
+            errorDiv.innerHTML = '';
+            
+            if (!token) {
+                errorDiv.innerHTML = '<div class="error">Моля, въведете токен!</div>';
+                return;
+            }
+            
+            if (!photoUrl) {
+                errorDiv.innerHTML = '<div class="error">Моля, въведете URL на снимката!</div>';
+                return;
+            }
+            
+            // Create image element
+            const img = document.createElement('img');
+            img.alt = 'Athlete Photo';
+            img.style.display = 'none';
+            
+            // Set up error handler
+            img.onerror = function() {
+                errorDiv.innerHTML = '<div class="error">Грешка при зареждане на снимката. Проверете URL-а и токена.</div>';
+                img.style.display = 'none';
+            };
+            
+            // Set up success handler
+            img.onload = function() {
+                img.style.display = 'block';
+                errorDiv.innerHTML = '';
+            };
+            
+            // Load image with Authorization header using fetch
+            fetch(photoUrl, {
+                method: 'GET',
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('HTTP ' + response.status + ': ' + response.statusText);
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const url = URL.createObjectURL(blob);
+                img.src = url;
+                photoContainer.appendChild(img);
+            })
+            .catch(error => {
+                errorDiv.innerHTML = '<div class="error">Грешка: ' + error.message + '</div>';
+            });
+        }
+        
+        // Allow Enter key to trigger load
+        document.getElementById('photoUrl').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadPhoto();
+            }
+        });
+        
+        document.getElementById('token').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                loadPhoto();
+            }
+        });
+    </script>
+</body>
+</html>
+

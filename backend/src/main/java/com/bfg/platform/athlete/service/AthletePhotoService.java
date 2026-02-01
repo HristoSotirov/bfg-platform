@@ -1,21 +1,22 @@
 package com.bfg.platform.athlete.service;
 
+import com.bfg.platform.gen.model.AthletePhotoDto;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.bfg.platform.common.dto.ListResult;
-import com.bfg.platform.gen.model.AthletePhotoFacets;
-
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 public interface AthletePhotoService {
-    Optional<com.bfg.platform.gen.model.AthletePhotoDto> uploadPhoto(UUID athleteId, MultipartFile file);
-    ListResult<com.bfg.platform.gen.model.AthletePhotoDto, AthletePhotoFacets> getPhotoHistory(
+    Optional<AthletePhotoDto> uploadPhoto(UUID athleteId, MultipartFile file);
+    Page<AthletePhotoDto> getPhotoHistory(
             UUID athleteId,
             String filter,
-            String orderBy,
+            List<String> orderBy,
             Integer top,
-            Integer skip
+            Integer skip,
+            List<String> expand
     );
 }
 

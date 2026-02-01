@@ -1,6 +1,7 @@
 package com.bfg.platform.athlete.mapper;
 
 import com.bfg.platform.athlete.entity.AthletePhotoHistory;
+import com.bfg.platform.club.mapper.ClubMapper;
 import com.bfg.platform.gen.model.AthletePhotoDto;
 
 import java.time.OffsetDateTime;
@@ -14,6 +15,10 @@ public class AthletePhotoMapper {
     }
 
     public static AthletePhotoDto toDto(AthletePhotoHistory photoHistory) {
+        return toDto(photoHistory, null);
+    }
+
+    public static AthletePhotoDto toDto(AthletePhotoHistory photoHistory, java.util.Set<String> expand) {
         if (photoHistory == null) {
             return null;
         }
@@ -22,14 +27,14 @@ public class AthletePhotoMapper {
         dto.setUuid(photoHistory.getId());
         dto.setAthleteId(photoHistory.getAthleteId());
         dto.setPhotoUrl(photoHistory.getPhotoUrl());
-        dto.setUploadedAt(photoHistory.getUploadedAt() != null
-                ? OffsetDateTime.ofInstant(photoHistory.getUploadedAt(), ZoneOffset.UTC)
-                : null);
+        dto.setUploadedAt(OffsetDateTime.ofInstant(photoHistory.getUploadedAt(), ZoneOffset.UTC));
         dto.setUploadedById(photoHistory.getUploadedBy());
         
-        if (photoHistory.getUploadedByClub() != null) {
+        boolean expandUploadedByClub = expand != null && expand.contains("uploadedByClub");
+        
+        if (expandUploadedByClub && photoHistory.getUploadedByClub() != null) {
             dto.uploadedByName(photoHistory.getUploadedByClub().getName());
-            dto.setUploadedBy(com.bfg.platform.club.mapper.ClubMapper.toDto(photoHistory.getUploadedByClub()));
+            dto.setUploadedBy(ClubMapper.toDto(photoHistory.getUploadedByClub(), expand));
         }
         
         return dto;
@@ -37,6 +42,7 @@ public class AthletePhotoMapper {
 
     public static AthletePhotoHistory createPhotoHistory(UUID athleteId, String photoUrl, UUID uploadedByClubId) {
         return AthletePhotoHistory.builder()
+                .id(UUID.randomUUID())
                 .athleteId(athleteId)
                 .photoUrl(photoUrl)
                 .uploadedBy(uploadedByClubId)

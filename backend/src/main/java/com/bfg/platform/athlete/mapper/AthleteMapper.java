@@ -25,9 +25,7 @@ public class AthleteMapper {
                 .medicalExaminationDue(athlete.getMedicalExaminationDue())
                 .insuranceFrom(athlete.getInsuranceFrom())
                 .insuranceTo(athlete.getInsuranceTo())
-                .registeredOn(athlete.getRegisteredOn() != null
-                        ? OffsetDateTime.ofInstant(athlete.getRegisteredOn(), ZoneOffset.UTC)
-                        : null);
+                .registeredOn(OffsetDateTime.ofInstant(athlete.getRegisteredOn(), ZoneOffset.UTC));
 
         return dto;
     }

@@ -4,23 +4,35 @@ import com.bfg.platform.club.entity.Club;
 import com.bfg.platform.club.mapper.ClubMapper;
 import com.bfg.platform.club.query.ClubQueryAdapter;
 import com.bfg.platform.club.repository.ClubRepository;
-import com.bfg.platform.common.dto.ListResult;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.PhotoUploadException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
-import com.bfg.platform.common.query.FacetQueryService;
+import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
+import com.bfg.platform.common.query.EnhancedSortParser;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.common.repository.DynamicEntityGraph;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import org.springframework.data.domain.Sort;
+import java.util.Set;
 import com.bfg.platform.common.storage.S3Service;
+import static com.bfg.platform.common.storage.S3Service.FileType;
 import com.bfg.platform.gen.model.ClubBatchCreateRequest;
 import com.bfg.platform.gen.model.ClubBatchCreateRequestItem;
 import com.bfg.platform.gen.model.ClubBatchCreateResponse;
 import com.bfg.platform.gen.model.ClubBatchCreateResponseSkippedInner;
 import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubDto;
-import com.bfg.platform.gen.model.ClubFacets;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
 import com.bfg.platform.user.entity.User;
+import com.bfg.platform.user.repository.UserRepository;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,38 +53,65 @@ import java.util.UUID;
 public class ClubServiceImpl implements ClubService {
 
     private final ClubRepository clubRepository;
-    private final com.bfg.platform.user.repository.UserRepository userRepository;
-    private final FacetQueryService facetQueryService;
+    private final UserRepository userRepository;
     private final S3Service s3Service;
-    private static final String LOGO_BUCKET_NAME = "bfg-platform-logos";
+    private final EntityManager entityManager;
 
-    // GET methods (Read)
     @Override
-    public ListResult<ClubDto, ClubFacets> getAllClubs(String filter, String search, String orderBy, Integer top, Integer skip) {
-        Specification<Club> filterSpec = ClubQueryAdapter.parseFilter(filter);
+    public Page<ClubDto> getAllClubs(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
+        Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
+        
+        EnhancedFilterExpressionParser.ParseResult<Club> filterResult = 
+                ClubQueryAdapter.parseFilter(filter, requestedExpand);
+        Specification<Club> filterSpec = filterResult.getSpecification();
+        
         Specification<Club> searchSpec = ClubQueryAdapter.parseSearch(search);
+        
         Specification<Club> spec = Specification.where(filterSpec).and(searchSpec);
-        Pageable pageable = OffsetBasedPageRequest.of(skip, top, ClubQueryAdapter.parseSort(orderBy));
+        
+        EnhancedSortParser.ParseResult sortResult = 
+                ClubQueryAdapter.parseSort(orderBy, requestedExpand);
+        Sort sort = sortResult.getSort();
+        
+        Pageable pageable = OffsetBasedPageRequest.of(skip, top, sort);
 
-        Page<Club> page = clubRepository.findAll(spec, pageable);
-        ClubFacets facets = new ClubFacets()
-                .isActive(facetQueryService.buildFacetOptions(Club.class, spec, "isActive"));
-        return new ListResult<>(page.map(ClubMapper::toDto), facets);
+        Page<Club> page;
+        if (!requestedExpand.isEmpty()) {
+            EntityGraph<Club> entityGraph = DynamicEntityGraph.create(entityManager, Club.class, requestedExpand);
+            page = findAllWithEntityGraph(spec, pageable, entityGraph);
+        } else {
+            page = clubRepository.findAll(spec, pageable);
+        }
+        
+        return page.map(club -> ClubMapper.toDto(club, requestedExpand));
     }
 
     @Override
-    public Optional<ClubDto> getClubByAdminId(UUID adminId) {
+    public Optional<ClubDto> getClubByAdminId(UUID adminId, List<String> expand) {
+        Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
+        
         return clubRepository.findByClubAdmin(adminId)
-                .map(ClubMapper::toDto);
+                .map(club -> ClubMapper.toDto(club, requestedExpand));
     }
 
     @Override
-    public Optional<ClubDto> getClubDtoByUuid(UUID uuid) {
-        return clubRepository.findWithAdminById(uuid)
-                .map(ClubMapper::toDto);
+    public Optional<ClubDto> getClubDtoByUuid(UUID uuid, List<String> expand) {
+        Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
+        
+        Club club;
+        if (!requestedExpand.isEmpty()) {
+            EntityGraph<Club> entityGraph = DynamicEntityGraph.create(entityManager, Club.class, requestedExpand);
+            java.util.Map<String, Object> hints = new java.util.HashMap<>();
+            hints.put("jakarta.persistence.loadgraph", entityGraph);
+            club = entityManager.find(Club.class, uuid, hints);
+        } else {
+            club = clubRepository.findById(uuid).orElse(null);
+        }
+        
+        return Optional.ofNullable(club)
+                .map(c -> ClubMapper.toDto(c, requestedExpand));
     }
 
-    // POST methods (Create)
     @Override
     @Transactional
     public Optional<ClubDto> createClub(ClubCreateRequest request) {
@@ -107,7 +146,6 @@ public class ClubServiceImpl implements ClubService {
         return buildBatchResponse(created, skipped);
     }
 
-    // PATCH methods (Update)
     @Override
     @Transactional
     public Optional<ClubDto> updateClub(UUID uuid, ClubUpdateRequest request) {
@@ -127,18 +165,13 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public Optional<ClubDto> updateClubLogo(UUID uuid, MultipartFile file) {
-        validateLogoFile(file);
         return clubRepository.findById(uuid)
                 .map(club -> {
-                    String objectName = generateLogoObjectName(uuid, file.getOriginalFilename());
-                    String contentType = file.getContentType() != null ? file.getContentType() : "image/jpeg";
                     try {
-                        String logoUrl = s3Service.uploadFile(
-                                LOGO_BUCKET_NAME,
-                                objectName,
-                                file.getInputStream(),
-                                contentType,
-                                file.getSize()
+                        String logoUrl = s3Service.uploadImageFile(
+                                FileType.CLUB_LOGO,
+                                uuid,
+                                file
                         );
                         club.setLogoUrl(logoUrl);
                         Club savedClub = clubRepository.save(club);
@@ -153,7 +186,6 @@ public class ClubServiceImpl implements ClubService {
                 });
     }
 
-    // DELETE methods
     @Override
     @Transactional
     public void deleteClub(UUID uuid) {
@@ -167,7 +199,6 @@ public class ClubServiceImpl implements ClubService {
         }
     }
 
-    // Helper methods
     private void processClubMigrationItem(ClubBatchCreateRequestItem item,
                                           List<ClubDto> created,
                                           List<ClubBatchCreateResponseSkippedInner> skipped) {
@@ -222,25 +253,6 @@ public class ClubServiceImpl implements ClubService {
         response.setSkipped(skipped);
         return response;
     }
-    private void validateLogoFile(MultipartFile file) {
-        if (file == null || file.isEmpty()) {
-            throw new ValidationException("Logo file is required");
-        }
-        if (file.getSize() > 10 * 1024 * 1024) { // 10MB limit
-            throw new ValidationException("File size exceeds 10MB limit");
-        }
-        String contentType = file.getContentType();
-        if (contentType == null || (!contentType.startsWith("image/"))) {
-            throw new ValidationException("File must be an image");
-        }
-    }
-
-    private String generateLogoObjectName(UUID clubId, String originalFilename) {
-        String extension = originalFilename != null && originalFilename.contains(".")
-                ? originalFilename.substring(originalFilename.lastIndexOf("."))
-                : ".jpg";
-        return String.format("clubs/%s/logo/%s%s", clubId, UUID.randomUUID(), extension);
-    }
 
     private void validateClubAdmin(UUID clubAdminId) {
         if (!userRepository.isClubAdmin(clubAdminId)) {
@@ -248,15 +260,6 @@ public class ClubServiceImpl implements ClubService {
         }
     }
 
-    /**
-     * Finds the next card prefix by getting MAX + 1.
-     * Uses pessimistic lock to ensure thread-safety.
-     * Gaps in the sequence are acceptable.
-     * Returns "01" by default if no clubs exist.
-     * 
-     * @return Next card prefix formatted as two-digit string (e.g., "01", "02", ..., "99")
-     * @throws ValidationException if next prefix would exceed 99
-     */
     @Transactional
     private String findNextCardPrefix() {
         String prefix = clubRepository.findNextCardPrefix();
@@ -276,7 +279,6 @@ public class ClubServiceImpl implements ClubService {
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact constraint names and columns from Liquibase
         if (lowerMessage.contains("clubs_short_name_key") || 
             lowerMessage.matches(".*short_name.*unique.*|.*unique.*short_name.*")) {
             return "Club with this short name already exists";
@@ -303,7 +305,6 @@ public class ClubServiceImpl implements ClubService {
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact foreign key constraint names from Liquibase
         if (lowerMessage.contains("fk_club_coaches_club_id")) {
             return "Cannot delete club: club has assigned coaches";
         }
@@ -320,6 +321,64 @@ public class ClubServiceImpl implements ClubService {
         skippedItem.setClub(item);
         skippedItem.setReason(reason);
         skipped.add(skippedItem);
+    }
+
+    private Page<Club> findAllWithEntityGraph(
+            Specification<Club> spec, 
+            Pageable pageable, 
+            EntityGraph<Club> entityGraph) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Club> query = cb.createQuery(Club.class);
+        Root<Club> root = query.from(Club.class);
+        
+        Predicate predicate = spec != null ? spec.toPredicate(root, query, cb) : cb.conjunction();
+        if (predicate != null) {
+            query.where(predicate);
+        }
+        
+        if (pageable.getSort().isSorted()) {
+            List<jakarta.persistence.criteria.Order> orders = new java.util.ArrayList<>();
+            pageable.getSort().forEach(order -> {
+                jakarta.persistence.criteria.Path<?> path = resolvePath(root, order.getProperty());
+                if (order.isAscending()) {
+                    orders.add(cb.asc(path));
+                } else {
+                    orders.add(cb.desc(path));
+                }
+            });
+            query.orderBy(orders);
+        }
+        
+        TypedQuery<Club> typedQuery = entityManager.createQuery(query);
+        
+        if (entityGraph != null) {
+            typedQuery.setHint("jakarta.persistence.loadgraph", entityGraph);
+        }
+        
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        
+        List<Club> content = typedQuery.getResultList();
+        
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<Club> countRoot = countQuery.from(Club.class);
+        Predicate countPredicate = spec != null ? spec.toPredicate(countRoot, countQuery, cb) : cb.conjunction();
+        if (countPredicate != null) {
+            countQuery.where(countPredicate);
+        }
+        countQuery.select(cb.count(countRoot));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+        
+        return new org.springframework.data.domain.PageImpl<>(content, pageable, total);
+    }
+    
+    private jakarta.persistence.criteria.Path<?> resolvePath(Root<Club> root, String property) {
+        String[] parts = property.split("\\.");
+        jakarta.persistence.criteria.Path<?> path = root;
+        for (String part : parts) {
+            path = path.get(part);
+        }
+        return path;
     }
 
 }

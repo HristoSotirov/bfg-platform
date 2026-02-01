@@ -126,7 +126,7 @@ public class BootstrapAdminRunner implements CommandLineRunner {
     }
 
     private boolean isAlreadyBootstrapped() {
-        return !userRepository.findByRole(ROLE_APP_ADMIN.getValue()).isEmpty();
+        return !userRepository.findByRole(ROLE_APP_ADMIN).isEmpty();
     }
 
     private void validateRequiredFields(String username, String password) {

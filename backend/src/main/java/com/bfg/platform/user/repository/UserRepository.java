@@ -23,24 +23,24 @@ public interface UserRepository extends JpaRepository<User, UUID>, JpaSpecificat
 
     boolean existsByUsername(String username);
 
-    boolean existsByIdAndRole(UUID id, String role);
+    boolean existsByIdAndRole(UUID id, SystemRole role);
 
-    List<User> findByRole(String role);
+    List<User> findByRole(SystemRole role);
 
     default boolean isAppAdmin(UUID id) {
-        return existsByIdAndRole(id, SystemRole.APP_ADMIN.getValue());
+        return existsByIdAndRole(id, SystemRole.APP_ADMIN);
     }
 
     default boolean isFederationAdmin(UUID id) {
-        return existsByIdAndRole(id, SystemRole.FEDERATION_ADMIN.getValue());
+        return existsByIdAndRole(id, SystemRole.FEDERATION_ADMIN);
     }
 
     default boolean isClubAdmin(UUID id) {
-        return existsByIdAndRole(id, SystemRole.CLUB_ADMIN.getValue());
+        return existsByIdAndRole(id, SystemRole.CLUB_ADMIN);
     }
 
     default boolean isCoach(UUID id) {
-        return existsByIdAndRole(id, SystemRole.COACH.getValue());
+        return existsByIdAndRole(id, SystemRole.COACH);
     }
 }
 

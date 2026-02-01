@@ -8,10 +8,10 @@ import com.bfg.platform.gen.model.ClubBatchCreateRequest;
 import com.bfg.platform.gen.model.ClubBatchCreateResponse;
 import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubDto;
-import com.bfg.platform.gen.model.ClubListResponse;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
+import com.bfg.platform.common.util.PageConverter;
+import com.bfg.platform.gen.model.GetAllClubs200Response;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -29,40 +30,39 @@ public class ClubController implements ClubsApi {
 
     private final ClubService clubService;
 
-    // GET methods (Read)
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
-    public ResponseEntity<ClubListResponse> getAllClubs(
+    public ResponseEntity<GetAllClubs200Response> getAllClubs(
             String filter,
             String search,
-            String orderBy,
+            List<String> orderBy,
             Integer top,
-            Integer skip
+            Integer skip,
+            List<String> expand
     ) {
-        var result = clubService.getAllClubs(filter, search, orderBy, top, skip);
-        return ResponseEntity.ok(new ClubListResponse()
-                .count(Math.toIntExact(result.getPage().getTotalElements()))
-                .facets(result.getFacets())
-                .value(result.getPage().getContent()));
+        var page = clubService.getAllClubs(filter, search, orderBy, top, skip, expand);
+        return ResponseEntity.ok(PageConverter.toResponse(page, GetAllClubs200Response.class));
     }
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
-    public ResponseEntity<ClubDto> getClubByAdminId(@NotNull(message = "{user.uuid.required}") UUID adminId) {
-        return clubService.getClubByAdminId(adminId)
+    public ResponseEntity<ClubDto> getClubByAdminId(UUID adminId, List<String> expand) {
+        return clubService.getClubByAdminId(adminId, expand)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.ok().build());
     }
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
-    public ResponseEntity<ClubDto> getClubByUuid(@NotNull(message = "{club.uuid.required}") UUID clubUuid) {
-        return clubService.getClubDtoByUuid(clubUuid)
+    public ResponseEntity<ClubDto> getClubByUuid(
+            UUID clubUuid,
+            List<String> expand
+    ) {
+        return clubService.getClubDtoByUuid(clubUuid, expand)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubUuid));
     }
 
-    // POST methods (Create)
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<ClubDto> createClub(@Valid @RequestBody ClubCreateRequest clubCreateRequest) {
@@ -78,10 +78,9 @@ public class ClubController implements ClubsApi {
         return ResponseEntity.ok(response);
     }
 
-    // PATCH methods (Update)
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<ClubDto> patchClubByUuid(@NotNull(message = "{club.uuid.required}") UUID clubUuid, @Valid @RequestBody ClubUpdateRequest clubUpdateRequest) {
+    public ResponseEntity<ClubDto> patchClubByUuid(UUID clubUuid, @Valid @RequestBody ClubUpdateRequest clubUpdateRequest) {
         return clubService.updateClub(clubUuid, clubUpdateRequest)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubUuid));
@@ -89,16 +88,15 @@ public class ClubController implements ClubsApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<ClubDto> patchClubLogoByUuid(@NotNull(message = "{club.uuid.required}") UUID clubUuid, MultipartFile file) {
+    public ResponseEntity<ClubDto> patchClubLogoByUuid(UUID clubUuid, MultipartFile file) {
         return clubService.updateClubLogo(clubUuid, file)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubUuid));
     }
 
-    // DELETE methods
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<Void> deleteClubByUuid(@NotNull(message = "{club.uuid.required}") UUID clubUuid) {
+    public ResponseEntity<Void> deleteClubByUuid(UUID clubUuid) {
         clubService.deleteClub(clubUuid);
         return ResponseEntity.noContent().build();
     }

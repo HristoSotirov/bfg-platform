@@ -125,9 +125,9 @@ AccreditationStatus:
   type: string
   description: Enumeration of possible accreditation status values
   enum:
-    - Active
-    - Pending validation
-    - Pending photo validation
-    - New Photo Required
-    - Expired
-    - Suspended
+    - ACTIVE
+    - PENDING_VALIDATION
+    - PENDING_PHOTO_VALIDATION
+    - NEW_PHOTO_REQUIRED
+    - EXPIRED
+    - SUSPENDED

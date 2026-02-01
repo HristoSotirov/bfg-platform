@@ -92,7 +92,8 @@ final class FilterTokenizer {
 
         while (position < input.length()) {
             char c = input.charAt(position);
-            if (Character.isLetterOrDigit(c) || c == '_') {
+            // Allow dots in field names for dot notation (e.g., athlete.dateOfBirth)
+            if (Character.isLetterOrDigit(c) || c == '_' || c == '.') {
                 value.append(c);
                 position++;
             } else {
@@ -103,15 +104,18 @@ final class FilterTokenizer {
         String identifier = value.toString();
         String lowerIdentifier = identifier.toLowerCase(Locale.ROOT);
 
-        if ("and".equals(lowerIdentifier)) {
-            return new FilterToken(FilterTokenType.AND, "and", startPos);
-        } else if ("or".equals(lowerIdentifier)) {
-            return new FilterToken(FilterTokenType.OR, "or", startPos);
-        } else if (isComparisonOperator(lowerIdentifier)) {
-            return new FilterToken(FilterTokenType.COMPARISON_OP, lowerIdentifier, startPos);
-        } else {
-            return new FilterToken(FilterTokenType.FIELD, identifier, startPos);
+        // Only check keywords if no dot (dot notation fields can't be keywords)
+        if (!identifier.contains(".")) {
+            if ("and".equals(lowerIdentifier)) {
+                return new FilterToken(FilterTokenType.AND, "and", startPos);
+            } else if ("or".equals(lowerIdentifier)) {
+                return new FilterToken(FilterTokenType.OR, "or", startPos);
+            } else if (isComparisonOperator(lowerIdentifier)) {
+                return new FilterToken(FilterTokenType.COMPARISON_OP, lowerIdentifier, startPos);
+            }
         }
+        
+        return new FilterToken(FilterTokenType.FIELD, identifier, startPos);
     }
 
     private FilterToken tokenizeUnquotedValue() {
@@ -140,7 +144,8 @@ final class FilterTokenizer {
 
     private boolean isComparisonOperator(String str) {
         return "eq".equals(str) || "ne".equals(str) || "gt".equals(str) ||
-               "ge".equals(str) || "lt".equals(str) || "le".equals(str) || "in".equals(str);
+               "ge".equals(str) || "lt".equals(str) || "le".equals(str) || 
+               "in".equals(str) || "range".equals(str);
     }
 }
 

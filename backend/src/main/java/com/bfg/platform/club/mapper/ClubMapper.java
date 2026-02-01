@@ -7,6 +7,7 @@ import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
 import com.bfg.platform.user.service.UserMapper;
 
+import java.util.Set;
 import java.util.UUID;
 
 
@@ -17,6 +18,10 @@ public class ClubMapper {
     }
 
     public static ClubDto toDto(Club club) {
+        return toDto(club, null);
+    }
+
+    public static ClubDto toDto(Club club, Set<String> expand) {
         if (club == null) return null;
 
         ClubDto dto = new ClubDto();
@@ -29,8 +34,12 @@ public class ClubMapper {
         dto.setIsActive(club.isActive());
 
         dto.clubAdminId(club.getClubAdmin());
-        dto.clubAdminName(displayName(club.getClubAdminUser()));
-        if (club.getClubAdminUser() != null) {
+        
+        // Only populate display fields if the relationship is expanded
+        boolean expandClubAdminUser = expand != null && expand.contains("clubAdminUser");
+        
+        if (expandClubAdminUser && club.getClubAdminUser() != null) {
+            dto.clubAdminName(displayName(club.getClubAdminUser()));
             dto.setClubAdmin(UserMapper.toDto(club.getClubAdminUser()));
         }
 

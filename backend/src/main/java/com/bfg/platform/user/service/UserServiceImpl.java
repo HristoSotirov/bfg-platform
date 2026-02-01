@@ -1,16 +1,14 @@
 package com.bfg.platform.user.service;
 
-import com.bfg.platform.common.dto.ListResult;
+import org.springframework.data.domain.Page;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
-import com.bfg.platform.common.query.FacetQueryService;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.security.SecurityContextHelper;
 import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserDto;
-import com.bfg.platform.gen.model.UserFacets;
 import com.bfg.platform.gen.model.UserUpdateRequest;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.query.UserQueryAdapter;
@@ -23,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -32,28 +31,22 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final FacetQueryService facetQueryService;
     private final SecurityContextHelper securityContextHelper;
 
-    // GET methods (Read)
     @Override
-    public ListResult<UserDto, UserFacets> getAllUsers(String filter, String search, String orderBy, Integer top, Integer skip) {
+    public Page<UserDto> getAllUsers(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
         Specification<User> filterSpec = UserQueryAdapter.parseFilter(filter);
         Specification<User> searchSpec = UserQueryAdapter.parseSearch(search);
         Specification<User> spec = Specification.where(filterSpec).and(searchSpec);
         Pageable pageable = OffsetBasedPageRequest.of(skip, top, UserQueryAdapter.parseSort(orderBy));
-        var page = userRepository.findAll(spec, pageable).map(UserMapper::toDto);
-        UserFacets facets = new UserFacets()
-                .isActive(facetQueryService.buildFacetOptions(User.class, spec, "isActive"));
-        return new ListResult<>(page, facets);
+        return userRepository.findAll(spec, pageable).map(UserMapper::toDto);
     }
 
     @Override
-    public Optional<UserDto> getUserById(UUID uuid) {
-        return userRepository.findById(uuid).map(UserMapper::toDto);
+    public Optional<UserDto> getUserById(UUID uuid, List<String> expand) {
+        return userRepository.findById(uuid)                .map(UserMapper::toDto);
     }
 
-    // POST methods (Create)
     @Override
     @Transactional
     public Optional<UserDto> createUser(UserCreateRequest request) {
@@ -70,7 +63,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // PATCH methods (Update)
     @Override
     @Transactional
     public Optional<UserDto> updateUser(UUID uuid, UserUpdateRequest request) {
@@ -85,7 +77,6 @@ public class UserServiceImpl implements UserService {
                 });
     }
 
-    // DELETE methods
     @Override
     @Transactional
     public void deleteUser(UUID uuid) {
@@ -101,7 +92,6 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    // Helper methods
     private void validateCreatePermissions(UserCreateRequest request) {
         SystemRole currentRole = securityContextHelper.getUserRole();
         SystemRole targetRole = request.getRole();
@@ -120,7 +110,6 @@ public class UserServiceImpl implements UserService {
                 }
             }
             case APP_ADMIN -> {
-                // App admins can create any role.
             }
             default -> throw new ForbiddenException("You are not allowed to create users");
         }
@@ -139,7 +128,6 @@ public class UserServiceImpl implements UserService {
                 }
             }
             case APP_ADMIN -> {
-                // App admins can update any role.
             }
             default -> throw new ForbiddenException("You are not allowed to update users");
         }
@@ -158,7 +146,6 @@ public class UserServiceImpl implements UserService {
                 }
             }
             case APP_ADMIN -> {
-                // App admins can delete any role.
             }
             default -> throw new ForbiddenException("You are not allowed to delete users");
         }
@@ -170,7 +157,6 @@ public class UserServiceImpl implements UserService {
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact constraint name from Liquibase
         if (lowerMessage.contains("users_username_key") || 
             (lowerMessage.contains("username") && lowerMessage.contains("unique"))) {
             return "Username already exists";
@@ -185,7 +171,6 @@ public class UserServiceImpl implements UserService {
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact foreign key constraint names from Liquibase
         if (lowerMessage.contains("fk_clubs_club_admin")) {
             return "User is assigned as a club administrator";
         }

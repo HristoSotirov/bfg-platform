@@ -5,15 +5,11 @@ import com.bfg.platform.athlete.mapper.AthleteMapper;
 import com.bfg.platform.athlete.query.AthleteQueryAdapter;
 import com.bfg.platform.athlete.repository.AthleteRepository;
 import com.bfg.platform.club.repository.ClubCoachRepository;
-import com.bfg.platform.common.dto.ListResult;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
-import com.bfg.platform.common.query.DateRange;
-import com.bfg.platform.common.query.FacetQueryService;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.gen.model.AthleteBatchMedicalUpdateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
-import com.bfg.platform.gen.model.AthleteFacets;
 import com.bfg.platform.gen.model.AthleteUpdateRequest;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
@@ -35,16 +31,15 @@ public class AthleteServiceImpl implements AthleteService {
 
     private final AthleteRepository athleteRepository;
     private final ClubCoachRepository clubCoachRepository;
-    private final FacetQueryService facetQueryService;
 
-    // GET methods (Read)
     @Override
-    public ListResult<AthleteDto, AthleteFacets> getAllAthletes(
+    public Page<AthleteDto> getAllAthletes(
             String filter,
             String search,
-            String orderBy,
+            List<String> orderBy,
             Integer top,
-            Integer skip
+            Integer skip,
+            List<String> expand
     ) {
         Specification<Athlete> filterSpec = AthleteQueryAdapter.parseFilter(filter);
         Specification<Athlete> searchSpec = AthleteQueryAdapter.parseSearch(search);
@@ -52,17 +47,15 @@ public class AthleteServiceImpl implements AthleteService {
         Pageable pageable = OffsetBasedPageRequest.of(skip, top, AthleteQueryAdapter.parseSort(orderBy));
 
         Page<Athlete> athletePage = athleteRepository.findAll(spec, pageable);
-        AthleteFacets facets = buildFacets(spec);
-        return new ListResult<>(athletePage.map(AthleteMapper::toDto), facets);
+        return athletePage.map(AthleteMapper::toDto);
     }
 
     @Override
-    public Optional<AthleteDto> getAthleteDtoByUuid(UUID uuid) {
+    public Optional<AthleteDto> getAthleteDtoByUuid(UUID uuid, List<String> expand) {
         return athleteRepository.findById(uuid)
                 .map(AthleteMapper::toDto);
     }
 
-    // PATCH methods (Update)
     @Override
     @Transactional
     public Optional<AthleteDto> updateAthlete(UUID uuid, AthleteUpdateRequest request) {
@@ -102,7 +95,6 @@ public class AthleteServiceImpl implements AthleteService {
         return updated;
     }
 
-    // DELETE methods
     @Override
     @Transactional
     public void deleteAthlete(UUID uuid) {
@@ -117,19 +109,6 @@ public class AthleteServiceImpl implements AthleteService {
         }
     }
 
-    // Helper methods
-    private AthleteFacets buildFacets(Specification<Athlete> spec) {
-        DateRange dobRange = facetQueryService.buildDateRange(
-                Athlete.class,
-                spec,
-                "dateOfBirth"
-        );
-        return new AthleteFacets()
-                .gender(facetQueryService.buildFacetOptions(Athlete.class, spec, "gender"))
-                .dateOfBirthMin(dobRange.min())
-                .dateOfBirthMax(dobRange.max());
-    }
-
     private Athlete saveAthlete(Athlete athlete) {
         try {
             return athleteRepository.save(athlete);
@@ -138,14 +117,12 @@ public class AthleteServiceImpl implements AthleteService {
         }
     }
 
-    // Helper methods for extracting conflict reasons from database exceptions
     private String extractConflictReason(DataIntegrityViolationException e) {
         String message = e.getMessage();
         if (message == null) return "Operation failed";
         
         String lowerMessage = message.toLowerCase();
         
-        // Check exact constraint names from Liquibase
         if (lowerMessage.contains("uk_athletes_full_name_dob")) {
             return "Athlete with these details already exists";
         }
@@ -161,7 +138,6 @@ public class AthleteServiceImpl implements AthleteService {
             return "Cannot create accreditation: club does not exist";
         }
         
-        // Generic fallback checks
         if (lowerMessage.contains("unique") || lowerMessage.contains("duplicate")) {
             return "A record with these details already exists";
         }

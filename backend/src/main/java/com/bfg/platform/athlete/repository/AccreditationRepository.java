@@ -19,10 +19,8 @@ import java.util.UUID;
 public interface AccreditationRepository extends JpaRepository<Accreditation, UUID>, JpaSpecificationExecutor<Accreditation> {
 
     @Override
-    @EntityGraph(attributePaths = {"athlete", "club"})
     Page<Accreditation> findAll(Specification<Accreditation> spec, Pageable pageable);
 
-    @EntityGraph(attributePaths = {"athlete", "club"})
     Optional<Accreditation> findWithRelationsById(UUID id);
 
     List<Accreditation> findByAthleteId(UUID athleteId);

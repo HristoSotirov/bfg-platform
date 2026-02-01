@@ -55,19 +55,23 @@
           type: string
       - name: orderBy
         in: query
-        description: Predefined ordering (comma-separated for multi-sort)
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: true
         schema:
-          type: string
-          enum:
-            - lastName_asc
-            - lastName_desc
-            - firstName_asc
-            - firstName_desc
-            - dateOfBirth_asc
-            - dateOfBirth_desc
-            - registeredOn_asc
-            - registeredOn_desc
-          default: lastName_asc
+          type: array
+          items:
+            type: string
+            enum:
+              - lastName_asc
+              - lastName_desc
+              - firstName_asc
+              - firstName_desc
+              - dateOfBirth_asc
+              - dateOfBirth_desc
+              - registeredOn_asc
+              - registeredOn_desc
+          default: ["lastName_asc"]
       - name: top
         in: query
         description: Maximum number of items to return
@@ -83,13 +87,31 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Currently no expandable fields available for athletes.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
     responses:
       "200":
         description: List of athletes retrieved
         content:
           application/json:
             schema:
-              $ref: "../common/schemas.yaml#/AthleteListResponse"
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../athletes/schemas.yaml#/AthleteDto"
 
 /athletes/{athleteUuid}:
   get:
@@ -105,6 +127,17 @@
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Currently no expandable fields available for athletes.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
     responses:
       "200":
         description: Athlete details retrieved
@@ -205,7 +238,9 @@
         content:
           application/json:
             schema:
-              $ref: "../common/schemas.yaml#/AthleteListResponse"
+              type: array
+              items:
+                $ref: "../athletes/schemas.yaml#/AthleteDto"
       "400":
         description: Bad request - validation error
         content:

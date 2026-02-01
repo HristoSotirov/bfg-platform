@@ -3,8 +3,9 @@ package com.bfg.platform.athlete.query;
 import com.bfg.platform.athlete.entity.Accreditation;
 import com.bfg.platform.athlete.entity.Athlete;
 import com.bfg.platform.club.entity.Club;
-import com.bfg.platform.common.query.FilterExpressionParser;
-import com.bfg.platform.common.query.SortParser;
+import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
+import com.bfg.platform.common.query.EnhancedSortParser;
+import com.bfg.platform.common.query.QueryAdapterHelpers;
 import com.bfg.platform.gen.model.AccreditationStatus;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -15,14 +16,12 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.UUID;
+import java.util.Set;
 
 public final class AccreditationQueryAdapter {
     private static final Sort DEFAULT_SORT = Sort.by(new Sort.Order(Sort.Direction.DESC, "year"));
@@ -32,26 +31,74 @@ public final class AccreditationQueryAdapter {
             Map.entry("accreditationNumber_asc", new Sort.Order(Sort.Direction.ASC, "accreditationNumber")),
             Map.entry("accreditationNumber_desc", new Sort.Order(Sort.Direction.DESC, "accreditationNumber")),
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
-            Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt"))
+            Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt")),
+            Map.entry("athlete.dateOfBirth_asc", new Sort.Order(Sort.Direction.ASC, "athlete.dateOfBirth")),
+            Map.entry("athlete.dateOfBirth_desc", new Sort.Order(Sort.Direction.DESC, "athlete.dateOfBirth")),
+            Map.entry("athlete.firstName_asc", new Sort.Order(Sort.Direction.ASC, "athlete.firstName")),
+            Map.entry("athlete.firstName_desc", new Sort.Order(Sort.Direction.DESC, "athlete.firstName")),
+            Map.entry("athlete.lastName_asc", new Sort.Order(Sort.Direction.ASC, "athlete.lastName")),
+            Map.entry("athlete.lastName_desc", new Sort.Order(Sort.Direction.DESC, "athlete.lastName")),
+            Map.entry("club.name_asc", new Sort.Order(Sort.Direction.ASC, "club.name")),
+            Map.entry("club.name_desc", new Sort.Order(Sort.Direction.DESC, "club.name"))
     );
 
     private AccreditationQueryAdapter() {
         throw new IllegalStateException("Utility class");
     }
 
+    public static EnhancedFilterExpressionParser.ParseResult<Accreditation> parseFilter(
+            String filter,
+            Set<String> requestedExpand
+    ) {
+        return EnhancedFilterExpressionParser.parse(
+                filter,
+                new EnhancedPredicateBuilder(),
+                Accreditation.class,
+                requestedExpand
+        );
+    }
+
+    public static EnhancedSortParser.ParseResult parseSort(
+            List<String> orderBy,
+            Set<String> requestedExpand
+    ) {
+        return EnhancedSortParser.parse(
+                orderBy,
+                ORDER_MAP,
+                DEFAULT_SORT,
+                Accreditation.class,
+                requestedExpand
+        );
+    }
+
+    public static EnhancedSortParser.ParseResult parseSort(
+            String orderBy,
+            Set<String> requestedExpand
+    ) {
+        return EnhancedSortParser.parse(
+                orderBy,
+                ORDER_MAP,
+                DEFAULT_SORT,
+                Accreditation.class,
+                requestedExpand
+        );
+    }
+
     public static Specification<Accreditation> parseFilter(String filter) {
-        return FilterExpressionParser.parse(filter, AccreditationQueryAdapter::buildPredicate);
+        EnhancedFilterExpressionParser.ParseResult<Accreditation> result = parseFilter(filter, null);
+        return result.getSpecification();
     }
 
     public static Sort parseSort(String orderBy) {
-        return SortParser.parse(orderBy, ORDER_MAP, DEFAULT_SORT);
+        EnhancedSortParser.ParseResult result = parseSort(orderBy, null);
+        return result.getSort();
     }
 
     public static Specification<Accreditation> parseSearch(String search) {
         if (search == null || search.isBlank()) {
             return Specification.where(null);
         }
-        List<String> tokens = tokenize(search);
+        List<String> tokens = QueryAdapterHelpers.tokenize(search);
         if (tokens.isEmpty()) {
             return Specification.where(null);
         }
@@ -73,17 +120,200 @@ public final class AccreditationQueryAdapter {
         };
     }
 
-    private static Predicate buildPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
-        return switch (field) {
-            case "athleteId" -> uuidPredicate(root, cb, "athleteId", op, valueRaw);
-            case "clubId" -> uuidPredicate(root, cb, "clubId", op, valueRaw);
-            case "year", "accreditationYear" -> integerPredicate(root, cb, "year", op, valueRaw);
-            case "status", "accreditationStatus" -> enumPredicate(root, cb, "status", op, valueRaw);
-            case "accreditationNumber" -> stringPredicate(root, cb, "accreditationNumber", op, valueRaw);
-            case "createdAt" -> instantPredicate(root, cb, "createdAt", op, valueRaw);
-            case "dateOfBirth", "athleteDateOfBirth" -> athleteDatePredicate(root, cb, op, valueRaw);
-            default -> throw new IllegalArgumentException("Unsupported filter field: " + field);
-        };
+    private static class EnhancedPredicateBuilder implements EnhancedFilterExpressionParser.EnhancedPredicateBuilder<Accreditation> {
+
+        @Override
+        public Predicate build(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
+            if (field.contains(".")) {
+                return buildExpandedFieldPredicate(root, cb, field, op, valueRaw);
+            }
+            
+            return buildRegularFieldPredicate(root, cb, field, op, valueRaw);
+        }
+
+        @Override
+        public Predicate buildRange(Root<Accreditation> root, CriteriaBuilder cb, String field, String minValue, String maxValue) {
+            if (field.contains(".")) {
+                return buildExpandedFieldRange(root, cb, field, minValue, maxValue);
+            }
+            return buildRegularFieldRange(root, cb, field, minValue, maxValue);
+        }
+
+        @Override
+        public Predicate buildIn(Root<Accreditation> root, CriteriaBuilder cb, String field, List<String> values) {
+            if (field.contains(".")) {
+                return buildExpandedFieldIn(root, cb, field, values);
+            }
+            return buildRegularFieldIn(root, cb, field, values);
+        }
+
+        private Predicate buildExpandedFieldPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
+            String[] parts = field.split("\\.", 2);
+            String expandField = parts[0];
+            String subField = parts[1];
+
+            Join<?, ?> join = getOrCreateJoin(root, cb, expandField);
+            if (join == null) {
+                return cb.conjunction(); // Silent skip if expand not requested
+            }
+
+            return switch (expandField) {
+                case "athlete" -> buildAthleteFieldPredicate(join, cb, subField, op, valueRaw);
+                case "club" -> buildClubFieldPredicate(join, cb, subField, op, valueRaw);
+                default -> throw new IllegalArgumentException("Unsupported expand field: " + expandField);
+            };
+        }
+
+        private Predicate buildExpandedFieldRange(Root<Accreditation> root, CriteriaBuilder cb, String field, String minValue, String maxValue) {
+            String[] parts = field.split("\\.", 2);
+            String expandField = parts[0];
+            String subField = parts[1];
+
+            Join<?, ?> join = getOrCreateJoin(root, cb, expandField);
+            if (join == null) {
+                return cb.conjunction();
+            }
+
+            return switch (expandField) {
+                case "athlete" -> buildAthleteFieldRange(join, cb, subField, minValue, maxValue);
+                case "club" -> buildClubFieldRange(join, cb, subField, minValue, maxValue);
+                default -> throw new IllegalArgumentException("Unsupported expand field: " + expandField);
+            };
+        }
+
+        private Predicate buildExpandedFieldIn(Root<Accreditation> root, CriteriaBuilder cb, String field, List<String> values) {
+            String[] parts = field.split("\\.", 2);
+            String expandField = parts[0];
+            String subField = parts[1];
+
+            Join<?, ?> join = getOrCreateJoin(root, cb, expandField);
+            if (join == null) {
+                return cb.conjunction();
+            }
+
+            return switch (expandField) {
+                case "athlete" -> buildAthleteFieldIn(join, cb, subField, values);
+                case "club" -> buildClubFieldIn(join, cb, subField, values);
+                default -> throw new IllegalArgumentException("Unsupported expand field: " + expandField);
+            };
+        }
+
+        private Join<?, ?> getOrCreateJoin(Root<Accreditation> root, CriteriaBuilder cb, String expandField) {
+            return switch (expandField) {
+                case "athlete" -> root.join("athlete", JoinType.LEFT);
+                case "club" -> root.join("club", JoinType.LEFT);
+                default -> null;
+            };
+        }
+
+        private Predicate buildAthleteFieldPredicate(Join<?, ?> athleteJoin, CriteriaBuilder cb, String field, String op, String valueRaw) {
+            return switch (field) {
+                case "dateOfBirth" -> QueryAdapterHelpers.datePredicate(athleteJoin, cb, "dateOfBirth", op, valueRaw);
+                case "firstName", "lastName", "middleName" -> QueryAdapterHelpers.stringPredicate(athleteJoin, cb, field, op, valueRaw);
+                case "gender" -> QueryAdapterHelpers.stringPredicate(athleteJoin, cb, "gender", op, valueRaw);
+                default -> throw new IllegalArgumentException("Unsupported athlete field: " + field);
+            };
+        }
+
+        private Predicate buildClubFieldPredicate(Join<?, ?> clubJoin, CriteriaBuilder cb, String field, String op, String valueRaw) {
+            return switch (field) {
+                case "name", "shortName" -> QueryAdapterHelpers.stringPredicate(clubJoin, cb, field, op, valueRaw);
+                case "isActive" -> QueryAdapterHelpers.booleanPredicate(clubJoin, cb, "isActive", op, valueRaw);
+                default -> throw new IllegalArgumentException("Unsupported club field: " + field);
+            };
+        }
+
+        private Predicate buildAthleteFieldRange(Join<?, ?> athleteJoin, CriteriaBuilder cb, String field, String minValue, String maxValue) {
+            if (!"dateOfBirth".equals(field)) {
+                throw new IllegalArgumentException("Range operator not supported for athlete field: " + field);
+            }
+            return QueryAdapterHelpers.dateRangePredicate(athleteJoin, cb, "dateOfBirth", minValue, maxValue);
+        }
+
+        private Predicate buildClubFieldRange(Join<?, ?> clubJoin, CriteriaBuilder cb, String field, String minValue, String maxValue) {
+            throw new IllegalArgumentException("Range operator not supported for club field: " + field);
+        }
+
+        private Predicate buildAthleteFieldIn(Join<?, ?> athleteJoin, CriteriaBuilder cb, String field, List<String> values) {
+            return switch (field) {
+                case "gender" -> QueryAdapterHelpers.stringInPredicate(athleteJoin, cb, "gender", values);
+                default -> throw new IllegalArgumentException("In operator not supported for athlete field: " + field);
+            };
+        }
+
+        private Predicate buildClubFieldIn(Join<?, ?> clubJoin, CriteriaBuilder cb, String field, List<String> values) {
+            return switch (field) {
+                case "name", "shortName" -> QueryAdapterHelpers.stringInPredicate(clubJoin, cb, field, values);
+                default -> throw new IllegalArgumentException("In operator not supported for club field: " + field);
+            };
+        }
+
+        private Predicate buildRegularFieldPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
+            return switch (field) {
+                case "athleteId" -> QueryAdapterHelpers.uuidPredicate(root, cb, "athleteId", op, valueRaw);
+                case "clubId" -> QueryAdapterHelpers.uuidPredicate(root, cb, "clubId", op, valueRaw);
+                case "year", "accreditationYear" -> QueryAdapterHelpers.integerPredicate(root, cb, "year", op, valueRaw);
+                case "status", "accreditationStatus" -> enumPredicate(root, cb, "status", op, valueRaw);
+                case "accreditationNumber" -> QueryAdapterHelpers.stringPredicate(root, cb, "accreditationNumber", op, valueRaw);
+                case "createdAt" -> QueryAdapterHelpers.instantPredicate(root, cb, "createdAt", op, valueRaw);
+                case "dateOfBirth", "athleteDateOfBirth" -> {
+                    Join<Accreditation, Athlete> athleteJoin = root.join("athlete", JoinType.INNER);
+                    yield QueryAdapterHelpers.datePredicate(athleteJoin, cb, "dateOfBirth", op, valueRaw);
+                }
+                default -> throw new IllegalArgumentException("Unsupported filter field: " + field);
+            };
+        }
+
+        private Predicate buildRegularFieldRange(Root<Accreditation> root, CriteriaBuilder cb, String field, String minValue, String maxValue) {
+            return switch (field) {
+                case "year" -> QueryAdapterHelpers.integerRangePredicate(root, cb, "year", minValue, maxValue);
+                case "createdAt" -> QueryAdapterHelpers.instantRangePredicate(root, cb, "createdAt", minValue, maxValue);
+                default -> throw new IllegalArgumentException("Range operator not supported for field: " + field);
+            };
+        }
+
+        private Predicate buildRegularFieldIn(Root<Accreditation> root, CriteriaBuilder cb, String field, List<String> values) {
+            return switch (field) {
+                case "athleteId" -> QueryAdapterHelpers.uuidInPredicate(root, cb, "athleteId", values);
+                case "clubId" -> QueryAdapterHelpers.uuidInPredicate(root, cb, "clubId", values);
+                case "status", "accreditationStatus" -> enumInPredicate(root, cb, "status", values);
+                case "year" -> QueryAdapterHelpers.integerInPredicate(root, cb, "year", values);
+                default -> throw new IllegalArgumentException("In operator not supported for field: " + field);
+            };
+        }
+
+        private Predicate enumPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
+            String value = QueryAdapterHelpers.parseString(valueRaw);
+            AccreditationStatus status;
+            try {
+                status = AccreditationStatus.fromValue(value);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid accreditation status value: " + valueRaw);
+            }
+            Expression<AccreditationStatus> expr = root.get(field);
+
+            return switch (op) {
+                case "eq" -> cb.equal(expr, status);
+                case "ne" -> cb.notEqual(expr, status);
+                default -> throw new IllegalArgumentException("Operator '" + op + "' is not supported for field '" + field + "'");
+            };
+        }
+
+        private Predicate enumInPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, List<String> values) {
+            Expression<AccreditationStatus> expr = root.get(field);
+            List<Predicate> predicates = new ArrayList<>();
+            for (String value : values) {
+                String v = QueryAdapterHelpers.parseString(value);
+                AccreditationStatus status;
+                try {
+                    status = AccreditationStatus.fromValue(v);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Invalid accreditation status value: " + value);
+                }
+                predicates.add(cb.equal(expr, status));
+            }
+            return cb.or(predicates.toArray(new Predicate[0]));
+        }
     }
 
     private static Predicate buildSearchPredicate(
@@ -104,164 +334,10 @@ public final class AccreditationQueryAdapter {
         fieldPredicates.add(cb.like(cb.lower(athleteJoin.get("lastName").as(String.class)), likeValue));
         fieldPredicates.add(cb.like(cb.lower(clubJoin.get("name").as(String.class)), likeValue));
         fieldPredicates.add(cb.like(cb.lower(root.get("accreditationNumber").as(String.class)), likeValue));
-        LocalDate date = tryParseDate(normalized);
+        LocalDate date = QueryAdapterHelpers.tryParseDate(normalized);
         if (date != null) {
             fieldPredicates.add(cb.equal(athleteJoin.get("dateOfBirth"), date));
         }
         return cb.or(fieldPredicates.toArray(new Predicate[0]));
     }
-
-    private static Predicate stringPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
-        String value = parseString(valueRaw);
-        Expression<String> expr = cb.lower(root.get(field).as(String.class));
-        String v = value.toLowerCase(Locale.ROOT);
-
-        return switch (op) {
-            case "eq" -> cb.equal(expr, v);
-            case "ne" -> cb.notEqual(expr, v);
-            default -> throw new IllegalArgumentException("Operator '" + op + "' is not supported for field '" + field + "'");
-        };
-    }
-
-    private static Predicate enumPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
-        String value = parseString(valueRaw);
-        AccreditationStatus status;
-        try {
-            status = AccreditationStatus.fromValue(value);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid accreditation status value: " + valueRaw);
-        }
-        Expression<AccreditationStatus> expr = root.get(field);
-
-        return switch (op) {
-            case "eq" -> cb.equal(expr, status);
-            case "ne" -> cb.notEqual(expr, status);
-            default -> throw new IllegalArgumentException("Operator '" + op + "' is not supported for field '" + field + "'");
-        };
-    }
-
-    private static Predicate uuidPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
-        return switch (op) {
-            case "eq" -> {
-                UUID uuid = parseUuid(valueRaw);
-                Expression<UUID> expr = root.get(field);
-                yield cb.equal(expr, uuid);
-            }
-            case "ne" -> {
-                UUID uuid = parseUuid(valueRaw);
-                Expression<UUID> expr = root.get(field);
-                yield cb.notEqual(expr, uuid);
-            }
-            default -> throw new IllegalArgumentException("Operator '" + op + "' is not supported for UUID field '" + field + "'");
-        };
-    }
-
-    private static Predicate integerPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
-        Integer value = parseInteger(valueRaw);
-        Expression<Integer> expr = root.get(field);
-
-        return switch (op) {
-            case "eq" -> cb.equal(expr, value);
-            case "ne" -> cb.notEqual(expr, value);
-            case "gt" -> cb.greaterThan(expr, value);
-            case "ge" -> cb.greaterThanOrEqualTo(expr, value);
-            case "lt" -> cb.lessThan(expr, value);
-            case "le" -> cb.lessThanOrEqualTo(expr, value);
-            default -> throw new IllegalArgumentException("Unsupported operator: " + op);
-        };
-    }
-
-    private static Predicate instantPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
-        Instant instant = parseInstant(valueRaw);
-        Expression<Instant> expr = root.get(field);
-        return switch (op) {
-            case "eq" -> cb.equal(expr, instant);
-            case "ne" -> cb.notEqual(expr, instant);
-            case "gt" -> cb.greaterThan(expr, instant);
-            case "ge" -> cb.greaterThanOrEqualTo(expr, instant);
-            case "lt" -> cb.lessThan(expr, instant);
-            case "le" -> cb.lessThanOrEqualTo(expr, instant);
-            default -> throw new IllegalArgumentException("Unsupported operator: " + op);
-        };
-    }
-
-    private static Predicate athleteDatePredicate(Root<Accreditation> root, CriteriaBuilder cb, String op, String valueRaw) {
-        LocalDate date = parseLocalDate(valueRaw);
-        Join<Accreditation, Athlete> athleteJoin = root.join("athlete", JoinType.INNER);
-        Expression<LocalDate> expr = athleteJoin.get("dateOfBirth");
-        return switch (op) {
-            case "eq" -> cb.equal(expr, date);
-            case "ne" -> cb.notEqual(expr, date);
-            case "gt" -> cb.greaterThan(expr, date);
-            case "ge" -> cb.greaterThanOrEqualTo(expr, date);
-            case "lt" -> cb.lessThan(expr, date);
-            case "le" -> cb.lessThanOrEqualTo(expr, date);
-            default -> throw new IllegalArgumentException("Unsupported operator: " + op);
-        };
-    }
-
-    private static String parseString(String valueRaw) {
-        String v = valueRaw.trim();
-        if (v.startsWith("'") && v.endsWith("'") && v.length() >= 2) {
-            v = v.substring(1, v.length() - 1);
-        }
-        v = v.replace("\\'", "'");
-        return v;
-    }
-
-    private static List<String> tokenize(String search) {
-        String[] rawTokens = search.trim().split("\\s+");
-        List<String> tokens = new ArrayList<>();
-        for (String token : rawTokens) {
-            if (!token.isBlank()) {
-                tokens.add(token);
-            }
-        }
-        return tokens;
-    }
-
-    private static UUID parseUuid(String valueRaw) {
-        String v = parseString(valueRaw);
-        try {
-            return UUID.fromString(v);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid UUID value: " + valueRaw);
-        }
-    }
-
-    private static Integer parseInteger(String valueRaw) {
-        String v = parseString(valueRaw);
-        try {
-            return Integer.parseInt(v);
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid integer value: " + valueRaw);
-        }
-    }
-
-    private static Instant parseInstant(String valueRaw) {
-        String v = parseString(valueRaw);
-        try {
-            return Instant.parse(v);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid date-time value: " + valueRaw);
-        }
-    }
-
-    private static LocalDate parseLocalDate(String valueRaw) {
-        String v = parseString(valueRaw);
-        try {
-            return LocalDate.parse(v);
-        } catch (DateTimeParseException e) {
-            throw new IllegalArgumentException("Invalid date value: " + valueRaw);
-        }
-    }
-
-    private static LocalDate tryParseDate(String token) {
-        try {
-            return LocalDate.parse(token);
-        } catch (DateTimeParseException e) {
-            return null;
-        }
-    }
 }
-

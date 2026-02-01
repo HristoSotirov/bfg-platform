@@ -59,6 +59,10 @@ bfg:
       password: ${BOOTSTRAP_ADMIN_PASSWORD:admin123}
       first-name: ${BOOTSTRAP_ADMIN_FIRST_NAME:App}
       last-name: ${BOOTSTRAP_ADMIN_LAST_NAME:Admin}
+  # Test data bootstrap - set to true to enable test data loading
+  # Or use --spring.profiles.active=local
+  test-data:
+    enabled: ${BFG_TEST_DATA_ENABLED:false}
 
 # S3/MinIO configuration - local development defaults
 # For production, set S3_ENDPOINT, S3_ACCESS_KEY, S3_SECRET_KEY env vars
