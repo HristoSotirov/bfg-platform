@@ -3,6 +3,7 @@ package com.bfg.platform.athlete.service;
 import com.bfg.platform.athlete.entity.Accreditation;
 import com.bfg.platform.athlete.repository.AccreditationRepository;
 import com.bfg.platform.athlete.service.AccreditationService;
+import com.bfg.platform.athlete.service.AthletePhotoService;
 import com.bfg.platform.athlete.entity.AthletePhotoHistory;
 import com.bfg.platform.athlete.mapper.AthletePhotoMapper;
 import com.bfg.platform.athlete.repository.AthletePhotoHistoryRepository;
@@ -113,10 +114,30 @@ public class AthletePhotoServiceImpl implements AthletePhotoService {
         Specification<AthletePhotoHistory> spec = Specification
                 .where(AthletePhotoQueryAdapter.parseFilter(filter))
                 .and((root, query, cb) -> cb.equal(root.get("athleteId"), athleteId));
-        
+
+        final int presignedExpirySeconds = 3600;
         return photoHistoryRepository.findAll(spec, pageable)
-                .map(photo -> AthletePhotoMapper.toDto(photo, requestedExpand));
+                .map(photo -> {
+                    AthletePhotoDto dto = AthletePhotoMapper.toDto(photo, requestedExpand);
+                    String path = photo.getPhotoUrl();
+                    if (path != null && !path.isBlank()) {
+                        parseBucketAndObject(path)
+                                .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                                .filter(url -> url != null && !url.isBlank())
+                                .ifPresent(dto::setPhotoUrl);
+                    }
+                    return dto;
+                });
     }
+
+    private Optional<BucketObject> parseBucketAndObject(String photoUrl) {
+        String path = photoUrl.startsWith("/") ? photoUrl.substring(1) : photoUrl;
+        String[] parts = path.split("/", 2);
+        if (parts.length != 2 || parts[0].isBlank() || parts[1].isBlank()) return Optional.empty();
+        return Optional.of(new BucketObject(parts[0], parts[1]));
+    }
+
+    private record BucketObject(String bucket, String objectName) {}
 
     private void validateUuid(UUID uuid) {
         if (uuid == null) {

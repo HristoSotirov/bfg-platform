@@ -12,23 +12,11 @@ AccreditationDto:
       format: uuid
       description: UUID of the athlete
       example: "550e8400-e29b-41d4-a716-446655440001"
-    athleteName:
-      type: string
-      description: Display name of the athlete (firstName + middleName + lastName)
-      example: "Ivan Petrov Ivanov"
     clubId:
       type: string
       format: uuid
       description: UUID of the club
       example: "550e8400-e29b-41d4-a716-446655440002"
-    clubName:
-      type: string
-      description: Name of the club
-      example: "Rowing Club Sofia"
-    clubShortName:
-      type: string
-      description: Short name of the club
-      example: "RCS"
     club:
       $ref: "../clubs/schemas.yaml#/ClubDto"
       description: Full club details
@@ -131,3 +119,58 @@ AccreditationStatus:
     - NEW_PHOTO_REQUIRED
     - EXPIRED
     - SUSPENDED
+
+AccreditationStatusPatchRequest:
+  type: object
+  description: Request body for PATCH accreditation status (single enum field)
+  required:
+    - status
+  properties:
+    status:
+      $ref: "#/AccreditationStatus"
+  x-class-extra-annotation: '@NotNull(message = "{accreditation.status.required}")'
+
+AccreditationBatchRenewalRequest:
+  type: object
+  description: Request payload for batch renewal of accreditations
+  x-class-extra-annotation: '@NotNull(message = "{accreditation.batchRenewal.request.required}") @Valid'
+  required:
+    - athleteIds
+  properties:
+    athleteIds:
+      type: array
+      description: List of athlete UUIDs to renew accreditations for (max 100 per request; send multiple requests for more)
+      minItems: 1
+      maxItems: 100
+      items:
+        type: string
+        format: uuid
+      x-field-extra-annotation: '@NotEmpty(message = "{accreditation.batchRenewal.athletes.required}") @Size(max = 100, message = "{accreditation.batchRenewal.athletes.maxSize}")'
+
+AccreditationBatchRenewalResponse:
+  type: object
+  description: Response for batch accreditation renewal
+  properties:
+    renewed:
+      type: array
+      description: Successfully renewed accreditations
+      items:
+        $ref: "#/AccreditationDto"
+    failed:
+      type: array
+      description: Failed renewal attempts with error details
+      items:
+        type: object
+        properties:
+          athleteId:
+            type: string
+            format: uuid
+            description: UUID of the athlete
+          athleteName:
+            type: string
+            description: Full name of the athlete (firstName + middleName + lastName)
+            example: "Ivan Petrov Ivanov"
+          error:
+            type: string
+            description: Error message explaining why the renewal failed
+            example: "Accreditation for this athlete and year already exists"

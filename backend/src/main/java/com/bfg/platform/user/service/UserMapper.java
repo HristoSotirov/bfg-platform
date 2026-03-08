@@ -23,10 +23,15 @@ public class UserMapper {
         dto.setLastName(user.getLastName());
         dto.setDateOfBirth(user.getDateOfBirth());
         dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
         dto.setIsActive(user.isActive());
         dto.setRole(user.getRole());
-        dto.setCreatedAt(OffsetDateTime.ofInstant(user.getCreatedAt(), ZoneOffset.UTC));
-        dto.setUpdatedAt(OffsetDateTime.ofInstant(user.getModifiedAt(), ZoneOffset.UTC));
+        dto.setCreatedAt(user.getCreatedAt() != null 
+            ? OffsetDateTime.ofInstant(user.getCreatedAt(), ZoneOffset.UTC) 
+            : null);
+        dto.setUpdatedAt(user.getModifiedAt() != null 
+            ? OffsetDateTime.ofInstant(user.getModifiedAt(), ZoneOffset.UTC) 
+            : null);
         return dto;
     }
 
@@ -35,7 +40,12 @@ public class UserMapper {
         user.setFirstName(request.getFirstName());
         user.setLastName(request.getLastName());
         user.setDateOfBirth(request.getDateOfBirth());
-        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        if (request.getUsername() != null && !request.getUsername().isBlank()) {
+            user.setUsername(request.getUsername());
+        } else {
+            user.setUsername(request.getEmail());
+        }
         user.setRole(request.getRole());
         return user;
     }
@@ -46,6 +56,12 @@ public class UserMapper {
         }
         if (request.getLastName() != null) {
             user.setLastName(request.getLastName());
+        }
+        if (request.getDateOfBirth() != null) {
+            user.setDateOfBirth(request.getDateOfBirth());
+        }
+        if (request.getUsername() != null) {
+            user.setUsername(request.getUsername());
         }
         if (request.getIsActive() != null) {
             user.setActive(request.getIsActive());

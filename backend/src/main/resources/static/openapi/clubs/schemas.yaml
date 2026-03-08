@@ -37,13 +37,19 @@ ClubDto:
       format: uuid
       description: UUID of the club administrator user
       example: "550e8400-e29b-41d4-a716-446655440001"
-    clubAdminName:
-      type: string
-      description: Display name of the club administrator (firstName + lastName)
-      example: "Ivan Petrov"
-    clubAdmin:
+    clubAdminUser:
       $ref: "../users/schemas.yaml#/UserDto"
-      description: Full club administrator details
+      description: Full club administrator user details (available when expand=clubAdminUser)
+    createdAt:
+      type: string
+      format: date-time
+      description: Timestamp when the club was created
+      example: "2024-01-15T10:30:00Z"
+    updatedAt:
+      type: string
+      format: date-time
+      description: Timestamp when the club was last modified
+      example: "2024-01-16T14:20:00Z"
 
 ClubFacets:
   type: object
@@ -176,9 +182,11 @@ ClubBatchCreateRequest:
     clubs:
       type: array
       minItems: 1
+      maxItems: 100
+      description: At most 100 clubs per request are allowed.
       items:
         $ref: "#/ClubBatchCreateRequestItem"
-      x-field-extra-annotation: '@NotEmpty(message = "{club.batchClubs.required}")'
+      x-field-extra-annotation: '@NotEmpty(message = "{club.batchClubs.required}") @Size(max = 100, message = "{club.batchClubs.maxSize}")'
       example:
         - name: "Rowing Club Sofia"
           shortName: "RC Sofia"

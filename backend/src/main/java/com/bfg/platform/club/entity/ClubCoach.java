@@ -6,8 +6,10 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -21,7 +23,8 @@ import java.util.UUID;
 public class ClubCoach {
 
     @Id
-    @Column(name = "id", updatable = false, insertable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false)
     @Setter(AccessLevel.NONE)
     private UUID id;
 
@@ -38,11 +41,15 @@ public class ClubCoach {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "coach_id", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User coach;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_id", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private Club club;
 
 }

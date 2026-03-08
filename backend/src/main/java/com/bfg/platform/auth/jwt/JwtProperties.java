@@ -14,12 +14,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
 
-/**
- * Configuration properties for JWT token management.
- * <p>
- * Validates required properties and initializes RSA keys for token signing and verification.
- * Supports both configured keys (via PEM strings) and ephemeral key generation for development.
- */
 @Component
 @Slf4j
 @Getter
@@ -44,12 +38,6 @@ public class JwtProperties {
     @Setter(AccessLevel.PRIVATE)
     private PublicKey publicKey;
 
-    /**
-     * Validates all JWT configuration properties and initializes keys.
-     * This method is called automatically after all properties are bound.
-     *
-     * @throws IllegalStateException if configuration is invalid
-     */
     @PostConstruct
     public void validateAndInitialize() {
         validateIssuer();
@@ -114,7 +102,6 @@ public class JwtProperties {
         try {
             this.privateKey = RsaKeyLoader.loadPrivateKeyFromPem(privateKeyPem);
             this.publicKey = RsaKeyLoader.loadPublicKeyFromPem(publicKeyPem);
-            log.info("JWT RSA keys loaded successfully from configuration");
         } catch (IllegalArgumentException e) {
             throw new IllegalStateException(
                 "Failed to load JWT keys from PEM format. " +

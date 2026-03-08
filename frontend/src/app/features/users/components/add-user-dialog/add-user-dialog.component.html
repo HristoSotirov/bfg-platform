@@ -1,0 +1,124 @@
+<app-dialog [isOpen]="isOpen" title="Добавяне на потребител" size="lg" (closed)="close()">
+  <div class="space-y-4 flex-1 min-h-0 overflow-y-auto">
+    <div class="space-y-4">
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+          Име <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="formData.firstName"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm leading-normal transition-colors focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue min-h-[38px]"
+          [disabled]="saving"
+          placeholder="Въведете име"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+          Фамилия <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="formData.lastName"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm leading-normal transition-colors focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue min-h-[38px]"
+          [disabled]="saving"
+          placeholder="Въведете фамилия"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+          Дата на раждане <span class="text-red-500">*</span>
+        </label>
+        <app-date-picker
+          label=""
+          placeholder="Изберете дата на раждане"
+          [(ngModel)]="formData.dateOfBirth"
+          [required]="true"
+          [disabled]="saving"
+        ></app-date-picker>
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+          Имейл <span class="text-red-500">*</span>
+        </label>
+        <input
+          type="email"
+          [(ngModel)]="formData.email"
+          (ngModelChange)="onEmailChange()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm leading-normal transition-colors focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue min-h-[38px]"
+          [disabled]="saving"
+          placeholder="Въведете имейл"
+        />
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+          Потребителско име
+        </label>
+        <input
+          type="text"
+          [(ngModel)]="formData.username"
+          [disabled]="saving || isUsernameLocked()"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm leading-normal transition-colors focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue min-h-[38px]"
+          [class.bg-gray-50]="isUsernameLocked()"
+          [class.text-gray-500]="isUsernameLocked()"
+          placeholder="Ще бъде попълнено автоматично"
+        />
+        @if (isUsernameLocked()) {
+          <p class="mt-1 text-xs text-gray-500">
+            @if (userRole === 'CLUB_ADMIN') {
+              Потребителското име е автоматично и не може да се променя
+            } @else {
+              Въведете имейл, за да отключите полето
+            }
+          </p>
+        }
+      </div>
+
+      <div>
+        <label class="block text-xs font-medium text-gray-700 mb-1">
+          Роля <span class="text-red-500">*</span>
+        </label>
+        <app-searchable-select-dropdown
+          [options]="roleOptions"
+          [ngModel]="formData.role"
+          (ngModelChange)="onRoleChange($event)"
+          [placeholder]="'Изберете роля'"
+          [disabled]="saving"
+        >
+        </app-searchable-select-dropdown>
+      </div>
+    </div>
+  </div>
+
+  
+  <div class="dialog-footer bg-white flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200">
+    @if (error) {
+      <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+        <p class="text-sm text-red-700">{{ error }}</p>
+      </div>
+    }
+    <div class="flex items-center justify-center gap-2">
+      <app-button
+        variant="outline"
+        size="md"
+        text="Отказ"
+        [disabled]="saving"
+        (click)="close()"
+      >
+      </app-button>
+      <app-button
+        variant="primary"
+        size="md"
+        text="Създаване"
+        [disabled]="saving"
+        (click)="save()"
+      >
+      </app-button>
+    </div>
+  </div>
+</app-dialog>
+

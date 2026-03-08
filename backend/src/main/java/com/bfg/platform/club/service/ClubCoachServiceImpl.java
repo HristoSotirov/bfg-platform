@@ -76,14 +76,10 @@ public class ClubCoachServiceImpl implements ClubCoachService {
 
         validateCoachRole(request.getCoachId());
 
-        try {
-            ClubCoach clubCoach = ClubCoachMapper.fromCreateRequest(request);
+        ClubCoach clubCoach = ClubCoachMapper.fromCreateRequest(request);
 
-            ClubCoach saved = clubCoachRepository.save(clubCoach);
-            return Optional.of(ClubCoachMapper.toDto(saved));
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractConflictReason(e));
-        }
+        ClubCoach saved = clubCoachRepository.save(clubCoach);
+        return Optional.of(ClubCoachMapper.toDto(saved));
     }
 
     @Override
@@ -107,33 +103,6 @@ public class ClubCoachServiceImpl implements ClubCoachService {
         }
     }
 
-    private String extractConflictReason(DataIntegrityViolationException e) {
-        String message = e.getMessage();
-        if (message == null) return "Failed to assign coach to club";
-        
-        String lowerMessage = message.toLowerCase();
-        
-        if (lowerMessage.contains("fk_club_coaches_coach_id")) {
-            return "User does not exist or cannot be assigned as coach";
-        }
-        if (lowerMessage.contains("fk_club_coaches_club_id")) {
-            return "Club does not exist";
-        }
-        
-        if (lowerMessage.contains("club_coaches_coach_id_key") || 
-            (lowerMessage.contains("coach_id") && lowerMessage.contains("unique"))) {
-            return "Coach is already assigned to this club";
-        }
-        
-        if (lowerMessage.contains("unique") || lowerMessage.contains("duplicate")) {
-            return "Coach is already assigned to this club";
-        }
-        if (lowerMessage.contains("foreign key") || lowerMessage.contains("fk_")) {
-            return "Failed to assign coach to club: referenced entity does not exist";
-        }
-        
-        return "Failed to assign coach to club";
-    }
 
     private void validateAssignPermissions(ClubCoachCreateRequest request) {
         SystemRole currentRole = securityContextHelper.getUserRole();

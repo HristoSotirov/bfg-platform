@@ -21,6 +21,7 @@ import java.util.UUID;
 public class AthletePhotoHistory {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false)
     @Setter(AccessLevel.NONE)
     private UUID id;

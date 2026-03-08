@@ -74,8 +74,8 @@ paths:
     $ref: "./accreditations/paths.yaml#/~1accreditations"
   /accreditations/migrate:
     $ref: "./accreditations/paths.yaml#/~1accreditations~1migrate"
-  /accreditations/renew/{athleteId}:
-    $ref: "./accreditations/paths.yaml#/~1accreditations~1renew~1{athleteId}"
+  /accreditations/renew/batch:
+    $ref: "./accreditations/paths.yaml#/~1accreditations~1renew~1batch"
   /accreditations/{accreditationUuid}:
     $ref: "./accreditations/paths.yaml#/~1accreditations~1{accreditationUuid}"
 
@@ -130,6 +130,8 @@ components:
       $ref: "./clubs/schemas.yaml#/ClubLogoUpdateRequest"
 
     # Athletes
+    Gender:
+      $ref: "./athletes/schemas.yaml#/Gender"
     AthleteDto:
       $ref: "./athletes/schemas.yaml#/AthleteDto"
     AthleteCreateRequest:
@@ -160,3 +162,9 @@ components:
       $ref: "./accreditations/schemas.yaml#/AccreditationCreateRequest"
     AccreditationStatus:
       $ref: "./accreditations/schemas.yaml#/AccreditationStatus"
+    AccreditationStatusPatchRequest:
+      $ref: "./accreditations/schemas.yaml#/AccreditationStatusPatchRequest"
+    AccreditationBatchRenewalRequest:
+      $ref: "./accreditations/schemas.yaml#/AccreditationBatchRenewalRequest"
+    AccreditationBatchRenewalResponse:
+      $ref: "./accreditations/schemas.yaml#/AccreditationBatchRenewalResponse"

@@ -1,12 +1,14 @@
 package com.bfg.platform.athlete.mapper;
 
 import com.bfg.platform.athlete.entity.Athlete;
-import com.bfg.platform.gen.model.*;
+import com.bfg.platform.gen.model.AthleteBatchMigrationRequestItem;
+import com.bfg.platform.gen.model.AthleteCreateRequest;
+import com.bfg.platform.gen.model.AthleteDto;
+import com.bfg.platform.gen.model.AthleteUpdateRequest;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
-import java.util.UUID;
 
 @Component
 public class AthleteMapper {
@@ -15,7 +17,7 @@ public class AthleteMapper {
         if (athlete == null) {
             return null;
         }
-        AthleteDto dto = new AthleteDto()
+        return new AthleteDto()
                 .uuid(athlete.getId())
                 .firstName(athlete.getFirstName())
                 .middleName(athlete.getMiddleName())
@@ -25,9 +27,12 @@ public class AthleteMapper {
                 .medicalExaminationDue(athlete.getMedicalExaminationDue())
                 .insuranceFrom(athlete.getInsuranceFrom())
                 .insuranceTo(athlete.getInsuranceTo())
-                .registeredOn(OffsetDateTime.ofInstant(athlete.getRegisteredOn(), ZoneOffset.UTC));
-
-        return dto;
+                .registeredOn(athlete.getRegisteredOn() != null 
+                    ? OffsetDateTime.ofInstant(athlete.getRegisteredOn(), ZoneOffset.UTC) 
+                    : null)
+                .modifiedAt(athlete.getModifiedAt() != null 
+                    ? OffsetDateTime.ofInstant(athlete.getModifiedAt(), ZoneOffset.UTC) 
+                    : null);
     }
 
     public static Athlete fromCreateRequest(AthleteCreateRequest request) {

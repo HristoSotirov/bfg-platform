@@ -4,9 +4,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-/**
- * Tokenizes filter expressions into tokens.
- */
 final class FilterTokenizer {
     private final String input;
     private int position;
@@ -92,7 +89,6 @@ final class FilterTokenizer {
 
         while (position < input.length()) {
             char c = input.charAt(position);
-            // Allow dots in field names for dot notation (e.g., athlete.dateOfBirth)
             if (Character.isLetterOrDigit(c) || c == '_' || c == '.') {
                 value.append(c);
                 position++;
@@ -104,7 +100,6 @@ final class FilterTokenizer {
         String identifier = value.toString();
         String lowerIdentifier = identifier.toLowerCase(Locale.ROOT);
 
-        // Only check keywords if no dot (dot notation fields can't be keywords)
         if (!identifier.contains(".")) {
             if ("and".equals(lowerIdentifier)) {
                 return new FilterToken(FilterTokenType.AND, "and", startPos);

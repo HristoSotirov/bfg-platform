@@ -64,6 +64,12 @@ BFG Platform е уеб-базирана платформа за управлен
 - **SpringDoc OpenAPI** - Swagger UI интеграция
 - **Lombok** - Намаляване на boilerplate код
 
+### Frontend (Angular)
+- **Angular 17** - SPA framework
+- **TypeScript 5.4**
+- **Tailwind CSS** - Стилизация
+- **OpenAPI Generator** - Генериране на TypeScript API клиент от OpenAPI
+
 ### Инфраструктура
 - **Docker & Docker Compose** - Контейнеризация на услуги
 - **Maven** - Управление на зависимости и build процес
@@ -101,13 +107,23 @@ bfg-platform/
 │   │   └── test/                     # Тестове
 │   ├── docker-compose.yml            # Docker Compose конфигурация
 │   └── pom.xml                       # Maven конфигурация
-└── frontend/                         # Frontend приложение (в разработка)
+└── frontend/                         # Angular frontend приложение
+    ├── src/
+    │   ├── app/
+    │   │   ├── core/                  # Services, guards, interceptors, API
+    │   │   ├── shared/                # Общи компоненти
+    │   │   ├── features/              # Feature модули (auth, home)
+    │   │   └── layout/               # Layout компоненти
+    │   ├── environments/             # Конфигурация за dev/prod
+    │   └── assets/                   # Статични файлове
+    └── package.json                 # npm зависимости
 ```
 
 ## Изисквания
 
 - **Java 17 или по-нова версия**
 - **Maven 3.6+**
+- **Node.js 18+ и npm** (за frontend)
 - **Docker и Docker Compose** (за локална разработка)
 - **PostgreSQL 15** (или използване на Docker контейнер)
 - **MinIO** (или използване на Docker контейнер)
@@ -163,8 +179,20 @@ mvn spring-boot:run
 
 Тези стойности могат да бъдат променени чрез environment променливи или в `application.yaml`.
 
-### 7. Достъп до приложението
+### 7. Стартиране на frontend (Angular)
 
+```bash
+cd frontend
+npm install
+npm run generate:api    # Генерира API клиент от backend OpenAPI (при първо стартиране или при промяна на API)
+npm start
+```
+
+Frontend приложението ще стартира на: **http://localhost:4200**
+
+### 8. Достъп до приложението
+
+- **Frontend (UI):** http://localhost:4200
 - **API Base URL:** http://localhost:8080
 - **Swagger UI:** http://localhost:8080/swagger-ui.html
 - **API Docs:** http://localhost:8080/api-docs

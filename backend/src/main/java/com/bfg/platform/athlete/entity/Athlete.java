@@ -1,5 +1,6 @@
 package com.bfg.platform.athlete.entity;
 
+import com.bfg.platform.gen.model.Gender;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,8 @@ import java.util.UUID;
 public class Athlete {
 
     @Id
-    @Column(name = "id", updatable = false, insertable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false)
     @Setter(AccessLevel.NONE)
     private UUID id;
 
@@ -35,7 +37,8 @@ public class Athlete {
     private String lastName;
 
     @Column(name = "gender")
-    private String gender;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;

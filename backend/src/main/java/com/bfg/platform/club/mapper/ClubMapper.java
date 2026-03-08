@@ -7,6 +7,8 @@ import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
 import com.bfg.platform.user.service.UserMapper;
 
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.Set;
 import java.util.UUID;
 
@@ -32,26 +34,21 @@ public class ClubMapper {
         dto.setCardPrefix(club.getCardPrefix());
         dto.setClubEmail(club.getClubEmail());
         dto.setIsActive(club.isActive());
-
         dto.clubAdminId(club.getClubAdmin());
+        dto.setCreatedAt(club.getCreatedAt() != null 
+            ? OffsetDateTime.ofInstant(club.getCreatedAt(), ZoneOffset.UTC) 
+            : null);
+        dto.setUpdatedAt(club.getModifiedAt() != null 
+            ? OffsetDateTime.ofInstant(club.getModifiedAt(), ZoneOffset.UTC) 
+            : null);
         
-        // Only populate display fields if the relationship is expanded
         boolean expandClubAdminUser = expand != null && expand.contains("clubAdminUser");
         
         if (expandClubAdminUser && club.getClubAdminUser() != null) {
-            dto.clubAdminName(displayName(club.getClubAdminUser()));
-            dto.setClubAdmin(UserMapper.toDto(club.getClubAdminUser()));
+            dto.clubAdminUser(UserMapper.toDto(club.getClubAdminUser()));
         }
 
         return dto;
-    }
-
-    private static String displayName(com.bfg.platform.user.entity.User user) {
-        if (user == null) return null;
-        String first = user.getFirstName() != null ? user.getFirstName().trim() : "";
-        String last = user.getLastName() != null ? user.getLastName().trim() : "";
-        String combined = (first + " " + last).trim();
-        return combined.isEmpty() ? null : combined;
     }
 
     public static Club fromCreateRequest(ClubCreateRequest request) {

@@ -1,0 +1,83 @@
+<app-dialog
+  [isOpen]="isOpen"
+  title="Снимка на състезател"
+  size="lg"
+  [noScroll]="true"
+  (closed)="close()"
+>
+  <div class="flex flex-col items-center gap-4">
+    
+    @if (canPrev || canNext) {
+      <div class="w-full max-w-sm flex items-center justify-center gap-3">
+        <button
+          type="button"
+          class="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default"
+          (click)="onPrev()"
+          [disabled]="!canPrev"
+        >
+          ‹
+        </button>
+        <div class="flex-1 aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+          @if (photoUrl) {
+            <img
+              [src]="photoUrl"
+              alt="Снимка на състезател"
+              class="w-full h-full object-cover"
+            />
+          } @else {
+            <div class="w-full h-full flex items-center justify-center text-gray-500">
+              Няма снимка
+            </div>
+          }
+        </div>
+        <button
+          type="button"
+          class="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default"
+          (click)="onNext()"
+          [disabled]="!canNext"
+        >
+          ›
+        </button>
+      </div>
+      @if (photoUploadedAt || photoUploadedByName) {
+        <div class="w-full max-w-sm text-center text-xs text-gray-600">
+          @if (photoUploadedAt) { {{ photoUploadedAt }} }
+          @if (photoUploadedAt && photoUploadedByName) { · }
+          @if (photoUploadedByName) { {{ photoUploadedByName }} }
+        </div>
+      }
+    } @else {
+      
+      <div class="w-full max-w-sm aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+        @if (photoUrl) {
+          <img
+            [src]="photoUrl"
+            alt="Снимка на състезател"
+            class="w-full h-full object-cover"
+          />
+        } @else {
+          <div class="w-full h-full flex items-center justify-center text-gray-500">
+            Няма снимка
+          </div>
+        }
+      </div>
+    }
+    
+    @if (athleteInfo) {
+      <div class="w-full text-center space-y-1 text-sm border-t border-gray-200 pt-4">
+        <p class="font-medium text-gray-900">
+          {{ athleteInfo.firstName }} {{ athleteInfo.middleName }} {{ athleteInfo.lastName }}
+        </p>
+        <p class="text-gray-600">
+          {{ athleteInfo.dateOfBirth }}
+        </p>
+        <p class="text-gray-600">
+          {{ athleteInfo.raceGroup }}
+        </p>
+        <p class="text-gray-600">
+          {{ athleteInfo.lastAccreditationClub }} · {{ athleteInfo.lastAccreditationYear }} · {{ athleteInfo.lastAccreditationStatus }}
+        </p>
+      </div>
+    }
+  </div>
+</app-dialog>

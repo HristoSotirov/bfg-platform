@@ -42,7 +42,6 @@ public class AuthorizationServiceImpl implements AuthorizationService {
 
     @Override
     public void requireCanManageClubCoaches(UUID clubId) {
-        // Same rule as club modification: app/federation admins or club admin of this club.
         requireCanModifyClub(clubId);
     }
 

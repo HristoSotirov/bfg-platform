@@ -1,3 +1,10 @@
+Gender:
+  type: string
+  description: Gender; in UI display as Мъж (MALE) or Жена (FEMALE)
+  enum:
+    - MALE
+    - FEMALE
+
 AthleteDto:
   type: object
   description: Data Transfer Object representing an athlete with all their details
@@ -20,8 +27,8 @@ AthleteDto:
       format: date
       example: "1990-05-01"
     gender:
-      type: string
-      example: "male"
+      $ref: "#/Gender"
+      example: "MALE"
     medicalExaminationDue:
       type: string
       format: date
@@ -38,6 +45,11 @@ AthleteDto:
       type: string
       format: date-time
       example: "2024-01-15T10:30:00Z"
+    modifiedAt:
+      type: string
+      format: date-time
+      description: Timestamp when the athlete was last modified
+      example: "2024-01-16T14:20:00Z"
 
 AthleteFacets:
   type: object
@@ -78,9 +90,8 @@ AthleteCreateRequest:
       minLength: 1
       x-field-extra-annotation: '@NotBlank(message = "{athlete.lastName.required}")'
     gender:
-      type: string
-      minLength: 1
-      x-field-extra-annotation: '@NotBlank(message = "{athlete.gender.required}")'
+      $ref: "#/Gender"
+      x-field-extra-annotation: '@NotNull(message = "{athlete.gender.required}")'
     dateOfBirth:
       type: string
       format: date
@@ -107,9 +118,8 @@ AthleteCreateRequestFromAdmin:
       minLength: 1
       x-field-extra-annotation: '@NotBlank(message = "{athlete.lastName.required}")'
     gender:
-      type: string
-      minLength: 1
-      x-field-extra-annotation: '@NotBlank(message = "{athlete.gender.required}")'
+      $ref: "#/Gender"
+      x-field-extra-annotation: '@NotNull(message = "{athlete.gender.required}")'
     dateOfBirth:
       type: string
       format: date
@@ -136,7 +146,7 @@ AthleteUpdateRequest:
     lastName:
       type: string
     gender:
-      type: string
+      $ref: "#/Gender"
     dateOfBirth:
       type: string
       format: date
@@ -165,9 +175,10 @@ AthleteBatchMigrationRequest:
       example: 2024
     athletes:
       type: array
-      description: List of athletes to migrate
+      description: List of athletes to migrate (max 100 per request)
       minItems: 1
-      x-field-extra-annotation: '@NotEmpty(message = "{athlete.migration.athletes.required}")'
+      maxItems: 100
+      x-field-extra-annotation: '@NotEmpty(message = "{athlete.migration.athletes.required}") @Size(max = 100, message = "{athlete.migration.athletes.maxSize}")'
       items:
         $ref: "#/AthleteBatchMigrationRequestItem"
 
@@ -201,9 +212,8 @@ AthleteBatchMigrationRequestItem:
       minLength: 1
       x-field-extra-annotation: '@NotBlank(message = "{athlete.lastName.required}")'
     gender:
-      type: string
-      minLength: 1
-      x-field-extra-annotation: '@NotBlank(message = "{athlete.gender.required}")'
+      $ref: "#/Gender"
+      x-field-extra-annotation: '@NotNull(message = "{athlete.gender.required}")'
     dateOfBirth:
       type: string
       format: date
@@ -211,43 +221,36 @@ AthleteBatchMigrationRequestItem:
 
 AthleteBatchMedicalUpdateRequest:
   type: object
-  description: Request payload for batch update of medical and insurance information
-  x-class-extra-annotation: '@NotNull(message = "{athlete.batchMedical.request.required}")'
+  description: Request payload for batch update of medical and insurance information. At least one pair (insurance or medical examination) must be provided.
+  x-class-extra-annotation: '@NotNull(message = "{athlete.batchMedical.request.required}") @Valid'
   required:
     - athleteIds
-    - insuranceFrom
-    - insuranceTo
-    - medicalExaminationStartDate
-    - medicalExaminationDurationMonths
   properties:
     athleteIds:
       type: array
-      description: List of athlete UUIDs to update
+      description: List of athlete UUIDs to update (max 100 per request; send multiple requests for more)
       minItems: 1
+      maxItems: 100
       items:
         type: string
         format: uuid
-      x-field-extra-annotation: '@NotEmpty(message = "{athlete.batchMedical.athletes.required}")'
+      x-field-extra-annotation: '@NotEmpty(message = "{athlete.batchMedical.athletes.required}") @Size(max = 100, message = "{athlete.batchMedical.athletes.maxSize}")'
     insuranceFrom:
       type: string
       format: date
-      description: Insurance start date
-      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.insuranceFrom.required}")'
+      description: Insurance start date (required if insuranceTo is provided)
     insuranceTo:
       type: string
       format: date
-      description: Insurance end date
-      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.insuranceTo.required}")'
+      description: Insurance end date (required if insuranceFrom is provided)
     medicalExaminationStartDate:
       type: string
       format: date
-      description: Medical examination start date
-      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.medicalExaminationStartDate.required}")'
+      description: Medical examination start date (required if medicalExaminationDurationMonths is provided)
     medicalExaminationDurationMonths:
       type: integer
-      description: Medical examination duration in months
+      description: Medical examination duration in months (required if medicalExaminationStartDate is provided)
       minimum: 1
-      x-field-extra-annotation: '@NotNull(message = "{athlete.batchMedical.medicalExaminationDurationMonths.required}")'
       example: 12
 
 AthleteBatchMigrationResponse:

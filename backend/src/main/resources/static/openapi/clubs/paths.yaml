@@ -31,7 +31,7 @@
         in: query
         description: Predefined ordering (multiselect)
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -72,7 +72,7 @@
           When expanded, the full entity objects are included in the response.
           Expanded fields can also be used in filter and sort expressions using dot notation.
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -106,7 +106,6 @@
                       cardPrefix: "03"
                       isActive: true
                       clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
-                      clubAdminName: "Ivan Petrov"
                       createdBy: "550e8400-e29b-41d4-a716-446655440002"
                       createdByName: "App Admin"
                       updatedBy: "550e8400-e29b-41d4-a716-446655440002"
@@ -155,7 +154,6 @@
               cardPrefix: "01"
               status: "Active"
               clubAdminId: null
-              clubAdminName: null
               createdBy: "550e8400-e29b-41d4-a716-446655440002"
               createdByName: "App Admin"
               updatedBy: "550e8400-e29b-41d4-a716-446655440002"
@@ -255,7 +253,7 @@
           
           When expanded, the full entity objects are included in the response.
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -308,7 +306,7 @@
           
           When expanded, the full entity objects are included in the response.
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -331,7 +329,6 @@
               cardPrefix: "03"
               status: "Active"
               clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
-              clubAdminName: "Ivan Petrov"
               createdBy: "550e8400-e29b-41d4-a716-446655440002"
               createdByName: "App Admin"
               updatedBy: "550e8400-e29b-41d4-a716-446655440002"
@@ -379,7 +376,6 @@
               cardPrefix: "03"
               status: "Active"
               clubAdminId: "550e8400-e29b-41d4-a716-446655440001"
-              clubAdminName: "Ivan Petrov"
               createdBy: "550e8400-e29b-41d4-a716-446655440002"
               createdByName: "App Admin"
               updatedBy: "550e8400-e29b-41d4-a716-446655440002"

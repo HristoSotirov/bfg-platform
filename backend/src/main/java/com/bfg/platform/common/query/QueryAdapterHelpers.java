@@ -15,21 +15,12 @@ import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-/**
- * Common helper methods for query adapters.
- * Contains shared parsing and predicate building logic to reduce code duplication.
- */
 public final class QueryAdapterHelpers {
     
     private QueryAdapterHelpers() {
         throw new IllegalStateException("Utility class");
     }
     
-    // ==================== Parsing Methods ====================
-    
-    /**
-     * Parse a string value, removing quotes if present.
-     */
     public static String parseString(String valueRaw) {
         String v = valueRaw.trim();
         if (v.startsWith("'") && v.endsWith("'") && v.length() >= 2) {
@@ -39,9 +30,6 @@ public final class QueryAdapterHelpers {
         return v;
     }
     
-    /**
-     * Parse a UUID value.
-     */
     public static UUID parseUuid(String valueRaw) {
         String v = parseString(valueRaw);
         try {
@@ -51,9 +39,6 @@ public final class QueryAdapterHelpers {
         }
     }
     
-    /**
-     * Parse an integer value.
-     */
     public static Integer parseInteger(String valueRaw) {
         String v = parseString(valueRaw);
         try {
@@ -63,9 +48,6 @@ public final class QueryAdapterHelpers {
         }
     }
     
-    /**
-     * Parse a LocalDate value.
-     */
     public static LocalDate parseLocalDate(String valueRaw) {
         String v = parseString(valueRaw);
         try {
@@ -75,9 +57,6 @@ public final class QueryAdapterHelpers {
         }
     }
     
-    /**
-     * Parse an Instant value. Supports ISO-8601, LocalDate, and OffsetDateTime formats.
-     */
     public static Instant parseInstant(String valueRaw) {
         String v = parseString(valueRaw);
         try {
@@ -96,9 +75,6 @@ public final class QueryAdapterHelpers {
         }
     }
     
-    /**
-     * Parse a boolean value. Supports: true/false, 1/0, yes/no, on/off.
-     */
     public static Boolean parseBoolean(String valueRaw) {
         String v = parseString(valueRaw).toLowerCase(Locale.ROOT);
         return switch (v) {
@@ -108,11 +84,6 @@ public final class QueryAdapterHelpers {
         };
     }
     
-    // ==================== Tokenization Methods ====================
-    
-    /**
-     * Tokenize a search string by whitespace.
-     */
     public static List<String> tokenize(String search) {
         String[] rawTokens = search.trim().split("\\s+");
         List<String> tokens = new ArrayList<>();
@@ -124,9 +95,6 @@ public final class QueryAdapterHelpers {
         return tokens;
     }
     
-    /**
-     * Try to parse a token as a LocalDate. Returns null if parsing fails.
-     */
     public static LocalDate tryParseDate(String token) {
         try {
             return LocalDate.parse(token);
@@ -135,11 +103,6 @@ public final class QueryAdapterHelpers {
         }
     }
     
-    // ==================== Predicate Builders ====================
-    
-    /**
-     * Build a string predicate (case-insensitive).
-     */
     public static <T> Predicate stringPredicate(Path<T> path, CriteriaBuilder cb, String field, String op, String valueRaw) {
         String value = parseString(valueRaw);
         Expression<String> expr = cb.lower(path.get(field).as(String.class));
@@ -152,9 +115,6 @@ public final class QueryAdapterHelpers {
         };
     }
     
-    /**
-     * Build a UUID predicate.
-     */
     public static <T> Predicate uuidPredicate(Path<T> path, CriteriaBuilder cb, String field, String op, String valueRaw) {
         UUID uuid = parseUuid(valueRaw);
         Expression<UUID> expr = path.get(field).as(UUID.class);
@@ -166,9 +126,6 @@ public final class QueryAdapterHelpers {
         };
     }
     
-    /**
-     * Build a date (LocalDate) predicate.
-     */
     public static <T> Predicate datePredicate(Path<T> path, CriteriaBuilder cb, String field, String op, String valueRaw) {
         LocalDate date = parseLocalDate(valueRaw);
         Expression<LocalDate> expr = path.get(field).as(LocalDate.class);
@@ -184,9 +141,6 @@ public final class QueryAdapterHelpers {
         };
     }
     
-    /**
-     * Build an instant (Instant) predicate.
-     */
     public static <T> Predicate instantPredicate(Path<T> path, CriteriaBuilder cb, String field, String op, String valueRaw) {
         Instant instant = parseInstant(valueRaw);
         Expression<Instant> expr = path.get(field).as(Instant.class);
@@ -202,9 +156,6 @@ public final class QueryAdapterHelpers {
         };
     }
     
-    /**
-     * Build an integer predicate.
-     */
     public static <T> Predicate integerPredicate(Path<T> path, CriteriaBuilder cb, String field, String op, String valueRaw) {
         Integer value = parseInteger(valueRaw);
         Expression<Integer> expr = path.get(field).as(Integer.class);
@@ -220,9 +171,6 @@ public final class QueryAdapterHelpers {
         };
     }
     
-    /**
-     * Build a boolean predicate.
-     */
     public static <T> Predicate booleanPredicate(Path<T> path, CriteriaBuilder cb, String field, String op, String valueRaw) {
         Boolean boolValue = parseBoolean(valueRaw);
         Expression<Boolean> expr = path.get(field).as(Boolean.class);
@@ -234,11 +182,6 @@ public final class QueryAdapterHelpers {
         };
     }
     
-    // ==================== Range Predicates ====================
-    
-    /**
-     * Build a date range predicate.
-     */
     public static <T> Predicate dateRangePredicate(Path<T> path, CriteriaBuilder cb, String field, String minValue, String maxValue) {
         Expression<LocalDate> expr = path.get(field).as(LocalDate.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -258,9 +201,6 @@ public final class QueryAdapterHelpers {
         return cb.and(predicates.toArray(new Predicate[0]));
     }
     
-    /**
-     * Build an integer range predicate.
-     */
     public static <T> Predicate integerRangePredicate(Path<T> path, CriteriaBuilder cb, String field, String minValue, String maxValue) {
         Expression<Integer> expr = path.get(field).as(Integer.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -280,9 +220,6 @@ public final class QueryAdapterHelpers {
         return cb.and(predicates.toArray(new Predicate[0]));
     }
     
-    /**
-     * Build an instant range predicate.
-     */
     public static <T> Predicate instantRangePredicate(Path<T> path, CriteriaBuilder cb, String field, String minValue, String maxValue) {
         Expression<Instant> expr = path.get(field).as(Instant.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -302,11 +239,6 @@ public final class QueryAdapterHelpers {
         return cb.and(predicates.toArray(new Predicate[0]));
     }
     
-    // ==================== In Predicates ====================
-    
-    /**
-     * Build a string in predicate (case-insensitive).
-     */
     public static <T> Predicate stringInPredicate(Path<T> path, CriteriaBuilder cb, String field, List<String> values) {
         Expression<String> expr = cb.lower(path.get(field).as(String.class));
         List<Predicate> predicates = new ArrayList<>();
@@ -317,9 +249,6 @@ public final class QueryAdapterHelpers {
         return cb.or(predicates.toArray(new Predicate[0]));
     }
     
-    /**
-     * Build a UUID in predicate.
-     */
     public static <T> Predicate uuidInPredicate(Path<T> path, CriteriaBuilder cb, String field, List<String> values) {
         Expression<UUID> expr = path.get(field).as(UUID.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -330,9 +259,6 @@ public final class QueryAdapterHelpers {
         return cb.or(predicates.toArray(new Predicate[0]));
     }
     
-    /**
-     * Build an integer in predicate.
-     */
     public static <T> Predicate integerInPredicate(Path<T> path, CriteriaBuilder cb, String field, List<String> values) {
         Expression<Integer> expr = path.get(field).as(Integer.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -343,9 +269,6 @@ public final class QueryAdapterHelpers {
         return cb.or(predicates.toArray(new Predicate[0]));
     }
     
-    /**
-     * Build a boolean in predicate.
-     */
     public static <T> Predicate booleanInPredicate(Path<T> path, CriteriaBuilder cb, String field, List<String> values) {
         Expression<Boolean> expr = path.get(field).as(Boolean.class);
         List<Predicate> predicates = new ArrayList<>();

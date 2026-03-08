@@ -1,5 +1,6 @@
 package com.bfg.platform.athlete.service;
 
+import com.bfg.platform.gen.model.AthleteBatchMedicalUpdateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.gen.model.AthleteUpdateRequest;
 import org.springframework.data.domain.Page;
@@ -20,7 +21,7 @@ public interface AthleteService {
     Optional<AthleteDto> getAthleteDtoByUuid(UUID uuid, List<String> expand);
     
     Optional<AthleteDto> updateAthlete(UUID uuid, AthleteUpdateRequest request);
-    List<AthleteDto> batchUpdateMedicalInfo(com.bfg.platform.gen.model.AthleteBatchMedicalUpdateRequest request);
+    List<AthleteDto> batchUpdateMedicalInfo(AthleteBatchMedicalUpdateRequest request);
     
     void deleteAthlete(UUID uuid);
 }

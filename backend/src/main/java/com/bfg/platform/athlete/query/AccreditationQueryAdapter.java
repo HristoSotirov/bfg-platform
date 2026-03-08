@@ -7,6 +7,7 @@ import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.QueryAdapterHelpers;
 import com.bfg.platform.gen.model.AccreditationStatus;
+import com.bfg.platform.gen.model.Gender;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -30,14 +31,28 @@ public final class AccreditationQueryAdapter {
             Map.entry("year_desc", new Sort.Order(Sort.Direction.DESC, "year")),
             Map.entry("accreditationNumber_asc", new Sort.Order(Sort.Direction.ASC, "accreditationNumber")),
             Map.entry("accreditationNumber_desc", new Sort.Order(Sort.Direction.DESC, "accreditationNumber")),
+            Map.entry("status_asc", new Sort.Order(Sort.Direction.ASC, "status")),
+            Map.entry("status_desc", new Sort.Order(Sort.Direction.DESC, "status")),
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
             Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt")),
+            Map.entry("modifiedAt_asc", new Sort.Order(Sort.Direction.ASC, "modifiedAt")),
+            Map.entry("modifiedAt_desc", new Sort.Order(Sort.Direction.DESC, "modifiedAt")),
             Map.entry("athlete.dateOfBirth_asc", new Sort.Order(Sort.Direction.ASC, "athlete.dateOfBirth")),
             Map.entry("athlete.dateOfBirth_desc", new Sort.Order(Sort.Direction.DESC, "athlete.dateOfBirth")),
             Map.entry("athlete.firstName_asc", new Sort.Order(Sort.Direction.ASC, "athlete.firstName")),
             Map.entry("athlete.firstName_desc", new Sort.Order(Sort.Direction.DESC, "athlete.firstName")),
+            Map.entry("athlete.middleName_asc", new Sort.Order(Sort.Direction.ASC, "athlete.middleName")),
+            Map.entry("athlete.middleName_desc", new Sort.Order(Sort.Direction.DESC, "athlete.middleName")),
             Map.entry("athlete.lastName_asc", new Sort.Order(Sort.Direction.ASC, "athlete.lastName")),
             Map.entry("athlete.lastName_desc", new Sort.Order(Sort.Direction.DESC, "athlete.lastName")),
+            Map.entry("athlete.gender_asc", new Sort.Order(Sort.Direction.ASC, "athlete.gender")),
+            Map.entry("athlete.gender_desc", new Sort.Order(Sort.Direction.DESC, "athlete.gender")),
+            Map.entry("athlete.medicalExaminationDue_asc", new Sort.Order(Sort.Direction.ASC, "athlete.medicalExaminationDue")),
+            Map.entry("athlete.medicalExaminationDue_desc", new Sort.Order(Sort.Direction.DESC, "athlete.medicalExaminationDue")),
+            Map.entry("athlete.insuranceFrom_asc", new Sort.Order(Sort.Direction.ASC, "athlete.insuranceFrom")),
+            Map.entry("athlete.insuranceFrom_desc", new Sort.Order(Sort.Direction.DESC, "athlete.insuranceFrom")),
+            Map.entry("athlete.insuranceTo_asc", new Sort.Order(Sort.Direction.ASC, "athlete.insuranceTo")),
+            Map.entry("athlete.insuranceTo_desc", new Sort.Order(Sort.Direction.DESC, "athlete.insuranceTo")),
             Map.entry("club.name_asc", new Sort.Order(Sort.Direction.ASC, "club.name")),
             Map.entry("club.name_desc", new Sort.Order(Sort.Direction.DESC, "club.name"))
     );
@@ -210,7 +225,10 @@ public final class AccreditationQueryAdapter {
             return switch (field) {
                 case "dateOfBirth" -> QueryAdapterHelpers.datePredicate(athleteJoin, cb, "dateOfBirth", op, valueRaw);
                 case "firstName", "lastName", "middleName" -> QueryAdapterHelpers.stringPredicate(athleteJoin, cb, field, op, valueRaw);
-                case "gender" -> QueryAdapterHelpers.stringPredicate(athleteJoin, cb, "gender", op, valueRaw);
+                case "gender" -> athleteGenderPredicate(athleteJoin, cb, op, valueRaw);
+                case "medicalExaminationDue" -> QueryAdapterHelpers.datePredicate(athleteJoin, cb, "medicalExaminationDue", op, valueRaw);
+                case "insuranceFrom" -> QueryAdapterHelpers.datePredicate(athleteJoin, cb, "insuranceFrom", op, valueRaw);
+                case "insuranceTo" -> QueryAdapterHelpers.datePredicate(athleteJoin, cb, "insuranceTo", op, valueRaw);
                 default -> throw new IllegalArgumentException("Unsupported athlete field: " + field);
             };
         }
@@ -224,10 +242,13 @@ public final class AccreditationQueryAdapter {
         }
 
         private Predicate buildAthleteFieldRange(Join<?, ?> athleteJoin, CriteriaBuilder cb, String field, String minValue, String maxValue) {
-            if (!"dateOfBirth".equals(field)) {
-                throw new IllegalArgumentException("Range operator not supported for athlete field: " + field);
-            }
-            return QueryAdapterHelpers.dateRangePredicate(athleteJoin, cb, "dateOfBirth", minValue, maxValue);
+            return switch (field) {
+                case "dateOfBirth" -> QueryAdapterHelpers.dateRangePredicate(athleteJoin, cb, "dateOfBirth", minValue, maxValue);
+                case "medicalExaminationDue" -> QueryAdapterHelpers.dateRangePredicate(athleteJoin, cb, "medicalExaminationDue", minValue, maxValue);
+                case "insuranceFrom" -> QueryAdapterHelpers.dateRangePredicate(athleteJoin, cb, "insuranceFrom", minValue, maxValue);
+                case "insuranceTo" -> QueryAdapterHelpers.dateRangePredicate(athleteJoin, cb, "insuranceTo", minValue, maxValue);
+                default -> throw new IllegalArgumentException("Range operator not supported for athlete field: " + field);
+            };
         }
 
         private Predicate buildClubFieldRange(Join<?, ?> clubJoin, CriteriaBuilder cb, String field, String minValue, String maxValue) {
@@ -236,7 +257,7 @@ public final class AccreditationQueryAdapter {
 
         private Predicate buildAthleteFieldIn(Join<?, ?> athleteJoin, CriteriaBuilder cb, String field, List<String> values) {
             return switch (field) {
-                case "gender" -> QueryAdapterHelpers.stringInPredicate(athleteJoin, cb, "gender", values);
+                case "gender" -> athleteGenderInPredicate(athleteJoin, cb, values);
                 default -> throw new IllegalArgumentException("In operator not supported for athlete field: " + field);
             };
         }
@@ -280,6 +301,36 @@ public final class AccreditationQueryAdapter {
                 case "year" -> QueryAdapterHelpers.integerInPredicate(root, cb, "year", values);
                 default -> throw new IllegalArgumentException("In operator not supported for field: " + field);
             };
+        }
+
+        private Predicate athleteGenderPredicate(Join<?, ?> athleteJoin, CriteriaBuilder cb, String op, String valueRaw) {
+            String value = QueryAdapterHelpers.parseString(valueRaw);
+            Gender gender;
+            try {
+                gender = Gender.fromValue(value);
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Invalid gender value: " + valueRaw);
+            }
+            return switch (op) {
+                case "eq" -> cb.equal(athleteJoin.get("gender"), gender);
+                case "ne" -> cb.notEqual(athleteJoin.get("gender"), gender);
+                default -> throw new IllegalArgumentException("Operator '" + op + "' is not supported for field 'gender'");
+            };
+        }
+
+        private Predicate athleteGenderInPredicate(Join<?, ?> athleteJoin, CriteriaBuilder cb, List<String> values) {
+            List<Predicate> predicates = new ArrayList<>();
+            for (String value : values) {
+                String v = QueryAdapterHelpers.parseString(value);
+                Gender g;
+                try {
+                    g = Gender.fromValue(v);
+                } catch (IllegalArgumentException e) {
+                    throw new IllegalArgumentException("Invalid gender value: " + value);
+                }
+                predicates.add(cb.equal(athleteJoin.get("gender"), g));
+            }
+            return cb.or(predicates.toArray(new Predicate[0]));
         }
 
         private Predicate enumPredicate(Root<Accreditation> root, CriteriaBuilder cb, String field, String op, String valueRaw) {

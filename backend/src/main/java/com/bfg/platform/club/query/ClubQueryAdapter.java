@@ -28,7 +28,9 @@ public final class ClubQueryAdapter {
             Map.entry("cardPrefix_asc", new Sort.Order(Sort.Direction.ASC, "cardPrefix")),
             Map.entry("cardPrefix_desc", new Sort.Order(Sort.Direction.DESC, "cardPrefix")),
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
-            Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt"))
+            Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt")),
+            Map.entry("modifiedAt_asc", new Sort.Order(Sort.Direction.ASC, "modifiedAt")),
+            Map.entry("modifiedAt_desc", new Sort.Order(Sort.Direction.DESC, "modifiedAt"))
     );
 
     private ClubQueryAdapter() {

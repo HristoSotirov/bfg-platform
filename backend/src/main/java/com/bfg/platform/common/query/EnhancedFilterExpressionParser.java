@@ -11,22 +11,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-/**
- * Enhanced filter expression parser that supports:
- * - Dot notation for expanded fields (e.g., athlete.dateOfBirth)
- * - Range operator (e.g., field range 'min' to 'max')
- * - In operator (e.g., field in ('value1', 'value2'))
- * - Tracks which expanded fields are used in filters
- */
 public final class EnhancedFilterExpressionParser {
     
     private EnhancedFilterExpressionParser() {
         throw new IllegalStateException("Utility class");
     }
     
-    /**
-     * Result of parsing a filter expression.
-     */
     public static class ParseResult<T> {
         private final Specification<T> specification;
         private final Set<String> usedExpandFields;
@@ -49,35 +39,15 @@ public final class EnhancedFilterExpressionParser {
     public interface EnhancedPredicateBuilder<T> {
         Predicate build(Root<T> root, CriteriaBuilder cb, String field, String operator, String valueRaw);
         
-        /**
-         * Build predicate for range operator.
-         * @param field Field name (may contain dot notation)
-         * @param minValue Minimum value (empty string if unbounded)
-         * @param maxValue Maximum value (empty string if unbounded)
-         */
         default Predicate buildRange(Root<T> root, CriteriaBuilder cb, String field, String minValue, String maxValue) {
             throw new UnsupportedOperationException("Range operator not supported for field: " + field);
         }
         
-        /**
-         * Build predicate for in operator.
-         * @param field Field name (may contain dot notation)
-         * @param values List of values to match
-         */
         default Predicate buildIn(Root<T> root, CriteriaBuilder cb, String field, List<String> values) {
             throw new UnsupportedOperationException("In operator not supported for field: " + field);
         }
     }
     
-    /**
-     * Parse filter expression with enhanced features.
-     * 
-     * @param filter The filter expression string
-     * @param predicateBuilder Builder for creating predicates
-     * @param entityClass The entity class
-     * @param requestedExpand Set of requested expand fields (for validation)
-     * @return Parse result with specification and used expand fields
-     */
     public static <T> ParseResult<T> parse(
             String filter,
             EnhancedPredicateBuilder<T> predicateBuilder,
@@ -100,10 +70,6 @@ public final class EnhancedFilterExpressionParser {
         );
     }
     
-    /**
-     * Extract the base expand field from a dot-notation field path.
-     * Example: "athlete.dateOfBirth" -> "athlete"
-     */
     public static String extractExpandField(String fieldPath) {
         if (fieldPath == null || !fieldPath.contains(".")) {
             return null;
@@ -270,12 +236,9 @@ public final class EnhancedFilterExpressionParser {
             FilterToken fieldToken = consume(FilterTokenType.FIELD, "Expected field name");
             String field = fieldToken.getValue();
             
-            // Check if field uses dot notation (expanded field)
             String expandField = extractExpandField(field);
             if (expandField != null) {
-                // Validate that expand is requested (silent skip if not)
                 if (requestedExpand.isEmpty() || !requestedExpand.contains(expandField)) {
-                    // Return a no-op specification (always true)
                     return new ComparisonExpression<>("", "eq", "true", (r, cb, f, op, v) -> cb.conjunction());
                 }
                 usedExpandFields.add(expandField);
@@ -283,21 +246,18 @@ public final class EnhancedFilterExpressionParser {
             
             FilterToken opToken = peek();
             
-            // Check for range operator (tokenized as FIELD)
             if (opToken.getType() == FilterTokenType.FIELD && "range".equalsIgnoreCase(opToken.getValue())) {
                 return parseRangeExpression(field);
             }
             
-            // Check for in operator
             if (opToken.getType() == FilterTokenType.COMPARISON_OP && "in".equals(opToken.getValue())) {
                 return parseInExpression(field);
             }
             
-            // Regular comparison operator
             if (opToken.getType() != FilterTokenType.COMPARISON_OP) {
                 throw new IllegalArgumentException("Expected comparison operator at position " + opToken.getPosition());
             }
-            advance(); // consume the operator
+            advance();
             String operator = opToken.getValue();
             
             String value;
@@ -315,19 +275,15 @@ public final class EnhancedFilterExpressionParser {
         }
         
         private FilterExpression<T> parseRangeExpression(String field) {
-            // Consume "range" keyword (already peeked)
             advance();
             
-            // Parse min value
             String minValue = "";
             if (check(FilterTokenType.VALUE)) {
                 FilterToken minToken = advance();
                 minValue = minToken.getValue();
             } else if (check(FilterTokenType.FIELD)) {
-                // Could be empty string or "to" - check
                 String nextValue = peek().getValue();
                 if ("to".equalsIgnoreCase(nextValue)) {
-                    // Empty min value
                     minValue = "";
                 } else {
                     throw new IllegalArgumentException("Expected min value or 'to' at position " + peek().getPosition());
@@ -336,19 +292,16 @@ public final class EnhancedFilterExpressionParser {
                 throw new IllegalArgumentException("Expected min value at position " + peek().getPosition());
             }
             
-            // Consume "to" keyword
             FilterToken toToken = consume(FilterTokenType.FIELD, "Expected 'to'");
             if (!"to".equalsIgnoreCase(toToken.getValue())) {
                 throw new IllegalArgumentException("Expected 'to' at position " + toToken.getPosition());
             }
             
-            // Parse max value
             String maxValue = "";
             if (check(FilterTokenType.VALUE)) {
                 FilterToken maxToken = advance();
                 maxValue = maxToken.getValue();
             } else if (check(FilterTokenType.FIELD)) {
-                // Empty max value (unbounded)
                 advance();
                 maxValue = "";
             } else {
@@ -359,13 +312,10 @@ public final class EnhancedFilterExpressionParser {
         }
         
         private FilterExpression<T> parseInExpression(String field) {
-            // Consume "in" operator (already peeked)
             advance();
             
-            // Consume left parenthesis
             consume(FilterTokenType.LEFT_PAREN, "Expected '(' after 'in'");
             
-            // Parse values
             List<String> values = new ArrayList<>();
             
             while (!check(FilterTokenType.RIGHT_PAREN)) {
@@ -382,13 +332,10 @@ public final class EnhancedFilterExpressionParser {
                 
                 values.add(value);
                 
-                // Skip comma if present (optional)
                 if (check(FilterTokenType.VALUE) || check(FilterTokenType.FIELD)) {
-                    // More values, continue
                 }
             }
             
-            // Consume right parenthesis
             consume(FilterTokenType.RIGHT_PAREN, "Expected ')' after in values");
             
             if (values.isEmpty()) {

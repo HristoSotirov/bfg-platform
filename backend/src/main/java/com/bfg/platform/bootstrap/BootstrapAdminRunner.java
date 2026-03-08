@@ -15,35 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.Optional;
-import java.util.UUID;
 
-/**
- * Secure one-time bootstrap to create the first APP_ADMIN user.
- * <p>
- * Enabled only when BOOTSTRAP_TOKEN is provided.
- * It will create the admin only if no existing APP_ADMIN exists.
- * <p>
- * Required environment variables:
- * <ul>
- *   <li>BOOTSTRAP_TOKEN (enables the runner)</li>
- *   <li>BOOTSTRAP_ADMIN_USERNAME</li>
- *   <li>BOOTSTRAP_ADMIN_PASSWORD</li>
- * </ul>
- * Optional environment variables:
- * <ul>
- *   <li>BOOTSTRAP_ADMIN_FIRST_NAME (default: App)</li>
- *   <li>BOOTSTRAP_ADMIN_LAST_NAME (default: Admin)</li>
- * </ul>
- * <p>
- * Also supported as Spring properties (useful for local profile):
- * <ul>
- *   <li>bfg.bootstrap.token</li>
- *   <li>bfg.bootstrap.admin.username</li>
- *   <li>bfg.bootstrap.admin.password</li>
- *   <li>bfg.bootstrap.admin.first-name</li>
- *   <li>bfg.bootstrap.admin.last-name</li>
- * </ul>
- */
 @Component
 @RequiredArgsConstructor
 @Slf4j
@@ -66,12 +38,10 @@ public class BootstrapAdminRunner implements CommandLineRunner {
     public void run(String... args) {
         String bootstrapToken = getProperty("bfg.bootstrap.token", "BOOTSTRAP_TOKEN");
         if (bootstrapToken == null || bootstrapToken.isBlank()) {
-            log.debug("Bootstrap disabled: BOOTSTRAP_TOKEN not provided");
             return;
         }
 
         if (isAlreadyBootstrapped()) {
-            log.debug("Bootstrap skipped: APP_ADMIN already exists");
             return;
         }
 
@@ -103,14 +73,12 @@ public class BootstrapAdminRunner implements CommandLineRunner {
         );
         LocalDate dateOfBirth = parseDateOfBirth(dobRaw);
 
-        UUID adminId = UUID.randomUUID();
-
         User admin = User.builder()
-                .id(adminId)
                 .firstName(firstName)
                 .lastName(lastName)
                 .dateOfBirth(dateOfBirth)
                 .username(username)
+                .email(username)  // Default email to username for admin
                 .password(passwordEncoder.encode(password))
                 .isActive(true)
                 .role(ROLE_APP_ADMIN)

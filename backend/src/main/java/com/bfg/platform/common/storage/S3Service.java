@@ -54,6 +54,7 @@ public interface S3Service {
     String uploadFile(String bucketName, String objectName, InputStream inputStream, String contentType, long contentLength);
     void deleteFile(String bucketName, String objectName);
     String getFileUrl(String bucketName, String objectName);
+    String getPresignedUrl(String bucketName, String objectName, int expirySeconds);
     boolean fileExists(String bucketName, String objectName);
     InputStream getFile(String bucketName, String objectName);
     String getFileContentType(String bucketName, String objectName);

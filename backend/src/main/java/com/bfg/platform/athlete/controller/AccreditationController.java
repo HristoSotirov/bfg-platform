@@ -1,13 +1,16 @@
 package com.bfg.platform.athlete.controller;
 
 import com.bfg.platform.athlete.service.AccreditationService;
-import com.bfg.platform.common.exception.ResourceCreationException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.gen.api.AccreditationsApi;
+import com.bfg.platform.gen.model.AccreditationBatchRenewalRequest;
+import com.bfg.platform.gen.model.AccreditationBatchRenewalResponse;
 import com.bfg.platform.gen.model.AccreditationDto;
-import com.bfg.platform.gen.model.AccreditationStatus;
+import com.bfg.platform.gen.model.AccreditationStatusPatchRequest;
 import com.bfg.platform.gen.model.AthleteBatchMigrationRequest;
 import com.bfg.platform.gen.model.AthleteBatchMigrationResponse;
+import com.bfg.platform.gen.model.AthleteCreateRequest;
+import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.common.util.PageConverter;
 import com.bfg.platform.gen.model.GetAllAccreditations200Response;
 import jakarta.validation.Valid;
@@ -38,7 +41,8 @@ public class AccreditationController implements AccreditationsApi {
             List<String> expand
     ) {
         var page = accreditationService.getAllAccreditations(filter, search, orderBy, top, skip, expand);
-        return ResponseEntity.ok(PageConverter.toResponse(page, GetAllAccreditations200Response.class));
+        var response = PageConverter.toResponse(page, GetAllAccreditations200Response.class);
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -54,10 +58,19 @@ public class AccreditationController implements AccreditationsApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('CLUB_ADMIN', 'COACH')")
-    public ResponseEntity<AccreditationDto> renewAccreditation(UUID athleteId) {
-        return accreditationService.renewAccreditation(athleteId)
+    public ResponseEntity<AthleteDto> createAthleteWithAccreditation(@Valid @RequestBody AthleteCreateRequest request) {
+        return accreditationService.createAthleteWithAccreditation(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
-                .orElseThrow(() -> new ResourceCreationException("Failed to renew accreditation"));
+                .orElseThrow(() -> new RuntimeException("Failed to create athlete with accreditation"));
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('CLUB_ADMIN', 'COACH')")
+    public ResponseEntity<AccreditationBatchRenewalResponse> batchRenewAccreditations(
+            @Valid AccreditationBatchRenewalRequest request) {
+        AccreditationBatchRenewalResponse response = 
+                accreditationService.batchRenewAccreditations(request);
+        return ResponseEntity.ok(response);
     }
 
     @Override
@@ -71,13 +84,8 @@ public class AccreditationController implements AccreditationsApi {
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<AccreditationDto> patchAccreditationStatus(
             UUID accreditationUuid,
-            @Valid @RequestBody String body) {
-        String statusValue = body.trim();
-        if (statusValue.startsWith("\"") && statusValue.endsWith("\"")) {
-            statusValue = statusValue.substring(1, statusValue.length() - 1);
-        }
-        AccreditationStatus status = AccreditationStatus.fromValue(statusValue);
-        return accreditationService.updateAccreditationStatus(accreditationUuid, status)
+            @Valid @RequestBody AccreditationStatusPatchRequest body) {
+        return accreditationService.updateAccreditationStatus(accreditationUuid, body.getStatus())
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Accreditation", accreditationUuid));
     }

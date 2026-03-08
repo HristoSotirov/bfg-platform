@@ -1,0 +1,141 @@
+<app-dialog [isOpen]="isOpen" title="Подновяване на картотека" (closed)="close()">
+  <div class="space-y-4">
+    @if (!showResults) {
+      
+      <div>
+        <p class="text-sm text-gray-700 mb-4">
+          Ще бъдат подновени картотеки за <span class="font-medium">{{ athleteCount }}</span> уникални състезатели.
+        </p>
+        
+        @if (athletes.length > 0) {
+          <div class="border rounded-lg max-h-60 overflow-y-auto scrollbar-hover">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50 sticky top-0">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Име</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Дата на раждане</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200 bg-white">
+                @for (athlete of athletes; track athlete.id) {
+                  <tr>
+                    <td class="px-3 py-2 text-gray-900">{{ athlete.name || athlete.id }}</td>
+                    <td class="px-3 py-2 text-gray-700">
+                      @if (athlete.dateOfBirth) {
+                        {{ formatDate(athlete.dateOfBirth) }}
+                      } @else {
+                        <span class="text-gray-400">-</span>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      
+      <div class="flex justify-center gap-3 pt-4 border-t">
+        <app-button
+          variant="outline"
+          size="md"
+          text="Затвори"
+          [disabled]="loading"
+          (click)="close()">
+        </app-button>
+        <app-button
+          variant="primary"
+          size="md"
+          text="Поднови"
+          [disabled]="loading || athleteCount === 0"
+          (click)="renew()">
+        </app-button>
+      </div>
+    } @else {
+      
+      <div>
+        <div class="mb-4 space-y-2">
+          @if (successCount > 0) {
+            <p class="text-sm text-green-600">
+              Успешно подновени: <span class="font-medium">{{ successCount }}</span> от <span class="font-medium">{{ athleteCount }}</span> състезатели
+            </p>
+          }
+          @if (failCount > 0) {
+            <p class="text-sm text-red-600">
+              Неуспешни: <span class="font-medium">{{ failCount }}</span> от <span class="font-medium">{{ athleteCount }}</span> състезатели
+            </p>
+          }
+        </div>
+
+        @if (failCount > 0) {
+          <div class="border rounded-lg max-h-60 overflow-y-auto scrollbar-hover">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50 sticky top-0">
+                <tr>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Състезател ID</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Грешка</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                @for (result of results; track result.athleteId) {
+                  @if (!result.success) {
+                    <tr>
+                      <td class="px-3 py-2">{{ result.athleteName || result.athleteId }}</td>
+                      <td class="px-3 py-2 text-red-600">{{ result.error }}</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+
+      
+      <div class="flex justify-center pt-4 border-t">
+        <app-button
+          variant="primary"
+          size="md"
+          text="Затвори"
+          (click)="finishAndClose()">
+        </app-button>
+      </div>
+    }
+  </div>
+</app-dialog>
+
+
+<app-dialog
+  [isOpen]="isConfirmDialogOpen"
+  title="Потвърждение"
+  (closed)="closeConfirmDialog()"
+>
+  <div class="py-4">
+    <div class="mb-6 space-y-3">
+      <p class="text-gray-700 font-medium">С потвърждаването на тези условия се съгласявате да:</p>
+      <ul class="list-disc list-inside space-y-2 text-gray-700 text-sm ml-4">
+        <li>Съхранявате всички документи на състезателя</li>
+        <li>Предоставите съхраняваните документи пред федерацията по тяхното поискване</li>
+        <li>Носите наказателна отговорност при невъзможност за представяне на документите</li>
+      </ul>
+    </div>
+    <div class="flex gap-3 justify-center">
+      <app-button
+        variant="outline"
+        size="md"
+        text="Отказ"
+        (click)="closeConfirmDialog()"
+      >
+      </app-button>
+      <app-button
+        variant="primary"
+        size="md"
+        text="Потвърди"
+        [disabled]="loading"
+        (click)="confirmRenew()"
+      >
+      </app-button>
+    </div>
+  </div>
+</app-dialog>
