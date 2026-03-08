@@ -15,10 +15,11 @@
           - `year` or `accreditationYear`
           - `status` or `accreditationStatus`
           - `accreditationNumber`
-          - `createdAt`
+          - `createdAt`, `modifiedAt`
           
           **Expanded Fields (requires expand parameter):**
-          - `athlete.dateOfBirth`, `athlete.firstName`, `athlete.lastName`, `athlete.gender`
+          - `athlete.dateOfBirth`, `athlete.firstName`, `athlete.middleName`, `athlete.lastName`, `athlete.gender`
+          - `athlete.medicalExaminationDue`, `athlete.insuranceFrom`, `athlete.insuranceTo`
           - `club.name`, `club.shortName`, `club.isActive`
           
           **Operators:**
@@ -30,6 +31,8 @@
           - `clubId eq 'xxx' and year eq 2025`
           - `athlete.dateOfBirth range '2002-01-01' to '2010-01-01'` (requires expand=athlete)
           - `athlete.dateOfBirth range '2002-01-01' to ''` (after date, requires expand=athlete)
+          - `athlete.medicalExaminationDue lt '2026-03-01'` (requires expand=athlete)
+          - `athlete.insuranceTo ge '2026-01-01'` (requires expand=athlete)
           - `status in ('ACTIVE', 'PENDING')`
           - `clubId in ('uuid1', 'uuid2', 'uuid3')`
           - `club.name eq 'RC Sofia'` (requires expand=club)
@@ -64,11 +67,17 @@
           - `year_asc`, `year_desc`
           - `accreditationNumber_asc`, `accreditationNumber_desc`
           - `createdAt_asc`, `createdAt_desc`
+          - `modifiedAt_asc`, `modifiedAt_desc` (sorts by modification date; response field is `updatedAt`)
           
           **Expanded Field Sorts (requires expand parameter):**
           - `athlete.dateOfBirth_asc`, `athlete.dateOfBirth_desc`
           - `athlete.firstName_asc`, `athlete.firstName_desc`
+          - `athlete.middleName_asc`, `athlete.middleName_desc`
           - `athlete.lastName_asc`, `athlete.lastName_desc`
+          - `athlete.gender_asc`, `athlete.gender_desc`
+          - `athlete.medicalExaminationDue_asc`, `athlete.medicalExaminationDue_desc`
+          - `athlete.insuranceFrom_asc`, `athlete.insuranceFrom_desc`
+          - `athlete.insuranceTo_asc`, `athlete.insuranceTo_desc`
           - `club.name_asc`, `club.name_desc`
           
           **Examples:**
@@ -77,7 +86,7 @@
           
           **Note:** Conflicting sorts (e.g., `name_asc,name_desc`) are not allowed.
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -107,7 +116,7 @@
           When expanded, the full entity objects are included in the response.
           Expanded fields can also be used in filter and sort expressions using dot notation.
         style: form
-        explode: true
+        explode: false
         schema:
           type: array
           items:
@@ -137,30 +146,25 @@
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
-
-/accreditations/renew/{athleteId}:
   post:
     tags:
       - Accreditations
-    summary: Renew accreditation for an athlete
-    description: Renews accreditation for the current year. Uses the same card number if the athlete already has an accreditation for this club, otherwise generates a new one. Club ID is taken from the current user's context.
-    operationId: renewAccreditation
-    parameters:
-      - name: athleteId
-        in: path
-        required: true
-        description: UUID of the athlete
-        schema:
-          type: string
-          format: uuid
-        x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
+    summary: Create a new athlete with accreditation
+    description: Creates a new athlete and automatically creates an accreditation for the current year. If an athlete with the same name and date of birth already exists, uses that athlete and creates only the accreditation. Club ID is taken from the current user's context.
+    operationId: createAthleteWithAccreditation
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../athletes/schemas.yaml#/AthleteCreateRequest"
     responses:
       "201":
-        description: Accreditation renewed successfully
+        description: Athlete and accreditation created successfully
         content:
           application/json:
             schema:
-              $ref: "../accreditations/schemas.yaml#/AccreditationDto"
+              $ref: "../athletes/schemas.yaml#/AthleteDto"
       "400":
         description: Bad request - validation error
         content:
@@ -168,7 +172,34 @@
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
       "409":
-        description: Conflict - accreditation for this year already exists
+        description: Conflict - accreditation for this athlete and year already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/accreditations/renew/batch:
+  post:
+    tags:
+      - Accreditations
+    summary: Batch renew accreditations for multiple athletes
+    description: Renews accreditations for the current year for multiple athletes. Uses the same card number if the athlete already has an accreditation for this club, otherwise generates a new one. Club ID is taken from the current user's context. Maximum 100 athletes per request.
+    operationId: batchRenewAccreditations
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../accreditations/schemas.yaml#/AccreditationBatchRenewalRequest"
+    responses:
+      "200":
+        description: Batch renewal completed (some renewals may have failed)
+        content:
+          application/json:
+            schema:
+              $ref: "../accreditations/schemas.yaml#/AccreditationBatchRenewalResponse"
+      "400":
+        description: Bad request - validation error
         content:
           application/json:
             schema:
@@ -259,8 +290,7 @@
       content:
         application/json:
           schema:
-            $ref: "../accreditations/schemas.yaml#/AccreditationStatus"
-          x-request-body-extra-annotation: '@NotNull(message = "{accreditation.status.required}")'
+            $ref: "../accreditations/schemas.yaml#/AccreditationStatusPatchRequest"
     responses:
       "200":
         description: Accreditation status updated successfully

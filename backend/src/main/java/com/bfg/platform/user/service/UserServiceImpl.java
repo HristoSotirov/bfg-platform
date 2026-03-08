@@ -2,6 +2,7 @@ package com.bfg.platform.user.service;
 
 import org.springframework.data.domain.Page;
 import com.bfg.platform.common.exception.ConflictException;
+import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -44,7 +46,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDto> getUserById(UUID uuid, List<String> expand) {
-        return userRepository.findById(uuid)                .map(UserMapper::toDto);
+        return userRepository.findById(uuid).map(UserMapper::toDto);
     }
 
     @Override
@@ -52,15 +54,18 @@ public class UserServiceImpl implements UserService {
     public Optional<UserDto> createUser(UserCreateRequest request) {
         validateCreatePermissions(request);
 
-        try {
-            User user = UserMapper.fromCreateRequest(request);
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        User user = UserMapper.fromCreateRequest(request);
 
-            User savedUser = userRepository.save(user);
-            return Optional.of(UserMapper.toDto(savedUser));
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractUserConflictReason(e));
+        SystemRole currentRole = securityContextHelper.getUserRole();
+        if (currentRole == SystemRole.CLUB_ADMIN && request.getRole() == SystemRole.COACH) {
+            user.setUsername(request.getEmail());
         }
+
+        String randomPassword = generateRandomPassword();
+        user.setPassword(passwordEncoder.encode(randomPassword));
+
+        User savedUser = userRepository.save(user);
+        return Optional.of(UserMapper.toDto(savedUser));
     }
 
     @Override
@@ -68,7 +73,7 @@ public class UserServiceImpl implements UserService {
     public Optional<UserDto> updateUser(UUID uuid, UserUpdateRequest request) {
         return userRepository.findById(uuid)
                 .map(user -> {
-                    validateUpdatePermissions(user);
+                    validateUpdatePermissions(user, request);
 
                     UserMapper.updateUserFromRequest(user, request);
 
@@ -88,7 +93,14 @@ public class UserServiceImpl implements UserService {
         try {
             userRepository.delete(user);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractUserDeleteConflictReason(e));
+            String message = ConstraintViolationMessageExtractor.extractMessage(e);
+            String lowerMessage = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+            if (lowerMessage.contains("fk_clubs_club_admin")) {
+                message = "User is assigned as a club administrator";
+            } else if (lowerMessage.contains("fk_club_coaches_coach_id")) {
+                message = "User is assigned as a club coach";
+            }
+            throw new ConflictException(message);
         }
     }
 
@@ -115,7 +127,10 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private void validateUpdatePermissions(User user) {
+    private void validateUpdatePermissions(User user, UserUpdateRequest request) {
+        if (user.getId().equals(securityContextHelper.getUserId()) && request.getIsActive() != null) {
+            throw new ForbiddenException("You cannot update your own profile");
+        }
         SystemRole currentRole = securityContextHelper.getUserRole();
         SystemRole targetRole = user.getRole();
         if (currentRole == null) {
@@ -151,34 +166,35 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    private String extractUserConflictReason(DataIntegrityViolationException e) {
-        String message = e.getMessage();
-        if (message == null) return "User with these details already exists";
-        
-        String lowerMessage = message.toLowerCase();
-        
-        if (lowerMessage.contains("users_username_key") || 
-            (lowerMessage.contains("username") && lowerMessage.contains("unique"))) {
-            return "Username already exists";
-        }
-        
-        return "User with these details already exists";
-    }
 
-    private String extractUserDeleteConflictReason(DataIntegrityViolationException e) {
-        String message = e.getMessage();
-        if (message == null) return "Cannot delete user: user is referenced by other records";
+    private String generateRandomPassword() {
+        String upperCase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lowerCase = "abcdefghijklmnopqrstuvwxyz";
+        String digits = "0123456789";
+        String specialChars = "!@#$%^&*";
+        String allChars = upperCase + lowerCase + digits + specialChars;
         
-        String lowerMessage = message.toLowerCase();
+        SecureRandom random = new SecureRandom();
+        StringBuilder password = new StringBuilder(16);
         
-        if (lowerMessage.contains("fk_clubs_club_admin")) {
-            return "User is assigned as a club administrator";
+        password.append(upperCase.charAt(random.nextInt(upperCase.length())));
+        password.append(lowerCase.charAt(random.nextInt(lowerCase.length())));
+        password.append(digits.charAt(random.nextInt(digits.length())));
+        password.append(specialChars.charAt(random.nextInt(specialChars.length())));
+        
+        for (int i = 4; i < 16; i++) {
+            password.append(allChars.charAt(random.nextInt(allChars.length())));
         }
-        if (lowerMessage.contains("fk_club_coaches_coach_id")) {
-            return "User is assigned as a club coach";
+        
+        char[] passwordArray = password.toString().toCharArray();
+        for (int i = passwordArray.length - 1; i > 0; i--) {
+            int j = random.nextInt(i + 1);
+            char temp = passwordArray[i];
+            passwordArray[i] = passwordArray[j];
+            passwordArray[j] = temp;
         }
         
-        return "Cannot delete user: user is referenced by other records";
+        return new String(passwordArray);
     }
 
 }

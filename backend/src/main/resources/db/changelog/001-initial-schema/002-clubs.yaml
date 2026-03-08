@@ -18,6 +18,7 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: true
+                    unique: true
               - column:
                   name: club_email
                   type: VARCHAR(255)

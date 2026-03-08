@@ -1,7 +1,6 @@
 package com.bfg.platform.athlete.mapper;
 
 import com.bfg.platform.athlete.entity.Accreditation;
-import com.bfg.platform.athlete.entity.Athlete;
 import com.bfg.platform.club.mapper.ClubMapper;
 import com.bfg.platform.gen.model.AccreditationDto;
 import com.bfg.platform.gen.model.AccreditationCreateRequest;
@@ -31,38 +30,26 @@ public class AccreditationMapper {
         dto.setYear(accreditation.getYear());
         dto.setStatus(accreditation.getStatus());
 
-        dto.setCreatedAt(OffsetDateTime.ofInstant(accreditation.getCreatedAt(), ZoneOffset.UTC));
-        dto.setUpdatedAt(OffsetDateTime.ofInstant(accreditation.getModifiedAt(), ZoneOffset.UTC));
+        dto.setCreatedAt(accreditation.getCreatedAt() != null 
+            ? OffsetDateTime.ofInstant(accreditation.getCreatedAt(), ZoneOffset.UTC) 
+            : null);
+        dto.setUpdatedAt(accreditation.getModifiedAt() != null 
+            ? OffsetDateTime.ofInstant(accreditation.getModifiedAt(), ZoneOffset.UTC) 
+            : null);
 
         boolean expandAthlete = expand != null && expand.contains("athlete");
         boolean expandClub = expand != null && expand.contains("club");
         
         if (expandAthlete && accreditation.getAthlete() != null) {
-            String athleteName = displayAthleteName(accreditation.getAthlete());
-            dto.setAthleteName(athleteName);
             dto.setAthlete(AthleteMapper.toDto(accreditation.getAthlete()));
         }
         
         if (expandClub && accreditation.getClub() != null) {
-            String clubName = accreditation.getClub().getName();
-            dto.setClubName(clubName);
-            String clubShortName = accreditation.getClub().getShortName();
-            dto.setClubShortName(clubShortName);
             dto.setClub(ClubMapper.toDto(accreditation.getClub(), expand));
         }
 
         return dto;
     }
-
-    private static String displayAthleteName(Athlete athlete) {
-        if (athlete == null) return null;
-        String first = athlete.getFirstName() != null ? athlete.getFirstName().trim() : "";
-        String middle = athlete.getMiddleName() != null ? athlete.getMiddleName().trim() : "";
-        String last = athlete.getLastName() != null ? athlete.getLastName().trim() : "";
-        String combined = (first + " " + middle + " " + last).trim().replaceAll("\\s+", " ");
-        return combined.isEmpty() ? null : combined;
-    }
-
 
     public static Accreditation fromCreateRequest(AccreditationCreateRequest request) {
         Accreditation accreditation = new Accreditation();

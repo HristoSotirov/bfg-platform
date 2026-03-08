@@ -1,6 +1,7 @@
 package com.bfg.platform.common.exception;
 
 import com.bfg.platform.gen.model.ErrorResponse;
+import jakarta.persistence.PersistenceException;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,6 +11,7 @@ import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
+import io.jsonwebtoken.JwtException;
 
 @Slf4j
 @RestControllerAdvice
@@ -38,6 +40,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UnauthorizedException.class)
     public ResponseEntity<ErrorResponse> handleUnauthorized(UnauthorizedException ex) {
         return buildErrorResponse(HttpStatus.UNAUTHORIZED, ex.getMessage());
+    }
+
+    @ExceptionHandler(JwtException.class)
+    public ResponseEntity<ErrorResponse> handleJwtException(JwtException ex) {
+        log.debug("JWT validation failed", ex);
+        return buildErrorResponse(HttpStatus.UNAUTHORIZED,
+                "Token invalid or expired. Please log in again.");
     }
 
     @ExceptionHandler(ResourceCreationException.class)
@@ -98,15 +107,21 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ErrorResponse> handleDataIntegrity(DataIntegrityViolationException ex) {
         log.warn("Data integrity violation", ex);
-        return buildErrorResponse(HttpStatus.CONFLICT, "Data integrity violation");
+        String message = ConstraintViolationMessageExtractor.extractMessage(ex);
+        return buildErrorResponse(HttpStatus.CONFLICT, message);
+    }
+
+    @ExceptionHandler(PersistenceException.class)
+    public ResponseEntity<ErrorResponse> handlePersistence(PersistenceException ex) {
+        log.warn("Persistence exception", ex);
+        String message = ConstraintViolationMessageExtractor.extractMessage(ex);
+        return buildErrorResponse(HttpStatus.CONFLICT, message);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleNotReadable(HttpMessageNotReadableException ex) {
-        // Usually malformed JSON (wrong quotes / stray characters / invalid types)
         log.warn("Malformed request body", ex);
         
-        // Check if the cause is an IllegalArgumentException (e.g., invalid enum value)
         Throwable cause = ex.getCause();
         if (cause instanceof IllegalArgumentException) {
             return buildErrorResponse(HttpStatus.BAD_REQUEST, cause.getMessage());
@@ -117,7 +132,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ErrorResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
-        // Bad query params/path vars (e.g. invalid UUID, invalid boolean, invalid enum)
         log.warn("Type mismatch", ex);
         String param = ex.getName();
         String value = ex.getValue() != null ? String.valueOf(ex.getValue()) : "null";
@@ -126,7 +140,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleIllegalArgument(IllegalArgumentException ex) {
-        // Used by our query parsers (filter/order), pageable validation, etc.
         log.warn("Bad request", ex);
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
     }

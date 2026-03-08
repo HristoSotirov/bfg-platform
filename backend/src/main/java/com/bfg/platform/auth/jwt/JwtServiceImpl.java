@@ -21,7 +21,6 @@ public class JwtServiceImpl implements JwtService {
 
     public JwtServiceImpl(JwtProperties properties) {
         this.properties = properties;
-        // Keys are already validated and initialized in JwtProperties
         this.privateKey = properties.getPrivateKey();
         this.publicKey = properties.getPublicKey();
     }

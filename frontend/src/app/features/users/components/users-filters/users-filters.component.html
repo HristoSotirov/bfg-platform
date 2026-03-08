@@ -1,0 +1,52 @@
+<div class="mb-4">
+  
+  <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-3">
+    
+    <div class="w-full sm:flex-1 sm:min-w-[180px] sm:max-w-[180px]">
+      <app-search-bar
+        [searchValue]="searchValue"
+        (searchValueChange)="searchValue = $event"
+        (searchChange)="onSearchChange($event)"
+        placeholder="Търсене..."
+        [showIcon]="true"
+        [showClearButton]="false"
+        inputClasses="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-transparent"
+      ></app-search-bar>
+    </div>
+
+    
+    @if (hasVisibleFilters() && isFilterVisible('role')) {
+      <div [class.hidden]="!filtersExpanded" class="sm:block w-full sm:w-[180px]">
+        <app-multi-select-dropdown
+          [options]="roleOptions"
+          [multiple]="true"
+          [placeholder]="'Роля'"
+          [ngModel]="filters.roles || []"
+          (selectionChange)="onRolesChange($event)"
+        >
+        </app-multi-select-dropdown>
+      </div>
+    }
+
+    @if (hasVisibleFilters() && isFilterVisible('status')) {
+      <div [class.hidden]="!filtersExpanded" class="sm:block w-full sm:w-[180px]">
+        <app-multi-select-dropdown
+          [options]="statusOptions"
+          [multiple]="true"
+          [placeholder]="'Статус'"
+          [ngModel]="filters.statuses || []"
+          (selectionChange)="onStatusesChange($event)"
+        >
+        </app-multi-select-dropdown>
+      </div>
+    }
+  </div>
+
+  
+  <app-filter-toggle-button
+    [expanded]="filtersExpanded"
+    [visible]="hasVisibleFilters()"
+    (toggleChange)="filtersExpanded = $event"
+  ></app-filter-toggle-button>
+</div>
+

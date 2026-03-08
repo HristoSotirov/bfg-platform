@@ -26,6 +26,9 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.Set;
+import com.bfg.platform.gen.model.AccreditationBatchRenewalRequest;
+import com.bfg.platform.gen.model.AccreditationBatchRenewalResponse;
+import com.bfg.platform.gen.model.AccreditationBatchRenewalResponseFailedInner;
 import com.bfg.platform.gen.model.AccreditationDto;
 import com.bfg.platform.gen.model.AccreditationStatus;
 import com.bfg.platform.gen.model.AthleteBatchMigrationRequest;
@@ -34,15 +37,14 @@ import com.bfg.platform.gen.model.AthleteBatchMigrationResponse;
 import com.bfg.platform.gen.model.AthleteBatchMigrationResponseSkippedInner;
 import com.bfg.platform.gen.model.AthleteCreateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -64,6 +66,7 @@ public class AccreditationServiceImpl implements AccreditationService {
     private final EntityManager entityManager;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<AccreditationDto> getAllAccreditations(
             String filter,
             String search,
@@ -106,6 +109,7 @@ public class AccreditationServiceImpl implements AccreditationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public Optional<AccreditationDto> getAccreditationByUuid(UUID uuid, List<String> expand) {
         validateUuid(uuid);
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Accreditation.class);
@@ -125,48 +129,112 @@ public class AccreditationServiceImpl implements AccreditationService {
     }
 
     @Override
-    @Transactional
-    public Optional<AccreditationDto> renewAccreditation(UUID athleteId) {
-        try {
-            UUID clubId = authorizationService.requireCurrentUserClubId();
-            authorizationService.requireCanManageAccreditations(clubId);
+    public AccreditationBatchRenewalResponse batchRenewAccreditations(
+            AccreditationBatchRenewalRequest request) {
+        UUID clubId = authorizationService.requireCurrentUserClubId();
+        authorizationService.requireCanManageAccreditations(clubId);
 
-            athleteRepository.findById(athleteId)
-                    .orElseThrow(() -> new ValidationException("Athlete not found"));
-
-            Club club = clubRepository.findById(clubId)
-                    .orElseThrow(() -> new ValidationException("Club not found"));
-
-            int currentYear = Year.now().getValue();
-            boolean exists = accreditationRepository.existsByAthleteIdAndClubIdAndYear(athleteId, clubId, currentYear);
-            
-            if (exists) {
-                throw new ConflictException("Accreditation for this athlete and year already exists");
-            }
-
-            String cardNumber;
-            Optional<String> existingCardNumber = accreditationRepository
-                    .findExistingCardNumberForAthleteAndClub(athleteId, clubId);
-
-            if (existingCardNumber.isPresent()) {
-                cardNumber = existingCardNumber.get();
-            } else {
-                cardNumber = generateNextCardNumber(club.getCardPrefix(), clubId);
-            }
-
-            Accreditation accreditation = AccreditationMapper.createNewAccreditation(
-                    athleteId,
-                    clubId,
-                    cardNumber,
-                    currentYear,
-                    AccreditationStatus.PENDING_VALIDATION
-            );
-
-            Accreditation saved = accreditationRepository.save(accreditation);
-            return Optional.of(AccreditationMapper.toDto(saved));
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractConflictReason(e));
+        List<AccreditationDto> renewed = new ArrayList<>();
+        List<AccreditationBatchRenewalResponseFailedInner> failed = new ArrayList<>();
+        
+        if (request.getAthleteIds() == null || request.getAthleteIds().isEmpty()) {
+            AccreditationBatchRenewalResponse response = 
+                    new AccreditationBatchRenewalResponse();
+            response.setRenewed(renewed);
+            response.setFailed(failed);
+            return response;
         }
+
+        Club club = clubRepository.findById(clubId)
+                .orElseThrow(() -> new ValidationException("Club not found"));
+
+        int currentYear = Year.now().getValue();
+        
+        List<UUID> athleteIds = request.getAthleteIds();
+        List<Athlete> athletes = athleteRepository.findAllById(athleteIds);
+        java.util.Map<UUID, Athlete> athleteMap = athletes.stream()
+                .collect(java.util.stream.Collectors.toMap(Athlete::getId, a -> a));
+
+        TransactionTemplate transactionTemplate = new TransactionTemplate(transactionManager);
+        transactionTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        
+        for (UUID athleteId : athleteIds) {
+            transactionTemplate.execute(status -> {
+                try {
+                    Athlete athlete = athleteMap.get(athleteId);
+                    if (athlete == null) {
+                        throw new ValidationException("Athlete not found");
+                    }
+
+                    boolean exists = accreditationRepository.existsByAthleteIdAndClubIdAndYear(athleteId, clubId, currentYear);
+                    
+                    if (exists) {
+                        throw new ConflictException("Accreditation for this athlete and year already exists");
+                    }
+
+                    String cardNumber;
+                    Optional<String> existingCardNumber = accreditationRepository
+                            .findExistingCardNumberForAthleteAndClub(athleteId, clubId);
+
+                    if (existingCardNumber.isPresent()) {
+                        cardNumber = existingCardNumber.get();
+                    } else {
+                        cardNumber = generateNextCardNumber(club.getCardPrefix(), clubId);
+                    }
+
+                    Accreditation accreditation = AccreditationMapper.createNewAccreditation(
+                            athleteId,
+                            clubId,
+                            cardNumber,
+                            currentYear,
+                            AccreditationStatus.PENDING_VALIDATION
+                    );
+
+                    Accreditation saved = accreditationRepository.save(accreditation);
+                    renewed.add(AccreditationMapper.toDto(saved));
+                } catch (ValidationException | ConflictException e) {
+                    Athlete athlete = athleteMap.get(athleteId);
+                    String athleteName = getAthleteName(athlete);
+                    addFailed(failed, athleteId, athleteName, e.getMessage());
+                    status.setRollbackOnly();
+                } catch (Exception e) {
+                    Athlete athlete = athleteMap.get(athleteId);
+                    String athleteName = getAthleteName(athlete);
+                    String errorMessage = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+                    addFailed(failed, athleteId, athleteName, "Error: " + errorMessage);
+                    status.setRollbackOnly();
+                }
+                return null;
+            });
+        }
+        
+        AccreditationBatchRenewalResponse response = 
+                new AccreditationBatchRenewalResponse();
+        response.setRenewed(renewed);
+        response.setFailed(failed);
+        return response;
+    }
+
+    private String getAthleteName(Athlete athlete) {
+        if (athlete == null) return null;
+        String first = athlete.getFirstName() != null ? athlete.getFirstName().trim() : "";
+        String middle = athlete.getMiddleName() != null ? athlete.getMiddleName().trim() : "";
+        String last = athlete.getLastName() != null ? athlete.getLastName().trim() : "";
+        String combined = (first + " " + middle + " " + last).trim().replaceAll("\\s+", " ");
+        return combined.isEmpty() ? null : combined;
+    }
+
+    private void addFailed(
+            List<AccreditationBatchRenewalResponseFailedInner> failed,
+            UUID athleteId,
+            String athleteName,
+            String error) {
+        AccreditationBatchRenewalResponseFailedInner failedItem = 
+                new AccreditationBatchRenewalResponseFailedInner();
+        failedItem.setAthleteId(athleteId);
+        failedItem.setAthleteName(athleteName);
+        failedItem.setError(error);
+        failed.add(failedItem);
     }
 
     @Override
@@ -257,17 +325,13 @@ public class AccreditationServiceImpl implements AccreditationService {
             throw new ValidationException("Status is required for accreditation update");
         }
         
-        try {
-            return accreditationRepository.findById(uuid)
-                    .map(accreditation -> {
-                        accreditation.setStatus(status);
-                        
-                        Accreditation saved = accreditationRepository.save(accreditation);
-                        return AccreditationMapper.toDto(saved);
-                    });
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractConflictReason(e));
-        }
+        return accreditationRepository.findById(uuid)
+                .map(accreditation -> {
+                    accreditation.setStatus(status);
+                    
+                    Accreditation saved = accreditationRepository.save(accreditation);
+                    return AccreditationMapper.toDto(saved);
+                });
     }
 
     private void validateUuid(UUID uuid) {
@@ -276,31 +340,6 @@ public class AccreditationServiceImpl implements AccreditationService {
         }
     }
 
-    private String extractConflictReason(DataIntegrityViolationException e) {
-        String message = e.getMessage();
-        if (message == null) return "Accreditation with these details already exists";
-        
-        String lowerMessage = message.toLowerCase();
-        
-        if (lowerMessage.contains("uq_accreditations_athlete_club_year")) {
-            return "Accreditation for this athlete, club, and year already exists";
-        }
-        if (lowerMessage.contains("fk_accreditations_athlete_id")) {
-            return "Cannot create accreditation: athlete does not exist";
-        }
-        if (lowerMessage.contains("fk_accreditations_club_id")) {
-            return "Cannot create accreditation: club does not exist";
-        }
-        
-        if (lowerMessage.contains("unique") || lowerMessage.contains("duplicate")) {
-            return "Accreditation with these details already exists";
-        }
-        if (lowerMessage.contains("foreign key") || lowerMessage.contains("fk_")) {
-            return "Cannot create accreditation: referenced entity does not exist";
-        }
-        
-        return "Accreditation with these details already exists";
-    }
 
     private AthleteDto migrateSingleAthlete(AthleteBatchMigrationRequestItem item, Integer year, int currentYear) {
         String newCardNumber = parseAndConvertCardNumber(item.getOldCardNumber());
@@ -390,51 +429,13 @@ public class AccreditationServiceImpl implements AccreditationService {
     }
 
     private void saveAccreditation(Accreditation accreditation) {
-        try {
-            accreditationRepository.save(accreditation);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractConflictReason(e));
-        }
+        accreditationRepository.save(accreditation);
     }
 
     private Athlete saveAthlete(Athlete athlete) {
-        try {
-            return athleteRepository.save(athlete);
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractConflictReasonForAthlete(e));
-        }
+        return athleteRepository.save(athlete);
     }
 
-    private String extractConflictReasonForAthlete(DataIntegrityViolationException e) {
-        String message = e.getMessage();
-        if (message == null) return "Operation failed";
-        
-        String lowerMessage = message.toLowerCase();
-        
-        if (lowerMessage.contains("uk_athletes_full_name_dob")) {
-            return "Athlete with these details already exists";
-        }
-        if (lowerMessage.contains("uq_accreditations_athlete_club_year")) {
-            return "Accreditation for this athlete, club, and year already exists";
-        }
-        if (lowerMessage.contains("fk_accreditations_athlete_id")) {
-            return lowerMessage.contains("delete") || lowerMessage.contains("update") ? 
-                "Cannot delete athlete: athlete has accreditations" :
-                "Cannot create accreditation: athlete does not exist";
-        }
-        if (lowerMessage.contains("fk_accreditations_club_id")) {
-            return "Cannot create accreditation: club does not exist";
-        }
-        
-        if (lowerMessage.contains("unique") || lowerMessage.contains("duplicate")) {
-            return "A record with these details already exists";
-        }
-        if (lowerMessage.contains("foreign key") || lowerMessage.contains("fk_")) {
-            return "Cannot perform operation: record is referenced by other records";
-        }
-        
-        return "Operation failed";
-    }
 
     private void addSkipped(List<AthleteBatchMigrationResponseSkippedInner> skipped,
                             AthleteBatchMigrationRequestItem item, String reason) {

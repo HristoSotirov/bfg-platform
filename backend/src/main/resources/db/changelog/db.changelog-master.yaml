@@ -15,3 +15,7 @@ databaseChangeLog:
       file: db/changelog/002-functions/001-timestamp-triggers.yaml
   - include:
       file: db/changelog/002-functions/002-apply-timestamp-triggers.yaml
+  - include:
+      file: db/changelog/003-indexes/001-accreditations-indexes.yaml
+  - include:
+      file: db/changelog/004-data/001-athletes-gender-uppercase.yaml

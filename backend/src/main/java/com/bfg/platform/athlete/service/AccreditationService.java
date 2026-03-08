@@ -1,5 +1,7 @@
 package com.bfg.platform.athlete.service;
 
+import com.bfg.platform.gen.model.AccreditationBatchRenewalRequest;
+import com.bfg.platform.gen.model.AccreditationBatchRenewalResponse;
 import com.bfg.platform.gen.model.AccreditationDto;
 import com.bfg.platform.gen.model.AccreditationStatus;
 import com.bfg.platform.gen.model.AthleteBatchMigrationRequest;
@@ -23,7 +25,7 @@ public interface AccreditationService {
     );
     Optional<AccreditationDto> getAccreditationByUuid(UUID uuid, List<String> expand);
     
-    Optional<AccreditationDto> renewAccreditation(UUID athleteId);
+    AccreditationBatchRenewalResponse batchRenewAccreditations(AccreditationBatchRenewalRequest request);
     Optional<AthleteDto> createAthleteWithAccreditation(AthleteCreateRequest request);
     AthleteBatchMigrationResponse batchMigrateAthletes(AthleteBatchMigrationRequest request);
     

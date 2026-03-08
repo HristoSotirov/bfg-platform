@@ -211,7 +211,7 @@
                 <useSpringBoot3>true</useSpringBoot3>
                 <useBeanValidation>true</useBeanValidation>
                 <useJakartaEe>true</useJakartaEe>
-                <nullableReferenceTypes>true</nullableReferenceTypes>
+                <nullableReferenceTypes>false</nullableReferenceTypes>
                 <basePackage>com.bfg.platform</basePackage>
               </configOptions>
             </configuration>

@@ -4,6 +4,7 @@ import com.bfg.platform.athlete.entity.Athlete;
 import com.bfg.platform.common.query.FilterExpressionParser;
 import com.bfg.platform.common.query.QueryAdapterHelpers;
 import com.bfg.platform.common.query.SortParser;
+import com.bfg.platform.gen.model.Gender;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -70,10 +71,26 @@ public final class AthleteQueryAdapter {
 
     private static Predicate buildPredicate(Root<Athlete> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
         return switch (field) {
-            case "firstName", "middleName", "lastName", "gender" -> QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
+            case "firstName", "middleName", "lastName" -> QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
+            case "gender" -> genderPredicate(root, cb, op, valueRaw);
             case "dateOfBirth", "medicalExaminationDue", "insuranceFrom", "insuranceTo" -> QueryAdapterHelpers.datePredicate(root, cb, field, op, valueRaw);
             case "registeredOn" -> QueryAdapterHelpers.instantPredicate(root, cb, "registeredOn", op, valueRaw);
             default -> throw new IllegalArgumentException("Unsupported filter field: " + field);
+        };
+    }
+
+    private static Predicate genderPredicate(Root<Athlete> root, CriteriaBuilder cb, String op, String valueRaw) {
+        String value = QueryAdapterHelpers.parseString(valueRaw);
+        Gender gender;
+        try {
+            gender = Gender.fromValue(value);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Invalid gender value: " + valueRaw);
+        }
+        return switch (op) {
+            case "eq" -> cb.equal(root.get("gender"), gender);
+            case "ne" -> cb.notEqual(root.get("gender"), gender);
+            default -> throw new IllegalArgumentException("Operator '" + op + "' is not supported for field 'gender'");
         };
     }
 

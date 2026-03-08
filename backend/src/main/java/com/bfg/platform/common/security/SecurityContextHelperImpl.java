@@ -8,11 +8,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.UUID;
 
-/**
- * Helper class to read and return logged user information from JWT token.
- *
- * Flow: JWT Token → JwtAuthenticationFilter → SecurityContextHolder → SecurityContextHelper
- */
 @Component
 public class SecurityContextHelperImpl implements SecurityContextHelper {
     @Override

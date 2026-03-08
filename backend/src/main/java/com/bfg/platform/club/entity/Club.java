@@ -17,7 +17,8 @@ import java.util.UUID;
 public class Club {
 
     @Id
-    @Column(name = "id", updatable = false, insertable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false)
     @Setter(AccessLevel.NONE)
     private UUID id;
 
@@ -27,6 +28,8 @@ public class Club {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "club_admin", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private User clubAdminUser;
 
     @Column(name = "name")
@@ -56,6 +59,8 @@ public class Club {
     private Instant modifiedAt;
 
     @OneToMany(mappedBy = "club", fetch = FetchType.LAZY, cascade = {})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     private List<ClubCoach> coaches;
 }
 

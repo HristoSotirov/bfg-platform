@@ -27,13 +27,14 @@ public class AthletePhotoMapper {
         dto.setUuid(photoHistory.getId());
         dto.setAthleteId(photoHistory.getAthleteId());
         dto.setPhotoUrl(photoHistory.getPhotoUrl());
-        dto.setUploadedAt(OffsetDateTime.ofInstant(photoHistory.getUploadedAt(), ZoneOffset.UTC));
+        dto.setUploadedAt(photoHistory.getUploadedAt() != null 
+            ? OffsetDateTime.ofInstant(photoHistory.getUploadedAt(), ZoneOffset.UTC) 
+            : null);
         dto.setUploadedById(photoHistory.getUploadedBy());
         
         boolean expandUploadedByClub = expand != null && expand.contains("uploadedByClub");
         
         if (expandUploadedByClub && photoHistory.getUploadedByClub() != null) {
-            dto.uploadedByName(photoHistory.getUploadedByClub().getName());
             dto.setUploadedBy(ClubMapper.toDto(photoHistory.getUploadedByClub(), expand));
         }
         

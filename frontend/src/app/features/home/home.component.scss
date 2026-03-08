@@ -1,0 +1,13 @@
+:host {
+  display: block;
+}
+
+/* Hide scrollbar for cards horizontal scroll */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

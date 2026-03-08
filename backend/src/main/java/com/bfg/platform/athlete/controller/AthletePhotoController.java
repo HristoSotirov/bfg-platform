@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +31,7 @@ public class AthletePhotoController implements AthletePhotosApi {
     }
 
     @Override
+    @PreAuthorize("hasAnyAuthority('CLUB_ADMIN', 'COACH')")
     public ResponseEntity<AthletePhotoDto> uploadAthletePhoto(UUID athleteUuid, MultipartFile file) {
         return athletePhotoService.uploadPhoto(athleteUuid, file)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))

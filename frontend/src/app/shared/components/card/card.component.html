@@ -1,0 +1,19 @@
+<div
+  *ngIf="!section"
+  class="rounded-card border-2 bg-white p-3 h-full flex flex-col"
+  [ngClass]="borderColorClass"
+>
+  <span class="text-base font-medium text-gray-900">{{ label }}</span>
+</div>
+
+<div
+  *ngIf="section"
+  class="bg-gray-200 rounded-lg h-full flex flex-col overflow-hidden"
+>
+  <div class="flex-1 flex items-center justify-center overflow-y-auto p-4">
+    <span *ngIf="title" class="text-lg font-semibold text-gray-700">{{
+      title
+    }}</span>
+    <ng-content></ng-content>
+  </div>
+</div>

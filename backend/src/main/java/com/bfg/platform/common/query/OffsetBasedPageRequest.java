@@ -6,10 +6,6 @@ import org.springframework.data.domain.Sort;
 import java.io.Serial;
 import java.io.Serializable;
 
-/**
- * Pageable implementation that supports true offset/limit pagination.
- * Useful when using skip/top style params where skip is not necessarily a multiple of top.
- */
 public final class OffsetBasedPageRequest implements Pageable, Serializable {
 
     @Serial

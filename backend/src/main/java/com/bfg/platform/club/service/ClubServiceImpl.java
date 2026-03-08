@@ -5,6 +5,7 @@ import com.bfg.platform.club.mapper.ClubMapper;
 import com.bfg.platform.club.query.ClubQueryAdapter;
 import com.bfg.platform.club.repository.ClubRepository;
 import com.bfg.platform.common.exception.ConflictException;
+import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.PhotoUploadException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
@@ -15,6 +16,7 @@ import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.repository.DynamicEntityGraph;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceException;
 import jakarta.persistence.TypedQuery;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -33,13 +35,17 @@ import com.bfg.platform.gen.model.ClubDto;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.repository.UserRepository;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -56,8 +62,10 @@ public class ClubServiceImpl implements ClubService {
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final EntityManager entityManager;
+    private final PlatformTransactionManager transactionManager;
 
     @Override
+    @Transactional(readOnly = true)
     public Page<ClubDto> getAllClubs(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
         
@@ -121,12 +129,9 @@ public class ClubServiceImpl implements ClubService {
 
         Club club = ClubMapper.fromCreateRequest(request, cardPrefix);
 
-        try {
-            Club savedClub = clubRepository.save(club);
-            return Optional.of(ClubMapper.toDto(savedClub));
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractConflictReason(e));
-        }
+        Club savedClub = clubRepository.save(club);
+        entityManager.flush();
+        return Optional.of(ClubMapper.toDto(savedClub));
     }
 
     @Override
@@ -140,7 +145,14 @@ public class ClubServiceImpl implements ClubService {
         }
         
         for (ClubBatchCreateRequestItem item : request.getClubs()) {
-            processClubMigrationItem(item, created, skipped);
+            try {
+                processClubMigrationItem(item, created, skipped);
+            } catch (Exception e) {
+                String reason = e instanceof DataIntegrityViolationException || e instanceof PersistenceException
+                    ? ConstraintViolationMessageExtractor.extractMessage((Exception) e)
+                    : "Failed to create club: " + e.getMessage();
+                addSkipped(skipped, item, reason);
+            }
         }
         
         return buildBatchResponse(created, skipped);
@@ -149,17 +161,12 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public Optional<ClubDto> updateClub(UUID uuid, ClubUpdateRequest request) {
-        try {
-            return clubRepository.findById(uuid)
-                    .map(club -> {
-                        ClubMapper.updateClubFromRequest(club, request);
-                        Club savedClub = clubRepository.save(club);
-                        return ClubMapper.toDto(savedClub);
-                    });
-
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractConflictReason(e));
-        }
+        return clubRepository.findById(uuid)
+                .map(club -> {
+                    ClubMapper.updateClubFromRequest(club, request);
+                    Club savedClub = clubRepository.save(club);
+                    return ClubMapper.toDto(savedClub);
+                });
     }
 
     @Override
@@ -195,7 +202,14 @@ public class ClubServiceImpl implements ClubService {
         try {
             clubRepository.delete(club);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException(extractClubDeleteConflictReason(e));
+            String message = ConstraintViolationMessageExtractor.extractMessage(e);
+            String lowerMessage = e.getMessage() != null ? e.getMessage().toLowerCase() : "";
+            if (lowerMessage.contains("fk_club_coaches_club_id")) {
+                message = "Cannot delete club: club has assigned coaches";
+            } else if (lowerMessage.contains("fk_accreditations_club_id")) {
+                message = "Cannot delete club: club has accreditations";
+            }
+            throw new ConflictException(message);
         }
     }
 
@@ -214,12 +228,26 @@ public class ClubServiceImpl implements ClubService {
         Club club = ClubMapper.fromBatchCreateRequestItem(item, adminUser.getId());
 
         try {
-            Club savedClub = clubRepository.save(club);
-            created.add(ClubMapper.toDto(savedClub));
-        } catch (DataIntegrityViolationException e) {
-            addSkipped(skipped, item, extractConflictReason(e));
+            ClubDto dto = saveClubInNewTransaction(club);
+            created.add(dto);
+        } catch (DataIntegrityViolationException | PersistenceException e) {
+            addSkipped(skipped, item, ConstraintViolationMessageExtractor.extractMessage((Exception) e));
         } catch (Exception e) {
             addSkipped(skipped, item, "Error: " + (e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName()));
+        }
+    }
+
+    private ClubDto saveClubInNewTransaction(Club club) {
+        DefaultTransactionDefinition def = new DefaultTransactionDefinition(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
+        TransactionStatus status = transactionManager.getTransaction(def);
+        try {
+            Club saved = clubRepository.save(club);
+            entityManager.flush();
+            transactionManager.commit(status);
+            return ClubMapper.toDto(saved);
+        } catch (Exception e) {
+            transactionManager.rollback(status);
+            throw e;
         }
     }
 
@@ -273,47 +301,6 @@ public class ClubServiceImpl implements ClubService {
         return prefix;
     }
 
-    private String extractConflictReason(DataIntegrityViolationException e) {
-        String message = e.getMessage();
-        if (message == null) return "Club with these details already exists";
-        
-        String lowerMessage = message.toLowerCase();
-        
-        if (lowerMessage.contains("clubs_short_name_key") || 
-            lowerMessage.matches(".*short_name.*unique.*|.*unique.*short_name.*")) {
-            return "Club with this short name already exists";
-        }
-        if (lowerMessage.contains("clubs_name_key") || 
-            lowerMessage.matches(".*clubs\\.name.*unique.*|.*unique.*clubs\\.name.*")) {
-            return "Club with this name already exists";
-        }
-        if (lowerMessage.contains("clubs_card_prefix_key") || 
-            lowerMessage.matches(".*card_prefix.*unique.*|.*unique.*card_prefix.*")) {
-            return "Club with this card prefix already exists";
-        }
-        if (lowerMessage.contains("clubs_club_email_key") || 
-            lowerMessage.matches(".*club_email.*unique.*|.*unique.*club_email.*")) {
-            return "Club with this email already exists";
-        }
-        
-        return "Club with these details already exists";
-    }
-
-    private String extractClubDeleteConflictReason(DataIntegrityViolationException e) {
-        String message = e.getMessage();
-        if (message == null) return "Cannot delete club: club is referenced by other records";
-        
-        String lowerMessage = message.toLowerCase();
-        
-        if (lowerMessage.contains("fk_club_coaches_club_id")) {
-            return "Cannot delete club: club has assigned coaches";
-        }
-        if (lowerMessage.contains("fk_accreditations_club_id")) {
-            return "Cannot delete club: club has accreditations";
-        }
-        
-        return "Cannot delete club: club is referenced by other records";
-    }
 
     private void addSkipped(List<ClubBatchCreateResponseSkippedInner> skipped,
                             ClubBatchCreateRequestItem item, String reason) {

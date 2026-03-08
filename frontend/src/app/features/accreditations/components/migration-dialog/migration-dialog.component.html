@@ -1,0 +1,187 @@
+<app-dialog [isOpen]="isOpen" title="Миграция на състезатели" size="2xl" (closed)="close()">
+  <div class="space-y-4">
+    @if (step === 'upload') {
+      <div class="text-center py-8">
+        <div class="mb-4">
+          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+          </svg>
+        </div>
+        <div class="mb-4">
+          <label
+            for="athlete-file-upload"
+            class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+            Избери Excel файл
+            <input
+              id="athlete-file-upload"
+              type="file"
+              accept=".xlsx,.xls"
+              class="hidden"
+              (change)="onFileSelected($event)">
+          </label>
+        </div>
+        @if (fileName) {
+          <p class="text-sm text-gray-600">{{ fileName }}</p>
+        }
+        @if (error) {
+          <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg max-w-md mx-auto">
+            <p class="text-sm text-red-700">{{ error }}</p>
+          </div>
+        }
+      </div>
+    }
+
+    @if (step === 'mapping') {
+      <div class="space-y-4">
+        <h4 class="font-medium text-gray-900">Съпоставка на колони</h4>
+        <p class="text-sm text-gray-500">Изберете какво представлява всяка колона от файла.</p>
+
+        <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
+          @for (mapping of columnMappings; track mapping.excelColumn) {
+            <div class="flex items-center gap-3">
+              <span class="w-1/2 text-sm font-medium text-gray-700 truncate">{{ mapping.excelColumn }}</span>
+              <div class="w-1/2">
+                <app-searchable-select-dropdown
+                  [options]="getFieldOptionsForMapping(mapping)"
+                  [placeholder]="'Не импортирай'"
+                  [ngModel]="mapping.dataField || null"
+                  (ngModelChange)="onMappingFieldChange(mapping, $event)">
+                </app-searchable-select-dropdown>
+              </div>
+            </div>
+          }
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Година за картотекиране:</label>
+          <input
+            type="number"
+            [(ngModel)]="migrationYear"
+            min="2020"
+            max="2030"
+            class="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+        </div>
+
+        <div class="flex justify-center gap-2 pt-4 border-t">
+          <app-button variant="outline" size="sm" text="Назад" (click)="step = 'upload'"></app-button>
+          <app-button
+            variant="primary"
+            size="sm"
+            text="Преглед"
+            [disabled]="!hasRequiredMappings"
+            (click)="goToPreview()">
+          </app-button>
+        </div>
+      </div>
+    }
+
+    @if (step === 'preview') {
+      <div class="space-y-4">
+        <h4 class="font-medium text-gray-900">Преглед на данните</h4>
+        <p class="text-sm text-gray-500">Записи с валиден картотечен номер (4–6 цифри): {{ parsedAthletes.length }}</p>
+
+        <div class="overflow-auto scrollbar-hover border rounded-lg max-h-60">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50 sticky top-0">
+              <tr>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Картотека</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Име</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Презиме</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Фамилия</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Пол</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Дата раждане</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @for (a of parsedAthletes; track a.oldCardNumber + a.lastName + $index) {
+                <tr>
+                  <td class="px-3 py-2">{{ a.oldCardNumber }}</td>
+                  <td class="px-3 py-2">{{ a.firstName }}</td>
+                  <td class="px-3 py-2">{{ a.middleName }}</td>
+                  <td class="px-3 py-2">{{ a.lastName }}</td>
+                  <td class="px-3 py-2">{{ genderLabel(a.gender) }}</td>
+                  <td class="px-3 py-2">{{ a.dateOfBirth }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        @if (migrating) {
+          <div class="flex items-center gap-2 text-sm text-gray-600">
+            <span class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-bfg-blue border-t-transparent"></span>
+            {{ migrationProgress }}
+          </div>
+        }
+
+        @if (error) {
+          <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-sm text-red-700">{{ error }}</p>
+          </div>
+        }
+
+        <div class="flex justify-center gap-2 pt-4 border-t">
+          <app-button variant="outline" size="sm" text="Назад" [disabled]="migrating" (click)="goBackToMapping()"></app-button>
+          <app-button
+            variant="primary"
+            size="sm"
+            [text]="migrating ? 'Мигриране...' : 'Мигрирай'"
+            [disabled]="migrating"
+            (click)="migrate()">
+          </app-button>
+        </div>
+      </div>
+    }
+
+    @if (step === 'results' && migrationResult) {
+      <div class="space-y-4">
+        <h4 class="font-medium text-gray-900">Резултат от миграцията</h4>
+        <div class="space-y-2 text-sm">
+          <p class="text-green-600">Мигрирани: {{ migrationResult.totalMigrated }}</p>
+          <p class="text-amber-600">Пропуснати: {{ migrationResult.totalSkipped }}</p>
+          @if (migrationResult.failedChunkCount > 0) {
+            <p class="text-red-600">{{ migrationResult.failedChunkCount }} от {{ migrationResult.totalChunkCount }} заявки не успяха.</p>
+            <details class="mt-2">
+              <summary class="cursor-pointer text-red-600">Причини за неуспех на заявките</summary>
+              <ul class="mt-1 max-h-40 overflow-y-auto list-disc list-inside text-red-700 space-y-0.5">
+                @for (fail of migrationResult.failedChunkErrors; track fail.chunkIndex) {
+                  <li>Заявка {{ fail.chunkIndex }}: {{ fail.message }}</li>
+                }
+              </ul>
+            </details>
+          }
+          @if (migrationResult.skippedItems.length > 0) {
+            <div class="mt-2">
+              <p class="text-gray-600 mb-1">Пропуснати записи:</p>
+              <div class="overflow-auto border border-gray-200 rounded-lg max-h-40">
+                <table class="min-w-full divide-y divide-gray-200 text-sm">
+                  <thead class="bg-gray-50 sticky top-0">
+                    <tr>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Картотека</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Име</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Фамилия</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Причина</th>
+                    </tr>
+                  </thead>
+                  <tbody class="divide-y divide-gray-200 bg-white">
+                    @for (item of migrationResult.skippedItems; track $index) {
+                      <tr>
+                        <td class="px-3 py-2 text-gray-900">{{ item.athlete.oldCardNumber }}</td>
+                        <td class="px-3 py-2 text-gray-900">{{ item.athlete.firstName }} {{ item.athlete.middleName }}</td>
+                        <td class="px-3 py-2 text-gray-900">{{ item.athlete.lastName }} ({{ genderLabel(item.athlete.gender) }})</td>
+                        <td class="px-3 py-2 text-amber-700">{{ item.reason }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          }
+        </div>
+        <div class="flex justify-center pt-4 border-t">
+          <app-button variant="primary" size="sm" text="Готово" (click)="finishResults()"></app-button>
+        </div>
+      </div>
+    }
+  </div>
+</app-dialog>

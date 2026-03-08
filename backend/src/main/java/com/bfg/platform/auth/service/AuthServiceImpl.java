@@ -69,9 +69,6 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public void logout(UUID userId) {
-        // Stateless logout: we don't store refresh tokens server-side.
-        // Client should discard access/refresh tokens.
-        // If you need immediate token revocation, re-introduce token_version or persist refresh tokens.
     }
 }
 

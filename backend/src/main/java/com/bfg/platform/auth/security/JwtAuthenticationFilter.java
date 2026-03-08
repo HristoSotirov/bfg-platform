@@ -43,7 +43,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        // If already authenticated (e.g., by dev auth filter), skip JWT processing
         if (SecurityContextHolder.getContext().getAuthentication() != null &&
             SecurityContextHolder.getContext().getAuthentication().isAuthenticated()) {
             filterChain.doFilter(request, response);
@@ -58,9 +57,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         String token = header.substring("Bearer ".length()).trim();
         try {
-            // parseAndValidate() verifies the RS256 signature on every request.
-            // This ensures that any tampering with the token payload (e.g., modifying roles, user ID)
-            // will be detected and cause authentication to fail.
             Jws<Claims> jws = jwtService.parseAndValidate(token);
             Claims claims = jws.getPayload();
 

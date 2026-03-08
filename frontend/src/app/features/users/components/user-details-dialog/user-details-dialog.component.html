@@ -1,0 +1,242 @@
+<app-dialog [isOpen]="isOpen" [title]="fullName" [noScroll]="true" (closed)="close()">
+  @if (loading) {
+    <div class="flex items-center justify-center py-8">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-bfg-blue"></div>
+    </div>
+  } @else if (error && !userData) {
+    <div class="text-center py-8">
+      <p class="text-red-600">{{ error }}</p>
+    </div>
+  } @else if (userData) {
+    <div class="flex flex-col max-h-[calc(90vh-120px)]">
+      <div class="flex-1 min-h-0 overflow-y-auto space-y-4">
+      @if (!isEditing) {
+        
+        <div class="space-y-4">
+          
+          <div>
+            <div class="space-y-1">
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Име:</span>
+                <span class="text-sm font-medium">
+                  {{ fullName }}
+                </span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Потребителско име:</span>
+                <span class="text-sm font-medium">
+                  {{ userData.username || '-' }}
+                </span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Имейл:</span>
+                <span class="text-sm font-medium">
+                  {{ userData.email || '-' }}
+                </span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Роля:</span>
+                <span class="text-sm font-medium">
+                  {{ getRoleLabel(userData.role) }}
+                </span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Статус:</span>
+                <span
+                  class="text-sm font-medium"
+                  [ngClass]="userData.isActive ? 'text-green-600' : 'text-red-600'"
+                >
+                  {{ userData.isActive ? 'Активен' : 'Неактивен' }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          
+          <div class="pt-2 border-t border-gray-200">
+            <div class="space-y-1">
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Дата на раждане:</span>
+                <span class="text-sm font-medium">
+                  {{ formatDate(userData.dateOfBirth) }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          
+          @if (shouldShowClubSection()) {
+            <div class="pt-2 border-t border-gray-200">
+              <div class="space-y-1">
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-36 flex-shrink-0">Клуб:</span>
+                  <span class="text-sm font-medium">
+                    {{ clubData?.shortName || '-' }}
+                  </span>
+                </div>
+              </div>
+            </div>
+          }
+
+          
+          <div class="pt-2 border-t border-gray-200">
+            <div class="space-y-1">
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Създаден на:</span>
+                <span class="text-sm font-medium">
+                  {{ formatDateTime(userData.createdAt) }}
+                </span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Променен на:</span>
+                <span class="text-sm font-medium">
+                  {{ formatDateTime(userData.updatedAt) }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        
+        <div class="space-y-4">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Име <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="editData.firstName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                [disabled]="saving"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Фамилия <span class="text-red-500">*</span>
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="editData.lastName"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                [disabled]="saving"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Дата на раждане
+              </label>
+              <app-date-picker
+                label=""
+                placeholder="Изберете дата на раждане"
+                [(ngModel)]="editData.dateOfBirth"
+                [disabled]="saving"
+              ></app-date-picker>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Потребителско име
+              </label>
+              <input
+                type="text"
+                [(ngModel)]="editData.username"
+                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                [disabled]="saving"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-gray-700 mb-1">
+                Статус
+              </label>
+              <app-searchable-select-dropdown
+                [options]="statusOptions"
+                [ngModel]="editData.isActive ? 'true' : 'false'"
+                (ngModelChange)="onStatusChange($event)"
+                [placeholder]="'Изберете статус'"
+                [disabled]="saving"
+              >
+              </app-searchable-select-dropdown>
+            </div>
+
+          </div>
+        </div>
+      }
+      </div>
+
+      
+      <div class="dialog-footer shrink-0 bg-white flex flex-col gap-2 mt-6 pt-4 border-t border-gray-200">
+        @if (error && isEditing) {
+          <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+            <p class="text-sm text-red-700">{{ error }}</p>
+          </div>
+        }
+        <div class="flex items-center justify-center gap-2">
+          @if (!isEditing) {
+            @if (canEdit) {
+              <app-button
+                variant="outline"
+                size="md"
+                text="Редактиране"
+                (click)="startEditing()"
+              >
+              </app-button>
+            }
+            <app-button
+              variant="primary"
+              size="md"
+              text="Затвори"
+              (click)="close()"
+            >
+            </app-button>
+          } @else {
+            <app-button
+              variant="outline"
+              size="md"
+              text="Отказ"
+              [disabled]="saving"
+              (click)="cancelEditing()"
+            >
+            </app-button>
+            <app-button
+              variant="primary"
+              size="md"
+              text="Запази"
+              [disabled]="saving"
+              (click)="save()"
+            >
+            </app-button>
+          }
+        </div>
+      </div>
+    </div>
+  }
+  </app-dialog>
+
+  
+  <app-dialog
+    [isOpen]="showEditingWarningDialog"
+    title="Незапазени промени"
+    (closed)="showEditingWarningDialog = false"
+  >
+    <div class="py-4">
+      <p class="text-gray-700 mb-6">
+        Имате незапазени промени. Моля, използвайте бутоните
+        <span class="font-medium">„Запазване“</span> или
+        <span class="font-medium">„Отказ“</span>, за да излезете от редакция.
+      </p>
+      <div class="flex justify-center">
+        <app-button
+          variant="primary"
+          size="md"
+          text="Разбрах"
+          (click)="showEditingWarningDialog = false"
+        >
+        </app-button>
+      </div>
+    </div>
+  </app-dialog>
+

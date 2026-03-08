@@ -14,8 +14,8 @@ AthletePhotoDto:
       example: "550e8400-e29b-41d4-a716-446655440001"
     photoUrl:
       type: string
-      description: URL of the photo stored in S3
-      example: "https://s3.example.com/bfg-platform/photos/athlete-001.jpg"
+      description: When returned from getAthletePhotos, a full URL (e.g. time-limited presigned URL) suitable for direct use as an image source. The stored value in the system may be an internal path.
+      example: "https://minio.example.com/bfg-platform-photos/athletes/550e8400-e29b-41d4-a716-446655440001/photo.jpg?X-Amz-..."
     uploadedAt:
       type: string
       format: date-time
@@ -26,11 +26,6 @@ AthletePhotoDto:
       format: uuid
       description: UUID of the club that uploaded the photo
       example: "550e8400-e29b-41d4-a716-446655440002"
-    uploadedByName:
-      type: string
-      description: Display name of the club that uploaded the photo
-      example: "FC Dynamo"
-      nullable: true
     uploadedBy:
       $ref: "../clubs/schemas.yaml#/ClubDto"
       description: Full club details for uploadedBy

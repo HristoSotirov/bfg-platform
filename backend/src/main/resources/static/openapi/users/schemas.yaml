@@ -31,7 +31,12 @@ UserDto:
       example: "1980-01-15"
     username:
       type: string
-      description: Username (email)
+      description: Username for login
+      example: "ivan.petrov@example.com"
+    email:
+      type: string
+      format: email
+      description: Email address
       example: "ivan.petrov@example.com"
     isActive:
       type: boolean
@@ -67,8 +72,7 @@ UserCreateRequest:
     - firstName
     - lastName
     - dateOfBirth
-    - username
-    - password
+    - email
     - role
   properties:
     firstName:
@@ -88,18 +92,18 @@ UserCreateRequest:
       example: "1980-01-15"
     username:
       type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{user.username.required}")'
+      description: Username for login (optional, will be set to email if not provided for coaches created by club admins)
+      example: "ivan.petrov"
+    email:
+      type: string
       format: email
       minLength: 1
       x-field-extra-annotation: |-
-        @NotBlank(message = "{user.username.required}")
-        @Email(message = "{user.username.email}")
+        @NotBlank(message = "{user.email.required}")
+        @Email(message = "{user.email.email}")
       example: "ivan.petrov@example.com"
-    password:
-      type: string
-      format: password
-      minLength: 1
-      x-field-extra-annotation: '@NotBlank(message = "{user.password.required}")'
-      example: "SecurePassword123!"
     role:
       $ref: "#/SystemRole"
       x-field-extra-annotation: '@NotNull(message = "{user.role.required}")'
@@ -107,12 +111,17 @@ UserCreateRequest:
 
 UserUpdateRequest:
   type: object
-  description: Request payload for updating an existing user (partial update)
+  description: Request payload for updating an existing user (partial update). Email and role cannot be updated.
   x-class-extra-annotation: '@NotNull(message = "{user.updateRequest.required}")'
   properties:
     firstName:
       type: string
     lastName:
+      type: string
+    dateOfBirth:
+      type: string
+      format: date
+    username:
       type: string
     isActive:
       type: boolean
@@ -141,16 +150,6 @@ ClubCoachDto:
       format: date-time
       description: Timestamp when the coach was assigned to the club
       example: "2024-01-15T10:30:00Z"
-    userName:
-      type: string
-      description: Display name of the coach user (firstName + lastName)
-      example: "Ivan Petrov"
-      nullable: true
-    clubShortName:
-      type: string
-      description: Club short name
-      example: "RC Sofia"
-      nullable: true
     coach:
       $ref: "../users/schemas.yaml#/UserDto"
       description: Full coach user details

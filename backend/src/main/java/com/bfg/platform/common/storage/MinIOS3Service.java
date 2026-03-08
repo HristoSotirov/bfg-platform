@@ -3,11 +3,13 @@ package com.bfg.platform.common.storage;
 import com.bfg.platform.common.exception.ValidationException;
 import io.minio.BucketExistsArgs;
 import io.minio.GetObjectArgs;
+import io.minio.GetPresignedObjectUrlArgs;
 import io.minio.MakeBucketArgs;
 import io.minio.MinioClient;
 import io.minio.PutObjectArgs;
 import io.minio.RemoveObjectArgs;
 import io.minio.StatObjectArgs;
+import io.minio.http.Method;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -22,12 +24,17 @@ public class MinIOS3Service implements S3Service {
 
     private final MinioClient minioClient;
     private final String defaultBucketName;
-    
+    private final int presignedUrlExpirySeconds;
+
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024;
 
-    public MinIOS3Service(MinioClient minioClient, @Value("${s3.bucket-name:bfg-platform-photos}") String defaultBucketName) {
+    public MinIOS3Service(
+            MinioClient minioClient,
+            @Value("${s3.bucket-name:bfg-platform-photos}") String defaultBucketName,
+            @Value("${s3.presigned-url-expiry-seconds:3600}") int presignedUrlExpirySeconds) {
         this.minioClient = minioClient;
         this.defaultBucketName = defaultBucketName;
+        this.presignedUrlExpirySeconds = presignedUrlExpirySeconds;
     }
     
     @Override
@@ -103,6 +110,24 @@ public class MinIOS3Service implements S3Service {
     public String getFileUrl(String bucketName, String objectName) {
         String bucket = bucketName != null ? bucketName : defaultBucketName;
         return String.format("/%s/%s", bucket, objectName);
+    }
+
+    @Override
+    public String getPresignedUrl(String bucketName, String objectName, int expirySeconds) {
+        try {
+            String bucket = bucketName != null ? bucketName : defaultBucketName;
+            int expiry = expirySeconds >= 1 && expirySeconds <= 604800 ? expirySeconds : presignedUrlExpirySeconds;
+            return minioClient.getPresignedObjectUrl(
+                    GetPresignedObjectUrlArgs.builder()
+                            .method(Method.GET)
+                            .bucket(bucket)
+                            .object(objectName)
+                            .expiry(expiry)
+                            .build());
+        } catch (Exception e) {
+            log.warn("Failed to generate presigned URL for {}/{}: {}", bucketName, objectName, e.getMessage());
+            return null;
+        }
     }
 
     @Override

@@ -3,7 +3,6 @@ package com.bfg.platform.club.mapper;
 import com.bfg.platform.club.entity.ClubCoach;
 import com.bfg.platform.gen.model.ClubCoachCreateRequest;
 import com.bfg.platform.gen.model.ClubCoachDto;
-import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.service.UserMapper;
 
 import java.time.OffsetDateTime;
@@ -33,30 +32,22 @@ public class ClubCoachMapper {
         dto.setUuid(clubCoach.getId());
         dto.setUserId(clubCoach.getCoachId());
         dto.setClubId(clubCoach.getClubId());
-        dto.setAssignmentDate(OffsetDateTime.ofInstant(clubCoach.getAssignmentDate(), ZoneOffset.UTC));
+        dto.setAssignmentDate(clubCoach.getAssignmentDate() != null 
+            ? OffsetDateTime.ofInstant(clubCoach.getAssignmentDate(), ZoneOffset.UTC) 
+            : null);
 
         boolean expandCoach = expand != null && expand.contains("coach");
         boolean expandClub = expand != null && expand.contains("club");
         
         if (expandCoach && clubCoach.getCoach() != null) {
-            dto.userName(displayName(clubCoach.getCoach()));
             dto.setCoach(UserMapper.toDto(clubCoach.getCoach()));
         }
         
         if (expandClub && clubCoach.getClub() != null) {
-            dto.clubShortName(clubCoach.getClub().getShortName());
             dto.setClub(ClubMapper.toDto(clubCoach.getClub(), expand));
         }
         
         return dto;
-    }
-
-    private static String displayName(User user) {
-        if (user == null) return null;
-        String first = user.getFirstName() != null ? user.getFirstName().trim() : "";
-        String last = user.getLastName() != null ? user.getLastName().trim() : "";
-        String combined = (first + " " + last).trim();
-        return combined.isEmpty() ? null : combined;
     }
 }
 

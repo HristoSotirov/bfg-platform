@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-001-accreditations-indexes
+      author: bfg
+      changes:
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_accreditation_number
+            columns:
+              - column:
+                  name: accreditation_number
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_year
+            columns:
+              - column:
+                  name: year
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_status
+            columns:
+              - column:
+                  name: status

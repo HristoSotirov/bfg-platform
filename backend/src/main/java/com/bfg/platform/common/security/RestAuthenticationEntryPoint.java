@@ -35,7 +35,6 @@ public class RestAuthenticationEntryPoint implements AuthenticationEntryPoint {
         if (authException instanceof InsufficientAuthenticationException) {
             message = "Missing bearer token";
         } else if (authException.getMessage() != null && !authException.getMessage().isBlank()) {
-            // For invalid/expired tokens we pass a specific message from the JWT filter
             message = authException.getMessage();
         }
 

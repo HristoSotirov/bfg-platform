@@ -1,0 +1,15 @@
+export * from './accreditations.service';
+import { AccreditationsService } from './accreditations.service';
+export * from './athletePhotos.service';
+import { AthletePhotosService } from './athletePhotos.service';
+export * from './athletes.service';
+import { AthletesService } from './athletes.service';
+export * from './auth.service';
+import { AuthService } from './auth.service';
+export * from './clubCoaches.service';
+import { ClubCoachesService } from './clubCoaches.service';
+export * from './clubs.service';
+import { ClubsService } from './clubs.service';
+export * from './users.service';
+import { UsersService } from './users.service';
+export const APIS = [AccreditationsService, AthletePhotosService, AthletesService, AuthService, ClubCoachesService, ClubsService, UsersService];

@@ -23,7 +23,8 @@ import java.util.UUID;
 public class User {
 
     @Id
-    @Column(name = "id", updatable = false, insertable = false)
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false)
     @Setter(AccessLevel.NONE)
     private UUID id;
 
@@ -38,6 +39,9 @@ public class User {
 
     @Column(name = "username")
     private String username;
+
+    @Column(name = "email", nullable = false)
+    private String email;
 
     @Column(name = "password")
     @Getter(AccessLevel.NONE)
@@ -58,7 +62,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private SystemRole role;
 
-    // Expose the password hash for authentication only.
     public String getPasswordHash() {
         return password;
     }

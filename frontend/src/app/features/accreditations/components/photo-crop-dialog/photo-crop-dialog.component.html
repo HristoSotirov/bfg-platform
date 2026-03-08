@@ -1,0 +1,80 @@
+<app-dialog
+  [isOpen]="isOpen"
+  title="Изрежи снимката"
+  size="md"
+  [noScroll]="true"
+  (closed)="close()"
+>
+  <div class="photo-crop-dialog">
+    <p class="dialog-instruction">
+      Плъзнете снимката за позициониране. Зум: бутони +/-, колелцето на мишката или pinch с два пръста на touchscreen.
+    </p>
+
+    @if (sourceFile) {
+      <div class="crop-stage">
+        <div
+          class="crop-viewport"
+          appWheelZoom
+          (appWheelZoom)="onWheel($event)"
+          (mousedown)="startPan($event)"
+          (mousemove)="onPanMove($event)"
+          (mouseup)="endPan()"
+          (mouseleave)="endPan()"
+          (touchstart)="startPan($event)"
+          (touchmove)="onPanMove($event)"
+          (touchend)="endPan()"
+        >
+          @if (previewUrl) {
+            <img
+              #cropImage
+              class="crop-image"
+              [src]="previewUrl"
+              alt="Снимка за изрязване"
+              (load)="onImageElementLoaded($event)"
+              (error)="onLoadImageFailed()"
+              [style.transform]="transformStyle"
+            />
+          }
+          <div class="circle-overlay" aria-hidden="true">
+            <span class="circle-ring"></span>
+          </div>
+        </div>
+        <div class="zoom-controls">
+          <button type="button" class="zoom-btn" (click)="zoomOut()" title="Отдалечи" [disabled]="scale <= minScale">
+            <span aria-hidden="true">−</span>
+          </button>
+          <span class="zoom-label">{{ scale * 100 | number:'1.0-0' }}%</span>
+          <button type="button" class="zoom-btn" (click)="zoomIn()" title="Приближи" [disabled]="scale >= maxScale">
+            <span aria-hidden="true">+</span>
+          </button>
+        </div>
+      </div>
+    }
+
+    @if (cropError) {
+      <div class="error-banner" role="alert">
+        <svg class="error-icon" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        {{ cropError }}
+      </div>
+    }
+
+    <footer class="dialog-footer flex justify-center gap-2">
+      <app-button
+        variant="outline"
+        size="md"
+        text="Отказ"
+        [disabled]="confirming"
+        (click)="close()"
+      />
+      <app-button
+        variant="primary"
+        size="md"
+        [text]="confirming ? 'Обработка...' : 'Потвърди'"
+        [disabled]="confirming"
+        (click)="confirm()"
+      />
+    </footer>
+  </div>
+</app-dialog>
