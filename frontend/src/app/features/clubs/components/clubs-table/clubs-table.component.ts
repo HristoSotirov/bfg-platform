@@ -100,9 +100,12 @@ export class ClubsTableComponent implements OnInit {
       case 'clubEmail':
         return club.clubEmail || '@';
       case 'clubAdminName':
-        return club.clubAdminUser 
-          ? `${club.clubAdminUser.firstName || ''} ${club.clubAdminUser.lastName || ''}`.trim() || '-'
+        return club.clubAdminUser
+          ? `${club.clubAdminUser.firstName || ''} ${club.clubAdminUser.lastName || ''}`.trim() ||
+              '-'
           : '-';
+      case 'scopeType':
+        return this.getScopeTypeLabel(club.scopeType);
       case 'isActive':
         return club.isActive ? 'Активен' : 'Неактивен';
       case 'createdAt':
@@ -126,6 +129,16 @@ export class ClubsTableComponent implements OnInit {
 
   getStatusClass(club: ClubDto): string {
     return club.isActive ? 'text-green-600' : 'text-red-600';
+  }
+
+  getScopeTypeLabel(scopeType: string | undefined): string {
+    if (!scopeType) return '-';
+    const labels: Record<string, string> = {
+      INTERNAL: 'Вътрешен',
+      EXTERNAL: 'Външен',
+      NATIONAL: 'Национален',
+    };
+    return labels[scopeType] ?? scopeType;
   }
 
   onScroll(event: Event): void {

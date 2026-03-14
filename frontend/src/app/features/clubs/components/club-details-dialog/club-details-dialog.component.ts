@@ -13,6 +13,8 @@ import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { PhotoCropDialogComponent } from '../../../accreditations/components/photo-crop-dialog/photo-crop-dialog.component';
+import { ClubLogoViewDialogComponent, ClubLogoViewInfo } from '../club-logo-view-dialog/club-logo-view-dialog.component';
 import {
   ClubDto,
   ClubCoachDto,
@@ -36,11 +38,12 @@ import {
   scan,
 } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { SystemRole } from '../../../../core/models/navigation.model';
 
 @Component({
   selector: 'app-club-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, PhotoCropDialogComponent, ClubLogoViewDialogComponent],
   templateUrl: './club-details-dialog.component.html',
   styleUrl: './club-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,9 +54,13 @@ export class ClubDetailsDialogComponent implements OnChanges {
   @Input() canEdit = false;
   @Input() canManageCoaches = false;
   @Input() userClubId: string | null = null;
+  @Input() userRole: SystemRole | null = null;
+  /** Show scope type (APP_ADMIN / FEDERATION_ADMIN only) */
+  @Input() showScopeInDetails = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
+  @Output() logoUploaded = new EventEmitter<ClubDto>();
 
   private destroy$ = new Subject<void>();
 
@@ -91,6 +98,14 @@ export class ClubDetailsDialogComponent implements OnChanges {
   showRemoveCoachConfirm = false;
   coachToRemove: ClubCoachDto | null = null;
 
+  uploadingLogo = false;
+  logoError: string | null = null;
+  showCropDialog = false;
+  pendingLogoFile: File | null = null;
+  showLogoViewDialog = false;
+  private readonly allowedLogoTypes = ['image/jpeg', 'image/png'];
+  private readonly maxLogoSizeBytes = 10 * 1024 * 1024;
+
   constructor(
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
@@ -106,6 +121,40 @@ export class ClubDetailsDialogComponent implements OnChanges {
     if (changes['isOpen'] && !this.isOpen) {
       this.destroy$.next();
     }
+  }
+
+  get canUploadLogo(): boolean {
+    return (
+      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+    );
+  }
+
+  get logoViewInfo(): ClubLogoViewInfo | null {
+    if (!this.club) return null;
+    return {
+      shortName: this.club.shortName || '-',
+      name: this.club.name || '-'
+    };
+  }
+
+  openLogoView(): void {
+    this.showLogoViewDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  closeLogoViewDialog(): void {
+    this.showLogoViewDialog = false;
+    this.cdr.markForCheck();
+  }
+
+  getScopeTypeLabel(scopeType: string | undefined): string {
+    if (!scopeType) return '-';
+    const labels: Record<string, string> = {
+      INTERNAL: 'Вътрешен',
+      EXTERNAL: 'Външен',
+      NATIONAL: 'Национален',
+    };
+    return labels[scopeType] ?? scopeType;
   }
 
   get adminName(): string {
@@ -227,7 +276,8 @@ export class ClubDetailsDialogComponent implements OnChanges {
 
     forkJoin({
       coaches: this.usersService.getAllUsers("role eq 'COACH'", undefined, undefined, 1000, 0),
-      allClubs: this.clubsService.getAllClubs(undefined, undefined, undefined, 1000, 0, undefined)
+      // Only load INTERNAL clubs since coaches can only be assigned to internal clubs
+      allClubs: this.clubsService.getAllClubs("scopeType eq 'INTERNAL'", undefined, undefined, 1000, 0, undefined)
     }).pipe(
       retryWhen((errors) =>
         errors.pipe(
@@ -620,6 +670,109 @@ export class ClubDetailsDialogComponent implements OnChanges {
       });
   }
 
+  onLogoFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input?.files?.[0];
+    if (!file) return;
+
+    if (!this.allowedLogoTypes.includes(file.type)) {
+      this.logoError = 'Разрешени са само JPEG и PNG файлове.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    if (file.size > this.maxLogoSizeBytes) {
+      this.logoError = 'Файлът не трябва да надвишава 10 MB.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    input.value = '';
+    this.pendingLogoFile = file;
+    this.showCropDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  closeCropDialog(): void {
+    this.showCropDialog = false;
+    this.pendingLogoFile = null;
+    this.cdr.markForCheck();
+  }
+
+  onLogoCropped(blob: Blob): void {
+    const type = blob.type && blob.type.startsWith('image/') ? blob.type : 'image/jpeg';
+    const ext = type === 'image/png' ? 'png' : 'jpg';
+    const file = new File([blob], `logo.${ext}`, { type });
+    this.uploadLogo(file);
+    this.closeCropDialog();
+  }
+
+  private uploadLogo(file: File): void {
+    if (!this.club?.uuid) return;
+
+    if (!this.canUploadLogo) {
+      this.logoError =
+        'Качването на лого е позволено само за администратори на федерацията и на приложението.';
+      this.cdr.markForCheck();
+      return;
+    }
+
+    this.logoError = null;
+    this.uploadingLogo = true;
+    this.cdr.markForCheck();
+
+    this.clubsService
+      .patchClubLogoByUuid(this.club.uuid, file)
+      .pipe(
+        retryWhen((errors) =>
+          errors.pipe(
+            scan((retryCount, error: HttpErrorResponse) => {
+              if (
+                error.status === 401 ||
+                error.status === 403 ||
+                error.status === 404
+              ) {
+                throw error;
+              }
+              if (retryCount >= 2) {
+                throw error;
+              }
+              return retryCount + 1;
+            }, 0),
+            delay(1000),
+          ),
+        ),
+        catchError((err: HttpErrorResponse) => {
+          let errorMessage = 'Грешка при качване на логото';
+          if (err.status === 401) {
+            errorMessage = 'Сесията ви е изтекла. Моля, опитайте отново.';
+          } else if (err.status === 403) {
+            errorMessage = 'Нямате права за тази операция.';
+          } else if (err?.error?.message) {
+            errorMessage = err.error.message;
+          }
+          return throwError(() => ({ message: errorMessage }));
+        }),
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: (updatedClub) => {
+          this.uploadingLogo = false;
+          this.logoError = null;
+          if (updatedClub) {
+            this.club = updatedClub;
+            this.logoUploaded.emit(updatedClub);
+          }
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.uploadingLogo = false;
+          this.logoError = err?.message || 'Грешка при качване на логото.';
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
   private resetState(): void {
     this.isEditing = false;
     this.showAddCoachForm = false;
@@ -635,6 +788,11 @@ export class ClubDetailsDialogComponent implements OnChanges {
     this.showRemoveCoachConfirm = false;
     this.coachToRemove = null;
     this.loadingCoachesForAdd = false;
+    this.uploadingLogo = false;
+    this.logoError = null;
+    this.showCropDialog = false;
+    this.pendingLogoFile = null;
+    this.showLogoViewDialog = false;
   }
 
   getCoachDisplayName(coach: UserDto): string {

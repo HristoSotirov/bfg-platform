@@ -10,7 +10,12 @@ import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
-import { ClubsService, ClubCoachesService } from '../../core/services/api';
+import { ScopeVisibilityService } from '../../core/services/scope-visibility.service';
+import {
+  ClubsService,
+  ClubCoachesService,
+  ScopeType,
+} from '../../core/services/api';
 import { ClubDto } from '../../core/services/api';
 import { SystemRole } from '../../core/models/navigation.model';
 import { ClubsTableComponent } from './components/clubs-table/clubs-table.component';
@@ -20,7 +25,10 @@ import { AddClubDialogComponent } from './components/add-club-dialog/add-club-di
 import { ClubMigrationDialogComponent } from './components/club-migration-dialog/club-migration-dialog.component';
 import { ClubSettingsDialogComponent } from './components/club-settings-dialog/club-settings-dialog.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
-import { MobileActionMenuComponent, MobileActionMenuItem } from '../../shared/components/mobile-action-menu/mobile-action-menu.component';
+import {
+  MobileActionMenuComponent,
+  MobileActionMenuItem,
+} from '../../shared/components/mobile-action-menu/mobile-action-menu.component';
 import * as XLSX from 'xlsx';
 
 export interface ClubColumnConfig {
@@ -38,6 +46,7 @@ export interface ClubFilterConfig {
 export interface ClubFilters {
   search: string;
   statuses: string[]; // 'true' for active, 'false' for inactive
+  scopeTypes: string[]; // INTERNAL, EXTERNAL, NATIONAL – only for APP_ADMIN/FED_ADMIN, from cache only
 }
 
 @Component({
@@ -74,6 +83,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
   filters: ClubFilters = {
     search: '',
     statuses: [],
+    scopeTypes: [],
   };
   orderBy: string[] = ['cardPrefix_asc'];
 
@@ -88,12 +98,14 @@ export class ClubsComponent implements OnInit, OnDestroy {
     { id: 'clubEmail', label: 'Имейл', visible: true },
     { id: 'clubAdminName', label: 'Администратор', visible: true },
     { id: 'isActive', label: 'Статус', visible: true },
+    { id: 'scopeType', label: 'Тип', visible: true },
     { id: 'createdAt', label: 'Създаден на', visible: true },
     { id: 'updatedAt', label: 'Променен на', visible: true },
   ];
 
   filterConfigs: ClubFilterConfig[] = [
     { id: 'status', label: 'Статус', visible: true },
+    // Note: 'scopeType' filter is added dynamically based on user permissions
   ];
 
   isDetailsDialogOpen = false;
@@ -134,6 +146,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
+    private scopeVisibility: ScopeVisibilityService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -165,8 +178,43 @@ export class ClubsComponent implements OnInit, OnDestroy {
     );
   }
 
+  get showScopeFeatures(): boolean {
+    return this.scopeVisibility.canViewScopeField();
+  }
+
+  private applyRoleBasedVisibility(): void {
+    if (this.showScopeFeatures) {
+      if (!this.filterConfigs.find((f) => f.id === 'scopeType')) {
+        this.filterConfigs = [
+          ...this.filterConfigs,
+          { id: 'scopeType', label: 'Тип', visible: true },
+        ];
+      }
+      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
+      if (scopeCol) scopeCol.visible = true;
+    } else {
+      this.filterConfigs = this.filterConfigs.filter(
+        (f) => f.id !== 'scopeType',
+      );
+      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
+      if (scopeCol) scopeCol.visible = false;
+      this.filters.scopeTypes = [];
+    }
+  }
+
   canManageCoachesForClub(clubId: string | undefined): boolean {
     if (!clubId) return false;
+    // Only internal scope users can manage coaches
+    if (!this.showScopeFeatures) {
+      return false;
+    }
+
+    // Find the club to check if it's internal
+    const club = this.clubs.find((c) => c.uuid === clubId);
+    if (!club || club.scopeType !== 'INTERNAL') {
+      return false;
+    }
+
     if (this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN') {
       return true;
     }
@@ -179,11 +227,13 @@ export class ClubsComponent implements OnInit, OnDestroy {
   private initializeUserContext(): void {
     const user = this.authService.currentUser;
     if (!user || user.roles.length === 0) {
+      this.applyRoleBasedVisibility();
       this.loadClubs();
       return;
     }
 
     this.userRole = user.roles[0] as SystemRole;
+    this.applyRoleBasedVisibility();
 
     if (this.userRole === 'CLUB_ADMIN') {
       this.clubsService
@@ -232,6 +282,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [];
+    const defaults = this.scopeVisibility.buildDefaultFilter();
 
     if (this.filters.statuses.length > 0 && this.isFilterVisible('status')) {
       if (this.filters.statuses.length === 1) {
@@ -242,6 +293,26 @@ export class ClubsComponent implements OnInit, OnDestroy {
           .join(' or ');
         filterParts.push(`(${statusConditions})`);
       }
+    }
+
+    // Scope filter - use user's selection if visible, otherwise use default
+    if (this.showScopeFeatures) {
+      if (
+        this.filters.scopeTypes?.length > 0 &&
+        this.isFilterVisible('scopeType')
+      ) {
+        if (this.filters.scopeTypes.length === 1) {
+          filterParts.push(`scopeType eq '${this.filters.scopeTypes[0]}'`);
+        } else {
+          const scopeConditions = this.filters.scopeTypes
+            .map((s) => `scopeType eq '${s}'`)
+            .join(' or ');
+          filterParts.push(`(${scopeConditions})`);
+        }
+      }
+    } else if (defaults.scopeType) {
+      // User can't see scope filter - always filter by their scope
+      filterParts.push(`scopeType eq '${defaults.scopeType}'`);
     }
 
     const filterString =
@@ -293,16 +364,19 @@ export class ClubsComponent implements OnInit, OnDestroy {
 
   onFiltersChange(filters: ClubFilters): void {
     this.filters = { ...filters };
+    this.saveFilters();
     this.loadClubs();
   }
 
   onSearchChange(search: string): void {
     this.filters.search = search;
+    this.saveFilters();
     this.loadClubs();
   }
 
   onSortChange(orderBy: string[]): void {
     this.orderBy = orderBy;
+    this.saveFilters();
     this.loadClubs();
   }
 
@@ -359,8 +433,13 @@ export class ClubsComponent implements OnInit, OnDestroy {
       const oldFilter = oldFilterConfigs.find((f) => f.id === newFilter.id);
       if (oldFilter && oldFilter.visible && !newFilter.visible) {
         if (newFilter.id === 'status') this.filters.statuses = [];
-      } else if ((oldFilter && !oldFilter.visible && newFilter.visible) || (!oldFilter && newFilter.visible)) {
+        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
+      } else if (
+        (oldFilter && !oldFilter.visible && newFilter.visible) ||
+        (!oldFilter && newFilter.visible)
+      ) {
         if (newFilter.id === 'status') this.filters.statuses = [];
+        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
       }
     });
 
@@ -373,7 +452,15 @@ export class ClubsComponent implements OnInit, OnDestroy {
 
   private saveSettings(): void {
     localStorage.setItem('clubs_columns', JSON.stringify(this.columns));
-    localStorage.setItem('clubs_filters', JSON.stringify(this.filterConfigs));
+    localStorage.setItem(
+      'clubs_filterConfigs',
+      JSON.stringify(this.filterConfigs),
+    );
+  }
+
+  private saveFilters(): void {
+    localStorage.setItem('clubs_filterValues', JSON.stringify(this.filters));
+    localStorage.setItem('clubs_orderBy', JSON.stringify(this.orderBy));
   }
 
   private loadSettings(): void {
@@ -390,23 +477,101 @@ export class ClubsComponent implements OnInit, OnDestroy {
       }
     }
 
-    const savedFilters = localStorage.getItem('clubs_filters');
-    if (savedFilters) {
+    const savedFilterConfigs = localStorage.getItem('clubs_filterConfigs');
+    if (savedFilterConfigs) {
       try {
-        const parsed = JSON.parse(savedFilters);
+        const parsed = JSON.parse(savedFilterConfigs);
         this.filterConfigs = this.filterConfigs.map((f) => {
           const saved = parsed.find((p: ClubFilterConfig) => p.id === f.id);
           return saved ? { ...f, visible: saved.visible } : f;
         });
       } catch (e) {
-        console.error('Error loading filter settings:', e);
+        console.error('Error loading filter config settings:', e);
+      }
+    }
+
+    // Also check legacy key for backwards compatibility
+    const legacyFilters = localStorage.getItem('clubs_filters');
+    if (legacyFilters && !savedFilterConfigs) {
+      try {
+        const parsed = JSON.parse(legacyFilters);
+        this.filterConfigs = this.filterConfigs.map((f) => {
+          const saved = parsed.find((p: ClubFilterConfig) => p.id === f.id);
+          return saved ? { ...f, visible: saved.visible } : f;
+        });
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    this.loadFilters();
+  }
+
+  private loadFilters(): void {
+    const savedFilters = localStorage.getItem('clubs_filterValues');
+    if (savedFilters) {
+      try {
+        const parsed = JSON.parse(savedFilters);
+        this.filters = {
+          search: parsed.search || '',
+          statuses: parsed.statuses || [],
+          scopeTypes: parsed.scopeTypes || [],
+        };
+      } catch (e) {
+        console.error('Error loading filter values:', e);
+      }
+    }
+
+    // Also check legacy key for backwards compatibility
+    const legacyScopeTypes = localStorage.getItem('clubs_scope_types');
+    if (legacyScopeTypes && !savedFilters) {
+      try {
+        const parsed = JSON.parse(legacyScopeTypes);
+        if (Array.isArray(parsed)) {
+          this.filters.scopeTypes = parsed;
+        }
+      } catch {
+        // ignore
+      }
+    }
+
+    const savedOrderBy = localStorage.getItem('clubs_orderBy');
+    if (savedOrderBy) {
+      try {
+        const parsed = JSON.parse(savedOrderBy);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.orderBy = parsed;
+        }
+      } catch {
+        // ignore
       }
     }
   }
 
+  onLogoUploaded(updatedClub: ClubDto): void {
+    // Only update the selected club data, don't reload the table or close dialog
+    this.selectedClub = updatedClub;
+    this.cdr.markForCheck();
+  }
+
   onClubSaved(): void {
+    // Refresh the selected club to show updated data
+    if (this.selectedClub?.uuid) {
+      this.clubsService
+        .getClubByUuid(this.selectedClub.uuid, ['clubAdminUser'])
+        .pipe(takeUntil(this.destroy$))
+        .subscribe({
+          next: (updatedClub) => {
+            this.selectedClub = updatedClub;
+            this.cdr.markForCheck();
+          },
+          error: () => {
+            // If refresh fails, just reload the list
+          },
+        });
+    }
+    // Refresh the clubs list in the background
     this.loadClubs();
-    this.closeDetailsDialog();
   }
 
   onClubAdded(): void {
@@ -430,18 +595,24 @@ export class ClubsComponent implements OnInit, OnDestroy {
       } else {
         dateOnly = dateStr;
       }
-      
+
       const parts = dateOnly.split('-');
       if (parts.length === 3) {
         const year = parseInt(parts[0], 10);
         const month = parseInt(parts[1], 10);
         const day = parseInt(parts[2], 10);
-        
-        if (year >= 1900 && month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+
+        if (
+          year >= 1900 &&
+          month >= 1 &&
+          month <= 12 &&
+          day >= 1 &&
+          day <= 31
+        ) {
           return `${String(day).padStart(2, '0')}.${String(month).padStart(2, '0')}.${year}`;
         }
       }
-      
+
       const date = new Date(dateOnly + 'T00:00:00Z');
       if (!isNaN(date.getTime())) {
         const day = String(date.getUTCDate()).padStart(2, '0');
@@ -449,7 +620,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
         const year = date.getUTCFullYear();
         return `${day}.${month}.${year}`;
       }
-      
+
       return dateStr;
     } catch {
       return dateStr;
@@ -469,6 +640,19 @@ export class ClubsComponent implements OnInit, OnDestroy {
           .map((s) => `isActive eq ${s}`)
           .join(' or ');
         filterParts.push(`(${statusConditions})`);
+      }
+    }
+    if (
+      this.filters.scopeTypes?.length > 0 &&
+      this.isFilterVisible('scopeType')
+    ) {
+      if (this.filters.scopeTypes.length === 1) {
+        filterParts.push(`scopeType eq '${this.filters.scopeTypes[0]}'`);
+      } else {
+        const scopeConditions = this.filters.scopeTypes
+          .map((s) => `scopeType eq '${s}'`)
+          .join(' or ');
+        filterParts.push(`(${scopeConditions})`);
       }
     }
     const filterString =
@@ -499,6 +683,15 @@ export class ClubsComponent implements OnInit, OnDestroy {
                 case 'name':
                   row[col.label] = c.name || '';
                   break;
+                case 'scopeType':
+                  row[col.label] = c.scopeType
+                    ? ({
+                        INTERNAL: 'Вътрешен',
+                        EXTERNAL: 'Външен',
+                        NATIONAL: 'Национален',
+                      }[c.scopeType] ?? c.scopeType)
+                    : '';
+                  break;
                 case 'cardPrefix':
                   row[col.label] = c.cardPrefix || '';
                   break;
@@ -506,9 +699,10 @@ export class ClubsComponent implements OnInit, OnDestroy {
                   row[col.label] = c.clubEmail || '';
                   break;
                 case 'clubAdminName':
-                  row[col.label] = 
-                    (c.clubAdminUser ? `${c.clubAdminUser.firstName || ''} ${c.clubAdminUser.lastName || ''}`.trim() : '') || 
-                    '';
+                  row[col.label] =
+                    (c.clubAdminUser
+                      ? `${c.clubAdminUser.firstName || ''} ${c.clubAdminUser.lastName || ''}`.trim()
+                      : '') || '';
                   break;
                 case 'isActive':
                   row[col.label] = c.isActive ? 'Активен' : 'Неактивен';
@@ -526,11 +720,11 @@ export class ClubsComponent implements OnInit, OnDestroy {
           });
 
           const ws = XLSX.utils.json_to_sheet(data);
-          
+
           const range = XLSX.utils.decode_range(ws['!ref'] || 'A1');
           const datePattern = /^(\d{2})\.(\d{2})\.(\d{4})$/;
           const dateColumns: Set<number> = new Set();
-          
+
           for (let row = range.s.r + 1; row <= range.e.r; row++) {
             for (let col = range.s.c; col <= range.e.c; col++) {
               const cellAddress = XLSX.utils.encode_cell({ r: row, c: col });
@@ -541,12 +735,24 @@ export class ClubsComponent implements OnInit, OnDestroy {
                   const day = parseInt(match[1], 10);
                   const month = parseInt(match[2], 10);
                   const year = parseInt(match[3], 10);
-                  
-                  if (day >= 1 && day <= 31 && month >= 1 && month <= 12 && year >= 1900) {
-                    const excelDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+
+                  if (
+                    day >= 1 &&
+                    day <= 31 &&
+                    month >= 1 &&
+                    month <= 12 &&
+                    year >= 1900
+                  ) {
+                    const excelDate = new Date(
+                      Date.UTC(year, month - 1, day, 0, 0, 0, 0),
+                    );
                     if (!isNaN(excelDate.getTime())) {
-                      const excelEpoch = new Date(Date.UTC(1899, 11, 30, 0, 0, 0, 0));
-                      const excelSerial = (excelDate.getTime() - excelEpoch.getTime()) / (24 * 60 * 60 * 1000);
+                      const excelEpoch = new Date(
+                        Date.UTC(1899, 11, 30, 0, 0, 0, 0),
+                      );
+                      const excelSerial =
+                        (excelDate.getTime() - excelEpoch.getTime()) /
+                        (24 * 60 * 60 * 1000);
                       cell.v = excelSerial;
                       cell.z = 'dd.mm.yyyy'; // Excel date format (date only, no time)
                       cell.t = 'n'; // Number type
@@ -557,7 +763,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
               }
             }
           }
-          
+
           if (!ws['!cols']) ws['!cols'] = [];
           for (let col = range.s.c; col <= range.e.c; col++) {
             if (dateColumns.has(col)) {
@@ -566,7 +772,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
               ws['!cols'][col] = { wch: 15 }; // Default width for other columns
             }
           }
-          
+
           const wb = XLSX.utils.book_new();
           XLSX.utils.book_append_sheet(wb, ws, 'Клубове');
           const now = new Date();

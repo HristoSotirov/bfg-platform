@@ -27,7 +27,13 @@ import { getRaceGroupOptions } from '../../../../shared/utils/race-group.util';
 @Component({
   selector: 'app-accreditations-filters',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectDropdownComponent, SearchBarComponent, FilterToggleButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MultiSelectDropdownComponent,
+    SearchBarComponent,
+    FilterToggleButtonComponent,
+  ],
   templateUrl: './accreditations-filters.component.html',
   styleUrl: './accreditations-filters.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,6 +45,7 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
     years: [],
     clubs: [],
     raceGroups: [],
+    scopeTypes: [],
   };
   @Input() filterConfigs: FilterConfig[] = [];
   @Input() allClubs: ClubDto[] = [];
@@ -63,6 +70,11 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
   yearOptions: DropdownOption[] = [];
   clubOptions: DropdownOption[] = [];
   readonly raceGroupOptions: DropdownOption[] = getRaceGroupOptions();
+  readonly scopeTypeOptions: DropdownOption[] = [
+    { value: 'INTERNAL', label: 'Вътрешен' },
+    { value: 'EXTERNAL', label: 'Външен' },
+    { value: 'NATIONAL', label: 'Национален' },
+  ];
 
   constructor() {}
 
@@ -80,6 +92,9 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
       }
       if (!this.filters.raceGroups) {
         this.filters.raceGroups = [];
+      }
+      if (!this.filters.scopeTypes) {
+        this.filters.scopeTypes = [];
       }
       this.updateSelectedYearsCache();
       this.updateClubOptions();
@@ -106,13 +121,16 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
       if (this.filters && !this.filters.raceGroups) {
         this.filters.raceGroups = [];
       }
+      if (this.filters && !this.filters.scopeTypes) {
+        this.filters.scopeTypes = [];
+      }
       this.updateSelectedYearsCache();
     }
-    
+
     if (changes['allClubs']) {
       this.updateClubOptions();
     }
-    
+
     if (changes['availableYears']) {
       this.updateYearOptions();
       this.updateSelectedYearsCache();
@@ -121,7 +139,9 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
 
   isFilterVisible(filterId: string): boolean {
     const config = this.filterConfigs.find((f) => f.id === filterId);
-    return config?.visible ?? true;
+    // If config doesn't exist, the filter is not available for this user
+    if (!config) return false;
+    return config.visible;
   }
 
   hasVisibleFilters(): boolean {
@@ -129,7 +149,8 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
       this.isFilterVisible('status') ||
       this.isFilterVisible('year') ||
       this.isFilterVisible('club') ||
-      this.isFilterVisible('raceGroup')
+      this.isFilterVisible('raceGroup') ||
+      this.isFilterVisible('scopeType')
     );
   }
 
@@ -153,6 +174,10 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
 
   onRaceGroupsChange(values: string[]): void {
     this.emitFiltersChange({ raceGroups: values });
+  }
+
+  onScopeTypesChange(values: string[]): void {
+    this.emitFiltersChange({ scopeTypes: values });
   }
 
   private emitFiltersChange(changes: Partial<AccreditationFilters>): void {

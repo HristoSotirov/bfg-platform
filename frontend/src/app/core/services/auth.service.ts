@@ -151,6 +151,10 @@ export class AuthService implements OnDestroy {
     return user?.roles || [];
   }
 
+  getScopeType(): string | undefined {
+    return this.getCurrentUser()?.scopeType;
+  }
+
   isAuthenticated(): boolean {
     return !!this.getAccessToken() && !!this.getCurrentUser();
   }
@@ -297,12 +301,14 @@ export class AuthService implements OnDestroy {
       if (!payload) return;
       
       const role = payload.role || payload.roles?.[0];
+      const scopeType = payload.scopeType;
       const user: User = {
         uuid: payload.sub || '',
         username: payload.username || '',
         firstName: payload.firstName || '',
         lastName: payload.lastName || '',
-        roles: role ? [role as SystemRole] : []
+        roles: role ? [role as SystemRole] : [],
+        scopeType: scopeType ?? undefined
       };
       localStorage.setItem(this.USER_KEY, JSON.stringify(user));
       this.currentUserSubject.next(user);

@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
-import { ClubsService, UsersService, UserDto, ClubCreateRequest, ClubDto } from '../../../../core/services/api';
+import { ClubsService, UsersService, UserDto, ClubCreateRequest, ClubDto, ScopeType } from '../../../../core/services/api';
 import { takeUntil, Subject, forkJoin } from 'rxjs';
 
 @Component({
@@ -27,7 +27,8 @@ export class AddClubDialogComponent implements OnChanges {
     name: '',
     shortName: '',
     clubEmail: '',
-    clubAdminId: ''
+    clubAdminId: '',
+    scopeType: ScopeType.Internal as ScopeType,
   };
 
   availableAdmins: UserDto[] = [];
@@ -35,6 +36,12 @@ export class AddClubDialogComponent implements OnChanges {
   loadingAdmins = false;
   
   assignedAdminIds: Set<string> = new Set();
+  scopeTypeOptions: SearchableSelectOption[] = [
+    { value: ScopeType.Internal, label: 'Вътрешен' },
+    { value: ScopeType.External, label: 'Външен' },
+    { value: ScopeType.National, label: 'Национален' },
+  ];
+  readonly ScopeType = ScopeType;
 
   saving = false;
   error: string | null = null;
@@ -64,7 +71,8 @@ export class AddClubDialogComponent implements OnChanges {
       name: '',
       shortName: '',
       clubEmail: '',
-      clubAdminId: ''
+      clubAdminId: '',
+      scopeType: ScopeType.Internal,
     };
     this.error = null;
     this.saving = false;
@@ -120,7 +128,7 @@ export class AddClubDialogComponent implements OnChanges {
   }
 
   get isFormValid(): boolean {
-    return !!(this.formData.name && this.formData.shortName && this.formData.clubEmail && this.formData.clubAdminId);
+    return !!(this.formData.name && this.formData.shortName && this.formData.clubEmail && this.formData.clubAdminId && this.formData.scopeType);
   }
 
   save(): void {
@@ -134,7 +142,8 @@ export class AddClubDialogComponent implements OnChanges {
       name: this.formData.name,
       shortName: this.formData.shortName,
       clubEmail: this.formData.clubEmail,
-      clubAdminId: this.formData.clubAdminId
+      clubAdminId: this.formData.clubAdminId,
+      scopeType: this.formData.scopeType,
     };
 
     this.clubsService.createClub(request).pipe(

@@ -3,15 +3,21 @@ package com.bfg.platform.athlete.service;
 import com.bfg.platform.athlete.entity.Athlete;
 import com.bfg.platform.athlete.mapper.AthleteMapper;
 import com.bfg.platform.athlete.query.AthleteQueryAdapter;
+import com.bfg.platform.athlete.repository.AccreditationRepository;
 import com.bfg.platform.athlete.repository.AthleteRepository;
-import com.bfg.platform.club.repository.ClubCoachRepository;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
+import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.common.security.AuthorizationService;
+import com.bfg.platform.common.security.ScopeAccessPolicy;
+import com.bfg.platform.common.security.ScopeAccessValidator;
+import com.bfg.platform.common.security.SecurityContextHelper;
 import com.bfg.platform.gen.model.AthleteBatchMedicalUpdateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.gen.model.AthleteUpdateRequest;
+import com.bfg.platform.gen.model.ScopeType;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,7 +37,11 @@ import java.util.UUID;
 public class AthleteServiceImpl implements AthleteService {
 
     private final AthleteRepository athleteRepository;
-    private final ClubCoachRepository clubCoachRepository;
+    private final AccreditationRepository accreditationRepository;
+    private final SecurityContextHelper securityContextHelper;
+    private final AuthorizationService authorizationService;
+    private final ScopeAccessValidator scopeAccessValidator;
+    private final ScopeAccessPolicy scopeAccessPolicy;
 
     @Override
     public Page<AthleteDto> getAllAthletes(
@@ -42,6 +52,13 @@ public class AthleteServiceImpl implements AthleteService {
             Integer skip,
             List<String> expand
     ) {
+        // Validate scope filter - throws 403 if invalid
+        scopeAccessValidator.validateFilterScope(filter);
+        
+        // Athletes don't have direct clubId - they are accessed via accreditations
+        // Club restriction is enforced at the accreditations endpoint
+
+        // No implicit filter override - use only user-provided filter
         Specification<Athlete> filterSpec = AthleteQueryAdapter.parseFilter(filter);
         Specification<Athlete> searchSpec = AthleteQueryAdapter.parseSearch(search);
         Specification<Athlete> spec = Specification.where(filterSpec).and(searchSpec);
@@ -54,7 +71,10 @@ public class AthleteServiceImpl implements AthleteService {
     @Override
     public Optional<AthleteDto> getAthleteDtoByUuid(UUID uuid, List<String> expand) {
         return athleteRepository.findById(uuid)
-                .map(AthleteMapper::toDto);
+                .map(athlete -> {
+                    validateAthleteAccess(athlete);
+                    return AthleteMapper.toDto(athlete);
+                });
     }
 
     @Override
@@ -62,10 +82,45 @@ public class AthleteServiceImpl implements AthleteService {
     public Optional<AthleteDto> updateAthlete(UUID uuid, AthleteUpdateRequest request) {
         return athleteRepository.findById(uuid)
                 .map(a -> {
+                    validateAthleteAccess(a);
                     AthleteMapper.updateAthleteFromRequest(a, request);
                     Athlete saved = athleteRepository.save(a);
                     return AthleteMapper.toDto(saved);
                 });
+    }
+
+    /**
+     * Validates that the current user has access to the athlete.
+     * Athletes are special - they don't have a direct clubId, so we check via accreditations.
+     */
+    private void validateAthleteAccess(Athlete athlete) {
+        ScopeType userScope = securityContextHelper.getScopeType();
+        var userRole = securityContextHelper.getUserRole();
+        
+        // First check scope access
+        if (!scopeAccessPolicy.getAllowedScopes(userRole, userScope).contains(athlete.getScopeType())) {
+            throw new ForbiddenException("You do not have access to this athlete");
+        }
+        
+        // For EXTERNAL/NATIONAL CLUB_ADMIN/COACH, check access via accreditations
+        // (Athletes don't have direct clubId - they are linked via accreditations)
+        if (requiresAthleteClubRestriction(userRole, userScope)) {
+            UUID myClubId = authorizationService.requireCurrentUserClubId();
+            if (accreditationRepository.findFirstByAthleteIdAndClubIdOrderByYearDescCreatedAtDesc(athlete.getId(), myClubId).isEmpty()) {
+                throw new ForbiddenException("You do not have access to this athlete");
+            }
+        }
+    }
+    
+    /**
+     * Determines if the user needs club-based access restriction for individual athlete access.
+     */
+    private boolean requiresAthleteClubRestriction(com.bfg.platform.gen.model.SystemRole role, ScopeType scope) {
+        if (role == com.bfg.platform.gen.model.SystemRole.APP_ADMIN || 
+            role == com.bfg.platform.gen.model.SystemRole.FEDERATION_ADMIN) {
+            return false;
+        }
+        return scope != ScopeType.INTERNAL;
     }
 
     @Override

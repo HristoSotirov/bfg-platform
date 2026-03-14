@@ -12,7 +12,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import {
+  SearchableSelectDropdownComponent,
+  SearchableSelectOption,
+} from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
 import { PhotoCropDialogComponent } from '../photo-crop-dialog/photo-crop-dialog.component';
 import {
@@ -31,6 +34,7 @@ import {
   Gender,
 } from '../../../../core/services/api';
 import { forkJoin, of } from 'rxjs';
+import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 
 const DEFAULT_MEDICAL_DURATION_MONTHS = 12;
 import { calculateRaceGroup } from '../../../../shared/utils/race-group.util';
@@ -70,6 +74,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   @Input() canEdit = false;
   @Input() userRole: SystemRole | null = null;
   @Input() userClub: ClubDto | null = null;
+  @Input() showScopeInDetails = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -132,7 +137,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   ];
 
   get statusSelectOptions(): SearchableSelectOption[] {
-    return this.statusOptions.map(opt => ({
+    return this.statusOptions.map((opt) => ({
       value: opt.value,
       label: opt.label,
     }));
@@ -144,7 +149,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   ];
 
   get genderSelectOptions(): SearchableSelectOption[] {
-    return this.genderOptions.map(opt => ({
+    return this.genderOptions.map((opt) => ({
       value: opt.value,
       label: opt.label,
     }));
@@ -154,6 +159,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     private athletesService: AthletesService,
     private accreditationsService: AccreditationsService,
     private athletePhotosService: AthletePhotosService,
+    private scopeVisibility: ScopeVisibilityService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -189,7 +195,9 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   }
 
   private normalizePhotoUrl(url: string | undefined | null): string | null {
-    return url && (url.startsWith('http://') || url.startsWith('https://')) ? url : null;
+    return url && (url.startsWith('http://') || url.startsWith('https://'))
+      ? url
+      : null;
   }
 
   get canUploadPhoto(): boolean {
@@ -204,7 +212,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
       (acc) =>
         acc.year === this.currentYear &&
         acc.status === 'NEW_PHOTO_REQUIRED' &&
-        acc.clubId === this.userClub?.uuid
+        acc.clubId === this.userClub?.uuid,
     );
   }
 
@@ -285,6 +293,16 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   getGenderLabel(gender: string | undefined): string {
     if (!gender) return '-';
     return gender === 'MALE' ? 'Мъж' : gender === 'FEMALE' ? 'Жена' : gender;
+  }
+
+  getScopeTypeLabel(scopeType: string | undefined): string {
+    if (!scopeType) return '-';
+    const labels: Record<string, string> = {
+      INTERNAL: 'Вътрешен',
+      EXTERNAL: 'Външен',
+      NATIONAL: 'Национален',
+    };
+    return labels[scopeType] ?? scopeType;
   }
 
   getRaceGroup(): string {
@@ -418,9 +436,23 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     this.loadingHistory = true;
     this.cdr.markForCheck();
 
+    // Build filter with required scope and club restrictions
+    const filterParts: string[] = [`athleteId eq '${athleteId}'`];
+    const defaults = this.scopeVisibility.buildDefaultFilter();
+
+    if (defaults.scopeType) {
+      filterParts.push(`scopeType eq '${defaults.scopeType}'`);
+    }
+    // For EXTERNAL/NATIONAL users, add club filter from userClub input
+    if (!this.scopeVisibility.canViewClubFilter() && this.userClub?.uuid) {
+      filterParts.push(`clubId eq '${this.userClub.uuid}'`);
+    }
+
+    const filter = filterParts.join(' and ');
+
     this.accreditationsService
       .getAllAccreditations(
-        `athleteId eq '${athleteId}'`,
+        filter,
         undefined,
         ['year_desc', 'modifiedAt_desc'], // Backend sorting (entity field is modifiedAt)
         this.historyPageSize,
@@ -486,7 +518,9 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     if (!this.canEdit || !this.athlete) return;
 
     const { startDate: medicalStart, durationMonths: medicalDuration } =
-      this.medicalDueToStartAndDuration(this.formatDateForInput(this.athlete.medicalExaminationDue));
+      this.medicalDueToStartAndDuration(
+        this.formatDateForInput(this.athlete.medicalExaminationDue),
+      );
     this.editData = {
       firstName: this.athlete.firstName || '',
       middleName: this.athlete.middleName || '',
@@ -494,7 +528,8 @@ export class AthleteDetailsDialogComponent implements OnChanges {
       gender: this.athlete.gender || '',
       dateOfBirth: this.formatDateForInput(this.athlete.dateOfBirth),
       medicalExaminationStartDate: medicalStart || '',
-      medicalExaminationDurationMonths: medicalDuration ?? DEFAULT_MEDICAL_DURATION_MONTHS,
+      medicalExaminationDurationMonths:
+        medicalDuration ?? DEFAULT_MEDICAL_DURATION_MONTHS,
       insuranceFrom: this.formatDateForInput(this.athlete.insuranceFrom),
       insuranceTo: this.formatDateForInput(this.athlete.insuranceTo),
     };
@@ -520,7 +555,11 @@ export class AthleteDetailsDialogComponent implements OnChanges {
       firstName: this.editData.firstName || undefined,
       middleName: this.editData.middleName || undefined,
       lastName: this.editData.lastName || undefined,
-      gender: (this.editData.gender && Object.values(Gender).includes(this.editData.gender as Gender)) ? (this.editData.gender as Gender) : undefined,
+      gender:
+        this.editData.gender &&
+        Object.values(Gender).includes(this.editData.gender as Gender)
+          ? (this.editData.gender as Gender)
+          : undefined,
       dateOfBirth: this.editData.dateOfBirth || undefined,
     };
     const profileRequest$ = this.athletesService.patchAthleteByUuid(
@@ -529,45 +568,69 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     );
 
     const { startDate: origMedicalStart, durationMonths: origMedicalDuration } =
-      this.medicalDueToStartAndDuration(this.formatDateForInput(this.athlete.medicalExaminationDue));
+      this.medicalDueToStartAndDuration(
+        this.formatDateForInput(this.athlete.medicalExaminationDue),
+      );
     const medicalChanged =
       this.editData.medicalExaminationStartDate !== (origMedicalStart || '') ||
-      this.editData.medicalExaminationDurationMonths !== (origMedicalDuration ?? DEFAULT_MEDICAL_DURATION_MONTHS) ||
-      this.editData.insuranceFrom !== this.formatDateForInput(this.athlete.insuranceFrom) ||
-      this.editData.insuranceTo !== this.formatDateForInput(this.athlete.insuranceTo);
+      this.editData.medicalExaminationDurationMonths !==
+        (origMedicalDuration ?? DEFAULT_MEDICAL_DURATION_MONTHS) ||
+      this.editData.insuranceFrom !==
+        this.formatDateForInput(this.athlete.insuranceFrom) ||
+      this.editData.insuranceTo !==
+        this.formatDateForInput(this.athlete.insuranceTo);
     const insuranceFrom = this.editData.insuranceFrom?.trim();
     const insuranceTo = this.editData.insuranceTo?.trim();
     const medicalStart = this.editData.medicalExaminationStartDate?.trim();
     const medicalDuration = this.editData.medicalExaminationDurationMonths;
     const hasInsurance = !!(insuranceFrom && insuranceTo);
-    const hasMedical = !!(medicalStart && medicalDuration != null && medicalDuration >= 1);
+    const hasMedical = !!(
+      medicalStart &&
+      medicalDuration != null &&
+      medicalDuration >= 1
+    );
     const hasMedicalFields = hasInsurance || hasMedical;
     let batchMedicalRequest$ = of(null as unknown as Array<unknown>);
     if (medicalChanged && hasMedicalFields) {
       const { startDate: existingStart, durationMonths: existingDuration } =
-        this.medicalDueToStartAndDuration(this.formatDateForInput(this.athlete.medicalExaminationDue));
+        this.medicalDueToStartAndDuration(
+          this.formatDateForInput(this.athlete.medicalExaminationDue),
+        );
       batchMedicalRequest$ = this.athletesService.batchUpdateMedicalInfo({
         athleteIds: [this.athlete.uuid],
-        insuranceFrom: hasInsurance ? insuranceFrom! : (this.formatDateForInput(this.athlete.insuranceFrom) || ''),
-        insuranceTo: hasInsurance ? insuranceTo! : (this.formatDateForInput(this.athlete.insuranceTo) || ''),
-        medicalExaminationStartDate: hasMedical ? medicalStart! : (existingStart || ''),
-        medicalExaminationDurationMonths: hasMedical ? medicalDuration! : (existingDuration ?? DEFAULT_MEDICAL_DURATION_MONTHS),
-      }); 
+        insuranceFrom: hasInsurance
+          ? insuranceFrom!
+          : this.formatDateForInput(this.athlete.insuranceFrom) || '',
+        insuranceTo: hasInsurance
+          ? insuranceTo!
+          : this.formatDateForInput(this.athlete.insuranceTo) || '',
+        medicalExaminationStartDate: hasMedical
+          ? medicalStart!
+          : existingStart || '',
+        medicalExaminationDurationMonths: hasMedical
+          ? medicalDuration!
+          : (existingDuration ?? DEFAULT_MEDICAL_DURATION_MONTHS),
+      });
     }
 
     const statusUpdateRequests = Array.from(this.statusChanges.entries())
       .filter(([accreditationUuid, newStatus]) => {
-        const originalAcc = this.fullHistory.find(acc => acc.uuid === accreditationUuid);
+        const originalAcc = this.fullHistory.find(
+          (acc) => acc.uuid === accreditationUuid,
+        );
         return originalAcc && originalAcc.status !== newStatus;
       })
       .map(([accreditationUuid, newStatus]) =>
-        this.accreditationsService.patchAccreditationStatus(
-          accreditationUuid,
-          { status: newStatus },
-        ),
+        this.accreditationsService.patchAccreditationStatus(accreditationUuid, {
+          status: newStatus,
+        }),
       );
 
-    const requests = [profileRequest$, batchMedicalRequest$, ...statusUpdateRequests];
+    const requests = [
+      profileRequest$,
+      batchMedicalRequest$,
+      ...statusUpdateRequests,
+    ];
     forkJoin(requests).subscribe({
       next: (results) => {
         const updatedAthlete = results[0] as any;
@@ -589,7 +652,10 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     });
   }
 
-  private medicalDueToStartAndDuration(dueYyyyMmDd: string | null): { startDate: string | null; durationMonths: number | null } {
+  private medicalDueToStartAndDuration(dueYyyyMmDd: string | null): {
+    startDate: string | null;
+    durationMonths: number | null;
+  } {
     if (!dueYyyyMmDd?.trim()) return { startDate: null, durationMonths: null };
     const d = dueYyyyMmDd.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
     if (!d) return { startDate: null, durationMonths: null };
@@ -604,7 +670,10 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     }
     const ms = String(startMonth).padStart(2, '0');
     const ds = String(Math.min(day, 28)).padStart(2, '0');
-    return { startDate: `${startYear}-${ms}-${ds}`, durationMonths: DEFAULT_MEDICAL_DURATION_MONTHS };
+    return {
+      startDate: `${startYear}-${ms}-${ds}`,
+      durationMonths: DEFAULT_MEDICAL_DURATION_MONTHS,
+    };
   }
 
   onStatusChange(accreditationUuid: string, value: string | null): void {
@@ -649,13 +718,16 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     const top = 1;
     const skip = 0;
     this.athletePhotosService
-      .getAthletePhotos(athleteId, undefined, ['uploadedAt_desc'], top, skip, ['uploadedByClub'])
+      .getAthletePhotos(athleteId, undefined, ['uploadedAt_desc'], top, skip, [
+        'uploadedByClub',
+      ])
       .subscribe({
         next: (res) => {
           const items = res.content ?? [];
           const first = items[0];
           this.latestPhoto = first ?? null;
-          this.photoTotalCount = res.totalElements ?? (items.length > 0 ? 1 : 0);
+          this.photoTotalCount =
+            res.totalElements ?? (items.length > 0 ? 1 : 0);
           this.cdr.markForCheck();
         },
         error: () => {
@@ -689,13 +761,16 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     const top = Math.min(this.photoHistoryPageSize, remaining);
 
     this.athletePhotosService
-      .getAthletePhotos(athleteId, undefined, ['uploadedAt_desc'], top, skip, ['uploadedByClub'])
+      .getAthletePhotos(athleteId, undefined, ['uploadedAt_desc'], top, skip, [
+        'uploadedByClub',
+      ])
       .subscribe({
         next: (res) => {
           const newItems = res.content ?? [];
           if (newItems.length > 0) {
             this.photoHistory = [...this.photoHistory, ...newItems];
-            const newLoadedCount = (this.latestPhoto ? 1 : 0) + this.photoHistory.length;
+            const newLoadedCount =
+              (this.latestPhoto ? 1 : 0) + this.photoHistory.length;
             if (this.photoHistoryIndex < newLoadedCount - 1) {
               this.photoHistoryIndex++;
             }
@@ -742,7 +817,8 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   }
 
   onPhotoCropped(blob: Blob): void {
-    const type = blob.type && blob.type.startsWith('image/') ? blob.type : 'image/jpeg';
+    const type =
+      blob.type && blob.type.startsWith('image/') ? blob.type : 'image/jpeg';
     const ext = type === 'image/png' ? 'png' : 'jpg';
     const file = new File([blob], `photo.${ext}`, { type });
     this.uploadPhoto(file);
@@ -750,10 +826,8 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   }
 
   openPhotoView(): void {
-    if (this.displayPhotoUrl) {
-      this.showPhotoViewDialog = true;
-      this.cdr.markForCheck();
-    }
+    this.showPhotoViewDialog = true;
+    this.cdr.markForCheck();
   }
 
   closePhotoViewDialog(): void {
@@ -787,11 +861,11 @@ export class AthleteDetailsDialogComponent implements OnChanges {
       error: (err) => {
         this.uploadingPhoto = false;
         this.photoError =
-          err?.error?.message || err?.message || 'Грешка при качване на снимката.';
+          err?.error?.message ||
+          err?.message ||
+          'Грешка при качване на снимката.';
         this.cdr.markForCheck();
       },
     });
   }
-
-
 }

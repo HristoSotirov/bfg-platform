@@ -1,10 +1,20 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import {
+  SearchableSelectDropdownComponent,
+  SearchableSelectOption,
+} from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
 import { AccreditationsService, ClubDto } from '../../../../core/services/api';
 import { Gender } from '../../../../core/services/api/model/gender';
@@ -13,10 +23,17 @@ import { catchError } from 'rxjs';
 @Component({
   selector: 'app-add-athlete-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DatePickerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DialogComponent,
+    ButtonComponent,
+    SearchableSelectDropdownComponent,
+    DatePickerComponent,
+  ],
   templateUrl: './add-athlete-dialog.component.html',
   styleUrl: './add-athlete-dialog.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddAthleteDialogComponent {
   @Input() isOpen = false;
@@ -30,22 +47,22 @@ export class AddAthleteDialogComponent {
     middleName: '',
     lastName: '',
     dateOfBirth: '',
-    gender: '' as Gender | ''
+    gender: '' as Gender | '',
   };
 
   loading = false;
   error: string | null = null;
   isConfirmDialogOpen = false;
-  
+
   genderOptions: SearchableSelectOption[] = [
     { value: Gender.MALE, label: 'Мъж' },
-    { value: Gender.FEMALE, label: 'Жена' }
+    { value: Gender.FEMALE, label: 'Жена' },
   ];
 
   constructor(
     private accreditationsService: AccreditationsService,
     private httpClient: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
   ) {}
 
   close(): void {
@@ -54,7 +71,7 @@ export class AddAthleteDialogComponent {
       middleName: '',
       lastName: '',
       dateOfBirth: '',
-      gender: '' as Gender | ''
+      gender: '' as Gender | '',
     };
     this.error = null;
     this.loading = false;
@@ -109,42 +126,53 @@ export class AddAthleteDialogComponent {
       middleName: this.formData.middleName.trim(),
       lastName: this.formData.lastName.trim(),
       dateOfBirth: this.formData.dateOfBirth,
-      gender: this.formData.gender as Gender
+      gender: this.formData.gender as Gender,
     };
 
-    const createMethod = (this.accreditationsService as any).createAthleteWithAccreditation;
-    const apiCall = createMethod && typeof createMethod === 'function'
-      ? createMethod.call(this.accreditationsService, request)
-      : this.makeDirectHttpCall(request);
+    const createMethod = (this.accreditationsService as any)
+      .createAthleteWithAccreditation;
+    const apiCall =
+      createMethod && typeof createMethod === 'function'
+        ? createMethod.call(this.accreditationsService, request)
+        : this.makeDirectHttpCall(request);
 
-    apiCall.pipe(
-      catchError(err => {
-        console.error('[AddAthleteDialog] Error creating athlete:', err);
-        this.loading = false;
-        this.error = err?.error?.message || err?.message || 'Грешка при създаване на състезател';
-        this.cdr.markForCheck();
-        return [];
-      })
-    ).subscribe({
-      next: () => {
-        this.loading = false;
-        this.created.emit();
-        this.close();
-      },
-      error: (err: any) => {
-        console.error('[AddAthleteDialog] Subscribe error:', err);
-        this.loading = false;
-        this.error = err?.error?.message || err?.message || 'Грешка при създаване на състезател';
-        this.cdr.markForCheck();
-      }
-    });
+    apiCall
+      .pipe(
+        catchError((err) => {
+          console.error('[AddAthleteDialog] Error creating athlete:', err);
+          this.loading = false;
+          this.error =
+            err?.error?.message ||
+            err?.message ||
+            'Грешка при създаване на състезател';
+          this.cdr.markForCheck();
+          return [];
+        }),
+      )
+      .subscribe({
+        next: () => {
+          this.loading = false;
+          this.created.emit();
+          this.close();
+        },
+        error: (err: any) => {
+          console.error('[AddAthleteDialog] Subscribe error:', err);
+          this.loading = false;
+          this.error =
+            err?.error?.message ||
+            err?.message ||
+            'Грешка при създаване на състезател';
+          this.cdr.markForCheck();
+        },
+      });
   }
 
-
   private makeDirectHttpCall(request: any): any {
-    const basePath = (this.accreditationsService as any).configuration?.basePath || 'http://localhost:8080';
+    const basePath =
+      (this.accreditationsService as any).configuration?.basePath ||
+      'http://localhost:8080';
     const url = `${basePath}/accreditations`;
-    
+
     const serviceHeaders = (this.accreditationsService as any).defaultHeaders;
     let headers = new HttpHeaders();
     if (serviceHeaders) {
@@ -157,18 +185,19 @@ export class AddAthleteDialogComponent {
         }
       });
     }
-    
+
     const token = localStorage.getItem('access_token');
     if (token) {
       headers = headers.set('Authorization', `Bearer ${token}`);
     }
-    
+
     headers = headers.set('Content-Type', 'application/json');
-    
+
     return this.httpClient.post(url, request, {
       headers: headers,
-      withCredentials: (this.accreditationsService as any).configuration?.withCredentials || false
+      withCredentials:
+        (this.accreditationsService as any).configuration?.withCredentials ||
+        false,
     });
   }
 }
-

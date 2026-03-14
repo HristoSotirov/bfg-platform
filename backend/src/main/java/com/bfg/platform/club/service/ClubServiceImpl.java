@@ -9,6 +9,8 @@ import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.PhotoUploadException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
+import com.bfg.platform.common.security.ResourceType;
+import com.bfg.platform.common.security.ScopeAccessValidator;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.ExpandQueryParser;
@@ -63,10 +65,14 @@ public class ClubServiceImpl implements ClubService {
     private final S3Service s3Service;
     private final EntityManager entityManager;
     private final PlatformTransactionManager transactionManager;
+    private final ScopeAccessValidator scopeAccessValidator;
 
     @Override
     @Transactional(readOnly = true)
     public Page<ClubDto> getAllClubs(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
+        // Validate scope filter - throws 403 if invalid
+        scopeAccessValidator.validateFilterScope(filter);
+
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
         
         EnhancedFilterExpressionParser.ParseResult<Club> filterResult = 
@@ -91,15 +97,37 @@ public class ClubServiceImpl implements ClubService {
             page = clubRepository.findAll(spec, pageable);
         }
         
-        return page.map(club -> ClubMapper.toDto(club, requestedExpand));
+        final int presignedExpirySeconds = 3600;
+        return page.map(club -> {
+            ClubDto dto = ClubMapper.toDto(club, requestedExpand);
+            String logoPath = club.getLogoUrl();
+            if (logoPath != null && !logoPath.isBlank()) {
+                parseBucketAndObject(logoPath)
+                    .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                    .filter(url -> url != null && !url.isBlank())
+                    .ifPresent(dto::setLogoUrl);
+            }
+            return dto;
+        });
     }
 
     @Override
     public Optional<ClubDto> getClubByAdminId(UUID adminId, List<String> expand) {
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
         
+        final int presignedExpirySeconds = 3600;
         return clubRepository.findByClubAdmin(adminId)
-                .map(club -> ClubMapper.toDto(club, requestedExpand));
+                .map(club -> {
+                    ClubDto dto = ClubMapper.toDto(club, requestedExpand);
+                    String logoPath = club.getLogoUrl();
+                    if (logoPath != null && !logoPath.isBlank()) {
+                        parseBucketAndObject(logoPath)
+                            .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                            .filter(url -> url != null && !url.isBlank())
+                            .ifPresent(dto::setLogoUrl);
+                    }
+                    return dto;
+                });
     }
 
     @Override
@@ -116,8 +144,24 @@ public class ClubServiceImpl implements ClubService {
             club = clubRepository.findById(uuid).orElse(null);
         }
         
+        if (club != null) {
+            // Validate access - clubs don't have a clubId since they ARE the club
+            scopeAccessValidator.validateResourceAccess(club.getScopeType(), null, ResourceType.CLUB);
+        }
+        
+        final int presignedExpirySeconds = 3600;
         return Optional.ofNullable(club)
-                .map(c -> ClubMapper.toDto(c, requestedExpand));
+                .map(c -> {
+                    ClubDto dto = ClubMapper.toDto(c, requestedExpand);
+                    String logoPath = c.getLogoUrl();
+                    if (logoPath != null && !logoPath.isBlank()) {
+                        parseBucketAndObject(logoPath)
+                            .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                            .filter(url -> url != null && !url.isBlank())
+                            .ifPresent(dto::setLogoUrl);
+                    }
+                    return dto;
+                });
     }
 
     @Override
@@ -131,7 +175,17 @@ public class ClubServiceImpl implements ClubService {
 
         Club savedClub = clubRepository.save(club);
         entityManager.flush();
-        return Optional.of(ClubMapper.toDto(savedClub));
+        
+        final int presignedExpirySeconds = 3600;
+        ClubDto dto = ClubMapper.toDto(savedClub);
+        String logoPath = savedClub.getLogoUrl();
+        if (logoPath != null && !logoPath.isBlank()) {
+            parseBucketAndObject(logoPath)
+                .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                .filter(url -> url != null && !url.isBlank())
+                .ifPresent(dto::setLogoUrl);
+        }
+        return Optional.of(dto);
     }
 
     @Override
@@ -161,20 +215,32 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public Optional<ClubDto> updateClub(UUID uuid, ClubUpdateRequest request) {
+        final int presignedExpirySeconds = 3600;
         return clubRepository.findById(uuid)
                 .map(club -> {
                     ClubMapper.updateClubFromRequest(club, request);
                     Club savedClub = clubRepository.save(club);
-                    return ClubMapper.toDto(savedClub);
+                    ClubDto dto = ClubMapper.toDto(savedClub);
+                    String logoPath = savedClub.getLogoUrl();
+                    if (logoPath != null && !logoPath.isBlank()) {
+                        parseBucketAndObject(logoPath)
+                            .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                            .filter(url -> url != null && !url.isBlank())
+                            .ifPresent(dto::setLogoUrl);
+                    }
+                    return dto;
                 });
     }
 
     @Override
     @Transactional
     public Optional<ClubDto> updateClubLogo(UUID uuid, MultipartFile file) {
+        final int presignedExpirySeconds = 3600;
         return clubRepository.findById(uuid)
                 .map(club -> {
                     try {
+                        String oldLogoUrl = club.getLogoUrl();
+                        
                         String logoUrl = s3Service.uploadImageFile(
                                 FileType.CLUB_LOGO,
                                 uuid,
@@ -182,7 +248,20 @@ public class ClubServiceImpl implements ClubService {
                         );
                         club.setLogoUrl(logoUrl);
                         Club savedClub = clubRepository.save(club);
-                        return ClubMapper.toDto(savedClub);
+                        
+                        if (oldLogoUrl != null && !oldLogoUrl.isBlank()) {
+                            deleteOldLogoFile(oldLogoUrl);
+                        }
+                        
+                        ClubDto dto = ClubMapper.toDto(savedClub);
+                        String logoPath = savedClub.getLogoUrl();
+                        if (logoPath != null && !logoPath.isBlank()) {
+                            parseBucketAndObject(logoPath)
+                                .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                                .filter(url -> url != null && !url.isBlank())
+                                .ifPresent(dto::setLogoUrl);
+                        }
+                        return dto;
                     } catch (PhotoUploadException e) {
                         throw e;
                     } catch (IOException e) {
@@ -191,6 +270,27 @@ public class ClubServiceImpl implements ClubService {
                         throw new PhotoUploadException("Failed to upload club logo: " + e.getMessage());
                     }
                 });
+    }
+    
+    private Optional<BucketObject> parseBucketAndObject(String path) {
+        String cleanPath = path.startsWith("/") ? path.substring(1) : path;
+        String[] parts = cleanPath.split("/", 2);
+        if (parts.length != 2 || parts[0].isBlank() || parts[1].isBlank()) return Optional.empty();
+        return Optional.of(new BucketObject(parts[0], parts[1]));
+    }
+    
+    private record BucketObject(String bucket, String objectName) {}
+    
+    private void deleteOldLogoFile(String logoUrl) {
+        try {
+            String path = logoUrl.startsWith("/") ? logoUrl.substring(1) : logoUrl;
+            String[] parts = path.split("/", 2);
+            if (parts.length == 2 && !parts[0].isBlank() && !parts[1].isBlank()) {
+                s3Service.deleteFile(parts[0], parts[1]);
+            }
+        } catch (Exception e) {
+            // Log but don't fail the operation if old file deletion fails
+        }
     }
 
     @Override
@@ -244,7 +344,17 @@ public class ClubServiceImpl implements ClubService {
             Club saved = clubRepository.save(club);
             entityManager.flush();
             transactionManager.commit(status);
-            return ClubMapper.toDto(saved);
+            
+            final int presignedExpirySeconds = 3600;
+            ClubDto dto = ClubMapper.toDto(saved);
+            String logoPath = saved.getLogoUrl();
+            if (logoPath != null && !logoPath.isBlank()) {
+                parseBucketAndObject(logoPath)
+                    .map(pair -> s3Service.getPresignedUrl(pair.bucket(), pair.objectName(), presignedExpirySeconds))
+                    .filter(url -> url != null && !url.isBlank())
+                    .ifPresent(dto::setLogoUrl);
+            }
+            return dto;
         } catch (Exception e) {
             transactionManager.rollback(status);
             throw e;

@@ -36,6 +36,7 @@ export * from './loginRequest';
 export * from './page';
 export * from './pageSort';
 export * from './refreshRequest';
+export * from './scopeType';
 export * from './systemRole';
 export * from './tokenResponse';
 export * from './userCreateRequest';

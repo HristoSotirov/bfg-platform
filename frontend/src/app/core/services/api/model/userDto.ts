@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ScopeType } from './scopeType';
 import { SystemRole } from './systemRole';
 
 
@@ -43,6 +44,7 @@ export interface UserDto {
      */
     isActive?: boolean;
     role?: SystemRole;
+    scopeType?: ScopeType;
     /**
      * Account creation timestamp
      */

@@ -46,6 +46,9 @@ UserDto:
       $ref: "#/SystemRole"
       description: System role of the user
       example: "CLUB_ADMIN"
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type (only relevant for CLUB_ADMIN; null for other roles)
     createdAt:
       type: string
       format: date-time
@@ -108,6 +111,9 @@ UserCreateRequest:
       $ref: "#/SystemRole"
       x-field-extra-annotation: '@NotNull(message = "{user.role.required}")'
       example: "CLUB_ADMIN"
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type (optional; only used when role is CLUB_ADMIN, default INTERNAL)
 
 UserUpdateRequest:
   type: object

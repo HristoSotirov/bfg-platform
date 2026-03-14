@@ -25,5 +25,7 @@ public interface ClubCoachRepository extends JpaRepository<ClubCoach, UUID>, Jpa
     Optional<ClubCoach> findByCoachId(@NonNull UUID coachId);
 
     boolean existsByClubIdAndCoachId(@NonNull UUID clubId, @NonNull UUID coachId);
+
+    Optional<ClubCoach> findByClubIdAndCoachId(@NonNull UUID clubId, @NonNull UUID coachId);
 }
 

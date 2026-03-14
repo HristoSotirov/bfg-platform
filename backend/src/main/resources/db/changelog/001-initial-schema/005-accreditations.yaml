@@ -34,6 +34,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: scope_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
                   name: status
                   type: VARCHAR(50)
                   constraints:

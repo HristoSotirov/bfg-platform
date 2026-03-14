@@ -31,6 +31,9 @@ AccreditationDto:
       type: integer
       description: Year of the accreditation
       example: 2025
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type of the accreditation
     status:
       $ref: "#/AccreditationStatus"
       description: Status of the accreditation
@@ -105,6 +108,9 @@ AccreditationCreateRequest:
       description: Year of the accreditation
       x-field-extra-annotation: '@NotNull(message = "{accreditation.year.required}")'
       example: 2025
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type of the accreditation (must match athlete and club)
     status:
       $ref: "#/AccreditationStatus"
       description: Status of the accreditation

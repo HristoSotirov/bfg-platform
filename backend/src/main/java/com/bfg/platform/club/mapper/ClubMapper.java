@@ -5,6 +5,7 @@ import com.bfg.platform.gen.model.ClubBatchCreateRequestItem;
 import com.bfg.platform.gen.model.ClubDto;
 import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
+import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.user.service.UserMapper;
 
 import java.time.OffsetDateTime;
@@ -34,6 +35,7 @@ public class ClubMapper {
         dto.setCardPrefix(club.getCardPrefix());
         dto.setClubEmail(club.getClubEmail());
         dto.setIsActive(club.isActive());
+        dto.setScopeType(club.getScopeType());
         dto.clubAdminId(club.getClubAdmin());
         dto.setCreatedAt(club.getCreatedAt() != null 
             ? OffsetDateTime.ofInstant(club.getCreatedAt(), ZoneOffset.UTC) 
@@ -62,6 +64,7 @@ public class ClubMapper {
         club.setCardPrefix(cardPrefix);
         club.setClubEmail(request.getClubEmail());
         club.setClubAdmin(request.getClubAdminId());
+        club.setScopeType(request.getScopeType());
         return club;
     }
 
@@ -70,6 +73,7 @@ public class ClubMapper {
         if (request.getShortName() != null) club.setShortName(request.getShortName());
         if (request.getIsActive() != null) club.setActive(request.getIsActive());
         if (request.getClubAdminId() != null) club.setClubAdmin(request.getClubAdminId());
+        if (request.getScopeType() != null) club.setScopeType(request.getScopeType());
     }
 
     public static Club fromBatchCreateRequestItem(ClubBatchCreateRequestItem item, UUID adminUserId) {
@@ -80,6 +84,7 @@ public class ClubMapper {
         club.setClubEmail(item.getClubEmail());
         club.setClubAdmin(adminUserId);
         club.setActive(true);
+        club.setScopeType(ScopeType.INTERNAL); // migrations are internal only
         return club;
     }
 

@@ -112,6 +112,8 @@ export class UsersTableComponent implements OnInit {
         return user.isActive ? 'Активен' : 'Неактивен';
       case 'role':
         return this.getRoleLabel(user.role);
+      case 'scopeType':
+        return this.getScopeTypeLabel(user.scopeType);
       case 'createdAt':
         return this.formatDateTime(user.createdAt);
       case 'updatedAt':
@@ -150,6 +152,16 @@ export class UsersTableComponent implements OnInit {
     return this.roleLabels[role] || role;
   }
 
+  getScopeTypeLabel(scopeType: string | undefined): string {
+    if (!scopeType) return '-';
+    const labels: Record<string, string> = {
+      INTERNAL: 'Вътрешен',
+      EXTERNAL: 'Външен',
+      NATIONAL: 'Национален',
+    };
+    return labels[scopeType] ?? scopeType;
+  }
+
   onScroll(event: Event): void {
     const element = event.target as HTMLElement;
     const threshold = 100;
@@ -163,4 +175,3 @@ export class UsersTableComponent implements OnInit {
     }
   }
 }
-

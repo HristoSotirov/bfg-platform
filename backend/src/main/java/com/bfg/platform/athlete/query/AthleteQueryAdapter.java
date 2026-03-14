@@ -26,6 +26,8 @@ public final class AthleteQueryAdapter {
             Map.entry("firstName_desc", new Sort.Order(Sort.Direction.DESC, "firstName")),
             Map.entry("dateOfBirth_asc", new Sort.Order(Sort.Direction.ASC, "dateOfBirth")),
             Map.entry("dateOfBirth_desc", new Sort.Order(Sort.Direction.DESC, "dateOfBirth")),
+            Map.entry("scopeType_asc", new Sort.Order(Sort.Direction.ASC, "scopeType")),
+            Map.entry("scopeType_desc", new Sort.Order(Sort.Direction.DESC, "scopeType")),
             Map.entry("registeredOn_asc", new Sort.Order(Sort.Direction.ASC, "registeredOn")),
             Map.entry("registeredOn_desc", new Sort.Order(Sort.Direction.DESC, "registeredOn"))
     );
@@ -73,6 +75,7 @@ public final class AthleteQueryAdapter {
         return switch (field) {
             case "firstName", "middleName", "lastName" -> QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
             case "gender" -> genderPredicate(root, cb, op, valueRaw);
+            case "scopeType" -> QueryAdapterHelpers.stringPredicate(root, cb, "scopeType", op, valueRaw);
             case "dateOfBirth", "medicalExaminationDue", "insuranceFrom", "insuranceTo" -> QueryAdapterHelpers.datePredicate(root, cb, field, op, valueRaw);
             case "registeredOn" -> QueryAdapterHelpers.instantPredicate(root, cb, "registeredOn", op, valueRaw);
             default -> throw new IllegalArgumentException("Unsupported filter field: " + field);

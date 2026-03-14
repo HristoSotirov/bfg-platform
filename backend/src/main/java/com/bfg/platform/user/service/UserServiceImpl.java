@@ -1,12 +1,15 @@
 package com.bfg.platform.user.service;
 
-import org.springframework.data.domain.Page;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.common.security.ResourceType;
+import com.bfg.platform.common.security.ScopeAccessPolicy;
+import com.bfg.platform.common.security.ScopeAccessValidator;
 import com.bfg.platform.common.security.SecurityContextHelper;
+import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserDto;
@@ -16,6 +19,7 @@ import com.bfg.platform.user.query.UserQueryAdapter;
 import com.bfg.platform.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -32,11 +36,19 @@ import java.util.UUID;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
+    private final com.bfg.platform.club.repository.ClubRepository clubRepository;
+    private final com.bfg.platform.club.repository.ClubCoachRepository clubCoachRepository;
     private final PasswordEncoder passwordEncoder;
     private final SecurityContextHelper securityContextHelper;
+    private final ScopeAccessValidator scopeAccessValidator;
+    private final ScopeAccessPolicy scopeAccessPolicy;
 
     @Override
     public Page<UserDto> getAllUsers(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
+        // Validate scope filter - throws 403 if invalid
+        scopeAccessValidator.validateFilterScope(filter);
+
+        // No implicit filter override - use only user-provided filter
         Specification<User> filterSpec = UserQueryAdapter.parseFilter(filter);
         Specification<User> searchSpec = UserQueryAdapter.parseSearch(search);
         Specification<User> spec = Specification.where(filterSpec).and(searchSpec);
@@ -46,7 +58,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDto> getUserById(UUID uuid, List<String> expand) {
-        return userRepository.findById(uuid).map(UserMapper::toDto);
+        Optional<User> opt = userRepository.findById(uuid);
+        if (opt.isEmpty()) {
+            return Optional.empty();
+        }
+        User user = opt.get();
+        // Use the user's actual scope type (defaulting to INTERNAL if not set)
+        ScopeType userScope = user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL;
+        
+        // Validate access using the policy
+        scopeAccessValidator.validateResourceAccess(userScope, null, ResourceType.USER);
+        
+        return Optional.of(UserMapper.toDto(user));
     }
 
     @Override
@@ -73,6 +96,9 @@ public class UserServiceImpl implements UserService {
     public Optional<UserDto> updateUser(UUID uuid, UserUpdateRequest request) {
         return userRepository.findById(uuid)
                 .map(user -> {
+                    // Use the user's actual scope type (defaulting to INTERNAL if not set)
+                    ScopeType userScope = user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL;
+                    scopeAccessValidator.validateResourceAccess(userScope, null, ResourceType.USER);
                     validateUpdatePermissions(user, request);
 
                     UserMapper.updateUserFromRequest(user, request);
@@ -87,7 +113,9 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(UUID uuid) {
         User user = userRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("User", uuid));
-
+        // Use the user's actual scope type (defaulting to INTERNAL if not set)
+        ScopeType userScope = user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL;
+        scopeAccessValidator.validateResourceAccess(userScope, null, ResourceType.USER);
         validateDeletePermissions(user);
 
         try {
@@ -106,10 +134,15 @@ public class UserServiceImpl implements UserService {
 
     private void validateCreatePermissions(UserCreateRequest request) {
         SystemRole currentRole = securityContextHelper.getUserRole();
+        ScopeType currentScope = securityContextHelper.getScopeType();
         SystemRole targetRole = request.getRole();
+        ScopeType targetScope = request.getScopeType() != null ? request.getScopeType() : ScopeType.INTERNAL;
+        
         if (currentRole == null) {
             throw new ForbiddenException("Current user role is not available");
         }
+        
+        // Role hierarchy validation
         switch (currentRole) {
             case CLUB_ADMIN -> {
                 if (targetRole != SystemRole.COACH) {
@@ -124,6 +157,14 @@ public class UserServiceImpl implements UserService {
             case APP_ADMIN -> {
             }
             default -> throw new ForbiddenException("You are not allowed to create users");
+        }
+        
+        // Scope validation using the policy
+        if (!scopeAccessPolicy.canCreateWithScope(currentRole, currentScope, targetRole, targetScope)) {
+            throw new ForbiddenException(
+                    "You cannot create a " + targetRole.getValue() + " with scope " + targetScope.getValue() + 
+                    ". Your scope is " + currentScope.getValue() + "."
+            );
         }
     }
 

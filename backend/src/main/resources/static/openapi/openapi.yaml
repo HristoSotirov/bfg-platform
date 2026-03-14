@@ -94,6 +94,8 @@ components:
       $ref: "./auth/schemas.yaml#/TokenResponse"
 
     # Common
+    ScopeType:
+      $ref: "./common/schemas.yaml#/ScopeType"
     ErrorResponse:
       $ref: "./common/schemas.yaml#/ErrorResponse"
     Page:

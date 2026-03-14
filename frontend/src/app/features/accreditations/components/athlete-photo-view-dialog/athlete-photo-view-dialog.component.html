@@ -18,17 +18,11 @@
           ‹
         </button>
         <div class="flex-1 aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-          @if (photoUrl) {
-            <img
-              [src]="photoUrl"
-              alt="Снимка на състезател"
-              class="w-full h-full object-cover"
-            />
-          } @else {
-            <div class="w-full h-full flex items-center justify-center text-gray-500">
-              Няма снимка
-            </div>
-          }
+          <img
+            [src]="photoUrl || 'assets/images/default-user.png'"
+            [alt]="photoUrl ? 'Снимка на състезател' : 'Снимка по подразбиране'"
+            class="w-full h-full object-cover"
+          />
         </div>
         <button
           type="button"
@@ -49,17 +43,11 @@
     } @else {
       
       <div class="w-full max-w-sm aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-        @if (photoUrl) {
-          <img
-            [src]="photoUrl"
-            alt="Снимка на състезател"
-            class="w-full h-full object-cover"
-          />
-        } @else {
-          <div class="w-full h-full flex items-center justify-center text-gray-500">
-            Няма снимка
-          </div>
-        }
+        <img
+          [src]="photoUrl || 'assets/images/default-user.png'"
+          [alt]="photoUrl ? 'Снимка на състезател' : 'Снимка по подразбиране'"
+          class="w-full h-full object-cover"
+        />
       </div>
     }
     

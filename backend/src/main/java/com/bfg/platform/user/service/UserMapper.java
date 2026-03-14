@@ -1,5 +1,7 @@
 package com.bfg.platform.user.service;
 
+import com.bfg.platform.gen.model.ScopeType;
+import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserDto;
@@ -26,6 +28,7 @@ public class UserMapper {
         dto.setEmail(user.getEmail());
         dto.setIsActive(user.isActive());
         dto.setRole(user.getRole());
+        dto.setScopeType(user.getScopeType());
         dto.setCreatedAt(user.getCreatedAt() != null 
             ? OffsetDateTime.ofInstant(user.getCreatedAt(), ZoneOffset.UTC) 
             : null);
@@ -47,6 +50,9 @@ public class UserMapper {
             user.setUsername(request.getEmail());
         }
         user.setRole(request.getRole());
+        if (request.getRole() == SystemRole.CLUB_ADMIN) {
+            user.setScopeType(request.getScopeType() != null ? request.getScopeType() : ScopeType.INTERNAL);
+        }
         return user;
     }
 

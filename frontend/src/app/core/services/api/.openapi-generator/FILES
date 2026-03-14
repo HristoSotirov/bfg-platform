@@ -52,6 +52,7 @@ model/models.ts
 model/page.ts
 model/pageSort.ts
 model/refreshRequest.ts
+model/scopeType.ts
 model/systemRole.ts
 model/tokenResponse.ts
 model/userCreateRequest.ts

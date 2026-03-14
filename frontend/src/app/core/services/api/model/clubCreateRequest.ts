@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ScopeType } from './scopeType';
 
 
 /**
@@ -24,5 +25,9 @@ export interface ClubCreateRequest {
      * UUID of the club administrator user
      */
     clubAdminId: string;
+    scopeType: ScopeType;
 }
+export namespace ClubCreateRequest {
+}
+
 

@@ -37,6 +37,9 @@ ClubDto:
       format: uuid
       description: UUID of the club administrator user
       example: "550e8400-e29b-41d4-a716-446655440001"
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type of the club (internal, external, national)
     clubAdminUser:
       $ref: "../users/schemas.yaml#/UserDto"
       description: Full club administrator user details (available when expand=clubAdminUser)
@@ -69,6 +72,7 @@ ClubCreateRequest:
     - shortName
     - clubEmail
     - clubAdminId
+    - scopeType
   properties:
     name:
       type: string
@@ -103,6 +107,10 @@ ClubCreateRequest:
       description: UUID of the club administrator user
       x-field-extra-annotation: '@NotNull(message = "{club.admin.required}")'
       example: "550e8400-e29b-41d4-a716-446655440001"
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type of the club (required when creating)
+      x-field-extra-annotation: '@NotNull(message = "{club.scopeType.required}")'
 
 ClubUpdateRequest:
   type: object
@@ -123,6 +131,9 @@ ClubUpdateRequest:
       format: uuid
       description: UUID of the club administrator user
       example: "550e8400-e29b-41d4-a716-446655440001"
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type of the club
 
 ClubBatchCreateRequestItem:
   type: object

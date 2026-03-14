@@ -119,11 +119,17 @@ export class AccreditationsTableComponent implements OnInit {
     if (accreditation.uuid) {
       if (newSelection.has(accreditation.uuid)) {
         newSelection.delete(accreditation.uuid);
-      } else if (this.maxSelection == null || newSelection.size < this.maxSelection) {
+      } else if (
+        this.maxSelection == null ||
+        newSelection.size < this.maxSelection
+      ) {
         newSelection.add(accreditation.uuid);
       }
     }
-    if (newSelection.size !== this.selectedIds.size || [...newSelection].some((id) => !this.selectedIds.has(id))) {
+    if (
+      newSelection.size !== this.selectedIds.size ||
+      [...newSelection].some((id) => !this.selectedIds.has(id))
+    ) {
       this.selectionChange.emit(newSelection);
     }
   }
@@ -179,13 +185,16 @@ export class AccreditationsTableComponent implements OnInit {
         return this.getGenderLabel(accreditation.athlete?.gender);
       case 'clubShortName':
         return accreditation.club?.shortName || '-';
+      case 'scopeType':
+        return this.getScopeTypeLabel(accreditation.scopeType);
       case 'clubName':
         return accreditation.club?.name || '-';
       case 'clubEmail':
         return accreditation.club?.clubEmail || '-';
       case 'clubAdminName':
-        return accreditation.club?.clubAdminUser 
-          ? `${accreditation.club.clubAdminUser.firstName || ''} ${accreditation.club.clubAdminUser.lastName || ''}`.trim() || '-'
+        return accreditation.club?.clubAdminUser
+          ? `${accreditation.club.clubAdminUser.firstName || ''} ${accreditation.club.clubAdminUser.lastName || ''}`.trim() ||
+              '-'
           : '-';
       case 'accreditationNumber':
         return accreditation.accreditationNumber || '-';
@@ -213,6 +222,16 @@ export class AccreditationsTableComponent implements OnInit {
       FEMALE: 'Жена',
     };
     return genderLabels[gender.toUpperCase()] || gender;
+  }
+
+  private getScopeTypeLabel(scopeType: string | undefined): string {
+    if (!scopeType) return '-';
+    const labels: Record<string, string> = {
+      INTERNAL: 'Вътрешен',
+      EXTERNAL: 'Външен',
+      NATIONAL: 'Национален',
+    };
+    return labels[scopeType] ?? scopeType;
   }
 
   getRaceGroup(accreditation: AccreditationDto): string {

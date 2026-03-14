@@ -1,6 +1,7 @@
 package com.bfg.platform.athlete.entity;
 
 import com.bfg.platform.gen.model.Gender;
+import com.bfg.platform.gen.model.ScopeType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -42,6 +43,10 @@ public class Athlete {
 
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
+
+    @Column(name = "scope_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ScopeType scopeType;
 
     @Column(name = "medical_examination_due")
     private LocalDate medicalExaminationDue;

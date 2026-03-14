@@ -12,6 +12,8 @@ import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.security.AuthorizationService;
+import com.bfg.platform.common.security.ResourceType;
+import com.bfg.platform.common.security.ScopeAccessValidator;
 import com.bfg.platform.athlete.query.AccreditationQueryAdapter;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
@@ -62,6 +64,7 @@ public class AccreditationServiceImpl implements AccreditationService {
     private final AthleteRepository athleteRepository;
     private final ClubRepository clubRepository;
     private final AuthorizationService authorizationService;
+    private final ScopeAccessValidator scopeAccessValidator;
     private final PlatformTransactionManager transactionManager;
     private final EntityManager entityManager;
 
@@ -75,6 +78,10 @@ public class AccreditationServiceImpl implements AccreditationService {
             Integer skip,
             List<String> expand
     ) {
+        // Validate scope and club access - throws 403 if invalid
+        scopeAccessValidator.validateFilterScope(filter);
+        scopeAccessValidator.validateFilterClub(filter, ResourceType.ACCREDITATION);
+
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Accreditation.class);
         
         EnhancedFilterExpressionParser.ParseResult<Accreditation> filterResult = 
@@ -124,6 +131,14 @@ public class AccreditationServiceImpl implements AccreditationService {
             accreditation = accreditationRepository.findById(uuid).orElse(null);
         }
         
+        if (accreditation != null) {
+            // Validate access to this specific resource
+            scopeAccessValidator.validateResourceAccess(
+                    accreditation.getScopeType(),
+                    accreditation.getClubId(),
+                    ResourceType.ACCREDITATION
+            );
+        }
         return Optional.ofNullable(accreditation)
                 .map(acc -> AccreditationMapper.toDto(acc, requestedExpand));
     }
@@ -165,6 +180,10 @@ public class AccreditationServiceImpl implements AccreditationService {
                     if (athlete == null) {
                         throw new ValidationException("Athlete not found");
                     }
+                    if (!athlete.getScopeType().equals(club.getScopeType())) {
+                        throw new ValidationException(
+                            "Athlete scope type does not match club (cannot create accreditation for different scope type)");
+                    }
 
                     boolean exists = accreditationRepository.existsByAthleteIdAndClubIdAndYear(athleteId, clubId, currentYear);
                     
@@ -187,6 +206,7 @@ public class AccreditationServiceImpl implements AccreditationService {
                             clubId,
                             cardNumber,
                             currentYear,
+                            club.getScopeType(),
                             AccreditationStatus.PENDING_VALIDATION
                     );
 
@@ -256,12 +276,16 @@ public class AccreditationServiceImpl implements AccreditationService {
 
         if (existingAthlete.isPresent()) {
             athlete = existingAthlete.get();
+            if (!athlete.getScopeType().equals(club.getScopeType())) {
+                throw new ValidationException(
+                    "Cannot create accreditation: athlete scope type does not match club (e.g. cannot create national accreditation for internal athlete)");
+            }
             Optional<String> existingCardNumber = accreditationRepository
                     .findExistingCardNumberForAthleteAndClub(athlete.getId(), clubId);
 
             cardNumber = existingCardNumber.orElseGet(() -> generateNextCardNumber(club.getCardPrefix(), clubId));
         } else {
-            athlete = saveAthlete(AthleteMapper.fromCreateRequest(request));
+            athlete = saveAthlete(AthleteMapper.fromCreateRequest(request, club.getScopeType()));
             cardNumber = generateNextCardNumber(club.getCardPrefix(), clubId);
         }
 
@@ -270,6 +294,7 @@ public class AccreditationServiceImpl implements AccreditationService {
                 clubId,
                 cardNumber,
                 Year.now().getValue(),
+                club.getScopeType(),
                 AccreditationStatus.PENDING_VALIDATION
         );
 
@@ -379,6 +404,7 @@ public class AccreditationServiceImpl implements AccreditationService {
                 club.getId(),
                 newCardNumber,
                 year,
+                com.bfg.platform.gen.model.ScopeType.INTERNAL,
                 status
         );
         

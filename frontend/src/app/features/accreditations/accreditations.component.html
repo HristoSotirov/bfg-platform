@@ -35,18 +35,24 @@
     </app-accreditations-filters>
 
     @if (selectionMessage && selectedAccreditations.size > 0) {
-      <div class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
+      <div
+        class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800"
+      >
         {{ selectionMessage }}
       </div>
     }
     <div class="flex items-center justify-between gap-2 sm:gap-4 mb-4">
       <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
         <div class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
-          Брой: <span class="font-semibold text-gray-900">{{ totalElements }}</span>
+          Брой:
+          <span class="font-semibold text-gray-900">{{ totalElements }}</span>
         </div>
         @if (selectedAccreditations.size > 0) {
           <div class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
-            Избрани: <span class="font-semibold text-gray-900">{{ selectedAccreditations.size }}</span>
+            Избрани:
+            <span class="font-semibold text-gray-900">{{
+              selectedAccreditations.size
+            }}</span>
           </div>
           @if (canRenewAccreditation || canEdit) {
             <button
@@ -60,7 +66,6 @@
         }
       </div>
       <div class="flex items-center gap-2 ml-auto">
-        
         <div class="hidden sm:flex items-center gap-2">
           @if (canRenewAccreditation) {
             <div class="relative group">
@@ -72,10 +77,16 @@
                 (click)="openRenewDialog()"
               ></app-button>
               @if (selectedAccreditations.size === 0) {
-                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block">
+                <div
+                  class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block"
+                >
                   Изисква се избор на състезатели
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                    <div class="border-4 border-transparent border-t-white"></div>
+                  <div
+                    class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
+                  >
+                    <div
+                      class="border-4 border-transparent border-t-white"
+                    ></div>
                   </div>
                 </div>
               }
@@ -97,10 +108,16 @@
                 (click)="openBatchMedicalDialog()"
               ></app-button>
               @if (selectedAccreditations.size === 0) {
-                <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block">
+                <div
+                  class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block"
+                >
                   Изисква се избор на състезатели
-                  <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
-                    <div class="border-4 border-transparent border-t-white"></div>
+                  <div
+                    class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
+                  >
+                    <div
+                      class="border-4 border-transparent border-t-white"
+                    ></div>
                   </div>
                 </div>
               }
@@ -123,7 +140,6 @@
           ></app-button>
         </div>
 
-        
         <app-mobile-action-menu
           [items]="mobileMenuItems"
           [isOpen]="mobileMenuOpen"
@@ -131,7 +147,6 @@
           (menuToggle)="onMobileMenuToggle($event)"
         ></app-mobile-action-menu>
 
-        
         <div class="relative group flex-shrink-0">
           <button
             type="button"
@@ -158,9 +173,13 @@
               ></path>
             </svg>
           </button>
-          <div class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200">
+          <div
+            class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200"
+          >
             Настройки
-            <div class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+            <div
+              class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
+            >
               <div class="border-4 border-transparent border-t-white"></div>
             </div>
           </div>
@@ -208,6 +227,7 @@
   [canEdit]="canEdit"
   [userRole]="userRole"
   [userClub]="userClub"
+  [showScopeInDetails]="showScopeFeatures"
   (closed)="closeDetailsDialog()"
   (saved)="onAthleteUpdated()"
 ></app-athlete-details-dialog>
@@ -234,6 +254,7 @@
   [isOpen]="isSettingsDialogOpen"
   [columns]="columns"
   [filterConfigs]="filterConfigs"
+  [showScopeFeatures]="showScopeFeatures"
   (closed)="closeSettingsDialog()"
   (settingsChange)="onSettingsChange($event)"
 ></app-accreditation-settings-dialog>

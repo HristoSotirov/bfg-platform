@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ScopeType } from './scopeType';
 import { ClubDto } from './clubDto';
 import { AccreditationStatus } from './accreditationStatus';
 import { AthleteDto } from './athleteDto';
@@ -38,6 +39,7 @@ export interface AccreditationDto {
      * Year of the accreditation
      */
     year?: number;
+    scopeType?: ScopeType;
     status?: AccreditationStatus;
     /**
      * Timestamp when the accreditation was created

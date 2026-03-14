@@ -29,6 +29,9 @@ AthleteDto:
     gender:
       $ref: "#/Gender"
       example: "MALE"
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+      description: Scope type of the athlete
     medicalExaminationDue:
       type: string
       format: date

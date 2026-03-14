@@ -13,13 +13,63 @@
         
         <div class="space-y-2">
           
-          <div class="flex justify-start">
-            <div
-              class="w-24 h-24 bg-gray-200 rounded flex items-center justify-center text-gray-500 text-xs"
+          <div class="flex flex-col gap-2 items-start">
+            <button
+              type="button"
+              class="w-24 h-24 rounded flex items-center justify-center overflow-hidden bg-gray-100 focus:outline-none focus:ring-2 focus:ring-bfg-blue/50 hover:opacity-90 transition-opacity"
+              (click)="openLogoView()"
             >
-              лого
-            </div>
+              @if (club.logoUrl) {
+                <img 
+                  [src]="club.logoUrl" 
+                  alt="Лого на клуба"
+                  class="w-full h-full object-contain"
+                />
+              } @else {
+                <img 
+                  src="assets/images/default-club.png" 
+                  alt="Лого по подразбиране"
+                  class="w-full h-full object-contain"
+                />
+              }
+            </button>
+            @if (canUploadLogo && !isEditing) {
+              <div class="flex flex-col gap-1">
+                <input
+                  #logoInput
+                  type="file"
+                  accept="image/jpeg,image/png"
+                  class="hidden"
+                  (change)="onLogoFileSelected($event)"
+                />
+                <button
+                  type="button"
+                  class="text-sm text-bfg-blue hover:underline disabled:opacity-50 disabled:no-underline text-left"
+                  [disabled]="uploadingLogo"
+                  (click)="logoInput.click()"
+                >
+                  {{ uploadingLogo ? 'Качване...' : 'Качи ново лого' }}
+                </button>
+                @if (logoError) {
+                  <p class="text-xs text-red-600">{{ logoError }}</p>
+                }
+              </div>
+            }
           </div>
+
+          <app-photo-crop-dialog
+            [isOpen]="showCropDialog"
+            [sourceFile]="pendingLogoFile"
+            (closed)="closeCropDialog()"
+            (cropped)="onLogoCropped($event)"
+          />
+          
+          <app-club-logo-view-dialog
+            [isOpen]="showLogoViewDialog"
+            [logoUrl]="club.logoUrl ?? null"
+            [clubInfo]="logoViewInfo"
+            (closed)="closeLogoViewDialog()"
+          />
 
           @if (!isEditing) {
             
@@ -58,6 +108,14 @@
                     club.clubEmail || "-"
                   }}</span>
                 </div>
+                @if (showScopeInDetails) {
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-28 flex-shrink-0">Тип:</span>
+                    <span class="text-sm font-medium">{{
+                      getScopeTypeLabel($any(club).scopeType)
+                    }}</span>
+                  </div>
+                }
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-28 flex-shrink-0"
                     >Статус:</span

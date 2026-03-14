@@ -47,6 +47,11 @@ databaseChangeLog:
                     nullable: false
                     unique: true
               - column:
+                  name: scope_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
                   name: is_active
                   type: BOOLEAN
                   constraints:

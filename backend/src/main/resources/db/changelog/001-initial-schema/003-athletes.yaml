@@ -39,6 +39,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: scope_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
                   name: medical_examination_due
                   type: DATE
               - column:

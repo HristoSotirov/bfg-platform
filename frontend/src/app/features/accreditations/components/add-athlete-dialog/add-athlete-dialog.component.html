@@ -1,53 +1,63 @@
-<app-dialog [isOpen]="isOpen" title="Добавяне на нов състезател" (closed)="close()">
+<app-dialog
+  [isOpen]="isOpen"
+  title="Добавяне на нов състезател"
+  (closed)="close()"
+>
   <div class="space-y-4 flex-1 min-h-0 overflow-y-auto">
-    
     <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg">
       <p class="text-sm text-blue-800">
-        <strong>Важно:</strong> С подаването на тази заявка декларирате, че това е нов състезател към федерацията и не е бил картотекиран в вашия или в друг клуб.
+        <strong>Важно:</strong> С подаването на тази заявка декларирате, че това
+        е нов състезател към федерацията и не е бил картотекиран в вашия или в
+        друг клуб.
       </p>
     </div>
 
-    
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Клуб:</label>
       <input
         type="text"
         [value]="userClub?.shortName || userClub?.name || '-'"
         disabled
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-100 cursor-not-allowed">
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-gray-100 cursor-not-allowed"
+      />
     </div>
 
-    
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Име: <span class="text-red-500">*</span></label>
+      <label class="block text-sm font-medium text-gray-700 mb-1"
+        >Име: <span class="text-red-500">*</span></label
+      >
       <input
         type="text"
         [(ngModel)]="formData.firstName"
         placeholder="Въведете име"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
     </div>
 
-    
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Презиме: <span class="text-red-500">*</span></label>
+      <label class="block text-sm font-medium text-gray-700 mb-1"
+        >Презиме: <span class="text-red-500">*</span></label
+      >
       <input
         type="text"
         [(ngModel)]="formData.middleName"
         placeholder="Въведете презиме"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
     </div>
 
-    
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Фамилия: <span class="text-red-500">*</span></label>
+      <label class="block text-sm font-medium text-gray-700 mb-1"
+        >Фамилия: <span class="text-red-500">*</span></label
+      >
       <input
         type="text"
         [(ngModel)]="formData.lastName"
         placeholder="Въведете фамилия"
-        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
     </div>
 
-    
     <app-date-picker
       label="Дата на раждане"
       placeholder="Изберете дата на раждане"
@@ -55,9 +65,10 @@
       [required]="true"
     ></app-date-picker>
 
-    
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Пол: <span class="text-red-500">*</span></label>
+      <label class="block text-sm font-medium text-gray-700 mb-1"
+        >Пол: <span class="text-red-500">*</span></label
+      >
       <app-searchable-select-dropdown
         [(ngModel)]="formData.gender"
         [options]="genderOptions"
@@ -65,10 +76,13 @@
       ></app-searchable-select-dropdown>
     </div>
 
-    
-    <div class="dialog-footer bg-white flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200">
+    <div
+      class="dialog-footer bg-white flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200"
+    >
       @if (error) {
-        <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+        <div
+          class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg"
+        >
           <p class="text-sm text-red-700">{{ error }}</p>
         </div>
       }
@@ -77,20 +91,21 @@
           variant="outline"
           size="md"
           text="Затвори"
-          (click)="close()">
+          (click)="close()"
+        >
         </app-button>
         <app-button
           variant="primary"
           size="md"
           text="Запази"
           [disabled]="loading"
-          (click)="onSubmit()">
+          (click)="onSubmit()"
+        >
         </app-button>
       </div>
     </div>
   </div>
 </app-dialog>
-
 
 <app-dialog
   [isOpen]="isConfirmDialogOpen"
@@ -99,11 +114,19 @@
 >
   <div class="py-4">
     <div class="mb-6 space-y-3">
-      <p class="text-gray-700 font-medium">С потвърждаването на тези условия се съгласявате да:</p>
+      <p class="text-gray-700 font-medium">
+        С потвърждаването на тези условия се съгласявате да:
+      </p>
       <ul class="list-disc list-inside space-y-2 text-gray-700 text-sm ml-4">
         <li>Съхранявате всички документи на състезателя</li>
-        <li>Предоставите съхраняваните документи пред федерацията по тяхното поискване</li>
-        <li>Носите наказателна отговорност при невъзможност за представяне на документите</li>
+        <li>
+          Предоставите съхраняваните документи пред федерацията по тяхното
+          поискване
+        </li>
+        <li>
+          Носите наказателна отговорност при невъзможност за представяне на
+          документите
+        </li>
       </ul>
     </div>
     <div class="flex gap-3 justify-center">

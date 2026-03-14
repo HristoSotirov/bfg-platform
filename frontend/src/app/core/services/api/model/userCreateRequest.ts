@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ScopeType } from './scopeType';
 import { SystemRole } from './systemRole';
 
 
@@ -23,6 +24,7 @@ export interface UserCreateRequest {
     username?: string;
     email: string;
     role: SystemRole;
+    scopeType?: ScopeType;
 }
 export namespace UserCreateRequest {
 }

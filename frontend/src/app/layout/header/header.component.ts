@@ -9,11 +9,17 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { LanguageService, AppLanguage } from '../../core/services/language.service';
+import {
+  LanguageService,
+  AppLanguage,
+} from '../../core/services/language.service';
 import { User } from '../../core/models/user.model';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
-import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import {
+  SearchableSelectDropdownComponent,
+  SearchableSelectOption,
+} from '../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { Observable, forkJoin, of, catchError } from 'rxjs';
 import {
   UsersService,
@@ -33,7 +39,14 @@ interface ProfileData {
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, ButtonComponent, DialogComponent, SearchableSelectDropdownComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    FormsModule,
+    ButtonComponent,
+    DialogComponent,
+    SearchableSelectDropdownComponent,
+  ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

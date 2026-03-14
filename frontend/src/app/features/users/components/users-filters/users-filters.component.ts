@@ -20,7 +20,13 @@ import { SystemRole } from '../../../../core/services/api';
 @Component({
   selector: 'app-users-filters',
   standalone: true,
-  imports: [CommonModule, FormsModule, MultiSelectDropdownComponent, SearchBarComponent, FilterToggleButtonComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    MultiSelectDropdownComponent,
+    SearchBarComponent,
+    FilterToggleButtonComponent,
+  ],
   templateUrl: './users-filters.component.html',
   styleUrl: './users-filters.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +36,7 @@ export class UsersFiltersComponent implements OnInit {
     search: '',
     roles: [],
     statuses: [],
+    scopeTypes: [],
   };
   @Input() filterConfigs: UserFilterConfig[] = [];
 
@@ -51,17 +58,29 @@ export class UsersFiltersComponent implements OnInit {
     { value: 'false', label: 'Неактивен' },
   ];
 
+  readonly scopeTypeOptions: DropdownOption[] = [
+    { value: 'INTERNAL', label: 'Вътрешен' },
+    { value: 'EXTERNAL', label: 'Външен' },
+    { value: 'NATIONAL', label: 'Национален' },
+  ];
+
   ngOnInit(): void {
     this.searchValue = this.filters.search || '';
   }
 
   isFilterVisible(filterId: string): boolean {
     const config = this.filterConfigs.find((f) => f.id === filterId);
-    return config?.visible ?? true;
+    // If config doesn't exist, the filter is not available for this user
+    if (!config) return false;
+    return config.visible;
   }
 
   hasVisibleFilters(): boolean {
-    return this.isFilterVisible('role') || this.isFilterVisible('status');
+    return (
+      this.isFilterVisible('role') ||
+      this.isFilterVisible('status') ||
+      this.isFilterVisible('scopeType')
+    );
   }
 
   onSearchChange(value: string): void {
@@ -77,6 +96,10 @@ export class UsersFiltersComponent implements OnInit {
     this.emitFiltersChange({ statuses: values });
   }
 
+  onScopeTypesChange(values: string[]): void {
+    this.emitFiltersChange({ scopeTypes: values });
+  }
+
   private emitFiltersChange(changes: Partial<UserFilters>): void {
     this.filtersChange.emit({
       ...this.filters,
@@ -84,4 +107,3 @@ export class UsersFiltersComponent implements OnInit {
     });
   }
 }
-

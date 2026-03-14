@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ScopeType } from './scopeType';
 import { UserDto } from './userDto';
 
 
@@ -46,6 +47,7 @@ export interface ClubDto {
      * UUID of the club administrator user
      */
     clubAdminId?: string;
+    scopeType?: ScopeType;
     clubAdminUser?: UserDto;
     /**
      * Timestamp when the club was created
@@ -56,4 +58,7 @@ export interface ClubDto {
      */
     updatedAt?: string;
 }
+export namespace ClubDto {
+}
+
 

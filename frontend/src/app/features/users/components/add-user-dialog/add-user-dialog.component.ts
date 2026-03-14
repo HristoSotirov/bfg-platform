@@ -1,20 +1,45 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  Input,
+  Output,
+  EventEmitter,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnChanges,
+  SimpleChanges,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import {
+  SearchableSelectDropdownComponent,
+  SearchableSelectOption,
+} from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
-import { UsersService, UserCreateRequest, SystemRole } from '../../../../core/services/api';
+import {
+  UsersService,
+  UserCreateRequest,
+  SystemRole,
+  ScopeType,
+} from '../../../../core/services/api';
+import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 import { takeUntil, Subject, catchError, of } from 'rxjs';
 
 @Component({
   selector: 'app-add-user-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DatePickerComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    DialogComponent,
+    ButtonComponent,
+    SearchableSelectDropdownComponent,
+    DatePickerComponent,
+  ],
   templateUrl: './add-user-dialog.component.html',
   styleUrl: './add-user-dialog.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AddUserDialogComponent implements OnChanges {
   @Input() isOpen = false;
@@ -32,12 +57,39 @@ export class AddUserDialogComponent implements OnChanges {
     email: '',
     username: '',
     role: '' as SystemRole | '',
+    scopeType: ScopeType.Internal as ScopeType,
   };
 
   saving = false;
   error: string | null = null;
 
   roleOptions: SearchableSelectOption[] = [];
+  readonly ScopeType = ScopeType;
+
+  /**
+   * Whether the scope field should be shown.
+   * Only show when creating CLUB_ADMIN AND creator can assign different scopes.
+   */
+  get showScopeField(): boolean {
+    if (this.formData.role !== 'CLUB_ADMIN') return false;
+    return this.scopeVisibility.canAssignDifferentScopes();
+  }
+
+  /**
+   * Available scope options based on user's permissions.
+   */
+  get scopeTypeOptions(): SearchableSelectOption[] {
+    const allowedScopes = this.scopeVisibility.getAvailableScopeOptionsForCreate();
+    const scopeLabels: Record<ScopeType, string> = {
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
+    };
+    return allowedScopes.map(scope => ({
+      value: scope,
+      label: scopeLabels[scope],
+    }));
+  }
 
   private roleLabels: Record<SystemRole, string> = {
     APP_ADMIN: 'Администратор',
@@ -48,7 +100,8 @@ export class AddUserDialogComponent implements OnChanges {
 
   constructor(
     private usersService: UsersService,
-    private cdr: ChangeDetectorRef
+    private scopeVisibility: ScopeVisibilityService,
+    private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -69,8 +122,9 @@ export class AddUserDialogComponent implements OnChanges {
   }
 
   private resetForm(): void {
-    const defaultRole = this.userRole === 'CLUB_ADMIN' ? 'COACH' : ('' as SystemRole | '');
-    
+    const defaultRole =
+      this.userRole === 'CLUB_ADMIN' ? 'COACH' : ('' as SystemRole | '');
+
     this.formData = {
       firstName: '',
       lastName: '',
@@ -78,6 +132,7 @@ export class AddUserDialogComponent implements OnChanges {
       email: '',
       username: '',
       role: defaultRole,
+      scopeType: ScopeType.Internal,
     };
     this.error = null;
     this.saving = false;
@@ -90,7 +145,7 @@ export class AddUserDialogComponent implements OnChanges {
     }
 
     let availableRoles: SystemRole[] = [];
-    
+
     if (this.userRole === 'APP_ADMIN') {
       availableRoles = ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'];
     } else if (this.userRole === 'FEDERATION_ADMIN') {
@@ -99,9 +154,9 @@ export class AddUserDialogComponent implements OnChanges {
       availableRoles = ['COACH'];
     }
 
-    this.roleOptions = availableRoles.map(role => ({
+    this.roleOptions = availableRoles.map((role) => ({
       value: role,
-      label: this.roleLabels[role]
+      label: this.roleLabels[role],
     }));
   }
 
@@ -115,7 +170,10 @@ export class AddUserDialogComponent implements OnChanges {
   onEmailChange(): void {
     if (this.userRole === 'CLUB_ADMIN') {
       this.formData.username = this.formData.email;
-    } else if (this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN') {
+    } else if (
+      this.userRole === 'APP_ADMIN' ||
+      this.userRole === 'FEDERATION_ADMIN'
+    ) {
       if (this.formData.email) {
         this.formData.username = this.formData.email;
       } else {
@@ -140,6 +198,18 @@ export class AddUserDialogComponent implements OnChanges {
     this.error = null;
     this.cdr.markForCheck();
 
+    // Determine scope for CLUB_ADMIN
+    let scopeType: ScopeType | undefined = undefined;
+    if (this.formData.role === 'CLUB_ADMIN') {
+      if (this.showScopeField) {
+        // User can assign different scopes - use their selection
+        scopeType = this.formData.scopeType;
+      } else {
+        // User can only create with their own scope
+        scopeType = this.scopeVisibility.getUserScope();
+      }
+    }
+
     const createRequest: UserCreateRequest = {
       firstName: this.formData.firstName,
       lastName: this.formData.lastName,
@@ -147,13 +217,15 @@ export class AddUserDialogComponent implements OnChanges {
       email: this.formData.email,
       username: this.formData.username || undefined,
       role: this.formData.role as SystemRole,
+      scopeType: scopeType,
     };
 
     this.usersService
       .createUser(createRequest)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при създаване на потребителя';
+          this.error =
+            err?.error?.message || 'Грешка при създаване на потребителя';
           this.saving = false;
           return of(null);
         }),
@@ -178,6 +250,4 @@ export class AddUserDialogComponent implements OnChanges {
       this.formData.role
     );
   }
-
 }
-

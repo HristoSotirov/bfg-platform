@@ -1,6 +1,7 @@
 package com.bfg.platform.auth.security;
 
 import com.bfg.platform.auth.jwt.JwtService;
+import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.user.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -19,6 +20,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -68,6 +70,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             UUID userId = UUID.fromString(claims.getSubject());
             String role = claims.get(JwtService.CLAIM_ROLE, String.class);
+            String scopeTypeStr = claims.get(JwtService.CLAIM_SCOPE_TYPE, String.class);
+            ScopeType scopeType = (scopeTypeStr != null && !scopeTypeStr.isBlank())
+                    ? ScopeType.fromValue(scopeTypeStr)
+                    : ScopeType.INTERNAL;
 
             User user = userRepository.findById(userId).orElse(null);
             if (user == null || Boolean.FALSE.equals(user.isActive())) {
@@ -85,6 +91,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     null,
                     role != null ? List.of(new SimpleGrantedAuthority(role)) : List.of()
             );
+            authentication.setDetails(Map.of("scopeType", scopeType));
             SecurityContextHolder.getContext().setAuthentication(authentication);
         } catch (ExpiredJwtException e) {
             SecurityContextHolder.clearContext();

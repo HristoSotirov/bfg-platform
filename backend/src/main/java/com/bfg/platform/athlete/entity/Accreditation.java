@@ -3,6 +3,7 @@ package com.bfg.platform.athlete.entity;
 import com.bfg.platform.athlete.entity.Athlete;
 import com.bfg.platform.club.entity.Club;
 import com.bfg.platform.gen.model.AccreditationStatus;
+import com.bfg.platform.gen.model.ScopeType;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -55,6 +56,10 @@ public class Accreditation {
 
     @Column(name = "year")
     private Integer year;
+
+    @Column(name = "scope_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ScopeType scopeType;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)

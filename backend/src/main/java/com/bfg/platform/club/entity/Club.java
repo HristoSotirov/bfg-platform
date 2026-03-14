@@ -1,5 +1,6 @@
 package com.bfg.platform.club.entity;
 
+import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.user.entity.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -43,6 +44,10 @@ public class Club {
 
     @Column(name = "card_prefix")
     private String cardPrefix;
+
+    @Column(name = "scope_type", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private ScopeType scopeType;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;

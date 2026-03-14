@@ -26,6 +26,8 @@ public final class UserQueryAdapter {
             Map.entry("username_desc", new Sort.Order(Sort.Direction.DESC, "username")),
             Map.entry("role_asc", new Sort.Order(Sort.Direction.ASC, "role")),
             Map.entry("role_desc", new Sort.Order(Sort.Direction.DESC, "role")),
+            Map.entry("scopeType_asc", new Sort.Order(Sort.Direction.ASC, "scopeType")),
+            Map.entry("scopeType_desc", new Sort.Order(Sort.Direction.DESC, "scopeType")),
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
             Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt"))
     );
@@ -74,6 +76,7 @@ public final class UserQueryAdapter {
             case "firstName", "lastName", "username", "role" -> QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
             case "isActive" -> QueryAdapterHelpers.booleanPredicate(root, cb, "isActive", op, valueRaw);
             case "status" -> QueryAdapterHelpers.booleanPredicate(root, cb, "isActive", op, valueRaw);
+            case "scopeType" -> QueryAdapterHelpers.stringPredicate(root, cb, "scopeType", op, valueRaw);
             case "createdAt", "modifiedAt" -> QueryAdapterHelpers.instantPredicate(root, cb, field, op, valueRaw);
             default -> throw new IllegalArgumentException("Unsupported filter field: " + field);
         };

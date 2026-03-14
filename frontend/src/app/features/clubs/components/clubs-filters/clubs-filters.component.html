@@ -1,6 +1,5 @@
 <div class="bg-white rounded-lg p-4 mb-4">
   <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-4">
-    
     <div class="w-full sm:flex-1 sm:min-w-[180px] sm:max-w-[180px]">
       <app-search-bar
         [searchValue]="searchValue"
@@ -13,9 +12,11 @@
       ></app-search-bar>
     </div>
 
-    
     @if (hasVisibleFilters() && isFilterVisible("status")) {
-      <div [class.hidden]="!filtersExpanded" class="sm:block w-full sm:w-[180px]">
+      <div
+        [class.hidden]="!filtersExpanded"
+        class="sm:block w-full sm:w-[180px]"
+      >
         <label class="block text-xs font-medium text-gray-500 mb-1"
           >Статус:</label
         >
@@ -29,9 +30,25 @@
         </app-multi-select-dropdown>
       </div>
     }
+
+    @if (hasVisibleFilters() && isFilterVisible("scopeType")) {
+      <div
+        [class.hidden]="!filtersExpanded"
+        class="sm:block w-full sm:w-[180px]"
+      >
+        <label class="block text-xs font-medium text-gray-500 mb-1">Тип:</label>
+        <app-multi-select-dropdown
+          [options]="scopeTypeOptions"
+          [multiple]="true"
+          placeholder="Всички типове"
+          [ngModel]="filters.scopeTypes || []"
+          (selectionChange)="onScopeTypesChange($event)"
+        >
+        </app-multi-select-dropdown>
+      </div>
+    }
   </div>
 
-  
   <app-filter-toggle-button
     [expanded]="filtersExpanded"
     [visible]="hasVisibleFilters()"

@@ -1,3 +1,11 @@
+ScopeType:
+  type: string
+  description: Scope type for access control (internal, external, national)
+  enum:
+    - INTERNAL
+    - EXTERNAL
+    - NATIONAL
+
 ErrorResponse:
   type: object
   description: Standard error response format used across all API endpoints

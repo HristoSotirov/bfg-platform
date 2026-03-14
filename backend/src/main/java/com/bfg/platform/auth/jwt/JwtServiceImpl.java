@@ -26,7 +26,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String issueAccessToken(UUID userId, String role) {
+    public String issueAccessToken(UUID userId, String role, String scopeType) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(properties.getAccessTokenTtlSeconds());
         var builder = Jwts.builder()
@@ -36,6 +36,9 @@ public class JwtServiceImpl implements JwtService {
                 .expiration(Date.from(exp))
                 .claim(CLAIM_ROLE, role)
                 .claim(CLAIM_TYPE, TYPE_ACCESS);
+        if (scopeType != null && !scopeType.isBlank()) {
+            builder.claim(CLAIM_SCOPE_TYPE, scopeType);
+        }
         if (properties.getAudience() != null && !properties.getAudience().isBlank()) {
             builder.audience().add(properties.getAudience()).and();
         }
@@ -43,7 +46,7 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
-    public String issueRefreshToken(UUID userId, String role) {
+    public String issueRefreshToken(UUID userId, String role, String scopeType) {
         Instant now = Instant.now();
         Instant exp = now.plusSeconds(properties.getRefreshTokenTtlSeconds());
         var builder = Jwts.builder()
@@ -53,6 +56,9 @@ public class JwtServiceImpl implements JwtService {
                 .expiration(Date.from(exp))
                 .claim(CLAIM_ROLE, role)
                 .claim(CLAIM_TYPE, TYPE_REFRESH);
+        if (scopeType != null && !scopeType.isBlank()) {
+            builder.claim(CLAIM_SCOPE_TYPE, scopeType);
+        }
         if (properties.getAudience() != null && !properties.getAudience().isBlank()) {
             builder.audience().add(properties.getAudience()).and();
         }

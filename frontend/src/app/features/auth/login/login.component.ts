@@ -1,6 +1,17 @@
-import { Component, OnInit, ChangeDetectionStrategy, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  OnDestroy,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  ReactiveFormsModule,
+} from '@angular/forms';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
@@ -12,7 +23,7 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
   imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class LoginComponent implements OnInit, OnDestroy {
   loginForm: FormGroup;
@@ -27,16 +38,18 @@ export class LoginComponent implements OnInit, OnDestroy {
   ) {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required]],
-      password: ['', [Validators.required]]
+      password: ['', [Validators.required]],
     });
   }
 
   ngOnInit(): void {
-    this.authService.isAuthenticated$.pipe(takeUntil(this.destroy$)).subscribe(isAuth => {
-      if (isAuth) {
-        this.router.navigate(['/']);
-      }
-    });
+    this.authService.isAuthenticated$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((isAuth) => {
+        if (isAuth) {
+          this.router.navigate(['/']);
+        }
+      });
   }
 
   ngOnDestroy(): void {
@@ -57,10 +70,10 @@ export class LoginComponent implements OnInit, OnDestroy {
         error: (errorMessage: string) => {
           this.error = errorMessage;
           this.cdr.markForCheck();
-        }
+        },
       });
     } else {
-      Object.keys(this.loginForm.controls).forEach(key => {
+      Object.keys(this.loginForm.controls).forEach((key) => {
         this.loginForm.get(key)?.markAsTouched();
       });
       this.cdr.markForCheck();

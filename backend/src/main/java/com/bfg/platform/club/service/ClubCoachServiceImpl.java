@@ -71,8 +71,13 @@ public class ClubCoachServiceImpl implements ClubCoachService {
     public Optional<ClubCoachDto> assignCoachToClub(ClubCoachCreateRequest request) {
         validateAssignPermissions(request);
 
-        clubRepository.findById(request.getClubId())
+        Club club = clubRepository.findById(request.getClubId())
                 .orElseThrow(() -> new ResourceNotFoundException("Club", request.getClubId()));
+
+        // Only INTERNAL clubs can have coaches assigned
+        if (club.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
+            throw new ValidationException("Coaches can only be assigned to internal clubs");
+        }
 
         validateCoachRole(request.getCoachId());
 
@@ -112,8 +117,16 @@ public class ClubCoachServiceImpl implements ClubCoachService {
 
         switch (currentRole) {
             case APP_ADMIN, FEDERATION_ADMIN -> {
+                // Only INTERNAL scope admins can assign coaches
+                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
+                    throw new ForbiddenException("Only internal administrators can assign coaches to clubs");
+                }
             }
             case CLUB_ADMIN -> {
+                // Only INTERNAL scope club admins can assign coaches
+                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
+                    throw new ForbiddenException("Only internal club administrators can assign coaches to clubs");
+                }
                 UUID currentUserId = securityContextHelper.getUserId();
                 Club club = clubRepository.findByClubAdmin(currentUserId)
                         .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
@@ -133,8 +146,16 @@ public class ClubCoachServiceImpl implements ClubCoachService {
 
         switch (currentRole) {
             case APP_ADMIN, FEDERATION_ADMIN -> {
+                // Only INTERNAL scope admins can remove coaches
+                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
+                    throw new ForbiddenException("Only internal administrators can remove coaches from clubs");
+                }
             }
             case CLUB_ADMIN -> {
+                // Only INTERNAL scope club admins can remove coaches
+                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
+                    throw new ForbiddenException("Only internal club administrators can remove coaches from clubs");
+                }
                 UUID currentUserId = securityContextHelper.getUserId();
                 Club club = clubRepository.findByClubAdmin(currentUserId)
                         .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
