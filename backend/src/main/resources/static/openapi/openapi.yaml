@@ -170,3 +170,65 @@ components:
       $ref: "./accreditations/schemas.yaml#/AccreditationBatchRenewalRequest"
     AccreditationBatchRenewalResponse:
       $ref: "./accreditations/schemas.yaml#/AccreditationBatchRenewalResponse"
+
+    # Competitions - Enums
+    CompetitionType:
+      $ref: "./competitions/schemas.yaml#/CompetitionType"
+    CompetitionGroupGender:
+      $ref: "./competitions/schemas.yaml#/CompetitionGroupGender"
+    TransferRounding:
+      $ref: "./competitions/schemas.yaml#/TransferRounding"
+    CompetitionStageType:
+      $ref: "./competitions/schemas.yaml#/CompetitionStageType"
+    CompetitionEventType:
+      $ref: "./competitions/schemas.yaml#/CompetitionEventType"
+    QualificationEventType:
+      $ref: "./competitions/schemas.yaml#/QualificationEventType"
+    CompetitionStatus:
+      $ref: "./competitions/schemas.yaml#/CompetitionStatus"
+    StageStatus:
+      $ref: "./competitions/schemas.yaml#/StageStatus"
+    CompetitionEventStatus:
+      $ref: "./competitions/schemas.yaml#/CompetitionEventStatus"
+    FinishStatus:
+      $ref: "./competitions/schemas.yaml#/FinishStatus"
+    SeatPosition:
+      $ref: "./competitions/schemas.yaml#/SeatPosition"
+    WeightMeasurementRole:
+      $ref: "./competitions/schemas.yaml#/WeightMeasurementRole"
+
+    # Competitions - DTOs
+    CompetitionGroupDefinitionDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionGroupDefinitionDto"
+    DisciplineDefinitionDto:
+      $ref: "./competitions/schemas.yaml#/DisciplineDefinitionDto"
+    CompetitionTemplateDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionTemplateDto"
+    CompetitionStageTemplateDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionStageTemplateDto"
+    CompetitionEventTimetableTemplateDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
+    CompetitionScoringFormulaDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionScoringFormulaDto"
+    QualificationSchemeDto:
+      $ref: "./competitions/schemas.yaml#/QualificationSchemeDto"
+    QualificationStageDto:
+      $ref: "./competitions/schemas.yaml#/QualificationStageDto"
+    QualificationRuleDto:
+      $ref: "./competitions/schemas.yaml#/QualificationRuleDto"
+    CompetitionDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionDto"
+    CompetitionStageDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionStageDto"
+    EntryDto:
+      $ref: "./competitions/schemas.yaml#/EntryDto"
+    CrewMemberDto:
+      $ref: "./competitions/schemas.yaml#/CrewMemberDto"
+    CompetitionEventTimetableDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableDto"
+    CompetitionParticipationDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionParticipationDto"
+    CompetitionFinalStandingDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionFinalStandingDto"
+    AthleteWeightMeasurementDto:
+      $ref: "./competitions/schemas.yaml#/AthleteWeightMeasurementDto"

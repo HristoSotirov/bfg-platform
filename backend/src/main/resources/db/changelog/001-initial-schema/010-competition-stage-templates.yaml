@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-competition-stage-templates
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_stage_templates
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: template_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stage_order
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: duration_days
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_group_codes
+                  type: JSONB
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discipline_codes
+                  type: JSONB
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_stage_type
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: competition_stage_templates
+            columnNames: template_id, stage_order
+            constraintName: uq_stage_template_order
+        - addForeignKeyConstraint:
+            baseTableName: competition_stage_templates
+            baseColumnNames: template_id
+            referencedTableName: competition_templates
+            referencedColumnNames: id
+            constraintName: fk_stage_template_template
+            onDelete: CASCADE

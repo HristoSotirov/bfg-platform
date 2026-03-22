@@ -1,0 +1,714 @@
+# ── Enums ──────────────────────────────────────────────────────────────────────
+
+CompetitionType:
+  type: string
+  description: Type of competition
+  enum:
+    - NATIONAL_ERGO
+    - NATIONAL_WATER
+    - BALKAN_WATER
+
+CompetitionGroupGender:
+  type: string
+  description: Gender classification for competition groups
+  enum:
+    - MALE
+    - FEMALE
+    - MIXED
+
+TransferRounding:
+  type: string
+  description: Rounding strategy for crew transfer calculations
+  enum:
+    - FLOOR
+    - CEIL
+    - ROUND
+
+CompetitionStageType:
+  type: string
+  description: Type of competition stage
+  enum:
+    - NATIONAL_WATER_ADULT
+    - NATIONAL_WATER_SENIOR
+    - NATIONAL_WATER_JUNIOR_YOUTH
+
+CompetitionEventType:
+  type: string
+  description: Type of competition event (heat, repechage, semi-final, final)
+  enum:
+    - H1
+    - H2
+    - R
+    - SF
+    - FB
+    - FA
+
+QualificationEventType:
+  type: string
+  description: Type of qualification event
+  enum:
+    - H
+    - SF
+    - FA
+    - FB
+
+CompetitionStatus:
+  type: string
+  description: Status of a competition
+  enum:
+    - DRAFT
+    - REGISTRATION_OPEN
+    - REGISTRATION_CLOSED
+    - IN_PROGRESS
+    - COMPLETED
+    - CANCELLED
+
+StageStatus:
+  type: string
+  description: Status of a competition stage
+  enum:
+    - DRAFT
+    - REGISTRATION_OPEN
+    - REGISTRATION_CLOSED
+    - IN_PROGRESS
+    - COMPLETED
+    - CANCELLED
+
+CompetitionEventStatus:
+  type: string
+  description: Status of a competition event
+  enum:
+    - SCHEDULED
+    - IN_PROGRESS
+    - FINISHED
+    - CANCELLED
+    - POSTPONED
+
+FinishStatus:
+  type: string
+  description: Finish status of a participation
+  enum:
+    - OK
+    - DNS
+    - DNF
+    - DSQ
+
+SeatPosition:
+  type: string
+  description: Seat position in a boat
+  enum:
+    - BOW
+    - TWO
+    - THREE
+    - FOUR
+    - FIVE
+    - SIX
+    - SEVEN
+    - STROKE
+    - COX
+
+WeightMeasurementRole:
+  type: string
+  description: Role of the athlete for weight measurement purposes
+  enum:
+    - ROWER
+    - COX
+
+# ── DTOs ──────────────────────────────────────────────────────────────────────
+
+CompetitionGroupDefinitionDto:
+  type: object
+  description: Data Transfer Object for competition group definition
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: "M_U23"
+    name:
+      type: string
+      example: "Men Under 23"
+    shortName:
+      type: string
+      example: "M U23"
+    gender:
+      $ref: "#/CompetitionGroupGender"
+    minAge:
+      type: integer
+      example: 18
+    maxAge:
+      type: integer
+      example: 22
+    competitionType:
+      $ref: "#/CompetitionType"
+    transferGroupId:
+      type: string
+      format: uuid
+    transferMinCrew:
+      type: integer
+    transferRatio:
+      type: integer
+    transferRounding:
+      $ref: "#/TransferRounding"
+    coxRequiredWeightKg:
+      type: number
+      format: double
+    coxMinWeightKg:
+      type: number
+      format: double
+    lightMaxWeightKg:
+      type: number
+      format: double
+    isActive:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+DisciplineDefinitionDto:
+  type: object
+  description: Data Transfer Object for discipline definition
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: "M1x"
+    name:
+      type: string
+      example: "Men's Single Sculls"
+    shortName:
+      type: string
+      example: "M1x"
+    gender:
+      $ref: "#/CompetitionGroupGender"
+    boatClass:
+      type: string
+      example: "1x"
+    crewSize:
+      type: integer
+      example: 1
+    hasCoxswain:
+      type: boolean
+      example: false
+    isLightweight:
+      type: boolean
+      example: false
+    distanceMeters:
+      type: integer
+      example: 2000
+    competitionGroupId:
+      type: string
+      format: uuid
+    maxTransferCrew:
+      type: integer
+    scoringMultiplier:
+      type: number
+      format: double
+      example: 1.000
+    competitionType:
+      $ref: "#/CompetitionType"
+    isActive:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionTemplateDto:
+  type: object
+  description: Data Transfer Object for competition template
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: "NAT_WATER_2DAY"
+    shortName:
+      type: string
+      example: "Nat Water 2D"
+    name:
+      type: string
+      example: "National Water Championship 2-Day"
+    description:
+      type: string
+    durationDays:
+      type: integer
+      example: 2
+    competitionType:
+      $ref: "#/CompetitionType"
+    isActive:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionStageTemplateDto:
+  type: object
+  description: Data Transfer Object for competition stage template
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    templateId:
+      type: string
+      format: uuid
+    stageOrder:
+      type: integer
+      example: 1
+    name:
+      type: string
+      example: "Day 1 - Heats"
+    durationDays:
+      type: integer
+      example: 1
+    competitionGroupCodes:
+      type: string
+      description: JSON array of competition group codes
+    disciplineCodes:
+      type: string
+      description: JSON array of discipline codes
+    competitionStageType:
+      $ref: "#/CompetitionStageType"
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionEventTimetableTemplateDto:
+  type: object
+  description: Data Transfer Object for competition event timetable template
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    templateId:
+      type: string
+      format: uuid
+    stageTemplateId:
+      type: string
+      format: uuid
+    disciplineCode:
+      type: string
+      example: "M1x"
+    competitionEventType:
+      $ref: "#/CompetitionEventType"
+    dayOffset:
+      type: integer
+      example: 0
+    plannedTime:
+      type: string
+      format: time
+      example: "09:00:00"
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionScoringFormulaDto:
+  type: object
+  description: Data Transfer Object for competition scoring formula
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    competitionType:
+      $ref: "#/CompetitionType"
+    placement:
+      type: integer
+      example: 1
+    basePoints:
+      type: number
+      format: double
+      example: 100.00
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+QualificationSchemeDto:
+  type: object
+  description: Data Transfer Object for qualification scheme
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: "NAT_WATER_6L"
+    name:
+      type: string
+      example: "National Water 6 Lanes"
+    competitionType:
+      $ref: "#/CompetitionType"
+    competitionStageType:
+      $ref: "#/CompetitionStageType"
+    laneCount:
+      type: integer
+      example: 6
+    isActive:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+QualificationStageDto:
+  type: object
+  description: Data Transfer Object for qualification stage
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: "NAT_WATER_6L_H"
+    schemeId:
+      type: string
+      format: uuid
+    competitionEventType:
+      $ref: "#/QualificationEventType"
+    boatCountMin:
+      type: integer
+      example: 7
+    boatCountMax:
+      type: integer
+      example: 12
+    eventCount:
+      type: integer
+      example: 2
+    stageOrder:
+      type: integer
+      example: 1
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+QualificationRuleDto:
+  type: object
+  description: Data Transfer Object for qualification rule
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    code:
+      type: string
+      example: "NAT_WATER_6L_H_TO_FA"
+    schemeId:
+      type: string
+      format: uuid
+    sourceStageId:
+      type: string
+      format: uuid
+    destinationStageId:
+      type: string
+      format: uuid
+    qualifyByPosition:
+      type: integer
+      example: 3
+    qualifyByTime:
+      type: integer
+      example: 0
+    isRemainder:
+      type: boolean
+      example: false
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionDto:
+  type: object
+  description: Data Transfer Object for competition
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    shortName:
+      type: string
+      example: "NWC 2025"
+    name:
+      type: string
+      example: "National Water Championship 2025"
+    season:
+      type: integer
+      example: 2025
+    location:
+      type: string
+      example: "Plovdiv"
+    startDate:
+      type: string
+      format: date
+      example: "2025-06-15"
+    endDate:
+      type: string
+      format: date
+      example: "2025-06-17"
+    status:
+      $ref: "#/CompetitionStatus"
+    competitionType:
+      $ref: "#/CompetitionType"
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionStageDto:
+  type: object
+  description: Data Transfer Object for competition stage
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    competitionId:
+      type: string
+      format: uuid
+    stageOrder:
+      type: integer
+      example: 1
+    name:
+      type: string
+      example: "Day 1 - Heats"
+    startDate:
+      type: string
+      format: date
+    endDate:
+      type: string
+      format: date
+    submissionStart:
+      type: string
+      format: date-time
+    submissionEnd:
+      type: string
+      format: date-time
+    techMeetingAt:
+      type: string
+      format: date-time
+    changesDeadlineHours:
+      type: integer
+      example: 24
+    competitionGroupCodes:
+      type: string
+      description: JSON array of competition group codes
+    disciplineCodes:
+      type: string
+      description: JSON array of discipline codes
+    status:
+      $ref: "#/StageStatus"
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+EntryDto:
+  type: object
+  description: Data Transfer Object for competition entry
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    competitionId:
+      type: string
+      format: uuid
+    stageId:
+      type: string
+      format: uuid
+    clubId:
+      type: string
+      format: uuid
+    disciplineId:
+      type: string
+      format: uuid
+    teamNumber:
+      type: integer
+      example: 1
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CrewMemberDto:
+  type: object
+  description: Data Transfer Object for crew member
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    entryId:
+      type: string
+      format: uuid
+    seatPosition:
+      $ref: "#/SeatPosition"
+    athleteId:
+      type: string
+      format: uuid
+    cardNumber:
+      type: string
+      example: "BG001234"
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionEventTimetableDto:
+  type: object
+  description: Data Transfer Object for competition event timetable
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    competitionId:
+      type: string
+      format: uuid
+    stageId:
+      type: string
+      format: uuid
+    disciplineId:
+      type: string
+      format: uuid
+    competitionEventType:
+      $ref: "#/CompetitionEventType"
+    scheduledAt:
+      type: string
+      format: date-time
+    startedAt:
+      type: string
+      format: date-time
+    competitionEventStatus:
+      $ref: "#/CompetitionEventStatus"
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionParticipationDto:
+  type: object
+  description: Data Transfer Object for competition participation
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    competitionEventId:
+      type: string
+      format: uuid
+    entryId:
+      type: string
+      format: uuid
+    lane:
+      type: integer
+      example: 3
+    finishStatus:
+      $ref: "#/FinishStatus"
+    finishTimeMs:
+      type: integer
+      example: 420500
+    place:
+      type: integer
+      example: 1
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionFinalStandingDto:
+  type: object
+  description: Data Transfer Object for competition final standing
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    competitionId:
+      type: string
+      format: uuid
+    stageId:
+      type: string
+      format: uuid
+    disciplineId:
+      type: string
+      format: uuid
+    entryId:
+      type: string
+      format: uuid
+    overallRank:
+      type: integer
+      example: 1
+    bestTimeMs:
+      type: integer
+      example: 415200
+    points:
+      type: number
+      format: double
+      example: 100.00
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+AthleteWeightMeasurementDto:
+  type: object
+  description: Data Transfer Object for athlete weight measurement
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    athleteId:
+      type: string
+      format: uuid
+    weightKg:
+      type: number
+      format: double
+      example: 75.50
+    measurementDate:
+      type: string
+      format: date
+      example: "2025-06-15"
+    role:
+      $ref: "#/WeightMeasurementRole"
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time

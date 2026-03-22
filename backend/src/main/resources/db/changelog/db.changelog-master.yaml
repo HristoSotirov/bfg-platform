@@ -1,4 +1,5 @@
 databaseChangeLog:
+  # Initial schema - tables
   - include:
       file: db/changelog/001-initial-schema/001-users.yaml
   - include:
@@ -11,11 +12,54 @@ databaseChangeLog:
       file: db/changelog/001-initial-schema/005-accreditations.yaml
   - include:
       file: db/changelog/001-initial-schema/006-athlete-photo-history.yaml
+
+  # Competition module - template/config tables
+  - include:
+      file: db/changelog/001-initial-schema/007-competition-group-definitions.yaml
+  - include:
+      file: db/changelog/001-initial-schema/008-discipline-definitions.yaml
+  - include:
+      file: db/changelog/001-initial-schema/009-competition-templates.yaml
+  - include:
+      file: db/changelog/001-initial-schema/010-competition-stage-templates.yaml
+  - include:
+      file: db/changelog/001-initial-schema/011-competition-events-timetable-templates.yaml
+  - include:
+      file: db/changelog/001-initial-schema/012-competition-scoring-formulas.yaml
+
+  # Competition module - qualification rules
+  - include:
+      file: db/changelog/001-initial-schema/013-qualification-schemes.yaml
+  - include:
+      file: db/changelog/001-initial-schema/014-qualification-stages.yaml
+  - include:
+      file: db/changelog/001-initial-schema/015-qualification-rules.yaml
+
+  # Competition module - real competition tables
+  - include:
+      file: db/changelog/001-initial-schema/016-competitions.yaml
+  - include:
+      file: db/changelog/001-initial-schema/017-competition-stages.yaml
+  - include:
+      file: db/changelog/001-initial-schema/018-entries.yaml
+  - include:
+      file: db/changelog/001-initial-schema/019-crew-members.yaml
+  - include:
+      file: db/changelog/001-initial-schema/020-competition-events-timetables.yaml
+  - include:
+      file: db/changelog/001-initial-schema/021-competition-participations.yaml
+  - include:
+      file: db/changelog/001-initial-schema/022-competition-final-standings.yaml
+  - include:
+      file: db/changelog/001-initial-schema/023-athlete-weight-measurements.yaml
+
+  # Functions and triggers
   - include:
       file: db/changelog/002-functions/001-timestamp-triggers.yaml
   - include:
       file: db/changelog/002-functions/002-apply-timestamp-triggers.yaml
+
+  # Indexes
   - include:
-      file: db/changelog/003-indexes/001-accreditations-indexes.yaml
-  - include:
-      file: db/changelog/004-data/001-athletes-gender-uppercase.yaml
+      file: db/changelog/003-indexes/001-indexes.yaml
+

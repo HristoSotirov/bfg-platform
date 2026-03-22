@@ -1,0 +1,82 @@
+databaseChangeLog:
+  - changeSet:
+      id: 014-qualification-stages
+      author: bfg
+      changes:
+        - createTable:
+            tableName: qualification_stages
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: code
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_event_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "H, SF, FA, FB"
+              - column:
+                  name: boat_count_min
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: boat_count_max
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stage_order
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: qualification_stages
+            columnNames: scheme_id, boat_count_min, boat_count_max, competition_event_type
+            constraintName: uq_qual_stage_scheme_boats_type
+        - addForeignKeyConstraint:
+            baseTableName: qualification_stages
+            baseColumnNames: scheme_id
+            referencedTableName: qualification_schemes
+            referencedColumnNames: id
+            constraintName: fk_qual_stage_scheme
+            onDelete: CASCADE
+        - sql:
+            sql: |
+              ALTER TABLE qualification_stages
+                ADD CONSTRAINT chk_qual_stage_boat_min CHECK (boat_count_min > 0),
+                ADD CONSTRAINT chk_qual_stage_boat_max CHECK (boat_count_max >= boat_count_min),
+                ADD CONSTRAINT chk_qual_stage_event_count CHECK (event_count > 0),
+                ADD CONSTRAINT chk_qual_stage_order CHECK (stage_order > 0);

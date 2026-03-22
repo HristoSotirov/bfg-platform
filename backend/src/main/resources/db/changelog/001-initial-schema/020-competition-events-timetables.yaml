@@ -1,0 +1,87 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-competition-events-timetables
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_events_timetables
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: competition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stage_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discipline_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_event_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "H1, H2, R, SF, FB, FA"
+              - column:
+                  name: scheduled_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+              - column:
+                  name: started_at
+                  type: TIMESTAMPTZ
+              - column:
+                  name: competition_event_status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED"
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: competition_events_timetables
+            columnNames: stage_id, discipline_id, competition_event_type
+            constraintName: uq_event_tt_stage_disc_type
+        - addForeignKeyConstraint:
+            baseTableName: competition_events_timetables
+            baseColumnNames: competition_id
+            referencedTableName: competitions
+            referencedColumnNames: id
+            constraintName: fk_event_tt_competition
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: competition_events_timetables
+            baseColumnNames: stage_id
+            referencedTableName: competition_stages
+            referencedColumnNames: id
+            constraintName: fk_event_tt_stage
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: competition_events_timetables
+            baseColumnNames: discipline_id
+            referencedTableName: discipline_definitions
+            referencedColumnNames: id
+            constraintName: fk_event_tt_discipline
+            onDelete: RESTRICT

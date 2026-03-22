@@ -1,0 +1,106 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-competition-group-definitions
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_group_definitions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: code
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: short_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gender
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+                  remarks: "MALE, FEMALE, or MIXED"
+              - column:
+                  name: min_age
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_age
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_type
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transfer_group_id
+                  type: UUID
+              - column:
+                  name: transfer_min_crew
+                  type: INTEGER
+              - column:
+                  name: transfer_ratio
+                  type: INTEGER
+              - column:
+                  name: transfer_rounding
+                  type: VARCHAR(20)
+              - column:
+                  name: cox_required_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Recommended weight for coxswain"
+              - column:
+                  name: cox_min_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Minimal allowed weight for coxswain"
+              - column:
+                  name: light_max_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Maximum allowed weight for lightweight rowers"
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: true
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: competition_group_definitions
+            baseColumnNames: transfer_group_id
+            referencedTableName: competition_group_definitions
+            referencedColumnNames: id
+            constraintName: fk_comp_group_transfer_group
+            onDelete: SET NULL
+        - sql:
+            sql: |
+              ALTER TABLE competition_group_definitions
+                ADD CONSTRAINT chk_comp_group_cox_weight CHECK (cox_min_weight_kg IS NULL OR cox_required_weight_kg IS NULL OR cox_min_weight_kg <= cox_required_weight_kg),
+                ADD CONSTRAINT chk_comp_group_light_weight CHECK (light_max_weight_kg IS NULL OR light_max_weight_kg > 0);

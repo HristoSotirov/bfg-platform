@@ -1,0 +1,100 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-qualification-rules
+      author: bfg
+      changes:
+        - createTable:
+            tableName: qualification_rules
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: code
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: source_stage_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: destination_stage_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: qualify_by_position
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 0
+              - column:
+                  name: qualify_by_time
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 0
+              - column:
+                  name: is_remainder
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: qualification_rules
+            columnNames: source_stage_id, destination_stage_id
+            constraintName: uq_qual_rule_src_dst
+        - addForeignKeyConstraint:
+            baseTableName: qualification_rules
+            baseColumnNames: scheme_id
+            referencedTableName: qualification_schemes
+            referencedColumnNames: id
+            constraintName: fk_qual_rule_scheme
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: qualification_rules
+            baseColumnNames: source_stage_id
+            referencedTableName: qualification_stages
+            referencedColumnNames: id
+            constraintName: fk_qual_rule_source
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: qualification_rules
+            baseColumnNames: destination_stage_id
+            referencedTableName: qualification_stages
+            referencedColumnNames: id
+            constraintName: fk_qual_rule_destination
+            onDelete: CASCADE
+        - sql:
+            sql: |
+              ALTER TABLE qualification_rules
+                ADD CONSTRAINT chk_qual_rule_position CHECK (qualify_by_position >= 0),
+                ADD CONSTRAINT chk_qual_rule_time CHECK (qualify_by_time >= 0),
+                ADD CONSTRAINT chk_qual_rule_remainder CHECK (
+                  (is_remainder = true AND qualify_by_position = 0 AND qualify_by_time = 0)
+                  OR (is_remainder = false AND (qualify_by_position > 0 OR qualify_by_time > 0))
+                );

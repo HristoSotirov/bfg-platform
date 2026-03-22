@@ -1,0 +1,392 @@
+databaseChangeLog:
+  - changeSet:
+      id: 003-001-indexes
+      author: bfg
+      comment: Indexes for all tables - FKs, status/filter columns, and search columns
+      changes:
+
+        # =============================================
+        # users
+        # =============================================
+        # username has UNIQUE → already indexed
+        - createIndex:
+            tableName: users
+            indexName: idx_users_role
+            columns:
+              - column: { name: role }
+        - createIndex:
+            tableName: users
+            indexName: idx_users_scope_type
+            columns:
+              - column: { name: scope_type }
+        - createIndex:
+            tableName: users
+            indexName: idx_users_is_active
+            columns:
+              - column: { name: is_active }
+        - createIndex:
+            tableName: users
+            indexName: idx_users_email
+            columns:
+              - column: { name: email }
+
+        # =============================================
+        # clubs
+        # =============================================
+        # club_admin, club_email, name, short_name, card_prefix have UNIQUE → already indexed
+        - createIndex:
+            tableName: clubs
+            indexName: idx_clubs_scope_type
+            columns:
+              - column: { name: scope_type }
+        - createIndex:
+            tableName: clubs
+            indexName: idx_clubs_is_active
+            columns:
+              - column: { name: is_active }
+
+        # =============================================
+        # athletes
+        # =============================================
+        - createIndex:
+            tableName: athletes
+            indexName: idx_athletes_gender
+            columns:
+              - column: { name: gender }
+        - createIndex:
+            tableName: athletes
+            indexName: idx_athletes_scope_type
+            columns:
+              - column: { name: scope_type }
+        - createIndex:
+            tableName: athletes
+            indexName: idx_athletes_last_name
+            columns:
+              - column: { name: last_name }
+
+        # =============================================
+        # club_coaches
+        # =============================================
+        # coach_id has UNIQUE → already indexed
+        - createIndex:
+            tableName: club_coaches
+            indexName: idx_club_coaches_club_id
+            columns:
+              - column: { name: club_id }
+
+        # =============================================
+        # accreditations
+        # =============================================
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_athlete_id
+            columns:
+              - column: { name: athlete_id }
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_club_id
+            columns:
+              - column: { name: club_id }
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_accreditation_number
+            columns:
+              - column: { name: accreditation_number }
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_year
+            columns:
+              - column: { name: year }
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_status
+            columns:
+              - column: { name: status }
+        - createIndex:
+            tableName: accreditations
+            indexName: idx_accreditations_scope_type
+            columns:
+              - column: { name: scope_type }
+
+        # =============================================
+        # athlete_photo_history
+        # =============================================
+        - createIndex:
+            tableName: athlete_photo_history
+            indexName: idx_athlete_photo_history_athlete_id
+            columns:
+              - column: { name: athlete_id }
+        - createIndex:
+            tableName: athlete_photo_history
+            indexName: idx_athlete_photo_history_uploaded_by
+            columns:
+              - column: { name: uploaded_by }
+
+        # =============================================
+        # competition_group_definitions
+        # =============================================
+        # code has UNIQUE → already indexed
+        - createIndex:
+            tableName: competition_group_definitions
+            indexName: idx_comp_group_def_competition_type
+            columns:
+              - column: { name: competition_type }
+        - createIndex:
+            tableName: competition_group_definitions
+            indexName: idx_comp_group_def_gender
+            columns:
+              - column: { name: gender }
+
+        # =============================================
+        # discipline_definitions
+        # =============================================
+        # code has UNIQUE → already indexed
+        - createIndex:
+            tableName: discipline_definitions
+            indexName: idx_discipline_def_competition_group_id
+            columns:
+              - column: { name: competition_group_id }
+        - createIndex:
+            tableName: discipline_definitions
+            indexName: idx_discipline_def_competition_type
+            columns:
+              - column: { name: competition_type }
+        - createIndex:
+            tableName: discipline_definitions
+            indexName: idx_discipline_def_gender
+            columns:
+              - column: { name: gender }
+
+        # =============================================
+        # competition_templates
+        # =============================================
+        # code, short_name have UNIQUE → already indexed
+        - createIndex:
+            tableName: competition_templates
+            indexName: idx_comp_templates_competition_type
+            columns:
+              - column: { name: competition_type }
+
+        # =============================================
+        # competition_stage_templates
+        # =============================================
+        - createIndex:
+            tableName: competition_stage_templates
+            indexName: idx_comp_stage_templates_template_id
+            columns:
+              - column: { name: template_id }
+
+        # =============================================
+        # competition_events_timetable_templates
+        # =============================================
+        - createIndex:
+            tableName: competition_events_timetable_templates
+            indexName: idx_comp_event_tt_templates_template_id
+            columns:
+              - column: { name: template_id }
+        - createIndex:
+            tableName: competition_events_timetable_templates
+            indexName: idx_comp_event_tt_templates_stage_template_id
+            columns:
+              - column: { name: stage_template_id }
+
+        # =============================================
+        # competition_scoring_formulas
+        # =============================================
+        - createIndex:
+            tableName: competition_scoring_formulas
+            indexName: idx_comp_scoring_formulas_competition_type
+            columns:
+              - column: { name: competition_type }
+
+        # =============================================
+        # qualification_schemes
+        # =============================================
+        # code has UNIQUE → already indexed
+        - createIndex:
+            tableName: qualification_schemes
+            indexName: idx_qual_schemes_competition_type
+            columns:
+              - column: { name: competition_type }
+
+        # =============================================
+        # qualification_stages
+        # =============================================
+        # code has UNIQUE → already indexed
+        - createIndex:
+            tableName: qualification_stages
+            indexName: idx_qual_stages_scheme_id
+            columns:
+              - column: { name: scheme_id }
+
+        # =============================================
+        # qualification_rules
+        # =============================================
+        # code has UNIQUE → already indexed
+        - createIndex:
+            tableName: qualification_rules
+            indexName: idx_qual_rules_scheme_id
+            columns:
+              - column: { name: scheme_id }
+        - createIndex:
+            tableName: qualification_rules
+            indexName: idx_qual_rules_source_stage_id
+            columns:
+              - column: { name: source_stage_id }
+        - createIndex:
+            tableName: qualification_rules
+            indexName: idx_qual_rules_destination_stage_id
+            columns:
+              - column: { name: destination_stage_id }
+
+        # =============================================
+        # competitions
+        # =============================================
+        - createIndex:
+            tableName: competitions
+            indexName: idx_competitions_season
+            columns:
+              - column: { name: season }
+        - createIndex:
+            tableName: competitions
+            indexName: idx_competitions_status
+            columns:
+              - column: { name: status }
+        - createIndex:
+            tableName: competitions
+            indexName: idx_competitions_competition_type
+            columns:
+              - column: { name: competition_type }
+
+        # =============================================
+        # competition_stages
+        # =============================================
+        - createIndex:
+            tableName: competition_stages
+            indexName: idx_comp_stages_competition_id
+            columns:
+              - column: { name: competition_id }
+        - createIndex:
+            tableName: competition_stages
+            indexName: idx_comp_stages_status
+            columns:
+              - column: { name: status }
+
+        # =============================================
+        # entries
+        # =============================================
+        - createIndex:
+            tableName: entries
+            indexName: idx_entries_competition_id
+            columns:
+              - column: { name: competition_id }
+        - createIndex:
+            tableName: entries
+            indexName: idx_entries_stage_id
+            columns:
+              - column: { name: stage_id }
+        - createIndex:
+            tableName: entries
+            indexName: idx_entries_club_id
+            columns:
+              - column: { name: club_id }
+        - createIndex:
+            tableName: entries
+            indexName: idx_entries_discipline_id
+            columns:
+              - column: { name: discipline_id }
+
+        # =============================================
+        # crew_members
+        # =============================================
+        - createIndex:
+            tableName: crew_members
+            indexName: idx_crew_members_entry_id
+            columns:
+              - column: { name: entry_id }
+        - createIndex:
+            tableName: crew_members
+            indexName: idx_crew_members_athlete_id
+            columns:
+              - column: { name: athlete_id }
+
+        # =============================================
+        # competition_events_timetables
+        # =============================================
+        - createIndex:
+            tableName: competition_events_timetables
+            indexName: idx_comp_event_tt_competition_id
+            columns:
+              - column: { name: competition_id }
+        - createIndex:
+            tableName: competition_events_timetables
+            indexName: idx_comp_event_tt_stage_id
+            columns:
+              - column: { name: stage_id }
+        - createIndex:
+            tableName: competition_events_timetables
+            indexName: idx_comp_event_tt_discipline_id
+            columns:
+              - column: { name: discipline_id }
+        - createIndex:
+            tableName: competition_events_timetables
+            indexName: idx_comp_event_tt_status
+            columns:
+              - column: { name: competition_event_status }
+
+        # =============================================
+        # competition_participations
+        # =============================================
+        - createIndex:
+            tableName: competition_participations
+            indexName: idx_comp_participations_event_id
+            columns:
+              - column: { name: competition_event_id }
+        - createIndex:
+            tableName: competition_participations
+            indexName: idx_comp_participations_entry_id
+            columns:
+              - column: { name: entry_id }
+
+        # =============================================
+        # competition_final_standings
+        # =============================================
+        - createIndex:
+            tableName: competition_final_standings
+            indexName: idx_comp_final_standings_competition_id
+            columns:
+              - column: { name: competition_id }
+        - createIndex:
+            tableName: competition_final_standings
+            indexName: idx_comp_final_standings_stage_id
+            columns:
+              - column: { name: stage_id }
+        - createIndex:
+            tableName: competition_final_standings
+            indexName: idx_comp_final_standings_discipline_id
+            columns:
+              - column: { name: discipline_id }
+        - createIndex:
+            tableName: competition_final_standings
+            indexName: idx_comp_final_standings_entry_id
+            columns:
+              - column: { name: entry_id }
+
+        # =============================================
+        # athlete_weight_measurements
+        # =============================================
+        - createIndex:
+            tableName: athlete_weight_measurements
+            indexName: idx_athlete_weight_athlete_id
+            columns:
+              - column: { name: athlete_id }
+        - createIndex:
+            tableName: athlete_weight_measurements
+            indexName: idx_athlete_weight_measurement_date
+            columns:
+              - column: { name: measurement_date }
+        - createIndex:
+            tableName: athlete_weight_measurements
+            indexName: idx_athlete_weight_role
+            columns:
+              - column: { name: role }

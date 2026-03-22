@@ -10,7 +10,7 @@ databaseChangeLog:
                 BEFORE INSERT OR UPDATE ON users
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
-        
+
         # Clubs table triggers
         - sql:
             sql: |
@@ -18,15 +18,15 @@ databaseChangeLog:
                 BEFORE INSERT OR UPDATE ON clubs
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
-        
-        # Athletes table triggers (only modified_at, no created_at)
+
+        # Athletes table triggers
         - sql:
             sql: |
               CREATE TRIGGER set_athletes_modified_at
                 BEFORE INSERT OR UPDATE ON athletes
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
-        
+
         # Accreditations table triggers
         - sql:
             sql: |
@@ -35,3 +35,112 @@ databaseChangeLog:
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
 
+        # Competition module - template/config tables
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_group_definitions_modified_at
+                BEFORE INSERT OR UPDATE ON competition_group_definitions
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_discipline_definitions_modified_at
+                BEFORE INSERT OR UPDATE ON discipline_definitions
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_templates_modified_at
+                BEFORE INSERT OR UPDATE ON competition_templates
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_stage_templates_modified_at
+                BEFORE INSERT OR UPDATE ON competition_stage_templates
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_events_timetable_templates_modified_at
+                BEFORE INSERT OR UPDATE ON competition_events_timetable_templates
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_scoring_formulas_modified_at
+                BEFORE INSERT OR UPDATE ON competition_scoring_formulas
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+
+        # Competition module - qualification tables
+        - sql:
+            sql: |
+              CREATE TRIGGER set_qualification_schemes_modified_at
+                BEFORE INSERT OR UPDATE ON qualification_schemes
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_qualification_stages_modified_at
+                BEFORE INSERT OR UPDATE ON qualification_stages
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_qualification_rules_modified_at
+                BEFORE INSERT OR UPDATE ON qualification_rules
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+
+        # Competition module - real competition tables
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competitions_modified_at
+                BEFORE INSERT OR UPDATE ON competitions
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_stages_modified_at
+                BEFORE INSERT OR UPDATE ON competition_stages
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_entries_modified_at
+                BEFORE INSERT OR UPDATE ON entries
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_crew_members_modified_at
+                BEFORE INSERT OR UPDATE ON crew_members
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_events_timetables_modified_at
+                BEFORE INSERT OR UPDATE ON competition_events_timetables
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_participations_modified_at
+                BEFORE INSERT OR UPDATE ON competition_participations
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_final_standings_modified_at
+                BEFORE INSERT OR UPDATE ON competition_final_standings
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+
+        # Athlete weight measurements
+        - sql:
+            sql: |
+              CREATE TRIGGER set_athlete_weight_measurements_modified_at
+                BEFORE INSERT OR UPDATE ON athlete_weight_measurements
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
