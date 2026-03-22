@@ -85,4 +85,4 @@ databaseChangeLog:
             referencedTableName: competitions
             referencedColumnNames: id
             constraintName: fk_comp_stage_competition
-            onDelete: CASCADE
+            onDelete: RESTRICT

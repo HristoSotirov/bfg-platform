@@ -48,9 +48,9 @@ public class QualificationStage {
     @EqualsAndHashCode.Exclude
     private QualificationScheme scheme;
 
-    @Column(name = "competition_event_type")
+    @Column(name = "qualification_event_type")
     @Enumerated(EnumType.STRING)
-    private QualificationEventType competitionEventType;
+    private QualificationEventType qualificationEventType;
 
     @Column(name = "boat_count_min")
     private Integer boatCountMin;

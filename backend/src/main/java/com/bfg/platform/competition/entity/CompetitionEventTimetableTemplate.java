@@ -39,11 +39,11 @@ public class CompetitionEventTimetableTemplate {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "template_id")
-    private UUID templateId;
+    @Column(name = "competition_template_id")
+    private UUID competitionTemplateId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", insertable = false, updatable = false)
+    @JoinColumn(name = "competition_template_id", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
@@ -62,9 +62,9 @@ public class CompetitionEventTimetableTemplate {
     @Column(name = "discipline_code")
     private String disciplineCode;
 
-    @Column(name = "competition_event_type")
+    @Column(name = "qualification_event_type")
     @Enumerated(EnumType.STRING)
-    private QualificationEventType competitionEventType;
+    private QualificationEventType qualificationEventType;
 
     @Column(name = "day_offset")
     private Integer dayOffset;

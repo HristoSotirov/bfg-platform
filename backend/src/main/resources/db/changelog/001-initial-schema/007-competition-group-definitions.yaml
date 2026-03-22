@@ -23,6 +23,7 @@ databaseChangeLog:
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: gender
                   type: VARCHAR(10)
@@ -92,9 +93,4 @@ databaseChangeLog:
             referencedTableName: competition_group_definitions
             referencedColumnNames: id
             constraintName: fk_comp_group_transfer_group
-            onDelete: SET NULL
-        - sql:
-            sql: |
-              ALTER TABLE competition_group_definitions
-                ADD CONSTRAINT chk_comp_group_cox_weight CHECK (cox_min_weight_kg IS NULL OR cox_required_weight_kg IS NULL OR cox_min_weight_kg <= cox_required_weight_kg),
-                ADD CONSTRAINT chk_comp_group_light_weight CHECK (light_max_weight_kg IS NULL OR light_max_weight_kg > 0);
+            onDelete: RESTRICT

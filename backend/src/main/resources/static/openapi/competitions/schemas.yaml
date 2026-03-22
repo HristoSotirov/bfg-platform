@@ -224,8 +224,6 @@ CompetitionTemplateDto:
     name:
       type: string
       example: "National Water Championship 2-Day"
-    description:
-      type: string
     durationDays:
       type: integer
       example: 2
@@ -248,7 +246,7 @@ CompetitionStageTemplateDto:
     uuid:
       type: string
       format: uuid
-    templateId:
+    competitionTemplateId:
       type: string
       format: uuid
     stageOrder:
@@ -288,7 +286,7 @@ CompetitionEventTimetableTemplateDto:
     uuid:
       type: string
       format: uuid
-    templateId:
+    competitionTemplateId:
       type: string
       format: uuid
     stageTemplateId:
@@ -297,7 +295,7 @@ CompetitionEventTimetableTemplateDto:
     disciplineCode:
       type: string
       example: "M1x"
-    competitionEventType:
+    qualificationEventType:
       $ref: "#/QualificationEventType"
     dayOffset:
       type: integer
@@ -373,7 +371,7 @@ QualificationStageDto:
     schemeId:
       type: string
       format: uuid
-    competitionEventType:
+    qualificationEventType:
       $ref: "#/QualificationEventType"
     boatCountMin:
       type: integer
@@ -595,7 +593,7 @@ CompetitionEventTimetableDto:
     disciplineId:
       type: string
       format: uuid
-    competitionEventType:
+    qualificationEventType:
       $ref: "#/QualificationEventType"
     scheduledAt:
       type: string

@@ -69,9 +69,9 @@ public class CompetitionEventTimetable {
     @EqualsAndHashCode.Exclude
     private DisciplineDefinition discipline;
 
-    @Column(name = "competition_event_type")
+    @Column(name = "qualification_event_type")
     @Enumerated(EnumType.STRING)
-    private QualificationEventType competitionEventType;
+    private QualificationEventType qualificationEventType;
 
     @Column(name = "scheduled_at")
     private Instant scheduledAt;

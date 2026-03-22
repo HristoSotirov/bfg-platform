@@ -58,7 +58,7 @@ databaseChangeLog:
             referencedTableName: entries
             referencedColumnNames: id
             constraintName: fk_crew_entry
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: crew_members
             baseColumnNames: athlete_id

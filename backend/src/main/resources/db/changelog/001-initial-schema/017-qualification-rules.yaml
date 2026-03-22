@@ -68,27 +68,18 @@ databaseChangeLog:
             referencedTableName: qualification_schemes
             referencedColumnNames: id
             constraintName: fk_qual_rule_scheme
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: qualification_rules
             baseColumnNames: source_stage_id
             referencedTableName: qualification_stages
             referencedColumnNames: id
             constraintName: fk_qual_rule_source
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: qualification_rules
             baseColumnNames: destination_stage_id
             referencedTableName: qualification_stages
             referencedColumnNames: id
             constraintName: fk_qual_rule_destination
-            onDelete: CASCADE
-        - sql:
-            sql: |
-              ALTER TABLE qualification_rules
-                ADD CONSTRAINT chk_qual_rule_position CHECK (qualify_by_position >= 0),
-                ADD CONSTRAINT chk_qual_rule_time CHECK (qualify_by_time >= 0),
-                ADD CONSTRAINT chk_qual_rule_remainder CHECK (
-                  (is_remainder = true AND qualify_by_position = 0 AND qualify_by_time = 0)
-                  OR (is_remainder = false AND (qualify_by_position > 0 OR qualify_by_time > 0))
-                );
+            onDelete: RESTRICT

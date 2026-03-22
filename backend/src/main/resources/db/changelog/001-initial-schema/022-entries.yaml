@@ -60,14 +60,14 @@ databaseChangeLog:
             referencedTableName: competitions
             referencedColumnNames: id
             constraintName: fk_entry_competition
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: entries
             baseColumnNames: stage_id
             referencedTableName: competition_stages
             referencedColumnNames: id
             constraintName: fk_entry_stage
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: entries
             baseColumnNames: club_id

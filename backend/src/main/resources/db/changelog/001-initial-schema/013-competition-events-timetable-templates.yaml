@@ -14,7 +14,7 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: gen_random_uuid()
               - column:
-                  name: template_id
+                  name: competition_template_id
                   type: UUID
                   constraints:
                     nullable: false
@@ -27,12 +27,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: competition_event_type
+                  name: qualification_event_type
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
-                  remarks: "H1, H2, H3, H4, R, SF, FB, FA"
-              - column:
+                  remarks: "H1, H2, H3, H4, R, SF, FB, FA"              - column:
                   name: day_offset
                   type: INTEGER
                   constraints:
@@ -56,19 +55,19 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
             tableName: competition_events_timetable_templates
-            columnNames: template_id, stage_template_id, discipline_code, competition_event_type
+            columnNames: competition_template_id, stage_template_id, discipline_code, qualification_event_type
             constraintName: uq_event_timetable_template
         - addForeignKeyConstraint:
             baseTableName: competition_events_timetable_templates
-            baseColumnNames: template_id
+            baseColumnNames: competition_template_id
             referencedTableName: competition_templates
             referencedColumnNames: id
             constraintName: fk_event_tt_template
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: competition_events_timetable_templates
             baseColumnNames: stage_template_id
             referencedTableName: competition_stage_templates
             referencedColumnNames: id
             constraintName: fk_event_tt_stage_template
-            onDelete: CASCADE
+            onDelete: RESTRICT

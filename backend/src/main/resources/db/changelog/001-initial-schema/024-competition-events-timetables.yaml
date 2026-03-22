@@ -29,7 +29,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: competition_event_type
+                  name: qualification_event_type
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
@@ -62,7 +62,7 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
             tableName: competition_events_timetables
-            columnNames: stage_id, discipline_id, competition_event_type
+            columnNames: stage_id, discipline_id, qualification_event_type
             constraintName: uq_event_tt_stage_disc_type
         - addForeignKeyConstraint:
             baseTableName: competition_events_timetables
@@ -70,14 +70,14 @@ databaseChangeLog:
             referencedTableName: competitions
             referencedColumnNames: id
             constraintName: fk_event_tt_competition
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: competition_events_timetables
             baseColumnNames: stage_id
             referencedTableName: competition_stages
             referencedColumnNames: id
             constraintName: fk_event_tt_stage
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: competition_events_timetables
             baseColumnNames: discipline_id

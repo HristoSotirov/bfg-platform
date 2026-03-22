@@ -172,9 +172,9 @@ databaseChangeLog:
         # =============================================
         - createIndex:
             tableName: competition_stage_templates
-            indexName: idx_comp_stage_templates_template_id
+            indexName: idx_comp_stage_templates_competition_template_id
             columns:
-              - column: { name: template_id }
+              - column: { name: competition_template_id }
 
         # =============================================
         # competition_stage_template_groups
@@ -209,9 +209,9 @@ databaseChangeLog:
         # =============================================
         - createIndex:
             tableName: competition_events_timetable_templates
-            indexName: idx_comp_event_tt_templates_template_id
+            indexName: idx_comp_event_tt_templates_competition_template_id
             columns:
-              - column: { name: template_id }
+              - column: { name: competition_template_id }
         - createIndex:
             tableName: competition_events_timetable_templates
             indexName: idx_comp_event_tt_templates_stage_template_id

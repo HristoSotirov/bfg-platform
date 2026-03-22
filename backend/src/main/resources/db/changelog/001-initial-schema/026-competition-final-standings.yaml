@@ -74,14 +74,14 @@ databaseChangeLog:
             referencedTableName: competitions
             referencedColumnNames: id
             constraintName: fk_comp_standing_competition
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: competition_final_standings
             baseColumnNames: stage_id
             referencedTableName: competition_stages
             referencedColumnNames: id
             constraintName: fk_comp_standing_stage
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: competition_final_standings
             baseColumnNames: discipline_id
@@ -95,4 +95,4 @@ databaseChangeLog:
             referencedTableName: entries
             referencedColumnNames: id
             constraintName: fk_comp_standing_entry
-            onDelete: CASCADE
+            onDelete: RESTRICT

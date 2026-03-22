@@ -23,6 +23,7 @@ databaseChangeLog:
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: competition_group_id
                   type: UUID
@@ -92,4 +93,4 @@ databaseChangeLog:
             referencedTableName: competition_group_definitions
             referencedColumnNames: id
             constraintName: fk_discipline_comp_group
-            onDelete: SET NULL
+            onDelete: RESTRICT

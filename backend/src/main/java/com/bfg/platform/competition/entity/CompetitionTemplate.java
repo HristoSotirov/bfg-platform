@@ -39,9 +39,6 @@ public class CompetitionTemplate {
     @Column(name = "name")
     private String name;
 
-    @Column(name = "description", columnDefinition = "TEXT")
-    private String description;
-
     @Column(name = "duration_days")
     private Integer durationDays;
 

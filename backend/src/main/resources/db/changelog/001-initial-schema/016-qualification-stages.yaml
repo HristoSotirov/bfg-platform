@@ -19,7 +19,7 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: competition_event_type
+                  name: qualification_event_type
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
@@ -58,7 +58,7 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
             tableName: qualification_stages
-            columnNames: scheme_id, boat_count_min, boat_count_max, competition_event_type
+            columnNames: scheme_id, boat_count_min, boat_count_max, qualification_event_type
             constraintName: uq_qual_stage_scheme_boats_type
         - addForeignKeyConstraint:
             baseTableName: qualification_stages
@@ -66,11 +66,4 @@ databaseChangeLog:
             referencedTableName: qualification_schemes
             referencedColumnNames: id
             constraintName: fk_qual_stage_scheme
-            onDelete: CASCADE
-        - sql:
-            sql: |
-              ALTER TABLE qualification_stages
-                ADD CONSTRAINT chk_qual_stage_boat_min CHECK (boat_count_min > 0),
-                ADD CONSTRAINT chk_qual_stage_boat_max CHECK (boat_count_max >= boat_count_min),
-                ADD CONSTRAINT chk_qual_stage_event_count CHECK (event_count > 0),
-                ADD CONSTRAINT chk_qual_stage_order CHECK (stage_order > 0);
+            onDelete: RESTRICT

@@ -25,11 +25,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: description
-                  type: TEXT
-                  constraints:
-                    nullable: false
-              - column:
                   name: duration_days
                   type: INTEGER
                   constraints:

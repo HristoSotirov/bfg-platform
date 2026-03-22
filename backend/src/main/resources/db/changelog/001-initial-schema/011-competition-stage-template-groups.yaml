@@ -33,11 +33,11 @@ databaseChangeLog:
             referencedTableName: competition_stage_templates
             referencedColumnNames: id
             constraintName: fk_stage_tmpl_groups_stage_tmpl
-            onDelete: CASCADE
+            onDelete: RESTRICT
         - addForeignKeyConstraint:
             baseTableName: competition_stage_template_groups
             baseColumnNames: competition_group_id
             referencedTableName: competition_group_definitions
             referencedColumnNames: id
             constraintName: fk_stage_tmpl_groups_group
-            onDelete: CASCADE
+            onDelete: RESTRICT
