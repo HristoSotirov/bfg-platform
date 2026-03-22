@@ -1,6 +1,6 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionEventType;
+import com.bfg.platform.gen.model.QualificationEventType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -64,7 +64,7 @@ public class CompetitionEventTimetableTemplate {
 
     @Column(name = "competition_event_type")
     @Enumerated(EnumType.STRING)
-    private CompetitionEventType competitionEventType;
+    private QualificationEventType competitionEventType;
 
     @Column(name = "day_offset")
     private Integer dayOffset;

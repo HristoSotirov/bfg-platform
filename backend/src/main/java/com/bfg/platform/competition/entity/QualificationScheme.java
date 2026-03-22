@@ -34,9 +34,6 @@ public class QualificationScheme {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "code")
-    private String code;
-
     @Column(name = "name")
     private String name;
 

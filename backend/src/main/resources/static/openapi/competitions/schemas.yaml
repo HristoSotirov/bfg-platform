@@ -35,25 +35,17 @@ CompetitionStageType:
     - INTERNAL_NATIONAL_ERGO_ALL
     - BALKAN_WATER_JUNIOR_SENIOR
 
-CompetitionEventType:
+QualificationEventType:
   type: string
   description: Type of competition event (heat, repechage, semi-final, final)
   enum:
     - H1
     - H2
-    - R
+    - H3
+    - H4
     - SF
     - FB
     - FA
-
-QualificationEventType:
-  type: string
-  description: Type of qualification event
-  enum:
-    - H
-    - SF
-    - FA
-    - FB
 
 CompetitionStatus:
   type: string
@@ -126,9 +118,6 @@ CompetitionGroupDefinitionDto:
     uuid:
       type: string
       format: uuid
-    code:
-      type: string
-      example: "M_U23"
     name:
       type: string
       example: "Men Under 23"
@@ -180,17 +169,15 @@ DisciplineDefinitionDto:
     uuid:
       type: string
       format: uuid
-    code:
-      type: string
-      example: "M1x"
     name:
       type: string
       example: "Men's Single Sculls"
     shortName:
       type: string
       example: "M1x"
-    gender:
-      $ref: "#/CompetitionGroupGender"
+    competitionGroupId:
+      type: string
+      format: uuid
     boatClass:
       type: string
       example: "1x"
@@ -206,9 +193,6 @@ DisciplineDefinitionDto:
     distanceMeters:
       type: integer
       example: 2000
-    competitionGroupId:
-      type: string
-      format: uuid
     maxTransferCrew:
       type: integer
     scoringMultiplier:
@@ -234,9 +218,6 @@ CompetitionTemplateDto:
     uuid:
       type: string
       format: uuid
-    code:
-      type: string
-      example: "NAT_WATER_2DAY"
     shortName:
       type: string
       example: "Nat Water 2D"
@@ -279,12 +260,6 @@ CompetitionStageTemplateDto:
     durationDays:
       type: integer
       example: 1
-    competitionGroupCodes:
-      type: string
-      description: JSON array of competition group codes
-    disciplineCodes:
-      type: string
-      description: JSON array of discipline codes
     competitionStageType:
       $ref: "#/CompetitionStageType"
     competitionGroupIds:
@@ -323,7 +298,7 @@ CompetitionEventTimetableTemplateDto:
       type: string
       example: "M1x"
     competitionEventType:
-      $ref: "#/CompetitionEventType"
+      $ref: "#/QualificationEventType"
     dayOffset:
       type: integer
       example: 0
@@ -368,9 +343,6 @@ QualificationSchemeDto:
     uuid:
       type: string
       format: uuid
-    code:
-      type: string
-      example: "NAT_WATER_6L"
     name:
       type: string
       example: "National Water 6 Lanes"
@@ -398,9 +370,6 @@ QualificationStageDto:
     uuid:
       type: string
       format: uuid
-    code:
-      type: string
-      example: "NAT_WATER_6L_H"
     schemeId:
       type: string
       format: uuid
@@ -432,9 +401,6 @@ QualificationRuleDto:
     uuid:
       type: string
       format: uuid
-    code:
-      type: string
-      example: "NAT_WATER_6L_H_TO_FA"
     schemeId:
       type: string
       format: uuid
@@ -630,7 +596,7 @@ CompetitionEventTimetableDto:
       type: string
       format: uuid
     competitionEventType:
-      $ref: "#/CompetitionEventType"
+      $ref: "#/QualificationEventType"
     scheduledAt:
       type: string
       format: date-time

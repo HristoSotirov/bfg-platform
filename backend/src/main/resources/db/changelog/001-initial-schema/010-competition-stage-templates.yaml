@@ -35,7 +35,7 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: competition_stage_type
-                  type: VARCHAR(255)
+                  type: VARCHAR(50)
                   constraints:
                     nullable: false
               - column:

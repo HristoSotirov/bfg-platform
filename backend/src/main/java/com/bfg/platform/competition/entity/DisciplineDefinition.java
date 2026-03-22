@@ -1,6 +1,5 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionGroupGender;
 import com.bfg.platform.gen.model.CompetitionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -40,18 +39,21 @@ public class DisciplineDefinition {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "code")
-    private String code;
-
     @Column(name = "name")
     private String name;
 
     @Column(name = "short_name")
     private String shortName;
 
-    @Column(name = "gender")
-    @Enumerated(EnumType.STRING)
-    private CompetitionGroupGender gender;
+    @Column(name = "competition_group_id")
+    private UUID competitionGroupId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "competition_group_id", insertable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private CompetitionGroupDefinition competitionGroup;
 
     @Column(name = "boat_class")
     private String boatClass;
@@ -67,16 +69,6 @@ public class DisciplineDefinition {
 
     @Column(name = "distance_meters")
     private Integer distanceMeters;
-
-    @Column(name = "competition_group_id")
-    private UUID competitionGroupId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "competition_group_id", insertable = false, updatable = false)
-    @Setter(AccessLevel.NONE)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private CompetitionGroupDefinition competitionGroup;
 
     @Column(name = "max_transfer_crew")
     private Integer maxTransferCrew;

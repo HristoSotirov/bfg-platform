@@ -38,9 +38,6 @@ public class QualificationStage {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "code")
-    private String code;
-
     @Column(name = "scheme_id")
     private UUID schemeId;
 

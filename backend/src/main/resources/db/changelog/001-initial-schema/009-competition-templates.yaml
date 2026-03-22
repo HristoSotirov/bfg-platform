@@ -14,12 +14,6 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: gen_random_uuid()
               - column:
-                  name: code
-                  type: VARCHAR(20)
-                  constraints:
-                    nullable: false
-                    unique: true
-              - column:
                   name: short_name
                   type: VARCHAR(50)
                   constraints:

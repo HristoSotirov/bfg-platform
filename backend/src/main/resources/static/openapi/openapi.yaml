@@ -180,8 +180,6 @@ components:
       $ref: "./competitions/schemas.yaml#/TransferRounding"
     CompetitionStageType:
       $ref: "./competitions/schemas.yaml#/CompetitionStageType"
-    CompetitionEventType:
-      $ref: "./competitions/schemas.yaml#/CompetitionEventType"
     QualificationEventType:
       $ref: "./competitions/schemas.yaml#/QualificationEventType"
     CompetitionStatus:

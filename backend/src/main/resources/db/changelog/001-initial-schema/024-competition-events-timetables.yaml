@@ -33,7 +33,7 @@ databaseChangeLog:
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
-                  remarks: "H1, H2, R, SF, FB, FA"
+                  remarks: "H1, H2, H3, H4, R, SF, FB, FA"
               - column:
                   name: scheduled_at
                   type: TIMESTAMPTZ

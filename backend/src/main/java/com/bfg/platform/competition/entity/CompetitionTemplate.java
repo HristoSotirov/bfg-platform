@@ -33,9 +33,6 @@ public class CompetitionTemplate {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "code")
-    private String code;
-
     @Column(name = "short_name")
     private String shortName;
 
