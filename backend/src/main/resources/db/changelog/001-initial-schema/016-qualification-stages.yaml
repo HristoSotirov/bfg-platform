@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 011-competition-events-timetable-templates
+      id: 016-qualification-stages
       author: bfg
       changes:
         - createTable:
-            tableName: competition_events_timetable_templates
+            tableName: qualification_stages
             columns:
               - column:
                   name: id
@@ -14,16 +14,14 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: gen_random_uuid()
               - column:
-                  name: template_id
-                  type: UUID
+                  name: code
+                  type: VARCHAR(50)
                   constraints:
                     nullable: false
+                    unique: true
               - column:
-                  name: stage_template_id
+                  name: scheme_id
                   type: UUID
-              - column:
-                  name: discipline_code
-                  type: VARCHAR(20)
                   constraints:
                     nullable: false
               - column:
@@ -31,15 +29,25 @@ databaseChangeLog:
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
-                  remarks: "H1, H2, R, SF, FB, FA"
+                  remarks: "H, SF, FA, FB"
               - column:
-                  name: day_offset
+                  name: boat_count_min
                   type: INTEGER
                   constraints:
                     nullable: false
               - column:
-                  name: planned_time
-                  type: TIME
+                  name: boat_count_max
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stage_order
+                  type: INTEGER
                   constraints:
                     nullable: false
               - column:
@@ -55,20 +63,20 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
-            tableName: competition_events_timetable_templates
-            columnNames: template_id, stage_template_id, discipline_code, competition_event_type
-            constraintName: uq_event_timetable_template
+            tableName: qualification_stages
+            columnNames: scheme_id, boat_count_min, boat_count_max, competition_event_type
+            constraintName: uq_qual_stage_scheme_boats_type
         - addForeignKeyConstraint:
-            baseTableName: competition_events_timetable_templates
-            baseColumnNames: template_id
-            referencedTableName: competition_templates
+            baseTableName: qualification_stages
+            baseColumnNames: scheme_id
+            referencedTableName: qualification_schemes
             referencedColumnNames: id
-            constraintName: fk_event_tt_template
+            constraintName: fk_qual_stage_scheme
             onDelete: CASCADE
-        - addForeignKeyConstraint:
-            baseTableName: competition_events_timetable_templates
-            baseColumnNames: stage_template_id
-            referencedTableName: competition_stage_templates
-            referencedColumnNames: id
-            constraintName: fk_event_tt_stage_template
-            onDelete: CASCADE
+        - sql:
+            sql: |
+              ALTER TABLE qualification_stages
+                ADD CONSTRAINT chk_qual_stage_boat_min CHECK (boat_count_min > 0),
+                ADD CONSTRAINT chk_qual_stage_boat_max CHECK (boat_count_max >= boat_count_min),
+                ADD CONSTRAINT chk_qual_stage_event_count CHECK (event_count > 0),
+                ADD CONSTRAINT chk_qual_stage_order CHECK (stage_order > 0);

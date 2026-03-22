@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 020-competition-stage-groups
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_stage_groups
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: stage_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_group_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: competition_stage_groups
+            columnNames: stage_id, competition_group_id
+            constraintName: uq_stage_group
+        - addForeignKeyConstraint:
+            baseTableName: competition_stage_groups
+            baseColumnNames: stage_id
+            referencedTableName: competition_stages
+            referencedColumnNames: id
+            constraintName: fk_stage_groups_stage
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: competition_stage_groups
+            baseColumnNames: competition_group_id
+            referencedTableName: competition_group_definitions
+            referencedColumnNames: id
+            constraintName: fk_stage_groups_group
+            onDelete: CASCADE

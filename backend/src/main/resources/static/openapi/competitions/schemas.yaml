@@ -284,6 +284,18 @@ CompetitionStageTemplateDto:
       description: JSON array of discipline codes
     competitionStageType:
       $ref: "#/CompetitionStageType"
+    competitionGroupIds:
+      type: array
+      description: IDs of competition groups assigned to this stage template
+      items:
+        type: string
+        format: uuid
+    disciplineIds:
+      type: array
+      description: IDs of disciplines assigned to this stage template
+      items:
+        type: string
+        format: uuid
     createdAt:
       type: string
       format: date-time
@@ -525,6 +537,18 @@ CompetitionStageDto:
       description: JSON array of discipline codes
     status:
       $ref: "#/StageStatus"
+    competitionGroupIds:
+      type: array
+      description: IDs of competition groups assigned to this stage
+      items:
+        type: string
+        format: uuid
+    disciplineIds:
+      type: array
+      description: IDs of disciplines assigned to this stage
+      items:
+        type: string
+        format: uuid
     createdAt:
       type: string
       format: date-time

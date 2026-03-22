@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 023-athlete-weight-measurements
+      id: 023-crew-members
       author: bfg
       changes:
         - createTable:
-            tableName: athlete_weight_measurements
+            tableName: crew_members
             columns:
               - column:
                   name: id
@@ -14,27 +14,24 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: gen_random_uuid()
               - column:
+                  name: entry_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: seat_position
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "BOW, 2..7, STROKE, COX"
+              - column:
                   name: athlete_id
                   type: UUID
                   constraints:
                     nullable: false
               - column:
-                  name: weight_kg
-                  type: NUMERIC(5,2)
-                  constraints:
-                    nullable: false
-                  remarks: "Measured weight of the athlete"
-              - column:
-                  name: measurement_date
-                  type: DATE
-                  constraints:
-                    nullable: false
-              - column:
-                  name: role
-                  type: VARCHAR(20)
-                  constraints:
-                    nullable: false
-                  remarks: "ROWER or COX"
+                  name: card_number
+                  type: VARCHAR(50)
               - column:
                   name: created_at
                   type: TIMESTAMPTZ
@@ -48,18 +45,24 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
-            tableName: athlete_weight_measurements
-            columnNames: athlete_id, measurement_date
-            constraintName: uq_athlete_weight_date
+            tableName: crew_members
+            columnNames: entry_id, seat_position
+            constraintName: uq_crew_entry_seat
+        - addUniqueConstraint:
+            tableName: crew_members
+            columnNames: entry_id, athlete_id
+            constraintName: uq_crew_entry_athlete
         - addForeignKeyConstraint:
-            baseTableName: athlete_weight_measurements
+            baseTableName: crew_members
+            baseColumnNames: entry_id
+            referencedTableName: entries
+            referencedColumnNames: id
+            constraintName: fk_crew_entry
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: crew_members
             baseColumnNames: athlete_id
             referencedTableName: athletes
             referencedColumnNames: id
-            constraintName: fk_athlete_weight_athlete
-            onDelete: CASCADE
-        - sql:
-            sql: |
-              ALTER TABLE athlete_weight_measurements
-                ADD CONSTRAINT chk_athlete_weight_positive CHECK (weight_kg > 0),
-                ADD CONSTRAINT chk_athlete_weight_role CHECK (role IN ('ROWER', 'COX'));
+            constraintName: fk_crew_athlete
+            onDelete: RESTRICT

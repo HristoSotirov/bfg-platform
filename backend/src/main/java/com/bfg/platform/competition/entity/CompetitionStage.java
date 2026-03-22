@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -56,15 +57,19 @@ public class CompetitionStage {
     @Column(name = "changes_deadline_hours")
     private Integer changesDeadlineHours;
 
-    @Column(name = "competition_group_codes", columnDefinition = "jsonb")
-    private String competitionGroupCodes;
-
-    @Column(name = "discipline_codes", columnDefinition = "jsonb")
-    private String disciplineCodes;
-
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
     private StageStatus status;
+
+    @OneToMany(mappedBy = "stage", fetch = FetchType.LAZY, cascade = {})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<CompetitionStageGroup> groups;
+
+    @OneToMany(mappedBy = "stage", fetch = FetchType.LAZY, cascade = {})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<CompetitionStageDiscipline> disciplines;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

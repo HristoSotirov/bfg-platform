@@ -177,6 +177,34 @@ databaseChangeLog:
               - column: { name: template_id }
 
         # =============================================
+        # competition_stage_template_groups
+        # =============================================
+        - createIndex:
+            tableName: competition_stage_template_groups
+            indexName: idx_stage_tmpl_groups_stage_template_id
+            columns:
+              - column: { name: stage_template_id }
+        - createIndex:
+            tableName: competition_stage_template_groups
+            indexName: idx_stage_tmpl_groups_competition_group_id
+            columns:
+              - column: { name: competition_group_id }
+
+        # =============================================
+        # competition_stage_template_disciplines
+        # =============================================
+        - createIndex:
+            tableName: competition_stage_template_disciplines
+            indexName: idx_stage_tmpl_disciplines_stage_template_id
+            columns:
+              - column: { name: stage_template_id }
+        - createIndex:
+            tableName: competition_stage_template_disciplines
+            indexName: idx_stage_tmpl_disciplines_discipline_id
+            columns:
+              - column: { name: discipline_id }
+
+        # =============================================
         # competition_events_timetable_templates
         # =============================================
         - createIndex:
@@ -271,6 +299,34 @@ databaseChangeLog:
             indexName: idx_comp_stages_status
             columns:
               - column: { name: status }
+
+        # =============================================
+        # competition_stage_groups
+        # =============================================
+        - createIndex:
+            tableName: competition_stage_groups
+            indexName: idx_comp_stage_groups_stage_id
+            columns:
+              - column: { name: stage_id }
+        - createIndex:
+            tableName: competition_stage_groups
+            indexName: idx_comp_stage_groups_competition_group_id
+            columns:
+              - column: { name: competition_group_id }
+
+        # =============================================
+        # competition_stage_disciplines
+        # =============================================
+        - createIndex:
+            tableName: competition_stage_disciplines
+            indexName: idx_comp_stage_disciplines_stage_id
+            columns:
+              - column: { name: stage_id }
+        - createIndex:
+            tableName: competition_stage_disciplines
+            indexName: idx_comp_stage_disciplines_discipline_id
+            columns:
+              - column: { name: discipline_id }
 
         # =============================================
         # entries

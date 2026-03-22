@@ -34,16 +34,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: competition_group_codes
-                  type: JSONB
-                  constraints:
-                    nullable: false
-              - column:
-                  name: discipline_codes
-                  type: JSONB
-                  constraints:
-                    nullable: false
-              - column:
                   name: competition_stage_type
                   type: VARCHAR(255)
                   constraints:

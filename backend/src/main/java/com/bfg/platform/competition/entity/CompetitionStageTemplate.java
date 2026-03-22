@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -40,15 +41,19 @@ public class CompetitionStageTemplate {
     @Column(name = "duration_days")
     private Integer durationDays;
 
-    @Column(name = "competition_group_codes", columnDefinition = "jsonb")
-    private String competitionGroupCodes;
-
-    @Column(name = "discipline_codes", columnDefinition = "jsonb")
-    private String disciplineCodes;
-
     @Column(name = "competition_stage_type")
     @Enumerated(EnumType.STRING)
     private CompetitionStageType competitionStageType;
+
+    @OneToMany(mappedBy = "stageTemplate", fetch = FetchType.LAZY, cascade = {})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<CompetitionStageTemplateGroup> groups;
+
+    @OneToMany(mappedBy = "stageTemplate", fetch = FetchType.LAZY, cascade = {})
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private List<CompetitionStageTemplateDiscipline> disciplines;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

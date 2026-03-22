@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 018-entries
+      id: 026-competition-final-standings
       author: bfg
       changes:
         - createTable:
-            tableName: entries
+            tableName: competition_final_standings
             columns:
               - column:
                   name: id
@@ -24,18 +24,28 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: club_id
-                  type: UUID
-                  constraints:
-                    nullable: false
-              - column:
                   name: discipline_id
                   type: UUID
                   constraints:
                     nullable: false
               - column:
-                  name: team_number
+                  name: entry_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: overall_rank
                   type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: best_time_ms
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: points
+                  type: DECIMAL(10,2)
                   constraints:
                     nullable: false
               - column:
@@ -51,34 +61,38 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
-            tableName: entries
-            columnNames: stage_id, club_id, discipline_id, team_number
-            constraintName: uq_entry_stage_club_disc_team
+            tableName: competition_final_standings
+            columnNames: stage_id, discipline_id, entry_id
+            constraintName: uq_comp_standing_stage_disc_entry
+        - addUniqueConstraint:
+            tableName: competition_final_standings
+            columnNames: stage_id, discipline_id, overall_rank
+            constraintName: uq_comp_standing_stage_disc_rank
         - addForeignKeyConstraint:
-            baseTableName: entries
+            baseTableName: competition_final_standings
             baseColumnNames: competition_id
             referencedTableName: competitions
             referencedColumnNames: id
-            constraintName: fk_entry_competition
+            constraintName: fk_comp_standing_competition
             onDelete: CASCADE
         - addForeignKeyConstraint:
-            baseTableName: entries
+            baseTableName: competition_final_standings
             baseColumnNames: stage_id
             referencedTableName: competition_stages
             referencedColumnNames: id
-            constraintName: fk_entry_stage
+            constraintName: fk_comp_standing_stage
             onDelete: CASCADE
         - addForeignKeyConstraint:
-            baseTableName: entries
-            baseColumnNames: club_id
-            referencedTableName: clubs
-            referencedColumnNames: id
-            constraintName: fk_entry_club
-            onDelete: RESTRICT
-        - addForeignKeyConstraint:
-            baseTableName: entries
+            baseTableName: competition_final_standings
             baseColumnNames: discipline_id
             referencedTableName: discipline_definitions
             referencedColumnNames: id
-            constraintName: fk_entry_discipline
+            constraintName: fk_comp_standing_discipline
             onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competition_final_standings
+            baseColumnNames: entry_id
+            referencedTableName: entries
+            referencedColumnNames: id
+            constraintName: fk_comp_standing_entry
+            onDelete: CASCADE

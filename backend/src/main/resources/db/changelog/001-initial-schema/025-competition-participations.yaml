@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 021-competition-participations
+      id: 025-competition-participations
       author: bfg
       changes:
         - createTable:

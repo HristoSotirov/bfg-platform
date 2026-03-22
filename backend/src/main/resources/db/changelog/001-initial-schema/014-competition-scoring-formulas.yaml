@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 012-competition-scoring-formulas
+      id: 014-competition-scoring-formulas
       author: bfg
       changes:
         - createTable:

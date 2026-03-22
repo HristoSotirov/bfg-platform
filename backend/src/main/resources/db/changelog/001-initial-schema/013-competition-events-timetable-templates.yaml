@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 020-competition-events-timetables
+      id: 013-competition-events-timetable-templates
       author: bfg
       changes:
         - createTable:
-            tableName: competition_events_timetables
+            tableName: competition_events_timetable_templates
             columns:
               - column:
                   name: id
@@ -14,18 +14,16 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: gen_random_uuid()
               - column:
-                  name: competition_id
+                  name: template_id
                   type: UUID
                   constraints:
                     nullable: false
               - column:
-                  name: stage_id
+                  name: stage_template_id
                   type: UUID
-                  constraints:
-                    nullable: false
               - column:
-                  name: discipline_id
-                  type: UUID
+                  name: discipline_code
+                  type: VARCHAR(20)
                   constraints:
                     nullable: false
               - column:
@@ -35,19 +33,15 @@ databaseChangeLog:
                     nullable: false
                   remarks: "H1, H2, R, SF, FB, FA"
               - column:
-                  name: scheduled_at
-                  type: TIMESTAMPTZ
+                  name: day_offset
+                  type: INTEGER
                   constraints:
                     nullable: false
               - column:
-                  name: started_at
-                  type: TIMESTAMPTZ
-              - column:
-                  name: competition_event_status
-                  type: VARCHAR(20)
+                  name: planned_time
+                  type: TIME
                   constraints:
                     nullable: false
-                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED"
               - column:
                   name: created_at
                   type: TIMESTAMPTZ
@@ -61,27 +55,20 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
-            tableName: competition_events_timetables
-            columnNames: stage_id, discipline_id, competition_event_type
-            constraintName: uq_event_tt_stage_disc_type
+            tableName: competition_events_timetable_templates
+            columnNames: template_id, stage_template_id, discipline_code, competition_event_type
+            constraintName: uq_event_timetable_template
         - addForeignKeyConstraint:
-            baseTableName: competition_events_timetables
-            baseColumnNames: competition_id
-            referencedTableName: competitions
+            baseTableName: competition_events_timetable_templates
+            baseColumnNames: template_id
+            referencedTableName: competition_templates
             referencedColumnNames: id
-            constraintName: fk_event_tt_competition
+            constraintName: fk_event_tt_template
             onDelete: CASCADE
         - addForeignKeyConstraint:
-            baseTableName: competition_events_timetables
-            baseColumnNames: stage_id
-            referencedTableName: competition_stages
+            baseTableName: competition_events_timetable_templates
+            baseColumnNames: stage_template_id
+            referencedTableName: competition_stage_templates
             referencedColumnNames: id
-            constraintName: fk_event_tt_stage
+            constraintName: fk_event_tt_stage_template
             onDelete: CASCADE
-        - addForeignKeyConstraint:
-            baseTableName: competition_events_timetables
-            baseColumnNames: discipline_id
-            referencedTableName: discipline_definitions
-            referencedColumnNames: id
-            constraintName: fk_event_tt_discipline
-            onDelete: RESTRICT

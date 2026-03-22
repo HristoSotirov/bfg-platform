@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 015-qualification-rules
+      id: 017-qualification-rules
       author: bfg
       changes:
         - createTable:

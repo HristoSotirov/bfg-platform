@@ -1,10 +1,10 @@
 databaseChangeLog:
   - changeSet:
-      id: 022-competition-final-standings
+      id: 024-competition-events-timetables
       author: bfg
       changes:
         - createTable:
-            tableName: competition_final_standings
+            tableName: competition_events_timetables
             columns:
               - column:
                   name: id
@@ -29,25 +29,25 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: entry_id
-                  type: UUID
+                  name: competition_event_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "H1, H2, R, SF, FB, FA"
+              - column:
+                  name: scheduled_at
+                  type: TIMESTAMPTZ
                   constraints:
                     nullable: false
               - column:
-                  name: overall_rank
-                  type: INTEGER
-                  constraints:
-                    nullable: false
+                  name: started_at
+                  type: TIMESTAMPTZ
               - column:
-                  name: best_time_ms
-                  type: INTEGER
+                  name: competition_event_status
+                  type: VARCHAR(20)
                   constraints:
                     nullable: false
-              - column:
-                  name: points
-                  type: DECIMAL(10,2)
-                  constraints:
-                    nullable: false
+                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED"
               - column:
                   name: created_at
                   type: TIMESTAMPTZ
@@ -61,38 +61,27 @@ databaseChangeLog:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
-            tableName: competition_final_standings
-            columnNames: stage_id, discipline_id, entry_id
-            constraintName: uq_comp_standing_stage_disc_entry
-        - addUniqueConstraint:
-            tableName: competition_final_standings
-            columnNames: stage_id, discipline_id, overall_rank
-            constraintName: uq_comp_standing_stage_disc_rank
+            tableName: competition_events_timetables
+            columnNames: stage_id, discipline_id, competition_event_type
+            constraintName: uq_event_tt_stage_disc_type
         - addForeignKeyConstraint:
-            baseTableName: competition_final_standings
+            baseTableName: competition_events_timetables
             baseColumnNames: competition_id
             referencedTableName: competitions
             referencedColumnNames: id
-            constraintName: fk_comp_standing_competition
+            constraintName: fk_event_tt_competition
             onDelete: CASCADE
         - addForeignKeyConstraint:
-            baseTableName: competition_final_standings
+            baseTableName: competition_events_timetables
             baseColumnNames: stage_id
             referencedTableName: competition_stages
             referencedColumnNames: id
-            constraintName: fk_comp_standing_stage
+            constraintName: fk_event_tt_stage
             onDelete: CASCADE
         - addForeignKeyConstraint:
-            baseTableName: competition_final_standings
+            baseTableName: competition_events_timetables
             baseColumnNames: discipline_id
             referencedTableName: discipline_definitions
             referencedColumnNames: id
-            constraintName: fk_comp_standing_discipline
+            constraintName: fk_event_tt_discipline
             onDelete: RESTRICT
-        - addForeignKeyConstraint:
-            baseTableName: competition_final_standings
-            baseColumnNames: entry_id
-            referencedTableName: entries
-            referencedColumnNames: id
-            constraintName: fk_comp_standing_entry
-            onDelete: CASCADE

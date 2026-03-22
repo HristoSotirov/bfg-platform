@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: 012-competition-stage-template-disciplines
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_stage_template_disciplines
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: stage_template_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discipline_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: competition_stage_template_disciplines
+            columnNames: stage_template_id, discipline_id
+            constraintName: uq_stage_tmpl_discipline
+        - addForeignKeyConstraint:
+            baseTableName: competition_stage_template_disciplines
+            baseColumnNames: stage_template_id
+            referencedTableName: competition_stage_templates
+            referencedColumnNames: id
+            constraintName: fk_stage_tmpl_disciplines_stage_tmpl
+            onDelete: CASCADE
+        - addForeignKeyConstraint:
+            baseTableName: competition_stage_template_disciplines
+            baseColumnNames: discipline_id
+            referencedTableName: discipline_definitions
+            referencedColumnNames: id
+            constraintName: fk_stage_tmpl_disciplines_discipline
+            onDelete: CASCADE

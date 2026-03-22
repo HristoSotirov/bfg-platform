@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 017-competition-stages
+      id: 019-competition-stages
       author: bfg
       changes:
         - createTable:
@@ -56,16 +56,6 @@ databaseChangeLog:
               - column:
                   name: changes_deadline_hours
                   type: INTEGER
-                  constraints:
-                    nullable: false
-              - column:
-                  name: competition_group_codes
-                  type: JSONB
-                  constraints:
-                    nullable: false
-              - column:
-                  name: discipline_codes
-                  type: JSONB
                   constraints:
                     nullable: false
               - column:
