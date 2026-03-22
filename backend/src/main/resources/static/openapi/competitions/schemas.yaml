@@ -4,8 +4,8 @@ CompetitionType:
   type: string
   description: Type of competition
   enum:
-    - NATIONAL_ERGO
-    - NATIONAL_WATER
+    - INTERNAL_NATIONAL_ERGO
+    - INTERNAL_NATIONAL_WATER
     - BALKAN_WATER
 
 CompetitionGroupGender:
@@ -28,9 +28,12 @@ CompetitionStageType:
   type: string
   description: Type of competition stage
   enum:
-    - NATIONAL_WATER_ADULT
-    - NATIONAL_WATER_SENIOR
-    - NATIONAL_WATER_JUNIOR_YOUTH
+    - INTERNAL_NATIONAL_WATER_ADULT
+    - INTERNAL_NATIONAL_WATER_SENIOR
+    - INTERNAL_NATIONAL_WATER_JUNIOR
+    - INTERNAL_NATIONAL_WATER_ALL
+    - INTERNAL_NATIONAL_ERGO_ALL
+    - BALKAN_WATER_JUNIOR_SENIOR
 
 CompetitionEventType:
   type: string
