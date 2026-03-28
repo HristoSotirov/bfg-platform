@@ -232,22 +232,20 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
 /accreditations/{accreditationUuid}:
-  parameters:
-    - name: accreditationUuid
-      in: path
-      required: true
-      description: UUID of the accreditation
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{accreditation.uuid.required}")'
-
   get:
     tags:
       - Accreditations
     summary: Get accreditation by UUID
     operationId: getAccreditationByUuid
     parameters:
+      - name: accreditationUuid
+        in: path
+        required: true
+        description: UUID of the accreditation
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{accreditation.uuid.required}")'
       - name: expand
         in: query
         description: |
@@ -285,6 +283,15 @@
     summary: Update accreditation status
     description: Updates only the status of an accreditation. Only FEDERATION_ADMIN and APP_ADMIN can update accreditation status.
     operationId: patchAccreditationStatus
+    parameters:
+      - name: accreditationUuid
+        in: path
+        required: true
+        description: UUID of the accreditation
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{accreditation.uuid.required}")'
     requestBody:
       required: true
       content:

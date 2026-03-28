@@ -49,10 +49,17 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: competition_type
-                  type: VARCHAR(50)
+                  name: scope_type
+                  type: VARCHAR(20)
                   constraints:
                     nullable: false
+                  remarks: "INTERNAL, EXTERNAL, NATIONAL"
+              - column:
+                  name: scoring_scheme_id
+                  type: UUID
+              - column:
+                  name: qualification_scheme_id
+                  type: UUID
               - column:
                   name: created_at
                   type: TIMESTAMPTZ
@@ -65,3 +72,17 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: competitions
+            baseColumnNames: scoring_scheme_id
+            referencedTableName: scoring_schemes
+            referencedColumnNames: id
+            constraintName: fk_competition_scoring_scheme
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competitions
+            baseColumnNames: qualification_scheme_id
+            referencedTableName: qualification_schemes
+            referencedColumnNames: id
+            constraintName: fk_competition_qual_scheme
+            onDelete: RESTRICT

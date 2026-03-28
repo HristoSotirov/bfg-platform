@@ -49,15 +49,11 @@ public class CompetitionEventTimetableTemplate {
     @EqualsAndHashCode.Exclude
     private CompetitionTemplate template;
 
-    @Column(name = "stage_template_id")
-    private UUID stageTemplateId;
+    @Column(name = "event_number")
+    private Integer eventNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stage_template_id", insertable = false, updatable = false)
-    @Setter(AccessLevel.NONE)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private CompetitionStageTemplate stageTemplate;
+    @Column(name = "qualification_stage_number")
+    private Integer qualificationStageNumber;
 
     @Column(name = "discipline_code")
     private String disciplineCode;

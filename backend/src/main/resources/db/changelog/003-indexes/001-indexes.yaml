@@ -8,7 +8,6 @@ databaseChangeLog:
         # =============================================
         # users
         # =============================================
-        # username has UNIQUE → already indexed
         - createIndex:
             tableName: users
             indexName: idx_users_role
@@ -33,7 +32,6 @@ databaseChangeLog:
         # =============================================
         # clubs
         # =============================================
-        # club_admin, club_email, name, short_name, card_prefix have UNIQUE → already indexed
         - createIndex:
             tableName: clubs
             indexName: idx_clubs_scope_type
@@ -67,7 +65,6 @@ databaseChangeLog:
         # =============================================
         # club_coaches
         # =============================================
-        # coach_id has UNIQUE → already indexed
         - createIndex:
             tableName: club_coaches
             indexName: idx_club_coaches_club_id
@@ -125,12 +122,6 @@ databaseChangeLog:
         # =============================================
         # competition_group_definitions
         # =============================================
-        # code has UNIQUE → already indexed
-        - createIndex:
-            tableName: competition_group_definitions
-            indexName: idx_comp_group_def_competition_type
-            columns:
-              - column: { name: competition_type }
         - createIndex:
             tableName: competition_group_definitions
             indexName: idx_comp_group_def_gender
@@ -140,67 +131,92 @@ databaseChangeLog:
         # =============================================
         # discipline_definitions
         # =============================================
-        # code has UNIQUE → already indexed
         - createIndex:
             tableName: discipline_definitions
             indexName: idx_discipline_def_competition_group_id
             columns:
               - column: { name: competition_group_id }
+
+        # =============================================
+        # scoring_schemes
+        # =============================================
         - createIndex:
-            tableName: discipline_definitions
-            indexName: idx_discipline_def_competition_type
+            tableName: scoring_schemes
+            indexName: idx_scoring_schemes_is_active
             columns:
-              - column: { name: competition_type }
+              - column: { name: is_active }
+
+        # =============================================
+        # scoring_rules
+        # =============================================
         - createIndex:
-            tableName: discipline_definitions
-            indexName: idx_discipline_def_gender
+            tableName: scoring_rules
+            indexName: idx_scoring_rules_scheme_id
             columns:
-              - column: { name: gender }
+              - column: { name: scoring_scheme_id }
+
+        # =============================================
+        # scoring_scheme_boat_coefficients
+        # =============================================
+        - createIndex:
+            tableName: scoring_scheme_boat_coefficients
+            indexName: idx_scoring_boat_coeff_scheme_id
+            columns:
+              - column: { name: scoring_scheme_id }
+
+        # =============================================
+        # qualification_stages
+        # =============================================
+        - createIndex:
+            tableName: qualification_stages
+            indexName: idx_qual_stages_scheme_id
+            columns:
+              - column: { name: qualification_scheme_id }
+
+        # =============================================
+        # qualification_rules
+        # =============================================
+        - createIndex:
+            tableName: qualification_rules
+            indexName: idx_qual_rules_scheme_id
+            columns:
+              - column: { name: qualification_scheme_id }
+        - createIndex:
+            tableName: qualification_rules
+            indexName: idx_qual_rules_source_stage_id
+            columns:
+              - column: { name: source_stage_id }
+        - createIndex:
+            tableName: qualification_rules
+            indexName: idx_qual_rules_dest_stage_id
+            columns:
+              - column: { name: destination_stage_id }
 
         # =============================================
         # competition_templates
         # =============================================
-        # code, short_name have UNIQUE → already indexed
         - createIndex:
             tableName: competition_templates
-            indexName: idx_comp_templates_competition_type
+            indexName: idx_comp_templates_scoring_scheme_id
             columns:
-              - column: { name: competition_type }
+              - column: { name: scoring_scheme_id }
+        - createIndex:
+            tableName: competition_templates
+            indexName: idx_comp_templates_qual_scheme_id
+            columns:
+              - column: { name: qualification_scheme_id }
 
         # =============================================
-        # competition_stage_templates
+        # competition_template_disciplines
         # =============================================
         - createIndex:
-            tableName: competition_stage_templates
-            indexName: idx_comp_stage_templates_competition_template_id
+            tableName: competition_template_disciplines
+            indexName: idx_comp_tmpl_disc_template_id
             columns:
               - column: { name: competition_template_id }
-
-        # =============================================
-        # competition_stage_template_groups
-        # =============================================
         - createIndex:
-            tableName: competition_stage_template_groups
-            indexName: idx_stage_tmpl_groups_stage_template_id
-            columns:
-              - column: { name: stage_template_id }
-        - createIndex:
-            tableName: competition_stage_template_groups
-            indexName: idx_stage_tmpl_groups_competition_group_id
-            columns:
-              - column: { name: competition_group_id }
-
-        # =============================================
-        # competition_stage_template_disciplines
-        # =============================================
-        - createIndex:
-            tableName: competition_stage_template_disciplines
-            indexName: idx_stage_tmpl_disciplines_stage_template_id
-            columns:
-              - column: { name: stage_template_id }
-        - createIndex:
-            tableName: competition_stage_template_disciplines
-            indexName: idx_stage_tmpl_disciplines_discipline_id
+            tableName: competition_template_disciplines
+            indexName: idx_comp_tmpl_disc_discipline_id
             columns:
               - column: { name: discipline_id }
 
@@ -212,60 +228,6 @@ databaseChangeLog:
             indexName: idx_comp_event_tt_templates_competition_template_id
             columns:
               - column: { name: competition_template_id }
-        - createIndex:
-            tableName: competition_events_timetable_templates
-            indexName: idx_comp_event_tt_templates_stage_template_id
-            columns:
-              - column: { name: stage_template_id }
-
-        # =============================================
-        # competition_scoring_formulas
-        # =============================================
-        - createIndex:
-            tableName: competition_scoring_formulas
-            indexName: idx_comp_scoring_formulas_competition_type
-            columns:
-              - column: { name: competition_type }
-
-        # =============================================
-        # qualification_schemes
-        # =============================================
-        # code has UNIQUE → already indexed
-        - createIndex:
-            tableName: qualification_schemes
-            indexName: idx_qual_schemes_competition_type
-            columns:
-              - column: { name: competition_type }
-
-        # =============================================
-        # qualification_stages
-        # =============================================
-        # code has UNIQUE → already indexed
-        - createIndex:
-            tableName: qualification_stages
-            indexName: idx_qual_stages_scheme_id
-            columns:
-              - column: { name: scheme_id }
-
-        # =============================================
-        # qualification_rules
-        # =============================================
-        # code has UNIQUE → already indexed
-        - createIndex:
-            tableName: qualification_rules
-            indexName: idx_qual_rules_scheme_id
-            columns:
-              - column: { name: scheme_id }
-        - createIndex:
-            tableName: qualification_rules
-            indexName: idx_qual_rules_source_stage_id
-            columns:
-              - column: { name: source_stage_id }
-        - createIndex:
-            tableName: qualification_rules
-            indexName: idx_qual_rules_destination_stage_id
-            columns:
-              - column: { name: destination_stage_id }
 
         # =============================================
         # competitions
@@ -282,49 +244,31 @@ databaseChangeLog:
               - column: { name: status }
         - createIndex:
             tableName: competitions
-            indexName: idx_competitions_competition_type
+            indexName: idx_competitions_scope_type
             columns:
-              - column: { name: competition_type }
+              - column: { name: scope_type }
+        - createIndex:
+            tableName: competitions
+            indexName: idx_competitions_scoring_scheme_id
+            columns:
+              - column: { name: scoring_scheme_id }
+        - createIndex:
+            tableName: competitions
+            indexName: idx_competitions_qual_scheme_id
+            columns:
+              - column: { name: qualification_scheme_id }
 
         # =============================================
-        # competition_stages
+        # competition_disciplines
         # =============================================
         - createIndex:
-            tableName: competition_stages
-            indexName: idx_comp_stages_competition_id
+            tableName: competition_disciplines
+            indexName: idx_comp_disc_competition_id
             columns:
               - column: { name: competition_id }
         - createIndex:
-            tableName: competition_stages
-            indexName: idx_comp_stages_status
-            columns:
-              - column: { name: status }
-
-        # =============================================
-        # competition_stage_groups
-        # =============================================
-        - createIndex:
-            tableName: competition_stage_groups
-            indexName: idx_comp_stage_groups_stage_id
-            columns:
-              - column: { name: stage_id }
-        - createIndex:
-            tableName: competition_stage_groups
-            indexName: idx_comp_stage_groups_competition_group_id
-            columns:
-              - column: { name: competition_group_id }
-
-        # =============================================
-        # competition_stage_disciplines
-        # =============================================
-        - createIndex:
-            tableName: competition_stage_disciplines
-            indexName: idx_comp_stage_disciplines_stage_id
-            columns:
-              - column: { name: stage_id }
-        - createIndex:
-            tableName: competition_stage_disciplines
-            indexName: idx_comp_stage_disciplines_discipline_id
+            tableName: competition_disciplines
+            indexName: idx_comp_disc_discipline_id
             columns:
               - column: { name: discipline_id }
 
@@ -336,11 +280,6 @@ databaseChangeLog:
             indexName: idx_entries_competition_id
             columns:
               - column: { name: competition_id }
-        - createIndex:
-            tableName: entries
-            indexName: idx_entries_stage_id
-            columns:
-              - column: { name: stage_id }
         - createIndex:
             tableName: entries
             indexName: idx_entries_club_id
@@ -376,11 +315,6 @@ databaseChangeLog:
               - column: { name: competition_id }
         - createIndex:
             tableName: competition_events_timetables
-            indexName: idx_comp_event_tt_stage_id
-            columns:
-              - column: { name: stage_id }
-        - createIndex:
-            tableName: competition_events_timetables
             indexName: idx_comp_event_tt_discipline_id
             columns:
               - column: { name: discipline_id }
@@ -412,11 +346,6 @@ databaseChangeLog:
             indexName: idx_comp_final_standings_competition_id
             columns:
               - column: { name: competition_id }
-        - createIndex:
-            tableName: competition_final_standings
-            indexName: idx_comp_final_standings_stage_id
-            columns:
-              - column: { name: stage_id }
         - createIndex:
             tableName: competition_final_standings
             indexName: idx_comp_final_standings_discipline_id

@@ -228,16 +228,6 @@
               message: "Invalid request data."
 
 /admins/{adminId}/club:
-  parameters:
-    - name: adminId
-      in: path
-      required: true
-      description: UUID of the club administrator user
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
-
   get:
     tags:
       - Clubs
@@ -245,6 +235,14 @@
     description: Returns the club where the administrator is registered as club admin. Returns null if admin is not assigned to any club.
     operationId: getClubByAdminId
     parameters:
+      - name: adminId
+        in: path
+        required: true
+        description: UUID of the club administrator user
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
       - name: expand
         in: query
         description: |
@@ -282,22 +280,20 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
 /clubs/{clubUuid}:
-  parameters:
-    - name: clubUuid
-      in: path
-      required: true
-      description: UUID of the club
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
-
   get:
     tags:
       - Clubs
     summary: Get club by UUID
     operationId: getClubByUuid
     parameters:
+      - name: clubUuid
+        in: path
+        required: true
+        description: UUID of the club
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
       - name: expand
         in: query
         description: |
@@ -348,6 +344,15 @@
       - Clubs
     summary: Update club by UUID
     operationId: patchClubByUuid
+    parameters:
+      - name: clubUuid
+        in: path
+        required: true
+        description: UUID of the club
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
     requestBody:
       required: true
       content:
@@ -413,6 +418,15 @@
       - Clubs
     summary: Delete club by UUID
     operationId: deleteClubByUuid
+    parameters:
+      - name: clubUuid
+        in: path
+        required: true
+        description: UUID of the club
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
     responses:
       "204":
         description: Club deleted successfully (no content)
@@ -436,21 +450,20 @@
               message: "Cannot delete club: club has assigned coaches"
 
 /clubs/{clubUuid}/logo:
-  parameters:
-    - name: clubUuid
-      in: path
-      required: true
-      description: UUID of the club
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
-
   patch:
     tags:
       - Clubs
     summary: Update club logo by UUID
     operationId: patchClubLogoByUuid
+    parameters:
+      - name: clubUuid
+        in: path
+        required: true
+        description: UUID of the club
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
     requestBody:
       required: true
       content:

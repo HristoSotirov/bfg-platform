@@ -1,21 +1,26 @@
 package com.bfg.platform.competition.entity;
 
 import com.bfg.platform.gen.model.CompetitionStatus;
-import com.bfg.platform.gen.model.CompetitionType;
+import com.bfg.platform.gen.model.ScopeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -57,9 +62,19 @@ public class Competition {
     @Enumerated(EnumType.STRING)
     private CompetitionStatus status;
 
-    @Column(name = "competition_type")
+    @Column(name = "scope_type")
     @Enumerated(EnumType.STRING)
-    private CompetitionType competitionType;
+    private ScopeType scopeType;
+
+    @Column(name = "qualification_scheme_id")
+    private UUID qualificationSchemeId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "qualification_scheme_id", insertable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private QualificationScheme qualificationScheme;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

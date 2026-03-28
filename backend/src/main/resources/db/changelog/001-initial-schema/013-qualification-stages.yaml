@@ -1,0 +1,70 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-qualification-stages
+      author: bfg
+      changes:
+        - createTable:
+            tableName: qualification_stages
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: qualification_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: boat_count_min
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: boat_count_max
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: qualification_event_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "H, SF, FB, FA"
+              - column:
+                  name: event_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: stage_rank
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  remarks: "1=Finals (FA/FB), 2=Semifinals (SF), 3=Heats (H)"
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: qualification_stages
+            columnNames: qualification_scheme_id, boat_count_min, boat_count_max, qualification_event_type
+            constraintName: uq_qual_stage
+        - addForeignKeyConstraint:
+            baseTableName: qualification_stages
+            baseColumnNames: qualification_scheme_id
+            referencedTableName: qualification_schemes
+            referencedColumnNames: id
+            constraintName: fk_qual_stage_scheme
+            onDelete: RESTRICT

@@ -18,12 +18,12 @@ databaseChangeLog:
                   type: VARCHAR(100)
                   constraints:
                     nullable: false
+                    unique: true
               - column:
                   name: short_name
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: gender
                   type: VARCHAR(10)
@@ -41,15 +41,10 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: competition_type
-                  type: VARCHAR(50)
-                  constraints:
-                    nullable: false
-              - column:
-                  name: transfer_group_id
+                  name: transfer_from_group_id
                   type: UUID
               - column:
-                  name: transfer_min_crew
+                  name: min_crew_for_transfer
                   type: INTEGER
               - column:
                   name: transfer_ratio
@@ -74,7 +69,6 @@ databaseChangeLog:
                   type: BOOLEAN
                   constraints:
                     nullable: false
-                  defaultValueBoolean: true
               - column:
                   name: created_at
                   type: TIMESTAMPTZ
@@ -89,7 +83,7 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addForeignKeyConstraint:
             baseTableName: competition_group_definitions
-            baseColumnNames: transfer_group_id
+            baseColumnNames: transfer_from_group_id
             referencedTableName: competition_group_definitions
             referencedColumnNames: id
             constraintName: fk_comp_group_transfer_group

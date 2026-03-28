@@ -79,6 +79,52 @@ paths:
   /accreditations/{accreditationUuid}:
     $ref: "./accreditations/paths.yaml#/~1accreditations~1{accreditationUuid}"
 
+  # Competition definitions & templates
+  /competition-group-definitions:
+    $ref: "./competitions/paths.yaml#/~1competition-group-definitions"
+  /competition-group-definitions/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1competition-group-definitions~1{uuid}"
+  /discipline-definitions:
+    $ref: "./competitions/paths.yaml#/~1discipline-definitions"
+  /discipline-definitions/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1discipline-definitions~1{uuid}"
+  /scoring-schemes:
+    $ref: "./competitions/paths.yaml#/~1scoring-schemes"
+  /scoring-schemes/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1scoring-schemes~1{uuid}"
+  /scoring-rules:
+    $ref: "./competitions/paths.yaml#/~1scoring-rules"
+  /scoring-rules/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1scoring-rules~1{uuid}"
+  /scoring-scheme-boat-coefficients:
+    $ref: "./competitions/paths.yaml#/~1scoring-scheme-boat-coefficients"
+  /scoring-scheme-boat-coefficients/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1scoring-scheme-boat-coefficients~1{uuid}"
+  /competition-templates:
+    $ref: "./competitions/paths.yaml#/~1competition-templates"
+  /competition-templates/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1competition-templates~1{uuid}"
+  /competition-template-disciplines:
+    $ref: "./competitions/paths.yaml#/~1competition-template-disciplines"
+  /competition-template-disciplines/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1competition-template-disciplines~1{uuid}"
+  /competition-event-timetable-templates:
+    $ref: "./competitions/paths.yaml#/~1competition-event-timetable-templates"
+  /competition-event-timetable-templates/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1competition-event-timetable-templates~1{uuid}"
+  /qualification-schemes:
+    $ref: "./competitions/paths.yaml#/~1qualification-schemes"
+  /qualification-schemes/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1qualification-schemes~1{uuid}"
+  /qualification-stages:
+    $ref: "./competitions/paths.yaml#/~1qualification-stages"
+  /qualification-stages/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1qualification-stages~1{uuid}"
+  /qualification-rules:
+    $ref: "./competitions/paths.yaml#/~1qualification-rules"
+  /qualification-rules/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1qualification-rules~1{uuid}"
+
 components:
   securitySchemes:
     bearerAuth:
@@ -172,20 +218,18 @@ components:
       $ref: "./accreditations/schemas.yaml#/AccreditationBatchRenewalResponse"
 
     # Competitions - Enums
-    CompetitionType:
-      $ref: "./competitions/schemas.yaml#/CompetitionType"
     CompetitionGroupGender:
       $ref: "./competitions/schemas.yaml#/CompetitionGroupGender"
     TransferRounding:
       $ref: "./competitions/schemas.yaml#/TransferRounding"
-    CompetitionStageType:
-      $ref: "./competitions/schemas.yaml#/CompetitionStageType"
+    BoatClass:
+      $ref: "./competitions/schemas.yaml#/BoatClass"
+    ScoringType:
+      $ref: "./competitions/schemas.yaml#/ScoringType"
     QualificationEventType:
       $ref: "./competitions/schemas.yaml#/QualificationEventType"
     CompetitionStatus:
       $ref: "./competitions/schemas.yaml#/CompetitionStatus"
-    StageStatus:
-      $ref: "./competitions/schemas.yaml#/StageStatus"
     CompetitionEventStatus:
       $ref: "./competitions/schemas.yaml#/CompetitionEventStatus"
     FinishStatus:
@@ -200,14 +244,16 @@ components:
       $ref: "./competitions/schemas.yaml#/CompetitionGroupDefinitionDto"
     DisciplineDefinitionDto:
       $ref: "./competitions/schemas.yaml#/DisciplineDefinitionDto"
+    ScoringSchemeDto:
+      $ref: "./competitions/schemas.yaml#/ScoringSchemeDto"
+    ScoringRuleDto:
+      $ref: "./competitions/schemas.yaml#/ScoringRuleDto"
     CompetitionTemplateDto:
       $ref: "./competitions/schemas.yaml#/CompetitionTemplateDto"
-    CompetitionStageTemplateDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionStageTemplateDto"
+    CompetitionTemplateDisciplineDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionTemplateDisciplineDto"
     CompetitionEventTimetableTemplateDto:
       $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
-    CompetitionScoringFormulaDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionScoringFormulaDto"
     QualificationSchemeDto:
       $ref: "./competitions/schemas.yaml#/QualificationSchemeDto"
     QualificationStageDto:
@@ -216,8 +262,8 @@ components:
       $ref: "./competitions/schemas.yaml#/QualificationRuleDto"
     CompetitionDto:
       $ref: "./competitions/schemas.yaml#/CompetitionDto"
-    CompetitionStageDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionStageDto"
+    CompetitionDisciplineDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionDisciplineDto"
     EntryDto:
       $ref: "./competitions/schemas.yaml#/EntryDto"
     CrewMemberDto:
@@ -230,3 +276,33 @@ components:
       $ref: "./competitions/schemas.yaml#/CompetitionFinalStandingDto"
     AthleteWeightMeasurementDto:
       $ref: "./competitions/schemas.yaml#/AthleteWeightMeasurementDto"
+
+    # Competitions - Create/Update Requests
+    CompetitionGroupDefinitionRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionGroupDefinitionRequest"
+    DisciplineDefinitionRequest:
+      $ref: "./competitions/schemas.yaml#/DisciplineDefinitionRequest"
+    ScoringSchemeRequest:
+      $ref: "./competitions/schemas.yaml#/ScoringSchemeRequest"
+    ScoringRuleRequest:
+      $ref: "./competitions/schemas.yaml#/ScoringRuleRequest"
+    ScoringSchemeBoatCoefficientDto:
+      $ref: "./competitions/schemas.yaml#/ScoringSchemeBoatCoefficientDto"
+    ScoringSchemeBoatCoefficientRequest:
+      $ref: "./competitions/schemas.yaml#/ScoringSchemeBoatCoefficientRequest"
+    CompetitionTemplateCreateRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionTemplateCreateRequest"
+    CompetitionTemplateUpdateRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionTemplateUpdateRequest"
+    CompetitionTemplateDisciplineCreateRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionTemplateDisciplineCreateRequest"
+    CompetitionEventTimetableTemplateCreateRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateCreateRequest"
+    CompetitionEventTimetableTemplateUpdateRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateUpdateRequest"
+    QualificationSchemeRequest:
+      $ref: "./competitions/schemas.yaml#/QualificationSchemeRequest"
+    QualificationStageRequest:
+      $ref: "./competitions/schemas.yaml#/QualificationStageRequest"
+    QualificationRuleRequest:
+      $ref: "./competitions/schemas.yaml#/QualificationRuleRequest"

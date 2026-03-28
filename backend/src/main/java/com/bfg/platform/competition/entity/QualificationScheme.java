@@ -1,11 +1,7 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionStageType;
-import com.bfg.platform.gen.model.CompetitionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,14 +32,6 @@ public class QualificationScheme {
 
     @Column(name = "name")
     private String name;
-
-    @Column(name = "competition_type")
-    @Enumerated(EnumType.STRING)
-    private CompetitionType competitionType;
-
-    @Column(name = "competition_stage_type")
-    @Enumerated(EnumType.STRING)
-    private CompetitionStageType competitionStageType;
 
     @Column(name = "lane_count")
     private Integer laneCount;

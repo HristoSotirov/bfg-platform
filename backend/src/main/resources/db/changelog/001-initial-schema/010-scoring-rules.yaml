@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 010-scoring-rules
+      author: bfg
+      changes:
+        - createTable:
+            tableName: scoring_rules
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: scoring_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: placement
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: base_points
+                  type: DECIMAL(10,2)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: scoring_rules
+            columnNames: scoring_scheme_id, placement
+            constraintName: uq_scoring_rule_scheme_placement
+        - addForeignKeyConstraint:
+            baseTableName: scoring_rules
+            baseColumnNames: scoring_scheme_id
+            referencedTableName: scoring_schemes
+            referencedColumnNames: id
+            constraintName: fk_scoring_rule_scheme
+            onDelete: RESTRICT

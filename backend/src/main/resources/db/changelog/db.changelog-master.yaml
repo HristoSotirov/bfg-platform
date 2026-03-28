@@ -13,53 +13,53 @@ databaseChangeLog:
   - include:
       file: db/changelog/001-initial-schema/006-athlete-photo-history.yaml
 
-  # Competition module - template/config tables
+  # Competition module - definitions
   - include:
       file: db/changelog/001-initial-schema/007-competition-group-definitions.yaml
   - include:
       file: db/changelog/001-initial-schema/008-discipline-definitions.yaml
-  - include:
-      file: db/changelog/001-initial-schema/009-competition-templates.yaml
-  - include:
-      file: db/changelog/001-initial-schema/010-competition-stage-templates.yaml
-  - include:
-      file: db/changelog/001-initial-schema/011-competition-stage-template-groups.yaml
-  - include:
-      file: db/changelog/001-initial-schema/012-competition-stage-template-disciplines.yaml
-  - include:
-      file: db/changelog/001-initial-schema/013-competition-events-timetable-templates.yaml
-  - include:
-      file: db/changelog/001-initial-schema/014-competition-scoring-formulas.yaml
 
-  # Competition module - qualification rules
+  # Competition module - scoring schemes
   - include:
-      file: db/changelog/001-initial-schema/015-qualification-schemes.yaml
+      file: db/changelog/001-initial-schema/009-scoring-schemes.yaml
   - include:
-      file: db/changelog/001-initial-schema/016-qualification-stages.yaml
+      file: db/changelog/001-initial-schema/010-scoring-rules.yaml
   - include:
-      file: db/changelog/001-initial-schema/017-qualification-rules.yaml
+      file: db/changelog/001-initial-schema/011-scoring-scheme-boat-coefficients.yaml
+
+  # Competition module - qualification schemes
+  - include:
+      file: db/changelog/001-initial-schema/012-qualification-schemes.yaml
+  - include:
+      file: db/changelog/001-initial-schema/013-qualification-stages.yaml
+  - include:
+      file: db/changelog/001-initial-schema/014-qualification-rules.yaml
+
+  # Competition module - templates
+  - include:
+      file: db/changelog/001-initial-schema/015-competition-templates.yaml
+  - include:
+      file: db/changelog/001-initial-schema/016-competition-template-disciplines.yaml
+  - include:
+      file: db/changelog/001-initial-schema/017-competition-events-timetable-templates.yaml
 
   # Competition module - real competition tables
   - include:
       file: db/changelog/001-initial-schema/018-competitions.yaml
   - include:
-      file: db/changelog/001-initial-schema/019-competition-stages.yaml
+      file: db/changelog/001-initial-schema/019-competition-disciplines.yaml
   - include:
-      file: db/changelog/001-initial-schema/020-competition-stage-groups.yaml
+      file: db/changelog/001-initial-schema/020-entries.yaml
   - include:
-      file: db/changelog/001-initial-schema/021-competition-stage-disciplines.yaml
+      file: db/changelog/001-initial-schema/021-crew-members.yaml
   - include:
-      file: db/changelog/001-initial-schema/022-entries.yaml
+      file: db/changelog/001-initial-schema/022-competition-events-timetables.yaml
   - include:
-      file: db/changelog/001-initial-schema/023-crew-members.yaml
+      file: db/changelog/001-initial-schema/023-competition-participations.yaml
   - include:
-      file: db/changelog/001-initial-schema/024-competition-events-timetables.yaml
+      file: db/changelog/001-initial-schema/024-competition-final-standings.yaml
   - include:
-      file: db/changelog/001-initial-schema/025-competition-participations.yaml
-  - include:
-      file: db/changelog/001-initial-schema/026-competition-final-standings.yaml
-  - include:
-      file: db/changelog/001-initial-schema/027-athlete-weight-measurements.yaml
+      file: db/changelog/001-initial-schema/025-athlete-weight-measurements.yaml
 
   # Functions and triggers
   - include:

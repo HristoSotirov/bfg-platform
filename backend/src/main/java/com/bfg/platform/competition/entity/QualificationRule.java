@@ -35,15 +35,15 @@ public class QualificationRule {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "scheme_id")
-    private UUID schemeId;
+    @Column(name = "qualification_scheme_id")
+    private UUID qualificationSchemeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scheme_id", insertable = false, updatable = false)
+    @JoinColumn(name = "qualification_scheme_id", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private QualificationScheme scheme;
+    private QualificationScheme qualificationScheme;
 
     @Column(name = "source_stage_id")
     private UUID sourceStageId;
@@ -68,8 +68,11 @@ public class QualificationRule {
     @Column(name = "qualify_by_position")
     private Integer qualifyByPosition;
 
-    @Column(name = "qualify_by_time")
-    private Integer qualifyByTime;
+    @Column(name = "base_qualify_by_time")
+    private Integer baseQualifyByTime;
+
+    @Column(name = "max_qualify_by_time")
+    private Integer maxQualifyByTime;
 
     @Column(name = "is_remainder")
     private boolean isRemainder;

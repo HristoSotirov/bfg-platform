@@ -38,19 +38,15 @@ public class QualificationStage {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "scheme_id")
-    private UUID schemeId;
+    @Column(name = "qualification_scheme_id")
+    private UUID qualificationSchemeId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "scheme_id", insertable = false, updatable = false)
+    @JoinColumn(name = "qualification_scheme_id", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private QualificationScheme scheme;
-
-    @Column(name = "qualification_event_type")
-    @Enumerated(EnumType.STRING)
-    private QualificationEventType qualificationEventType;
+    private QualificationScheme qualificationScheme;
 
     @Column(name = "boat_count_min")
     private Integer boatCountMin;
@@ -58,11 +54,15 @@ public class QualificationStage {
     @Column(name = "boat_count_max")
     private Integer boatCountMax;
 
+    @Column(name = "qualification_event_type")
+    @Enumerated(EnumType.STRING)
+    private QualificationEventType qualificationEventType;
+
     @Column(name = "event_count")
     private Integer eventCount;
 
-    @Column(name = "stage_order")
-    private Integer stageOrder;
+    @Column(name = "stage_rank")
+    private Integer stageRank;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

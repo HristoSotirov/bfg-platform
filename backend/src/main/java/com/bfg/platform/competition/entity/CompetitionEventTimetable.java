@@ -49,15 +49,11 @@ public class CompetitionEventTimetable {
     @EqualsAndHashCode.Exclude
     private Competition competition;
 
-    @Column(name = "stage_id")
-    private UUID stageId;
+    @Column(name = "event_number")
+    private Integer eventNumber;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stage_id", insertable = false, updatable = false)
-    @Setter(AccessLevel.NONE)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private CompetitionStage stage;
+    @Column(name = "qualification_stage_number")
+    private Integer qualificationStageNumber;
 
     @Column(name = "discipline_id")
     private UUID disciplineId;

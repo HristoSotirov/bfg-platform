@@ -1,6 +1,6 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionType;
+import com.bfg.platform.gen.model.BoatClass;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,7 +21,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.UUID;
 
@@ -56,10 +55,14 @@ public class DisciplineDefinition {
     private CompetitionGroupDefinition competitionGroup;
 
     @Column(name = "boat_class")
-    private String boatClass;
+    @Enumerated(EnumType.STRING)
+    private BoatClass boatClass;
 
     @Column(name = "crew_size")
     private Integer crewSize;
+
+    @Column(name = "max_crew_from_transfer")
+    private Integer maxCrewFromTransfer;
 
     @Column(name = "has_coxswain")
     private boolean hasCoxswain;
@@ -69,16 +72,6 @@ public class DisciplineDefinition {
 
     @Column(name = "distance_meters")
     private Integer distanceMeters;
-
-    @Column(name = "max_transfer_crew")
-    private Integer maxTransferCrew;
-
-    @Column(name = "scoring_multiplier")
-    private BigDecimal scoringMultiplier;
-
-    @Column(name = "competition_type")
-    @Enumerated(EnumType.STRING)
-    private CompetitionType competitionType;
 
     @Column(name = "is_active")
     private boolean isActive;

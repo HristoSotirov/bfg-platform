@@ -1,20 +1,22 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -42,9 +44,15 @@ public class CompetitionTemplate {
     @Column(name = "duration_days")
     private Integer durationDays;
 
-    @Column(name = "competition_type")
-    @Enumerated(EnumType.STRING)
-    private CompetitionType competitionType;
+    @Column(name = "qualification_scheme_id")
+    private UUID qualificationSchemeId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "qualification_scheme_id", insertable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private QualificationScheme qualificationScheme;
 
     @Column(name = "is_active")
     private boolean isActive;

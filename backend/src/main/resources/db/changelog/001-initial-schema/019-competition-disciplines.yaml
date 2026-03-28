@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-competition-disciplines
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_disciplines
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: competition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discipline_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: competition_disciplines
+            columnNames: competition_id, discipline_id
+            constraintName: uq_comp_discipline
+        - addForeignKeyConstraint:
+            baseTableName: competition_disciplines
+            baseColumnNames: competition_id
+            referencedTableName: competitions
+            referencedColumnNames: id
+            constraintName: fk_comp_disc_competition
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competition_disciplines
+            baseColumnNames: discipline_id
+            referencedTableName: discipline_definitions
+            referencedColumnNames: id
+            constraintName: fk_comp_disc_discipline
+            onDelete: RESTRICT

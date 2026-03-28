@@ -1,7 +1,6 @@
 package com.bfg.platform.competition.entity;
 
 import com.bfg.platform.gen.model.CompetitionGroupGender;
-import com.bfg.platform.gen.model.CompetitionType;
 import com.bfg.platform.gen.model.TransferRounding;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -57,22 +56,18 @@ public class CompetitionGroupDefinition {
     @Column(name = "max_age")
     private Integer maxAge;
 
-    @Column(name = "competition_type")
-    @Enumerated(EnumType.STRING)
-    private CompetitionType competitionType;
-
-    @Column(name = "transfer_group_id")
-    private UUID transferGroupId;
+    @Column(name = "transfer_from_group_id")
+    private UUID transferFromGroupId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transfer_group_id", insertable = false, updatable = false)
+    @JoinColumn(name = "transfer_from_group_id", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private CompetitionGroupDefinition transferGroup;
+    private CompetitionGroupDefinition transferFromGroup;
 
-    @Column(name = "transfer_min_crew")
-    private Integer transferMinCrew;
+    @Column(name = "min_crew_for_transfer")
+    private Integer minCrewForTransfer;
 
     @Column(name = "transfer_ratio")
     private Integer transferRatio;

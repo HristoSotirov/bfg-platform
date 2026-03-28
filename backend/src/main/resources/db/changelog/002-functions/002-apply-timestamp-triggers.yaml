@@ -35,7 +35,7 @@ databaseChangeLog:
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
 
-        # Competition module - template/config tables
+        # Competition module - definitions
         - sql:
             sql: |
               CREATE TRIGGER set_competition_group_definitions_modified_at
@@ -48,32 +48,28 @@ databaseChangeLog:
                 BEFORE INSERT OR UPDATE ON discipline_definitions
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
+
+        # Competition module - scoring schemes
         - sql:
             sql: |
-              CREATE TRIGGER set_competition_templates_modified_at
-                BEFORE INSERT OR UPDATE ON competition_templates
+              CREATE TRIGGER set_scoring_schemes_modified_at
+                BEFORE INSERT OR UPDATE ON scoring_schemes
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
         - sql:
             sql: |
-              CREATE TRIGGER set_competition_stage_templates_modified_at
-                BEFORE INSERT OR UPDATE ON competition_stage_templates
+              CREATE TRIGGER set_scoring_rules_modified_at
+                BEFORE INSERT OR UPDATE ON scoring_rules
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
         - sql:
             sql: |
-              CREATE TRIGGER set_competition_events_timetable_templates_modified_at
-                BEFORE INSERT OR UPDATE ON competition_events_timetable_templates
-                FOR EACH ROW
-                EXECUTE FUNCTION set_modified_at();
-        - sql:
-            sql: |
-              CREATE TRIGGER set_competition_scoring_formulas_modified_at
-                BEFORE INSERT OR UPDATE ON competition_scoring_formulas
+              CREATE TRIGGER set_scoring_scheme_boat_coefficients_modified_at
+                BEFORE INSERT OR UPDATE ON scoring_scheme_boat_coefficients
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
 
-        # Competition module - qualification tables
+        # Competition module - qualification schemes
         - sql:
             sql: |
               CREATE TRIGGER set_qualification_schemes_modified_at
@@ -93,6 +89,26 @@ databaseChangeLog:
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
 
+        # Competition module - templates
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_templates_modified_at
+                BEFORE INSERT OR UPDATE ON competition_templates
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_template_disciplines_modified_at
+                BEFORE INSERT OR UPDATE ON competition_template_disciplines
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_events_timetable_templates_modified_at
+                BEFORE INSERT OR UPDATE ON competition_events_timetable_templates
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+
         # Competition module - real competition tables
         - sql:
             sql: |
@@ -102,8 +118,8 @@ databaseChangeLog:
                 EXECUTE FUNCTION set_modified_at();
         - sql:
             sql: |
-              CREATE TRIGGER set_competition_stages_modified_at
-                BEFORE INSERT OR UPDATE ON competition_stages
+              CREATE TRIGGER set_competition_disciplines_modified_at
+                BEFORE INSERT OR UPDATE ON competition_disciplines
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
         - sql:

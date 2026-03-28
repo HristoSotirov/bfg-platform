@@ -46,16 +46,6 @@ public class Entry {
     @EqualsAndHashCode.Exclude
     private Competition competition;
 
-    @Column(name = "stage_id")
-    private UUID stageId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "stage_id", insertable = false, updatable = false)
-    @Setter(AccessLevel.NONE)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private CompetitionStage stage;
-
     @Column(name = "club_id")
     private UUID clubId;
 

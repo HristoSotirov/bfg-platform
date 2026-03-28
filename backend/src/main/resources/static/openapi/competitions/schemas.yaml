@@ -1,13 +1,5 @@
 # ── Enums ──────────────────────────────────────────────────────────────────────
 
-CompetitionType:
-  type: string
-  description: Type of competition
-  enum:
-    - INTERNAL_NATIONAL_ERGO
-    - INTERNAL_NATIONAL_WATER
-    - BALKAN_WATER
-
 CompetitionGroupGender:
   type: string
   description: Gender classification for competition groups
@@ -24,25 +16,11 @@ TransferRounding:
     - CEIL
     - ROUND
 
-CompetitionStageType:
-  type: string
-  description: Type of competition stage
-  enum:
-    - INTERNAL_NATIONAL_WATER_ADULT
-    - INTERNAL_NATIONAL_WATER_SENIOR
-    - INTERNAL_NATIONAL_WATER_JUNIOR
-    - INTERNAL_NATIONAL_WATER_ALL
-    - INTERNAL_NATIONAL_ERGO_ALL
-    - BALKAN_WATER_JUNIOR_SENIOR
-
 QualificationEventType:
   type: string
-  description: Type of competition event (heat, repechage, semi-final, final)
+  description: Type of competition event (heat, semi-final, final)
   enum:
-    - H1
-    - H2
-    - H3
-    - H4
+    - H
     - SF
     - FB
     - FA
@@ -50,17 +28,6 @@ QualificationEventType:
 CompetitionStatus:
   type: string
   description: Status of a competition
-  enum:
-    - DRAFT
-    - REGISTRATION_OPEN
-    - REGISTRATION_CLOSED
-    - IN_PROGRESS
-    - COMPLETED
-    - CANCELLED
-
-StageStatus:
-  type: string
-  description: Status of a competition stage
   enum:
     - DRAFT
     - REGISTRATION_OPEN
@@ -109,6 +76,28 @@ WeightMeasurementRole:
     - ROWER
     - COX
 
+BoatClass:
+  type: string
+  description: Type of rowing boat
+  enum:
+    - 1X
+    - 2X
+    - 2+
+    - 2-
+    - 4X
+    - 4X+
+    - 4+
+    - 4-
+    - 8+
+    - ERGO
+
+ScoringType:
+  type: string
+  description: Type of scoring calculation
+  enum:
+    - FIXED
+    - OFFSET_FROM_END
+
 # ── DTOs ──────────────────────────────────────────────────────────────────────
 
 CompetitionGroupDefinitionDto:
@@ -132,12 +121,10 @@ CompetitionGroupDefinitionDto:
     maxAge:
       type: integer
       example: 22
-    competitionType:
-      $ref: "#/CompetitionType"
-    transferGroupId:
+    transferFromGroupId:
       type: string
       format: uuid
-    transferMinCrew:
+    minCrewForTransfer:
       type: integer
     transferRatio:
       type: integer
@@ -179,8 +166,7 @@ DisciplineDefinitionDto:
       type: string
       format: uuid
     boatClass:
-      type: string
-      example: "1x"
+      $ref: "#/BoatClass"
     crewSize:
       type: integer
       example: 1
@@ -193,17 +179,63 @@ DisciplineDefinitionDto:
     distanceMeters:
       type: integer
       example: 2000
-    maxTransferCrew:
+    maxCrewFromTransfer:
       type: integer
-    scoringMultiplier:
-      type: number
-      format: double
-      example: 1.000
-    competitionType:
-      $ref: "#/CompetitionType"
     isActive:
       type: boolean
       example: true
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+ScoringSchemeDto:
+  type: object
+  description: Data Transfer Object for scoring scheme
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    name:
+      type: string
+      example: "National Scoring 2025"
+    scoringType:
+      $ref: "#/ScoringType"
+    isActive:
+      type: boolean
+      example: true
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+ScoringRuleDto:
+  type: object
+  description: Data Transfer Object for scoring rule
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    scoringSchemeId:
+      type: string
+      format: uuid
+    placement:
+      type: integer
+      example: 1
+    basePoints:
+      type: number
+      format: double
+      example: 100.00
+    boatClass:
+      $ref: "#/BoatClass"
+    coefficient:
+      type: number
+      format: double
+      example: 1.000
     createdAt:
       type: string
       format: date-time
@@ -227,8 +259,12 @@ CompetitionTemplateDto:
     durationDays:
       type: integer
       example: 2
-    competitionType:
-      $ref: "#/CompetitionType"
+    scoringSchemeId:
+      type: string
+      format: uuid
+    qualificationSchemeId:
+      type: string
+      format: uuid
     isActive:
       type: boolean
       example: true
@@ -239,9 +275,9 @@ CompetitionTemplateDto:
       type: string
       format: date-time
 
-CompetitionStageTemplateDto:
+CompetitionTemplateDisciplineDto:
   type: object
-  description: Data Transfer Object for competition stage template
+  description: Data Transfer Object for competition template discipline assignment
   properties:
     uuid:
       type: string
@@ -249,29 +285,9 @@ CompetitionStageTemplateDto:
     competitionTemplateId:
       type: string
       format: uuid
-    stageOrder:
-      type: integer
-      example: 1
-    name:
+    disciplineId:
       type: string
-      example: "Day 1 - Heats"
-    durationDays:
-      type: integer
-      example: 1
-    competitionStageType:
-      $ref: "#/CompetitionStageType"
-    competitionGroupIds:
-      type: array
-      description: IDs of competition groups assigned to this stage template
-      items:
-        type: string
-        format: uuid
-    disciplineIds:
-      type: array
-      description: IDs of disciplines assigned to this stage template
-      items:
-        type: string
-        format: uuid
+      format: uuid
     createdAt:
       type: string
       format: date-time
@@ -289,14 +305,17 @@ CompetitionEventTimetableTemplateDto:
     competitionTemplateId:
       type: string
       format: uuid
-    stageTemplateId:
-      type: string
-      format: uuid
+    eventNumber:
+      type: integer
+      example: 1
     disciplineCode:
       type: string
       example: "M1x"
     qualificationEventType:
       $ref: "#/QualificationEventType"
+    qualificationStageNumber:
+      type: integer
+      example: 1
     dayOffset:
       type: integer
       example: 0
@@ -304,29 +323,6 @@ CompetitionEventTimetableTemplateDto:
       type: string
       format: time
       example: "09:00:00"
-    createdAt:
-      type: string
-      format: date-time
-    modifiedAt:
-      type: string
-      format: date-time
-
-CompetitionScoringFormulaDto:
-  type: object
-  description: Data Transfer Object for competition scoring formula
-  properties:
-    uuid:
-      type: string
-      format: uuid
-    competitionType:
-      $ref: "#/CompetitionType"
-    placement:
-      type: integer
-      example: 1
-    basePoints:
-      type: number
-      format: double
-      example: 100.00
     createdAt:
       type: string
       format: date-time
@@ -344,10 +340,6 @@ QualificationSchemeDto:
     name:
       type: string
       example: "National Water 6 Lanes"
-    competitionType:
-      $ref: "#/CompetitionType"
-    competitionStageType:
-      $ref: "#/CompetitionStageType"
     laneCount:
       type: integer
       example: 6
@@ -368,21 +360,21 @@ QualificationStageDto:
     uuid:
       type: string
       format: uuid
-    schemeId:
+    qualificationSchemeId:
       type: string
       format: uuid
-    qualificationEventType:
-      $ref: "#/QualificationEventType"
     boatCountMin:
       type: integer
       example: 7
     boatCountMax:
       type: integer
       example: 12
+    qualificationEventType:
+      $ref: "#/QualificationEventType"
     eventCount:
       type: integer
       example: 2
-    stageOrder:
+    stageRank:
       type: integer
       example: 1
     createdAt:
@@ -399,7 +391,7 @@ QualificationRuleDto:
     uuid:
       type: string
       format: uuid
-    schemeId:
+    qualificationSchemeId:
       type: string
       format: uuid
     sourceStageId:
@@ -411,7 +403,10 @@ QualificationRuleDto:
     qualifyByPosition:
       type: integer
       example: 3
-    qualifyByTime:
+    baseQualifyByTime:
+      type: integer
+      example: 0
+    maxQualifyByTime:
       type: integer
       example: 0
     isRemainder:
@@ -453,8 +448,14 @@ CompetitionDto:
       example: "2025-06-17"
     status:
       $ref: "#/CompetitionStatus"
-    competitionType:
-      $ref: "#/CompetitionType"
+    scopeType:
+      $ref: "../common/schemas.yaml#/ScopeType"
+    scoringSchemeId:
+      type: string
+      format: uuid
+    qualificationSchemeId:
+      type: string
+      format: uuid
     createdAt:
       type: string
       format: date-time
@@ -462,9 +463,9 @@ CompetitionDto:
       type: string
       format: date-time
 
-CompetitionStageDto:
+CompetitionDisciplineDto:
   type: object
-  description: Data Transfer Object for competition stage
+  description: Data Transfer Object for competition discipline assignment
   properties:
     uuid:
       type: string
@@ -472,50 +473,9 @@ CompetitionStageDto:
     competitionId:
       type: string
       format: uuid
-    stageOrder:
-      type: integer
-      example: 1
-    name:
+    disciplineId:
       type: string
-      example: "Day 1 - Heats"
-    startDate:
-      type: string
-      format: date
-    endDate:
-      type: string
-      format: date
-    submissionStart:
-      type: string
-      format: date-time
-    submissionEnd:
-      type: string
-      format: date-time
-    techMeetingAt:
-      type: string
-      format: date-time
-    changesDeadlineHours:
-      type: integer
-      example: 24
-    competitionGroupCodes:
-      type: string
-      description: JSON array of competition group codes
-    disciplineCodes:
-      type: string
-      description: JSON array of discipline codes
-    status:
-      $ref: "#/StageStatus"
-    competitionGroupIds:
-      type: array
-      description: IDs of competition groups assigned to this stage
-      items:
-        type: string
-        format: uuid
-    disciplineIds:
-      type: array
-      description: IDs of disciplines assigned to this stage
-      items:
-        type: string
-        format: uuid
+      format: uuid
     createdAt:
       type: string
       format: date-time
@@ -531,9 +491,6 @@ EntryDto:
       type: string
       format: uuid
     competitionId:
-      type: string
-      format: uuid
-    stageId:
       type: string
       format: uuid
     clubId:
@@ -587,14 +544,17 @@ CompetitionEventTimetableDto:
     competitionId:
       type: string
       format: uuid
-    stageId:
-      type: string
-      format: uuid
+    eventNumber:
+      type: integer
+      example: 1
     disciplineId:
       type: string
       format: uuid
     qualificationEventType:
       $ref: "#/QualificationEventType"
+    qualificationStageNumber:
+      type: integer
+      example: 1
     scheduledAt:
       type: string
       format: date-time
@@ -651,9 +611,6 @@ CompetitionFinalStandingDto:
     competitionId:
       type: string
       format: uuid
-    stageId:
-      type: string
-      format: uuid
     disciplineId:
       type: string
       format: uuid
@@ -703,3 +660,466 @@ AthleteWeightMeasurementDto:
     modifiedAt:
       type: string
       format: date-time
+
+# ── Create/Update Requests ───────────────────────────────────────────────────
+
+CompetitionGroupDefinitionRequest:
+  type: object
+  description: Request payload for creating or updating a competition group definition
+  required:
+    - name
+    - shortName
+    - gender
+    - minAge
+    - maxAge
+    - isActive
+  properties:
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
+    shortName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Short name is required")'
+    gender:
+      allOf:
+        - $ref: "#/CompetitionGroupGender"
+      x-field-extra-annotation: '@NotNull(message = "Gender is required")'
+    minAge:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Min age is required")
+        @Min(value = 0, message = "Min age must be >= 0")
+    maxAge:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Max age is required")
+        @Min(value = 0, message = "Max age must be >= 0")
+    transferFromGroupId:
+      type: string
+      format: uuid
+      description: "Nullable - all transfer fields must be set together or all null"
+    minCrewForTransfer:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: '@Min(value = 1, message = "Min crew for transfer must be >= 1")'
+      description: "Nullable - all transfer fields must be set together or all null"
+    transferRatio:
+      type: integer
+      minimum: 1
+      maximum: 100
+      x-field-extra-annotation: '@Min(value = 1, message = "Transfer ratio must be >= 1")'
+      description: "Nullable - all transfer fields must be set together or all null"
+    transferRounding:
+      $ref: "#/TransferRounding"
+      description: "Nullable - all transfer fields must be set together or all null"
+    coxRequiredWeightKg:
+      type: number
+      format: double
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Cox required weight must be positive")'
+      description: "Nullable - both cox weight fields must be set together or both null"
+    coxMinWeightKg:
+      type: number
+      format: double
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Cox min weight must be positive")'
+      description: "Nullable - both cox weight fields must be set together or both null"
+    lightMaxWeightKg:
+      type: number
+      format: double
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Light max weight must be positive")'
+    isActive:
+      type: boolean
+      x-field-extra-annotation: '@NotNull(message = "isActive is required")'
+
+DisciplineDefinitionRequest:
+  type: object
+  description: Request payload for creating or updating a discipline definition
+  required:
+    - name
+    - shortName
+    - competitionGroupId
+    - boatClass
+    - crewSize
+    - distanceMeters
+    - isActive
+  properties:
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
+    shortName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Short name is required")'
+    competitionGroupId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Competition group ID is required")'
+    boatClass:
+      allOf:
+        - $ref: "#/BoatClass"
+      x-field-extra-annotation: '@NotNull(message = "Boat class is required")'
+    crewSize:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Crew size is required")
+        @Min(value = 1, message = "Crew size must be >= 1")
+    maxCrewFromTransfer:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: '@Min(value = 0, message = "Max crew from transfer must be >= 0")'
+    hasCoxswain:
+      type: boolean
+    isLightweight:
+      type: boolean
+    distanceMeters:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Distance meters is required")
+        @Min(value = 1, message = "Distance must be >= 1")
+    isActive:
+      type: boolean
+      x-field-extra-annotation: '@NotNull(message = "isActive is required")'
+
+ScoringSchemeRequest:
+  type: object
+  description: Request payload for creating or updating a scoring scheme
+  required:
+    - name
+    - scoringType
+    - isActive
+  properties:
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
+    scoringType:
+      allOf:
+        - $ref: "#/ScoringType"
+      x-field-extra-annotation: '@NotNull(message = "Scoring type is required")'
+    isActive:
+      type: boolean
+      x-field-extra-annotation: '@NotNull(message = "isActive is required")'
+
+ScoringSchemeBoatCoefficientDto:
+  type: object
+  description: Data Transfer Object for scoring scheme boat coefficient
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    scoringSchemeId:
+      type: string
+      format: uuid
+    boatClass:
+      $ref: "#/BoatClass"
+    coefficient:
+      type: number
+      format: double
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+ScoringSchemeBoatCoefficientRequest:
+  type: object
+  description: Request payload for creating or updating a scoring scheme boat coefficient
+  required:
+    - scoringSchemeId
+    - boatClass
+    - coefficient
+  properties:
+    scoringSchemeId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Scoring scheme ID is required")'
+    boatClass:
+      allOf:
+        - $ref: "#/BoatClass"
+      x-field-extra-annotation: '@NotNull(message = "Boat class is required")'
+    coefficient:
+      type: number
+      format: double
+      x-field-extra-annotation: |-
+        @NotNull(message = "Coefficient is required")
+        @DecimalMin(value = "0.0", inclusive = false, message = "Coefficient must be positive")
+
+ScoringRuleRequest:
+  type: object
+  description: Request payload for creating or updating a scoring rule
+  required:
+    - scoringSchemeId
+    - placement
+    - basePoints
+  properties:
+    scoringSchemeId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Scoring scheme ID is required")'
+    placement:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Placement is required")
+        @Min(value = 1, message = "Placement must be >= 1")
+    basePoints:
+      type: number
+      format: double
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Base points is required")
+        @DecimalMin(value = "0.0", inclusive = true, message = "Base points must be >= 0")
+
+CompetitionTemplateCreateRequest:
+  type: object
+  description: Request payload for creating a competition template
+  required:
+    - shortName
+    - name
+    - durationDays
+  properties:
+    shortName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Short name is required")'
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
+    durationDays:
+      type: integer
+      x-field-extra-annotation: '@NotNull(message = "Duration days is required")'
+    scoringSchemeId:
+      type: string
+      format: uuid
+    qualificationSchemeId:
+      type: string
+      format: uuid
+    isActive:
+      type: boolean
+
+CompetitionTemplateUpdateRequest:
+  type: object
+  description: Request payload for updating a competition template
+  properties:
+    shortName:
+      type: string
+    name:
+      type: string
+    durationDays:
+      type: integer
+    scoringSchemeId:
+      type: string
+      format: uuid
+    qualificationSchemeId:
+      type: string
+      format: uuid
+    isActive:
+      type: boolean
+
+CompetitionTemplateDisciplineCreateRequest:
+  type: object
+  description: Request to assign a discipline to a competition template
+  required:
+    - competitionTemplateId
+    - disciplineId
+  properties:
+    competitionTemplateId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Competition template ID is required")'
+    disciplineId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
+
+CompetitionEventTimetableTemplateCreateRequest:
+  type: object
+  description: Request payload for creating an event timetable template entry
+  required:
+    - competitionTemplateId
+    - eventNumber
+    - disciplineCode
+    - qualificationEventType
+    - dayOffset
+    - plannedTime
+  properties:
+    competitionTemplateId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Competition template ID is required")'
+    eventNumber:
+      type: integer
+      x-field-extra-annotation: '@NotNull(message = "Event number is required")'
+    disciplineCode:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Discipline code is required")'
+    qualificationEventType:
+      allOf:
+        - $ref: "#/QualificationEventType"
+      x-field-extra-annotation: '@NotNull(message = "Qualification event type is required")'
+    qualificationStageNumber:
+      type: integer
+      default: 1
+    dayOffset:
+      type: integer
+      x-field-extra-annotation: '@NotNull(message = "Day offset is required")'
+    plannedTime:
+      type: string
+      format: time
+      example: "09:00:00"
+      x-field-extra-annotation: '@NotNull(message = "Planned time is required")'
+
+CompetitionEventTimetableTemplateUpdateRequest:
+  type: object
+  description: Request payload for updating an event timetable template entry
+  properties:
+    eventNumber:
+      type: integer
+    disciplineCode:
+      type: string
+    qualificationEventType:
+      $ref: "#/QualificationEventType"
+    qualificationStageNumber:
+      type: integer
+    dayOffset:
+      type: integer
+    plannedTime:
+      type: string
+      format: time
+
+QualificationSchemeRequest:
+  type: object
+  description: Request payload for creating or updating a qualification scheme
+  required:
+    - name
+    - laneCount
+    - isActive
+  properties:
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
+    laneCount:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Lane count is required")
+        @Min(value = 1, message = "Lane count must be >= 1")
+    isActive:
+      type: boolean
+      x-field-extra-annotation: '@NotNull(message = "isActive is required")'
+
+QualificationStageRequest:
+  type: object
+  description: Request payload for creating or updating a qualification stage
+  required:
+    - qualificationSchemeId
+    - boatCountMin
+    - boatCountMax
+    - qualificationEventType
+    - eventCount
+    - stageRank
+  properties:
+    qualificationSchemeId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Qualification scheme ID is required")'
+    boatCountMin:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Boat count min is required")
+        @Min(value = 1, message = "Boat count min must be >= 1")
+    boatCountMax:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Boat count max is required")
+        @Min(value = 1, message = "Boat count max must be >= 1")
+    qualificationEventType:
+      allOf:
+        - $ref: "#/QualificationEventType"
+      x-field-extra-annotation: '@NotNull(message = "Qualification event type is required")'
+    eventCount:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Event count is required")
+        @Min(value = 1, message = "Event count must be >= 1")
+    stageRank:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Stage rank is required")
+        @Min(value = 1, message = "Stage rank must be >= 1")
+
+QualificationRuleRequest:
+  type: object
+  description: Request payload for creating or updating a qualification rule
+  required:
+    - qualificationSchemeId
+    - sourceStageId
+    - destinationStageId
+    - qualifyByPosition
+    - baseQualifyByTime
+    - maxQualifyByTime
+    - isRemainder
+  properties:
+    qualificationSchemeId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Qualification scheme ID is required")'
+    sourceStageId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Source stage ID is required")'
+    destinationStageId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Destination stage ID is required")'
+    qualifyByPosition:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Qualify by position is required")
+        @Min(value = 0, message = "Qualify by position must be >= 0")
+    baseQualifyByTime:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Base qualify by time is required")
+        @Min(value = 0, message = "Base qualify by time must be >= 0")
+    maxQualifyByTime:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Max qualify by time is required")
+        @Min(value = 0, message = "Max qualify by time must be >= 0")
+    isRemainder:
+      type: boolean
+      x-field-extra-annotation: '@NotNull(message = "isRemainder is required")'
+
+CompetitionDisciplineCreateRequest:
+  type: object
+  description: Request to assign a discipline to a competition
+  required:
+    - competitionId
+    - disciplineId
+  properties:
+    competitionId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Competition ID is required")'
+    disciplineId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
