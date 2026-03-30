@@ -1,0 +1,25 @@
+# BFG Platform - ER Diagram for draw.io
+# How to use:
+#   1. Open https://app.diagrams.net
+#   2. Arrange > Insert > Advanced > CSV...
+#   3. Paste this entire file content
+#   4. Click Import
+#
+# identity,label,columns,style,refs
+#
+# label: %label%<br><hr>%columns%
+# style: shape=mxgraph.er.entity;whiteSpace=wrap;html=1;fontSize=11;align=left;spacingLeft=8;spacingRight=8;
+# namespace: er-
+# connect: {"from":"refs","to":"identity","style":"endArrow=ERmandOne;startArrow=ERmandOne;fontSize=10;exitX=1;exitY=0.5;exitDx=0;exitDy=0;"}
+# width: auto
+# height: auto
+# padding: 15
+# ignore: style,refs
+## Core Module
+identity,label,columns,style,refs
+users,<b>users</b>,<font style="font-size:10px">🔑 id: UUID<br>first_name last_name: VARCHAR<br>username: VARCHAR (unique)<br>email password: VARCHAR<br>role scope_type: VARCHAR<br>date_of_birth: DATE<br>is_active: BOOLEAN<br>created_at modified_at: TIMESTAMPTZ</font>,fillColor=#dae8fc;strokeColor=#6c8ebf;,
+clubs,<b>clubs</b>,<font style="font-size:10px">🔑 id: UUID<br>🔗 club_admin → users<br>name short_name: VARCHAR (unique)<br>card_prefix: VARCHAR (unique)<br>club_email: VARCHAR (unique)<br>logo_url: VARCHAR<br>scope_type: VARCHAR<br>is_active: BOOLEAN<br>created_at modified_at: TIMESTAMPTZ</font>,fillColor=#dae8fc;strokeColor=#6c8ebf;,users
+athletes,<b>athletes</b>,<font style="font-size:10px">🔑 id: UUID<br>first_name middle_name last_name: VARCHAR<br>gender: VARCHAR<br>date_of_birth: DATE<br>scope_type: VARCHAR<br>medical_examination_due: DATE<br>insurance_from insurance_to: DATE<br>registered_on modified_at: TIMESTAMPTZ</font>,fillColor=#dae8fc;strokeColor=#6c8ebf;,
+club_coaches,<b>club_coaches</b>,<font style="font-size:10px">🔑 id: UUID<br>🔗 coach_id → users (unique)<br>🔗 club_id → clubs<br>assignment_date: TIMESTAMPTZ</font>,fillColor=#dae8fc;strokeColor=#6c8ebf;,"users,clubs"
+accreditations,<b>accreditations</b>,<font style="font-size:10px">🔑 id: UUID<br>🔗 athlete_id → athletes<br>🔗 club_id → clubs<br>accreditation_number: VARCHAR<br>year: INTEGER<br>scope_type status: VARCHAR<br>created_at modified_at: TIMESTAMPTZ</font>,fillColor=#dae8fc;strokeColor=#6c8ebf;,"athletes,clubs"
+athlete_photo_history,<b>athlete_photo_history</b>,<font style="font-size:10px">🔑 id: UUID<br>🔗 athlete_id → athletes<br>🔗 uploaded_by → clubs<br>photo_url: VARCHAR<br>uploaded_at: TIMESTAMPTZ</font>,fillColor=#dae8fc;strokeColor=#6c8ebf;,"athletes,clubs"

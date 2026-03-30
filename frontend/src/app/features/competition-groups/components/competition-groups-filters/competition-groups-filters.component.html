@@ -1,0 +1,59 @@
+<div class="bg-white rounded-lg p-4 mb-4">
+  <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-end gap-4">
+    <div class="w-full sm:flex-1 sm:min-w-[180px] sm:max-w-[180px]">
+      <app-search-bar
+        [searchValue]="searchValue"
+        (searchValueChange)="searchValue = $event"
+        (searchChange)="onSearchChange($event)"
+        placeholder="Потърси... (Enter за търсене)"
+        [showIcon]="true"
+        [showClearButton]="false"
+        inputClasses="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      ></app-search-bar>
+    </div>
+
+    @if (hasVisibleFilters() && isFilterVisible("gender")) {
+      <div
+        [class.hidden]="!filtersExpanded"
+        class="sm:block w-full sm:w-[180px]"
+      >
+        <label class="block text-xs font-medium text-gray-500 mb-1"
+          >Пол:</label
+        >
+        <app-multi-select-dropdown
+          [options]="genderOptions"
+          [multiple]="true"
+          placeholder="Всички полове"
+          [ngModel]="filters.genders || []"
+          (selectionChange)="onGendersChange($event)"
+        >
+        </app-multi-select-dropdown>
+      </div>
+    }
+
+    @if (hasVisibleFilters() && isFilterVisible("status")) {
+      <div
+        [class.hidden]="!filtersExpanded"
+        class="sm:block w-full sm:w-[180px]"
+      >
+        <label class="block text-xs font-medium text-gray-500 mb-1"
+          >Статус:</label
+        >
+        <app-multi-select-dropdown
+          [options]="statusOptions"
+          [multiple]="true"
+          placeholder="Всички статуси"
+          [ngModel]="filters.statuses || []"
+          (selectionChange)="onStatusesChange($event)"
+        >
+        </app-multi-select-dropdown>
+      </div>
+    }
+  </div>
+
+  <app-filter-toggle-button
+    [expanded]="filtersExpanded"
+    [visible]="hasVisibleFilters()"
+    (toggleChange)="filtersExpanded = $event"
+  ></app-filter-toggle-button>
+</div>

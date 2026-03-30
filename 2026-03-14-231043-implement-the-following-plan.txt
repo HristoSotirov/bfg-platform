@@ -1,0 +1,690 @@
+# Competition Management System - Implementation Plan
+# Based on competition-rules.doc (Bulgarian Rowing Federation Rules)
+# Updated: 2026-03-15
+
+## Context
+
+The BFG Platform currently manages clubs, athletes, accreditations, and users with role-based and scope-based access control. This plan extends the platform to support rowing competition management following the Bulgarian Rowing Federation rules (ПРАВИЛА ЗА ПРОВЕЖДАНЕ НА СЪСТЕЗАНИЯ ПО ГРЕБАНЕ).
+
+**Why this change:** The federation needs to digitize competition management—from athlete entries and eligibility validation to race scheduling, results recording, and automated rankings. Currently these processes are manual, error-prone, and time-consuming.
+
+### Competition Types to Support
+
+1. **DPGE** - National Indoor Rowing Championship (Държавно първенство по гребане на ергометър)
+   - Ergometer competition, all ages, single stage, 1 day
+
+2. **DOSH1** - National Team Championship Round 1 (Държавно отборно шампионат - Кръг 1)
+   - 2 days, ages ≤16, single stage
+
+3. **DISH** - National Individual Championship (Държавно индивидуално шампионат)
+   - 6 days, three 2-day stages:
+     - Stage 1: U23 + Seniors (days 1-2)
+     - Stage 2: Younger ≤16 (days 3-4)
+     - Stage 3: Youth 17-18 (days 5-6)
+
+4. **DOSH2** - National Team Championship Round 2 (Държавно отборно шампионат - Кръг 2)
+   - 6 days, three 2-day stages (same structure as DISH)
+
+5. **BALKAN** - Balkan Championship (Балканско първенство)
+   - National scope athletes only, ages ≤18, occasional, single stage, 2 days
+
+### Key Capabilities Required
+
+- **Entry validation:** Strict validation at submission time - invalid entries rejected immediately (never persisted)
+- **Bulk entry submission:** Club admins submit entries for multiple athletes at once; all entries validated atomically
+- **Stage management:** Support stage-based competitions with independent registration periods, schedules, and results per stage
+- **Race scheduling:** Generate and manually edit schedules (per stage for multi-stage competitions)
+- **Start lists:** Support both seeded (by previous performance) and random assignment
+- **Results & scoring:** Record race results, calculate points with coefficients, update team rankings
+- **Real-time updates:** WebSocket/SSE for live results and ranking updates during competitions
+- **Annual rankings:** Aggregate team scores across all competitions in a season
+
+---
+
+## Key Design Decisions
+
+### 1. Template-Based Competition Model
+
+**Decision:** Use `competition_template` table with no FK reference from competitions. Values are copied at creation time.
+
+**Rationale:**
+- Competitions are independent after creation - can modify scoring_formula, duration_days per competition
+- Templates can be updated without affecting existing competitions
+- Simpler model than FK-based approach
+
+**Implementation:**
+- `competition_template` stores defaults: code, name, defaultDurationDays, stageConfig (JSONB), defaultScoringFormula, defaultScopeType
+- `competition` copies values at creation: templateCode (reference only), scoringFormula, durationDays, scopeType
+- No foreign key - competitions are self-contained
+
+### 2. Stage-Based Competition Model
+
+**Decision:** Introduce `CompetitionStage` entity to represent 2-day blocks within multi-day competitions (DISH, DOSH2).
+
+**Rationale:**
+- DISH and DOSH2 have distinct stages with separate entry submissions, registration periods, and schedules
+- Each stage targets different age groups with potentially different allowed disciplines
+- Athletes may participate in multiple stages (cross-age eligibility)
+
+**Implementation:**
+- `CompetitionStage` has its own registrationStart/End, ageCategories[], status
+- Entries link to specific stage via `competition_stage_id` FK (nullable for single-stage competitions)
+- Single-stage competitions (DPGE, DOSH1) have no CompetitionStage records
+
+### 3. Strict Entry Validation (Never Persist Invalid)
+
+**Decision:** Reject invalid entries at API level with 400 error. Database contains ONLY valid entries.
+
+**Rationale:**
+- Eliminates need for entry status enum (PENDING, VALIDATED, APPROVED, REJECTED)
+- Simplifies queries - no need to filter by status
+- Prevents race schedules being generated with invalid entries
+- Clear user feedback at submission time
+
+**Implementation:**
+- `EntryValidationService.validate()` runs validation in-memory before any persistence
+- Bulk submissions validated atomically (all-or-nothing)
+- Returns 400 with structured validation errors if any entry fails
+- Only persists if all entries pass validation
+
+### 4. Enum-Based Validation Rules (Simplified)
+
+**Decision:** Use Java enum `ValidationRuleType` instead of database table. Admin selects which rules to enable per competition.
+
+**Rationale:**
+- Database-driven rules were over-engineered - adding new rules still required Java code
+- Simpler approach: predefined rules in enum, admin chooses which to apply
+- Easier to test, maintain, and understand
+
+**Implementation:**
+- `ValidationRuleType` enum with predefined rules and execution order:
+  ```
+  REGISTRATION_PERIOD (10)   - Check if registration is open
+  AGE_ELIGIBILITY (20)       - Check athlete age matches requirements
+  SCOPE_CHECK (30)           - Check club scope meets competition requirements
+  ACCREDITATION_CHECK (40)   - Check athlete has valid accreditation
+  MEDICAL_CHECK (50)         - Check athlete has valid medical exam
+  INSURANCE_CHECK (60)       - Check athlete has valid insurance
+  DUPLICATE_ENTRY (70)       - Check no duplicate registration
+  TEAM_COMPOSITION (80)      - Check club hasn't exceeded max entries
+  ```
+- Competition entity has `enabled_validation_rules` JSONB column storing array of rule types
+- If null/empty, ALL rules apply (safe default)
+- Each rule has a corresponding `EntryValidator` implementation in Java
+
+### 5. Bulk Entry Submission
+
+**Decision:** Club admins submit arrays of entries in single API call with atomic validation.
+
+**Rationale:**
+- Matches real-world workflow: club representatives register multiple athletes at once
+- Atomic validation ensures data consistency
+- Reduces API round-trips
+
+**Implementation:**
+- `POST /competitions/{id}/entries/bulk` accepts array of {athleteId, disciplineId}
+- Service validates all entries in memory
+- Transaction commits only if all valid
+- Returns 201 with all created entries, or 400 with all errors
+
+### 6. Per-Stage Team Composition Limits
+
+**Decision:** Team constraints (e.g., max 2 boats per club per discipline) apply within each stage independently.
+
+**Rationale:**
+- Stages are operationally independent competitions within a larger event
+- A club sending 2 boats to Stage 1 should be able to send 2 boats to Stage 2
+
+**Implementation:**
+- `TEAM_COMPOSITION` validator counts entries per (club, discipline, stage) tuple
+- Default max boats per discipline: 2 (configurable)
+
+---
+
+## Architecture Overview
+
+### Module Structure
+
+```
+backend/src/main/java/com/bfg/platform/competition/
+├── controller/
+│   ├── CompetitionController.java
+│   ├── CompetitionStageController.java
+│   ├── CompetitionEntryController.java
+│   ├── CompetitionConfigController.java
+│   ├── RaceScheduleController.java
+│   ├── ResultController.java
+│   └── RankingController.java
+├── service/
+│   ├── CompetitionService.java
+│   ├── CompetitionStageService.java
+│   ├── CompetitionEntryService.java
+│   ├── EntryValidationService.java
+│   ├── ScheduleService.java
+│   ├── ResultService.java
+│   ├── ScoringService.java
+│   ├── RankingService.java
+│   └── CompetitionWebSocketService.java
+├── repository/
+│   ├── CompetitionRepository.java
+│   ├── CompetitionStageRepository.java
+│   ├── CompetitionEntryRepository.java
+│   ├── CompetitionTemplateRepository.java
+│   ├── DisciplineDefinitionRepository.java
+│   ├── ScoringCoefficientRepository.java
+│   ├── RaceRepository.java
+│   ├── ResultRepository.java
+│   ├── TeamRankingRepository.java
+│   └── AnnualRankingRepository.java
+├── entity/
+│   ├── Competition.java
+│   ├── CompetitionStage.java
+│   ├── CompetitionEntry.java
+│   ├── CompetitionTemplate.java
+│   ├── DisciplineDefinition.java
+│   ├── ScoringCoefficient.java
+│   ├── Race.java
+│   ├── RaceParticipant.java
+│   ├── Result.java
+│   ├── TeamRanking.java
+│   └── AnnualRanking.java
+├── mapper/
+│   ├── CompetitionMapper.java
+│   ├── CompetitionStageMapper.java
+│   ├── CompetitionEntryMapper.java
+│   ├── CompetitionTemplateMapper.java
+│   ├── DisciplineDefinitionMapper.java
+│   ├── RaceMapper.java
+│   ├── ResultMapper.java
+│   └── RankingMapper.java
+├── query/
+│   ├── CompetitionQueryAdapter.java
+│   ├── CompetitionEntryQueryAdapter.java
+│   └── RaceQueryAdapter.java
+├── validation/
+│   ├── ValidationRuleType.java              # Enum with all rule types
+│   ├── EntryValidator.java                  # Interface
+│   ├── EntryValidationContext.java          # Data for validators
+│   ├── EntryValidationResult.java           # Result from validator
+│   ├── EntryValidationError.java            # Error details
+│   ├── EntryValidationException.java        # Thrown on failure
+│   ├── EntryValidationService.java          # Orchestrator
+│   └── validators/                          # One class per rule type
+│       ├── RegistrationPeriodValidator.java
+│       ├── AgeEligibilityValidator.java
+│       ├── ScopeCheckValidator.java
+│       ├── AccreditationCheckValidator.java
+│       ├── MedicalCheckValidator.java
+│       ├── InsuranceCheckValidator.java
+│       ├── DuplicateEntryValidator.java
+│       └── TeamCompositionValidator.java
+└── websocket/
+    ├── CompetitionWebSocketHandler.java
+    └── RankingUpdateMessage.java
+```
+
+---
+
+## Domain Model & Entities
+
+### Entity Relationship Diagram
+
+```
+┌─────────────────────┐         ┌──────────────────┐
+│ CompetitionTemplate │         │ Competition      │
+│ ────────────────────│         │ ─────────────────│
+│ id (UUID)           │         │ id (UUID)        │
+│ code (DPGE,DISH)    │ - - - - │ templateCode     │ (reference only, no FK)
+│ name                │         │ name             │
+│ defaultDurationDays │         │ season (year)    │
+│ stageConfig (JSONB) │         │ startDate        │
+│ defaultScoringFormula         │ endDate          │
+│ defaultScopeType    │         │ status           │
+│ isActive            │         │ scopeType        │
+└─────────────────────┘         │ scoringFormula   │
+                                │ durationDays     │
+                                │ enabledValidation│
+                                │ Rules (JSONB)    │
+                                └──────────────────┘
+                                         │1
+                                         │
+                                         │*
+                                ┌──────────────────┐
+                                │ CompetitionStage │
+                                │ ─────────────────│
+                                │ id (UUID)        │
+                                │ competitionId    │
+                                │ stageNumber (1-N)│
+                                │ name             │
+                                │ startDate        │
+                                │ endDate          │
+                                │ registrationStart│
+                                │ registrationEnd  │
+                                │ ageCategories[]  │
+                                │ status           │
+                                └──────────────────┘
+                                         │1
+                                         │
+                                         │*
+                                ┌───────────────────┐
+                                │ CompetitionEntry  │
+                                │ ──────────────────│
+                                │ id (UUID)         │
+                                │ competitionId     │
+                                │ stageId (nullable)│
+                                │ clubId            │
+                                │ athleteId         │
+                                │ disciplineId      │
+                                │ submittedAt       │
+                                │ submittedBy       │
+                                └───────────────────┘
+```
+
+### Key Entities
+
+**Competition:** Main competition entity. Stores all values directly (copied from template at creation). Has `enabled_validation_rules` JSONB column for per-competition rule configuration.
+
+**CompetitionStage:** Represents a distinct stage within multi-stage competitions. Has independent registration periods, age categories. For single-stage competitions, no CompetitionStage records exist.
+
+**CompetitionEntry:** Athlete application to compete in a specific discipline within a specific stage. CRITICAL: Only valid entries are persisted. Invalid submissions are rejected at API level with 400 error.
+
+**CompetitionTemplate:** Defines defaults for creating competitions. Values copied at creation - no FK relationship.
+
+**DisciplineDefinition:** Defines boat classes (M1x, W2x, M4-, W8+, etc.) with metadata: gender, crewSize, hasCoxswain, isLightweight, distanceMeters.
+
+---
+
+## Database Schema
+
+### Liquibase Migration Structure
+
+```
+backend/src/main/resources/db/changelog/
+├── 001-initial-schema/
+│   ├── 001-users.yaml
+│   ├── 002-clubs.yaml
+│   ├── 003-athletes.yaml
+│   ├── 004-club-coaches.yaml
+│   ├── 005-accreditations.yaml
+│   ├── 006-athlete-photo-history.yaml
+│   ├── 007-competition-template.yaml
+│   ├── 008-discipline-definition.yaml
+│   ├── 009-scoring-coefficient.yaml
+│   ├── 011-competition.yaml              # includes enabled_validation_rules
+│   ├── 012-competition-stage.yaml
+│   └── 013-competition-entry.yaml
+├── 002-functions/
+│   ├── 001-timestamp-triggers.yaml
+│   └── 002-apply-timestamp-triggers.yaml
+├── 003-indexes/
+│   ├── 001-accreditations-indexes.yaml
+│   └── 002-competition-indexes.yaml
+└── 004-data/
+    ├── 001-competition-templates.yaml    # 5 templates: DPGE, DOSH1, DISH, DOSH2, BALKAN
+    ├── 002-discipline-definitions.yaml   # 20 Olympic rowing disciplines
+    └── 004-sample-competitions.yaml      # Sample data for testing
+```
+
+### Key Table: competition
+
+```yaml
+columns:
+  - name: id
+    type: UUID
+    primaryKey: true
+  - name: template_code
+    type: VARCHAR(20)
+    remarks: "Template code used to create this competition (reference only, no FK)"
+  - name: name
+    type: VARCHAR(255)
+    nullable: false
+  - name: season
+    type: INTEGER
+    nullable: false
+  - name: start_date
+    type: DATE
+    nullable: false
+  - name: end_date
+    type: DATE
+    nullable: false
+  - name: registration_start
+    type: TIMESTAMPTZ
+    remarks: "For single-stage competitions"
+  - name: registration_end
+    type: TIMESTAMPTZ
+  - name: status
+    type: VARCHAR(20)
+    default: DRAFT
+    remarks: "DRAFT, REGISTRATION_OPEN, REGISTRATION_CLOSED, IN_PROGRESS, COMPLETED, CANCELLED"
+  - name: scope_type
+    type: VARCHAR(20)
+    nullable: false
+  - name: scoring_formula
+    type: VARCHAR(50)
+    nullable: false
+  - name: duration_days
+    type: INTEGER
+    nullable: false
+  - name: enabled_validation_rules
+    type: JSONB
+    remarks: "Array of ValidationRuleType enum values. If null, all rules apply."
+  - name: notes
+    type: TEXT
+  - name: created_at
+    type: TIMESTAMPTZ
+  - name: modified_at
+    type: TIMESTAMPTZ
+```
+
+---
+
+## Validation Rules Implementation
+
+### ValidationRuleType Enum
+
+```java
+@Getter
+@RequiredArgsConstructor
+public enum ValidationRuleType {
+
+    REGISTRATION_PERIOD(10, "Registration Period Check",
+        "Registration is not open. Period: {registrationStart} to {registrationEnd}"),
+
+    AGE_ELIGIBILITY(20, "Age Eligibility Check",
+        "Athlete {athleteName} (age {athleteAge}) does not meet age requirement for {ageCategories}"),
+
+    SCOPE_CHECK(30, "Scope Type Check",
+        "Club {clubName} scope ({clubScope}) does not meet requirement ({requiredScope})"),
+
+    ACCREDITATION_CHECK(40, "Accreditation Check",
+        "Athlete {athleteName} does not have valid accreditation"),
+
+    MEDICAL_CHECK(50, "Medical Examination Check",
+        "Athlete {athleteName} medical exam expired on {medicalExpiry}"),
+
+    INSURANCE_CHECK(60, "Insurance Check",
+        "Athlete {athleteName} insurance expired on {insuranceExpiry}"),
+
+    DUPLICATE_ENTRY(70, "Duplicate Entry Check",
+        "Athlete {athleteName} already registered for {disciplineCode} in this stage"),
+
+    TEAM_COMPOSITION(80, "Team Composition Check",
+        "Club {clubName} exceeded max entries ({maxEntries}) for {disciplineCode}");
+
+    private final int order;
+    private final String displayName;
+    private final String errorMessageTemplate;
+
+    public static List<ValidationRuleType> getSortedRules() {
+        return Arrays.stream(values())
+            .sorted(Comparator.comparingInt(ValidationRuleType::getOrder))
+            .toList();
+    }
+}
+```
+
+### EntryValidationService
+
+```java
+@Service
+@RequiredArgsConstructor
+public class EntryValidationService {
+
+    private final Map<ValidationRuleType, EntryValidator> validators;
+
+    public List<EntryValidationError> validate(EntryValidationContext ctx) {
+        List<ValidationRuleType> enabledRules = ctx.getCompetition().getEnabledValidationRules();
+
+        if (enabledRules == null || enabledRules.isEmpty()) {
+            enabledRules = ValidationRuleType.getSortedRules(); // All rules
+        }
+
+        List<ValidationRuleType> sortedRules = enabledRules.stream()
+            .sorted(Comparator.comparingInt(ValidationRuleType::getOrder))
+            .toList();
+
+        List<EntryValidationError> errors = new ArrayList<>();
+
+        for (ValidationRuleType ruleType : sortedRules) {
+            EntryValidator validator = validators.get(ruleType);
+            if (validator == null) continue;
+
+            EntryValidationResult result = validator.validate(ctx);
+
+            if (!result.isValid()) {
+                String message = formatMessage(ruleType.getErrorMessageTemplate(),
+                                               result.getPlaceholders());
+                errors.add(new EntryValidationError(ruleType, message));
+                break; // Stop on first error (fail fast)
+            }
+        }
+
+        return errors;
+    }
+}
+```
+
+### Admin UI for Rule Selection
+
+When creating/editing a competition, admin sees a checkbox list:
+
+```
+Validation Rules:
+┌─────────────────────────────────────────────────────┐
+│ [✓] Registration Period Check                        │
+│ [✓] Age Eligibility Check                            │
+│ [ ] Scope Type Check (optional for INTERNAL)         │
+│ [✓] Accreditation Check                              │
+│ [✓] Medical Examination Check                        │
+│ [✓] Insurance Check                                  │
+│ [✓] Duplicate Entry Check                            │
+│ [✓] Team Composition Check                           │
+└─────────────────────────────────────────────────────┘
+```
+
+---
+
+## API Design (OpenAPI Endpoints)
+
+### Competition Management
+
+```
+POST   /competitions                                    Create competition
+GET    /competitions                                    List competitions
+GET    /competitions/{id}                               Get competition
+PATCH  /competitions/{id}                               Update competition
+POST   /competitions/{id}/open-registration             Open registration
+POST   /competitions/{id}/close-registration            Close registration
+POST   /competitions/{id}/start                         Start competition
+POST   /competitions/{id}/complete                      Complete competition
+```
+
+### Stage Management
+
+```
+GET    /competitions/{id}/stages                        List stages
+GET    /competitions/{id}/stages/{stageId}              Get stage
+PATCH  /competitions/{id}/stages/{stageId}              Update stage
+POST   /competitions/{id}/stages/{stageId}/open-registration
+POST   /competitions/{id}/stages/{stageId}/close-registration
+```
+
+### Entry Management
+
+```
+POST   /competitions/{id}/entries                       Create single entry
+POST   /competitions/{id}/entries/bulk                  Bulk create entries
+GET    /competitions/{id}/entries                       List entries
+GET    /competitions/{id}/entries/{entryId}             Get entry
+POST   /competitions/{id}/entries/{entryId}/withdraw    Withdraw entry
+POST   /competitions/{id}/stages/{stageId}/entries/bulk Stage-specific bulk
+GET    /competitions/{id}/stages/{stageId}/entries      Stage entries
+```
+
+### Configuration
+
+```
+GET    /competition-config/templates                    List templates
+GET    /competition-config/templates/{id}               Get template
+GET    /competition-config/disciplines                  List disciplines
+GET    /competition-config/disciplines/{id}             Get discipline
+```
+
+---
+
+## Implementation Phases
+
+### Phase 1: Configuration & Domain Model (Week 1-2)
+
+**Database migrations:**
+- Create configuration tables: `competition_template`, `discipline_definition`, `scoring_coefficient`
+- Create core tables: `competition` (with `enabled_validation_rules`), `competition_stage`, `competition_entry`
+- Seed data: 5 templates, 20 disciplines, sample competitions
+
+**Entities & repositories:**
+- JPA entities following existing patterns (UUID ids, Instant timestamps, Lombok)
+- `Competition` entity with `enabledValidationRules` JSONB column
+- Repositories extending JpaRepository and JpaSpecificationExecutor
+
+**OpenAPI spec:**
+- Define schemas: CompetitionDto, CompetitionStageDto, CompetitionTemplateDto, ValidationRuleType enum
+- Define endpoints for competitions, stages, entries, config
+- Generate DTOs and API interfaces via Maven plugin
+
+**Mappers:**
+- Static utility classes: CompetitionMapper, CompetitionStageMapper, etc.
+- Handle timestamp conversions (Instant ↔ OffsetDateTime)
+
+### Phase 2: Competition & Entry Management (Week 3-4)
+
+**Competition service:**
+- CRUD operations with QueryAdapter
+- On create: if template has stageConfig, auto-create CompetitionStage records
+- Lifecycle methods: openRegistration, closeRegistration, start, complete
+
+**Stage service:**
+- CRUD operations for CompetitionStage
+- Independent lifecycle per stage
+
+**Entry validation service:**
+- `ValidationRuleType` enum with 8 predefined rules
+- One `EntryValidator` implementation per rule type
+- `EntryValidationService` orchestrates validation, respects `enabledValidationRules`
+- Returns structured errors with rule type and message
+
+**Entry service:**
+- Bulk submission: `submitBulkEntries()` - atomic validation and persistence
+- Single submission: `submitEntry()` - validates then persists if valid
+- Withdraw entry (before stage registration closes)
+
+**Controllers:**
+- Implement generated API interfaces
+- Handle validation failures: return 400 with EntryValidationError list
+
+### Phase 3: Race Scheduling & Start Lists (Week 5-6)
+
+**Database migrations:**
+- Create tables: `race`, `race_participant`
+- Indexes for schedule queries
+
+**Schedule service:**
+- `generateSchedule()`: create races based on entries, distribute across days
+- Heat distribution logic: ≤7 entries → single final, 8-14 → 2 heats + final, etc.
+- Manual edit: update race scheduled time
+
+**Start list service:**
+- `generateStartLists()`: create RaceParticipant records with lane assignments
+- Seeding algorithm: query previous results, snake lane assignment
+- Random algorithm: shuffle entries, sequential lanes
+
+### Phase 4: Results & Scoring (Week 7-8)
+
+**Database migrations:**
+- Create tables: `result`, `team_ranking`, `annual_ranking`
+
+**Result service:**
+- Record results: validate participant exists, store time/placement
+- Update results: allow corrections, re-trigger scoring
+
+**Scoring service:**
+- Load coefficient from database
+- Apply formula based on competition type (DISH vs DPGE logic)
+- Store points in Result.points
+
+**Ranking service:**
+- `updateTeamRankings()`: aggregate points per club/age/gender, apply tiebreakers
+- `updateAnnualRankings()`: sum across competitions in season
+- Trigger after result recording
+
+### Phase 5: Real-Time Updates (Week 9)
+
+**WebSocket configuration:**
+- Spring WebSocket with STOMP
+- Topics: `/topic/competitions/{id}/results`, `/topic/competitions/{id}/rankings`
+
+**WebSocket service:**
+- Publish race, result, and ranking updates
+- Integrate into ResultService and RankingService
+
+### Phase 6: Admin UI & Testing (Week 10-11)
+
+**Frontend:**
+- Competition list, create, edit pages (with validation rule checkboxes)
+- Entry submission form with validation feedback
+- Race schedule view
+- Results entry form
+- Live leaderboard with WebSocket updates
+
+**Testing:**
+- Service layer unit tests
+- Integration tests for validation, scoring, ranking
+- E2E: create competition → submit entries → record results → verify rankings
+
+### Phase 7: Performance & Production (Week 12)
+
+- Query optimization, missing indexes
+- Caching for configuration data
+- Security audit
+- Load testing
+- Production deployment
+
+---
+
+## Files Changed/Created Summary
+
+### Deleted (validation_rule table approach removed)
+- `001-initial-schema/010-validation-rule.yaml`
+- `004-data/003-validation-rules.yaml`
+- `ValidationRule.java` (entity)
+- `ValidationRuleRepository.java`
+- `ValidationRuleMapper.java`
+- `/competition-config/validation-rules` endpoint
+
+### Added (enum-based approach)
+- `enabled_validation_rules` JSONB column in `competition` table
+- `ValidationRuleType` enum in OpenAPI and Java
+- `validators/` package with 8 validator implementations
+- `enabledValidationRules` field in Competition DTOs
+
+---
+
+## Success Criteria
+
+✅ Follows existing BFG patterns (OpenAPI-first, layered architecture, scope-based auth)
+✅ Supports all required competition types (DISH, DOSH-1/2, DPGE, Balkan)
+✅ Stage-based competitions with independent registration, schedules
+✅ Strict entry validation (invalid entries rejected immediately, never persisted)
+✅ Per-competition validation rule configuration (admin selects which rules apply)
+✅ Bulk entry submission with atomic validation
+✅ Per-stage team composition limits
+✅ Automates validation (age, accreditation, medical, insurance, duplicates)
+✅ Generates schedules and start lists
+✅ Calculates points and rankings automatically
+✅ Provides real-time updates via WebSocket
+✅ Simple, maintainable validation system (enum-based, not database-driven)
+
+---
+
+**Estimated implementation time:** 12 weeks with 2 backend developers + 1 frontend developer
+
+**Database growth:** ~10 competitions/year × 500 entries/competition × 200 races/competition = manageable with proper indexing

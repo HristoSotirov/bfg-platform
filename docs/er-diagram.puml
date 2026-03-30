@@ -1,0 +1,437 @@
+@startuml BFG Platform ER Diagram
+
+!theme plain
+skinparam linetype ortho
+skinparam roundcorner 5
+skinparam class {
+  FontSize 12
+  AttributeFontSize 10
+}
+
+' ================================================================
+' COLOR LEGEND
+' Blue    = Core (users, clubs, athletes)
+' Green   = Competition Definitions
+' Orange  = Configuration (disc groups, scoring, qualification)
+' Purple  = Templates
+' Red     = Competition Runtime
+' ================================================================
+
+package "Core Module" <<Rectangle>> #E8F0FE {
+
+  entity "users" as users #DAE8FC {
+    * id : UUID <<PK>>
+    --
+    first_name : VARCHAR
+    last_name : VARCHAR
+    date_of_birth : DATE
+    username : VARCHAR <<unique>>
+    email : VARCHAR
+    password : VARCHAR
+    role : VARCHAR
+    scope_type : VARCHAR
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "clubs" as clubs #DAE8FC {
+    * id : UUID <<PK>>
+    --
+    club_admin : UUID <<FK users>>
+    name : VARCHAR <<unique>>
+    short_name : VARCHAR <<unique>>
+    logo_url : VARCHAR
+    card_prefix : VARCHAR <<unique>>
+    club_email : VARCHAR <<unique>>
+    scope_type : VARCHAR
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "athletes" as athletes #DAE8FC {
+    * id : UUID <<PK>>
+    --
+    first_name : VARCHAR
+    middle_name : VARCHAR
+    last_name : VARCHAR
+    gender : VARCHAR
+    date_of_birth : DATE
+    scope_type : VARCHAR
+    medical_examination_due : DATE
+    insurance_from : DATE
+    insurance_to : DATE
+    registered_on : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "club_coaches" as club_coaches #DAE8FC {
+    * id : UUID <<PK>>
+    --
+    coach_id : UUID <<FK users, unique>>
+    club_id : UUID <<FK clubs>>
+    assignment_date : TIMESTAMPTZ
+  }
+
+  entity "accreditations" as accreditations #DAE8FC {
+    * id : UUID <<PK>>
+    --
+    athlete_id : UUID <<FK athletes>>
+    club_id : UUID <<FK clubs>>
+    accreditation_number : VARCHAR
+    year : INTEGER
+    scope_type : VARCHAR
+    status : VARCHAR
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "athlete_photo_history" as photos #DAE8FC {
+    * id : UUID <<PK>>
+    --
+    athlete_id : UUID <<FK athletes>>
+    photo_url : VARCHAR
+    uploaded_at : TIMESTAMPTZ
+    uploaded_by : UUID <<FK clubs>>
+  }
+}
+
+package "Competition Definitions" <<Rectangle>> #E8F8E8 {
+
+  entity "competition_group_definitions" as comp_groups #D5E8D4 {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR
+    short_name : VARCHAR <<unique>>
+    gender : VARCHAR
+    min_age : INTEGER
+    max_age : INTEGER
+    transfer_group_id : UUID <<FK self>>
+    transfer_min_crew : INTEGER
+    transfer_ratio : INTEGER
+    transfer_rounding : VARCHAR
+    cox_required_weight_kg : NUMERIC
+    cox_min_weight_kg : NUMERIC
+    light_max_weight_kg : NUMERIC
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "discipline_definitions" as disciplines #D5E8D4 {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR
+    short_name : VARCHAR <<unique>>
+    competition_group_id : UUID <<FK comp_groups>>
+    boat_class : VARCHAR
+    crew_size : INTEGER
+    has_coxswain : BOOLEAN
+    is_lightweight : BOOLEAN
+    distance_meters : INTEGER
+    max_transfer_crew : INTEGER
+    scoring_multiplier : DECIMAL
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+}
+
+package "Configuration (Schemes & Groups)" <<Rectangle>> #FFF3E0 {
+
+  entity "discipline_groups" as disc_groups #FFE0B2 {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR <<unique>>
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "discipline_group_items" as disc_group_items #FFE0B2 {
+    * id : UUID <<PK>>
+    --
+    discipline_group_id : UUID <<FK disc_groups>>
+    discipline_id : UUID <<FK disciplines>>
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "scoring_schemes" as scoring_schemes #FFE0B2 {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "scoring_rules" as scoring_rules #FFE0B2 {
+    * id : UUID <<PK>>
+    --
+    scoring_scheme_id : UUID <<FK scoring_schemes>>
+    placement : INTEGER
+    base_points : DECIMAL
+    boat_class : VARCHAR
+    coefficient : DECIMAL
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "qualification_schemes" as qual_schemes #FFE0B2 {
+    * id : UUID <<PK>>
+    --
+    name : VARCHAR
+    lane_count : INTEGER
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "qualification_stages" as qual_stages #FFE0B2 {
+    * id : UUID <<PK>>
+    --
+    scheme_id : UUID <<FK qual_schemes>>
+    qualification_event_type : VARCHAR
+    boat_count_min : INTEGER
+    boat_count_max : INTEGER
+    event_count : INTEGER
+    stage_order : INTEGER
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "qualification_rules" as qual_rules #FFE0B2 {
+    * id : UUID <<PK>>
+    --
+    scheme_id : UUID <<FK qual_schemes>>
+    source_stage_id : UUID <<FK qual_stages>>
+    destination_stage_id : UUID <<FK qual_stages>>
+    qualify_by_position : INTEGER
+    qualify_by_time : INTEGER
+    is_remainder : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+}
+
+package "Competition Templates" <<Rectangle>> #F3E5F5 {
+
+  entity "competition_templates" as comp_templates #E1BEE7 {
+    * id : UUID <<PK>>
+    --
+    short_name : VARCHAR <<unique>>
+    name : VARCHAR
+    duration_days : INTEGER
+    scoring_scheme_id : UUID <<FK scoring_schemes>>
+    is_active : BOOLEAN
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "competition_stage_templates" as stage_templates #E1BEE7 {
+    * id : UUID <<PK>>
+    --
+    competition_template_id : UUID <<FK comp_templates>>
+    stage_order : INTEGER
+    name : VARCHAR
+    duration_days : INTEGER
+    qualification_scheme_id : UUID <<FK qual_schemes>>
+    discipline_group_id : UUID <<FK disc_groups>>
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "competition_events_timetable_templates" as tt_templates #E1BEE7 {
+    * id : UUID <<PK>>
+    --
+    competition_template_id : UUID <<FK comp_templates>>
+    stage_template_id : UUID <<FK stage_templates>>
+    discipline_code : VARCHAR
+    qualification_event_type : VARCHAR
+    day_offset : INTEGER
+    planned_time : TIME
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+}
+
+package "Competition Runtime" <<Rectangle>> #FFEBEE {
+
+  entity "competitions" as competitions #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    short_name : VARCHAR
+    name : VARCHAR
+    season : INTEGER
+    location : VARCHAR
+    start_date : DATE
+    end_date : DATE
+    status : VARCHAR
+    scope_type : VARCHAR
+    scoring_scheme_id : UUID <<FK scoring_schemes>>
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "competition_stages" as comp_stages #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    competition_id : UUID <<FK competitions>>
+    stage_order : INTEGER
+    name : VARCHAR
+    start_date : DATE
+    end_date : DATE
+    submission_start : TIMESTAMPTZ
+    submission_end : TIMESTAMPTZ
+    tech_meeting_at : TIMESTAMPTZ
+    changes_deadline_hours : INTEGER
+    status : VARCHAR
+    qualification_scheme_id : UUID <<FK qual_schemes>>
+    discipline_group_id : UUID <<FK disc_groups>>
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "entries" as entries #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    competition_id : UUID <<FK competitions>>
+    stage_id : UUID <<FK comp_stages>>
+    club_id : UUID <<FK clubs>>
+    discipline_id : UUID <<FK disciplines>>
+    team_number : INTEGER
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "crew_members" as crew #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    entry_id : UUID <<FK entries>>
+    seat_position : VARCHAR
+    athlete_id : UUID <<FK athletes>>
+    card_number : VARCHAR
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "competition_events_timetables" as events #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    competition_id : UUID <<FK competitions>>
+    stage_id : UUID <<FK comp_stages>>
+    discipline_id : UUID <<FK disciplines>>
+    qualification_event_type : VARCHAR
+    scheduled_at : TIMESTAMPTZ
+    started_at : TIMESTAMPTZ
+    competition_event_status : VARCHAR
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "competition_participations" as participations #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    competition_event_id : UUID <<FK events>>
+    entry_id : UUID <<FK entries>>
+    lane : INTEGER
+    finish_status : VARCHAR
+    finish_time_ms : INTEGER
+    place : INTEGER
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "competition_final_standings" as standings #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    competition_id : UUID <<FK competitions>>
+    stage_id : UUID <<FK comp_stages>>
+    discipline_id : UUID <<FK disciplines>>
+    entry_id : UUID <<FK entries>>
+    overall_rank : INTEGER
+    best_time_ms : INTEGER
+    points : DECIMAL
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+
+  entity "athlete_weight_measurements" as weights #FFCDD2 {
+    * id : UUID <<PK>>
+    --
+    athlete_id : UUID <<FK athletes>>
+    weight_kg : NUMERIC
+    measurement_date : DATE
+    role : VARCHAR
+    created_at : TIMESTAMPTZ
+    modified_at : TIMESTAMPTZ
+  }
+}
+
+' ================================================================
+' RELATIONSHIPS
+' ================================================================
+
+' Core
+clubs }|--|| users : club_admin
+club_coaches }|--|| users : coach_id
+club_coaches }|--|| clubs : club_id
+accreditations }|--|| athletes : athlete_id
+accreditations }|--|| clubs : club_id
+photos }|--|| athletes : athlete_id
+photos }|--|| clubs : uploaded_by
+
+' Definitions
+comp_groups ||--o| comp_groups : transfer_group_id
+disciplines }o--|| comp_groups : competition_group_id
+
+' Discipline groups
+disc_group_items }|--|| disc_groups : discipline_group_id
+disc_group_items }|--|| disciplines : discipline_id
+
+' Scoring
+scoring_rules }|--|| scoring_schemes : scoring_scheme_id
+
+' Qualification
+qual_stages }|--|| qual_schemes : scheme_id
+qual_rules }|--|| qual_schemes : scheme_id
+qual_rules }|--|| qual_stages : source_stage_id
+qual_rules }|--|| qual_stages : destination_stage_id
+
+' Templates
+comp_templates }o--o| scoring_schemes : scoring_scheme_id
+stage_templates }|--|| comp_templates : competition_template_id
+stage_templates }o--o| qual_schemes : qualification_scheme_id
+stage_templates }o--o| disc_groups : discipline_group_id
+tt_templates }|--|| comp_templates : competition_template_id
+tt_templates }o--o| stage_templates : stage_template_id
+
+' Competitions
+competitions }o--o| scoring_schemes : scoring_scheme_id
+comp_stages }|--|| competitions : competition_id
+comp_stages }o--o| qual_schemes : qualification_scheme_id
+comp_stages }o--o| disc_groups : discipline_group_id
+
+' Entries & Participation
+entries }|--|| competitions : competition_id
+entries }|--|| comp_stages : stage_id
+entries }|--|| clubs : club_id
+entries }|--|| disciplines : discipline_id
+crew }|--|| entries : entry_id
+crew }|--|| athletes : athlete_id
+events }|--|| competitions : competition_id
+events }|--|| comp_stages : stage_id
+events }|--|| disciplines : discipline_id
+participations }|--|| events : competition_event_id
+participations }|--|| entries : entry_id
+standings }|--|| competitions : competition_id
+standings }|--|| comp_stages : stage_id
+standings }|--|| disciplines : discipline_id
+standings }|--|| entries : entry_id
+
+' Weight measurements
+weights }|--|| athletes : athlete_id
+
+@enduml

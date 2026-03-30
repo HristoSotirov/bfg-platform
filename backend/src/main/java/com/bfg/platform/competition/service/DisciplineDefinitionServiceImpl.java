@@ -99,19 +99,19 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
         CompetitionGroupDefinition group = groupRepository.findById(request.getCompetitionGroupId())
                 .orElseThrow(() -> new ValidationException("Competition group not found: " + request.getCompetitionGroupId()));
 
-        if (Boolean.TRUE.equals(request.getHasCoxswain())) {
+        if (request.getHasCoxswain()) {
             if (group.getCoxRequiredWeightKg() == null || group.getCoxMinWeightKg() == null) {
                 throw new ValidationException("Cannot set hasCoxswain=true: competition group has no cox weight data configured");
             }
         }
 
-        if (Boolean.TRUE.equals(request.getIsLightweight())) {
+        if (request.getIsLightweight()) {
             if (group.getLightMaxWeightKg() == null) {
                 throw new ValidationException("Cannot set isLightweight=true: competition group has no lightweight weight limit configured");
             }
         }
 
-        if (request.getMaxCrewFromTransfer() != null && request.getMaxCrewFromTransfer() > 0) {
+        if (request.getMaxCrewFromTransfer() > 0) {
             if (group.getTransferFromGroupId() == null || group.getMinCrewForTransfer() == null || group.getTransferRatio() == null || group.getTransferRounding() == null) {
                 throw new ValidationException("Cannot set maxCrewFromTransfer: competition group has no transfer data configured");
             }
@@ -119,7 +119,7 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
     }
 
     private void validateCrewSize(DisciplineDefinitionRequest request) {
-        if (request.getMaxCrewFromTransfer() != null && request.getMaxCrewFromTransfer() > request.getCrewSize()) {
+        if (request.getMaxCrewFromTransfer() > request.getCrewSize()) {
             throw new ValidationException("Max crew from transfer cannot exceed crew size");
         }
     }

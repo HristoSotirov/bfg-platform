@@ -50,6 +50,7 @@ public class UserMapper {
             user.setUsername(request.getEmail());
         }
         user.setRole(request.getRole());
+        user.setActive(true);
         if (request.getRole() == SystemRole.CLUB_ADMIN) {
             user.setScopeType(request.getScopeType() != null ? request.getScopeType() : ScopeType.INTERNAL);
         }

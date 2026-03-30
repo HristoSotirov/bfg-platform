@@ -1,0 +1,140 @@
+<app-dialog [isOpen]="isOpen" title="Добавяне на нова дисциплина" (closed)="close()">
+  <div class="space-y-4 flex-1 min-h-0 overflow-y-auto">
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Име <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.name"
+        placeholder="Въведете име"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Кратко име <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.shortName"
+        placeholder="Въведете кратко име"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Състезателна група <span class="text-red-500">*</span>:</label>
+      @if (loadingGroups) {
+        <div class="text-sm text-gray-500">Зареждане...</div>
+      } @else {
+        <app-searchable-select-dropdown
+          [options]="competitionGroupOptions"
+          [placeholder]="'Изберете състезателна група'"
+          [ngModel]="formData.competitionGroupId"
+          (ngModelChange)="onCompetitionGroupChange($event)"
+          [disabled]="saving">
+        </app-searchable-select-dropdown>
+      }
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Клас лодка <span class="text-red-500">*</span>:</label>
+      <app-searchable-select-dropdown
+        [options]="boatClassOptions"
+        [placeholder]="'Изберете клас лодка'"
+        [ngModel]="formData.boatClass"
+        (ngModelChange)="onBoatClassChange($event)"
+        [disabled]="saving">
+      </app-searchable-select-dropdown>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Размер екипаж <span class="text-red-500">*</span>:</label>
+      <input
+        type="number"
+        [(ngModel)]="formData.crewSize"
+        min="1"
+        placeholder="Въведете размер на екипажа"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Макс. прехвърлени <span class="text-red-500">*</span>:</label>
+      <input
+        type="number"
+        [(ngModel)]="formData.maxCrewFromTransfer"
+        min="0"
+        placeholder="Въведете макс. прехвърлени"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Кокс <span class="text-red-500">*</span>:</label>
+      <app-searchable-select-dropdown
+        [options]="booleanOptions"
+        [placeholder]="'Изберете'"
+        [ngModel]="formData.hasCoxswain"
+        (ngModelChange)="onHasCoxswainChange($event)"
+        [disabled]="saving">
+      </app-searchable-select-dropdown>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Лековес <span class="text-red-500">*</span>:</label>
+      <app-searchable-select-dropdown
+        [options]="booleanOptions"
+        [placeholder]="'Изберете'"
+        [ngModel]="formData.isLightweight"
+        (ngModelChange)="onIsLightweightChange($event)"
+        [disabled]="saving">
+      </app-searchable-select-dropdown>
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Дистанция (м) <span class="text-red-500">*</span>:</label>
+      <input
+        type="number"
+        [(ngModel)]="formData.distanceMeters"
+        min="0"
+        placeholder="Въведете дистанция в метри"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+    </div>
+
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Статус <span class="text-red-500">*</span>:</label>
+      <app-searchable-select-dropdown
+        [options]="statusOptions"
+        [placeholder]="'Изберете статус'"
+        [ngModel]="formData.isActive ? 'true' : 'false'"
+        (ngModelChange)="onStatusChange($event)"
+        [disabled]="saving">
+      </app-searchable-select-dropdown>
+    </div>
+
+    <div class="dialog-footer bg-white flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200">
+      @if (error) {
+        <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+          <p class="text-sm text-red-700">{{ error }}</p>
+          <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="error = null">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      }
+      <div class="flex justify-center gap-3">
+        <app-button
+          variant="outline"
+          size="md"
+          text="Затвори"
+          [disabled]="saving"
+          (click)="close()">
+        </app-button>
+        <app-button
+          variant="primary"
+          size="md"
+          text="Запази"
+          [disabled]="!isFormValid || saving"
+          (click)="save()">
+        </app-button>
+      </div>
+    </div>
+  </div>
+</app-dialog>

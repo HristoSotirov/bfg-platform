@@ -45,8 +45,8 @@ public class DisciplineDefinitionMapper {
         entity.setCompetitionGroupId(request.getCompetitionGroupId());
         entity.setBoatClass(request.getBoatClass());
         entity.setCrewSize(request.getCrewSize());
-        entity.setHasCoxswain(request.getHasCoxswain() != null && request.getHasCoxswain());
-        entity.setLightweight(request.getIsLightweight() != null && request.getIsLightweight());
+        entity.setHasCoxswain(request.getHasCoxswain());
+        entity.setLightweight(request.getIsLightweight());
         entity.setDistanceMeters(request.getDistanceMeters());
         entity.setMaxCrewFromTransfer(request.getMaxCrewFromTransfer());
         entity.setActive(request.getIsActive());
@@ -60,8 +60,8 @@ public class DisciplineDefinitionMapper {
         entity.setBoatClass(request.getBoatClass());
         entity.setCrewSize(request.getCrewSize());
         entity.setMaxCrewFromTransfer(request.getMaxCrewFromTransfer());
-        entity.setHasCoxswain(request.getHasCoxswain() != null && request.getHasCoxswain());
-        entity.setLightweight(request.getIsLightweight() != null && request.getIsLightweight());
+        entity.setHasCoxswain(request.getHasCoxswain());
+        entity.setLightweight(request.getIsLightweight());
         entity.setDistanceMeters(request.getDistanceMeters());
         entity.setActive(request.getIsActive());
     }

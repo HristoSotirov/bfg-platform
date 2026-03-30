@@ -1776,233 +1776,14 @@
               code: 409
               message: "Cannot delete qualification scheme: it is referenced by other records."
 
-# ── Qualification Stages ─────────────────────────────────────────────────────
+# ── Qualification Tiers ──────────────────────────────────────────────────────
 
-/qualification-stages:
+/qualification-tiers:
   get:
     tags:
-      - Qualification Stages
-    summary: Get all qualification stages
-    operationId: getAllQualificationStages
-    parameters:
-      - name: filter
-        in: query
-        description: Filter expression (e.g., qualificationSchemeId eq 'uuid-value')
-        schema:
-          type: string
-      - name: orderBy
-        in: query
-        description: Predefined ordering (multiselect)
-        style: form
-        explode: false
-        schema:
-          type: array
-          items:
-            type: string
-            enum:
-              - stageRank_asc
-              - stageRank_desc
-              - createdAt_asc
-              - createdAt_desc
-          default: ["stageRank_asc"]
-      - name: top
-        in: query
-        description: Maximum number of items to return
-        schema:
-          type: integer
-          minimum: 1
-          maximum: 1000
-          default: 100
-      - name: skip
-        in: query
-        description: Number of items to skip
-        schema:
-          type: integer
-          minimum: 0
-          default: 0
-    responses:
-      "200":
-        description: List of qualification stages successfully retrieved
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: "../common/schemas.yaml#/Page"
-                - type: object
-                  properties:
-                    content:
-                      type: array
-                      items:
-                        $ref: "../competitions/schemas.yaml#/QualificationStageDto"
-      "500":
-        description: Server error
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 500
-              message: "Internal server error. Please try again later."
-
-  post:
-    tags:
-      - Qualification Stages
-    summary: Create a new qualification stage
-    operationId: createQualificationStage
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "../competitions/schemas.yaml#/QualificationStageRequest"
-    responses:
-      "201":
-        description: Qualification stage created successfully
-        content:
-          application/json:
-            schema:
-              $ref: "../competitions/schemas.yaml#/QualificationStageDto"
-      "400":
-        description: Bad request, validation failed
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 400
-              message: "Validation failed."
-
-/qualification-stages/{uuid}:
-  get:
-    tags:
-      - Qualification Stages
-    summary: Get qualification stage by UUID
-    operationId: getQualificationStageByUuid
-    parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: UUID of the qualification stage
-        schema:
-          type: string
-          format: uuid
-        x-parameter-extra-annotation: '@NotNull'
-    responses:
-      "200":
-        description: Qualification stage details found
-        content:
-          application/json:
-            schema:
-              $ref: "../competitions/schemas.yaml#/QualificationStageDto"
-      "404":
-        description: Qualification stage not found
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 404
-              message: "Qualification stage not found."
-
-  put:
-    tags:
-      - Qualification Stages
-    summary: Update qualification stage by UUID
-    operationId: updateQualificationStageByUuid
-    parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: UUID of the qualification stage
-        schema:
-          type: string
-          format: uuid
-        x-parameter-extra-annotation: '@NotNull'
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "../competitions/schemas.yaml#/QualificationStageRequest"
-    responses:
-      "200":
-        description: Qualification stage updated successfully
-        content:
-          application/json:
-            schema:
-              $ref: "../competitions/schemas.yaml#/QualificationStageDto"
-      "400":
-        description: Bad request - validation error
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 400
-              message: "Invalid data format."
-      "404":
-        description: Qualification stage not found
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 404
-              message: "Qualification stage not found."
-      "409":
-        description: Conflict - duplicate entry
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 409
-              message: "Another qualification stage with the same values already exists."
-
-  delete:
-    tags:
-      - Qualification Stages
-    summary: Delete qualification stage by UUID
-    operationId: deleteQualificationStageByUuid
-    parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: UUID of the qualification stage
-        schema:
-          type: string
-          format: uuid
-        x-parameter-extra-annotation: '@NotNull'
-    responses:
-      "204":
-        description: Qualification stage deleted successfully (no content)
-      "404":
-        description: Qualification stage not found
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 404
-              message: "Qualification stage not found."
-      "409":
-        description: Conflict - referenced by other records
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 409
-              message: "Cannot delete qualification stage: it is referenced by other records."
-
-# ── Qualification Rules ──────────────────────────────────────────────────────
-
-/qualification-rules:
-  get:
-    tags:
-      - Qualification Rules
-    summary: Get all qualification rules
-    operationId: getAllQualificationRules
+      - Qualification Tiers
+    summary: Get all qualification tiers
+    operationId: getAllQualificationTiers
     parameters:
       - name: filter
         in: query
@@ -2041,7 +1822,7 @@
           default: 0
     responses:
       "200":
-        description: List of qualification rules successfully retrieved
+        description: List of qualification tiers successfully retrieved
         content:
           application/json:
             schema:
@@ -2052,7 +1833,7 @@
                     content:
                       type: array
                       items:
-                        $ref: "../competitions/schemas.yaml#/QualificationRuleDto"
+                        $ref: "../competitions/schemas.yaml#/QualificationTierDto"
       "500":
         description: Server error
         content:
@@ -2065,22 +1846,22 @@
 
   post:
     tags:
-      - Qualification Rules
-    summary: Create a new qualification rule
-    operationId: createQualificationRule
+      - Qualification Tiers
+    summary: Create a new qualification tier
+    operationId: createQualificationTier
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: "../competitions/schemas.yaml#/QualificationRuleRequest"
+            $ref: "../competitions/schemas.yaml#/QualificationTierRequest"
     responses:
       "201":
-        description: Qualification rule created successfully
+        description: Qualification tier created successfully
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/QualificationRuleDto"
+              $ref: "../competitions/schemas.yaml#/QualificationTierDto"
       "400":
         description: Bad request, validation failed
         content:
@@ -2091,48 +1872,48 @@
               code: 400
               message: "Validation failed."
 
-/qualification-rules/{uuid}:
+/qualification-tiers/{uuid}:
   get:
     tags:
-      - Qualification Rules
-    summary: Get qualification rule by UUID
-    operationId: getQualificationRuleByUuid
+      - Qualification Tiers
+    summary: Get qualification tier by UUID
+    operationId: getQualificationTierByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the qualification rule
+        description: UUID of the qualification tier
         schema:
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
     responses:
       "200":
-        description: Qualification rule details found
+        description: Qualification tier details found
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/QualificationRuleDto"
+              $ref: "../competitions/schemas.yaml#/QualificationTierDto"
       "404":
-        description: Qualification rule not found
+        description: Qualification tier not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Qualification rule not found."
+              message: "Qualification tier not found."
 
   put:
     tags:
-      - Qualification Rules
-    summary: Update qualification rule by UUID
-    operationId: updateQualificationRuleByUuid
+      - Qualification Tiers
+    summary: Update qualification tier by UUID
+    operationId: updateQualificationTierByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the qualification rule
+        description: UUID of the qualification tier
         schema:
           type: string
           format: uuid
@@ -2142,14 +1923,14 @@
       content:
         application/json:
           schema:
-            $ref: "../competitions/schemas.yaml#/QualificationRuleRequest"
+            $ref: "../competitions/schemas.yaml#/QualificationTierRequest"
     responses:
       "200":
-        description: Qualification rule updated successfully
+        description: Qualification tier updated successfully
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/QualificationRuleDto"
+              $ref: "../competitions/schemas.yaml#/QualificationTierDto"
       "400":
         description: Bad request - validation error
         content:
@@ -2160,14 +1941,14 @@
               code: 400
               message: "Invalid data format."
       "404":
-        description: Qualification rule not found
+        description: Qualification tier not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Qualification rule not found."
+              message: "Qualification tier not found."
       "409":
         description: Conflict - duplicate entry
         content:
@@ -2176,34 +1957,34 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 409
-              message: "Another qualification rule with the same values already exists."
+              message: "Another qualification tier with the same values already exists."
 
   delete:
     tags:
-      - Qualification Rules
-    summary: Delete qualification rule by UUID
-    operationId: deleteQualificationRuleByUuid
+      - Qualification Tiers
+    summary: Delete qualification tier by UUID
+    operationId: deleteQualificationTierByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the qualification rule
+        description: UUID of the qualification tier
         schema:
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
     responses:
       "204":
-        description: Qualification rule deleted successfully (no content)
+        description: Qualification tier deleted successfully (no content)
       "404":
-        description: Qualification rule not found
+        description: Qualification tier not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Qualification rule not found."
+              message: "Qualification tier not found."
       "409":
         description: Conflict - referenced by other records
         content:
@@ -2212,7 +1993,224 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 409
-              message: "Cannot delete qualification rule: it is referenced by other records."
+              message: "Cannot delete qualification tier: it is referenced by other records."
+
+# ── Qualification Progressions ───────────────────────────────────────────────
+
+/qualification-progressions:
+  get:
+    tags:
+      - Qualification Progressions
+    summary: Get all qualification progressions
+    operationId: getAllQualificationProgressions
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., qualificationTierId eq 'uuid-value')
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - createdAt_asc
+              - createdAt_desc
+          default: ["createdAt_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of qualification progressions successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Qualification Progressions
+    summary: Create a new qualification progression
+    operationId: createQualificationProgression
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationProgressionRequest"
+    responses:
+      "201":
+        description: Qualification progression created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/qualification-progressions/{uuid}:
+  get:
+    tags:
+      - Qualification Progressions
+    summary: Get qualification progression by UUID
+    operationId: getQualificationProgressionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification progression
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Qualification progression details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "404":
+        description: Qualification progression not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification progression not found."
+
+  put:
+    tags:
+      - Qualification Progressions
+    summary: Update qualification progression by UUID
+    operationId: updateQualificationProgressionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification progression
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationProgressionRequest"
+    responses:
+      "200":
+        description: Qualification progression updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Qualification progression not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification progression not found."
+      "409":
+        description: Conflict - duplicate entry
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another qualification progression with the same values already exists."
+
+  delete:
+    tags:
+      - Qualification Progressions
+    summary: Delete qualification progression by UUID
+    operationId: deleteQualificationProgressionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification progression
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Qualification progression deleted successfully (no content)
+      "404":
+        description: Qualification progression not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification progression not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete qualification progression: it is referenced by other records."
 
 # ── Competition Disciplines (junction) ───────────────────────────────────────
 

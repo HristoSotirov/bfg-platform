@@ -26,6 +26,30 @@ export class NavigationService {
       requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN'],
     },
     {
+      id: 'competition-groups',
+      label: 'Състезателни групи',
+      route: '/competition-groups',
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN'],
+    },
+    {
+      id: 'disciplines',
+      label: 'Дисциплини',
+      route: '/disciplines',
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN'],
+    },
+    {
+      id: 'scoring',
+      label: 'Точкуване',
+      route: '/scoring',
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN'],
+    },
+    {
+      id: 'qualification',
+      label: 'Квалификации',
+      route: '/qualification',
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN'],
+    },
+    {
       id: 'competitions',
       label: 'Състезания',
       route: '/competitions',

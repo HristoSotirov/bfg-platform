@@ -27,6 +27,8 @@ databaseChangeLog:
               - column:
                   name: competition_group_id
                   type: UUID
+                  constraints:
+                    nullable: false
               - column:
                   name: boat_class
                   type: VARCHAR(20)
@@ -40,6 +42,8 @@ databaseChangeLog:
               - column:
                   name: max_crew_from_transfer
                   type: INTEGER
+                  constraints:
+                    nullable: false
               - column:
                   name: has_coxswain
                   type: BOOLEAN

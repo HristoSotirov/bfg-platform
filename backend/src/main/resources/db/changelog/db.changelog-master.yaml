@@ -31,9 +31,9 @@ databaseChangeLog:
   - include:
       file: db/changelog/001-initial-schema/012-qualification-schemes.yaml
   - include:
-      file: db/changelog/001-initial-schema/013-qualification-stages.yaml
+      file: db/changelog/001-initial-schema/013-qualification-tiers.yaml
   - include:
-      file: db/changelog/001-initial-schema/014-qualification-rules.yaml
+      file: db/changelog/001-initial-schema/014-qualification-progressions.yaml
 
   # Competition module - templates
   - include:

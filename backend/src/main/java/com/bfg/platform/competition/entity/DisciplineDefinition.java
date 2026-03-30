@@ -62,7 +62,7 @@ public class DisciplineDefinition {
     private Integer crewSize;
 
     @Column(name = "max_crew_from_transfer")
-    private Integer maxCrewFromTransfer;
+    private int maxCrewFromTransfer;
 
     @Column(name = "has_coxswain")
     private boolean hasCoxswain;

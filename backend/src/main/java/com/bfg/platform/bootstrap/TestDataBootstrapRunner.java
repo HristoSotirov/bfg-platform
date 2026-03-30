@@ -237,38 +237,18 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
 
         ScopeType effectiveScope = scopeType != null ? scopeType : ScopeType.INTERNAL;
 
-        // ScopeAccessPolicy allows only CLUB_ADMIN to have non-INTERNAL scope via UserService.
-        // APP_ADMIN and FEDERATION_ADMIN with NATIONAL/EXTERNAL must use repository directly.
-        boolean useRepository = (role == SystemRole.APP_ADMIN || role == SystemRole.FEDERATION_ADMIN)
-                && effectiveScope != ScopeType.INTERNAL;
-
-        if (useRepository) {
-            User user = User.builder()
-                    .username(username)
-                    .email(username)
-                    .password(passwordEncoder.encode(password))
-                    .firstName(firstName)
-                    .lastName(lastName)
-                    .dateOfBirth(dateOfBirth)
-                    .role(role)
-                    .scopeType(effectiveScope)
-                    .isActive(true)
-                    .build();
-            return UserMapper.toDto(userRepository.save(user));
-        }
-
-        UserCreateRequest request = new UserCreateRequest();
-        request.setUsername(username);
-        request.setEmail(username);
-        request.setFirstName(firstName);
-        request.setLastName(lastName);
-        request.setDateOfBirth(dateOfBirth);
-        request.setRole(role);
-        if (role == SystemRole.CLUB_ADMIN || role == SystemRole.APP_ADMIN || role == SystemRole.FEDERATION_ADMIN) {
-            request.setScopeType(effectiveScope);
-        }
-
-        return userService.createUser(request).orElseThrow();
+        User user = User.builder()
+                .username(username)
+                .email(username)
+                .password(passwordEncoder.encode(password))
+                .firstName(firstName)
+                .lastName(lastName)
+                .dateOfBirth(dateOfBirth)
+                .role(role)
+                .scopeType(effectiveScope)
+                .isActive(true)
+                .build();
+        return UserMapper.toDto(userRepository.save(user));
     }
 
     private ClubDto createClub(String name, String shortName, UUID clubAdmin, String clubEmail, ScopeType scopeType) {

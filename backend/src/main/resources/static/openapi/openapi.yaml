@@ -116,14 +116,14 @@ paths:
     $ref: "./competitions/paths.yaml#/~1qualification-schemes"
   /qualification-schemes/{uuid}:
     $ref: "./competitions/paths.yaml#/~1qualification-schemes~1{uuid}"
-  /qualification-stages:
-    $ref: "./competitions/paths.yaml#/~1qualification-stages"
-  /qualification-stages/{uuid}:
-    $ref: "./competitions/paths.yaml#/~1qualification-stages~1{uuid}"
-  /qualification-rules:
-    $ref: "./competitions/paths.yaml#/~1qualification-rules"
-  /qualification-rules/{uuid}:
-    $ref: "./competitions/paths.yaml#/~1qualification-rules~1{uuid}"
+  /qualification-tiers:
+    $ref: "./competitions/paths.yaml#/~1qualification-tiers"
+  /qualification-tiers/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1qualification-tiers~1{uuid}"
+  /qualification-progressions:
+    $ref: "./competitions/paths.yaml#/~1qualification-progressions"
+  /qualification-progressions/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1qualification-progressions~1{uuid}"
 
 components:
   securitySchemes:
@@ -256,10 +256,10 @@ components:
       $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
     QualificationSchemeDto:
       $ref: "./competitions/schemas.yaml#/QualificationSchemeDto"
-    QualificationStageDto:
-      $ref: "./competitions/schemas.yaml#/QualificationStageDto"
-    QualificationRuleDto:
-      $ref: "./competitions/schemas.yaml#/QualificationRuleDto"
+    QualificationTierDto:
+      $ref: "./competitions/schemas.yaml#/QualificationTierDto"
+    QualificationProgressionDto:
+      $ref: "./competitions/schemas.yaml#/QualificationProgressionDto"
     CompetitionDto:
       $ref: "./competitions/schemas.yaml#/CompetitionDto"
     CompetitionDisciplineDto:
@@ -302,7 +302,7 @@ components:
       $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateUpdateRequest"
     QualificationSchemeRequest:
       $ref: "./competitions/schemas.yaml#/QualificationSchemeRequest"
-    QualificationStageRequest:
-      $ref: "./competitions/schemas.yaml#/QualificationStageRequest"
-    QualificationRuleRequest:
-      $ref: "./competitions/schemas.yaml#/QualificationRuleRequest"
+    QualificationTierRequest:
+      $ref: "./competitions/schemas.yaml#/QualificationTierRequest"
+    QualificationProgressionRequest:
+      $ref: "./competitions/schemas.yaml#/QualificationProgressionRequest"

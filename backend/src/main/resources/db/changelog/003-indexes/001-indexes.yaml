@@ -165,32 +165,22 @@ databaseChangeLog:
               - column: { name: scoring_scheme_id }
 
         # =============================================
-        # qualification_stages
+        # qualification_tiers
         # =============================================
         - createIndex:
-            tableName: qualification_stages
-            indexName: idx_qual_stages_scheme_id
+            tableName: qualification_tiers
+            indexName: idx_qual_tiers_scheme_id
             columns:
               - column: { name: qualification_scheme_id }
 
         # =============================================
-        # qualification_rules
+        # qualification_progressions
         # =============================================
         - createIndex:
-            tableName: qualification_rules
-            indexName: idx_qual_rules_scheme_id
+            tableName: qualification_progressions
+            indexName: idx_qual_progressions_tier_id
             columns:
-              - column: { name: qualification_scheme_id }
-        - createIndex:
-            tableName: qualification_rules
-            indexName: idx_qual_rules_source_stage_id
-            columns:
-              - column: { name: source_stage_id }
-        - createIndex:
-            tableName: qualification_rules
-            indexName: idx_qual_rules_dest_stage_id
-            columns:
-              - column: { name: destination_stage_id }
+              - column: { name: qualification_tier_id }
 
         # =============================================
         # competition_templates

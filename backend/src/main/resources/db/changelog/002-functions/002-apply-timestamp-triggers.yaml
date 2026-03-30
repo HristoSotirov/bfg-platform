@@ -78,14 +78,14 @@ databaseChangeLog:
                 EXECUTE FUNCTION set_modified_at();
         - sql:
             sql: |
-              CREATE TRIGGER set_qualification_stages_modified_at
-                BEFORE INSERT OR UPDATE ON qualification_stages
+              CREATE TRIGGER set_qualification_tiers_modified_at
+                BEFORE INSERT OR UPDATE ON qualification_tiers
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
         - sql:
             sql: |
-              CREATE TRIGGER set_qualification_rules_modified_at
-                BEFORE INSERT OR UPDATE ON qualification_rules
+              CREATE TRIGGER set_qualification_progressions_modified_at
+                BEFORE INSERT OR UPDATE ON qualification_progressions
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
 

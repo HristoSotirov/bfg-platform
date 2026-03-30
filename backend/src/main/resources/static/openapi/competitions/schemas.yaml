@@ -353,9 +353,9 @@ QualificationSchemeDto:
       type: string
       format: date-time
 
-QualificationStageDto:
+QualificationTierDto:
   type: object
-  description: Data Transfer Object for qualification stage
+  description: Data Transfer Object for qualification tier
   properties:
     uuid:
       type: string
@@ -365,16 +365,20 @@ QualificationStageDto:
       format: uuid
     boatCountMin:
       type: integer
-      example: 7
+      example: 8
     boatCountMax:
       type: integer
-      example: 12
-    qualificationEventType:
-      $ref: "#/QualificationEventType"
-    eventCount:
+      example: 14
+    heatCount:
       type: integer
       example: 2
-    stageRank:
+    semiFinalCount:
+      type: integer
+      example: 0
+    finalBCount:
+      type: integer
+      example: 1
+    finalACount:
       type: integer
       example: 1
     createdAt:
@@ -384,34 +388,28 @@ QualificationStageDto:
       type: string
       format: date-time
 
-QualificationRuleDto:
+QualificationProgressionDto:
   type: object
-  description: Data Transfer Object for qualification rule
+  description: Data Transfer Object for qualification progression
   properties:
     uuid:
       type: string
       format: uuid
-    qualificationSchemeId:
+    qualificationTierId:
       type: string
       format: uuid
-    sourceStageId:
+    sourceEvent:
       type: string
-      format: uuid
-    destinationStageId:
+      example: "H"
+    destEvent:
       type: string
-      format: uuid
+      example: "SF"
     qualifyByPosition:
       type: integer
       example: 3
-    baseQualifyByTime:
+    qualifyByTime:
       type: integer
-      example: 0
-    maxQualifyByTime:
-      type: integer
-      example: 0
-    isRemainder:
-      type: boolean
-      example: false
+      example: 2
     createdAt:
       type: string
       format: date-time
@@ -743,7 +741,10 @@ DisciplineDefinitionRequest:
     - competitionGroupId
     - boatClass
     - crewSize
+    - hasCoxswain
+    - isLightweight
     - distanceMeters
+    - maxCrewFromTransfer
     - isActive
   properties:
     name:
@@ -771,11 +772,15 @@ DisciplineDefinitionRequest:
     maxCrewFromTransfer:
       type: integer
       minimum: 0
-      x-field-extra-annotation: '@Min(value = 0, message = "Max crew from transfer must be >= 0")'
+      x-field-extra-annotation: |-
+        @NotNull(message = "Max crew from transfer is required")
+        @Min(value = 0, message = "Max crew from transfer must be >= 0")
     hasCoxswain:
       type: boolean
+      x-field-extra-annotation: '@NotNull(message = "Has coxswain is required")'
     isLightweight:
       type: boolean
+      x-field-extra-annotation: '@NotNull(message = "Is lightweight is required")'
     distanceMeters:
       type: integer
       minimum: 1
@@ -1018,16 +1023,17 @@ QualificationSchemeRequest:
       type: boolean
       x-field-extra-annotation: '@NotNull(message = "isActive is required")'
 
-QualificationStageRequest:
+QualificationTierRequest:
   type: object
-  description: Request payload for creating or updating a qualification stage
+  description: Request payload for creating or updating a qualification tier
   required:
     - qualificationSchemeId
     - boatCountMin
     - boatCountMax
-    - qualificationEventType
-    - eventCount
-    - stageRank
+    - heatCount
+    - semiFinalCount
+    - finalBCount
+    - finalACount
   properties:
     qualificationSchemeId:
       type: string
@@ -1035,78 +1041,75 @@ QualificationStageRequest:
       x-field-extra-annotation: '@NotNull(message = "Qualification scheme ID is required")'
     boatCountMin:
       type: integer
-      minimum: 1
+      minimum: 0
       x-field-extra-annotation: |-
         @NotNull(message = "Boat count min is required")
-        @Min(value = 1, message = "Boat count min must be >= 1")
+        @Min(value = 0, message = "Boat count min must be >= 0")
     boatCountMax:
       type: integer
       minimum: 1
       x-field-extra-annotation: |-
         @NotNull(message = "Boat count max is required")
         @Min(value = 1, message = "Boat count max must be >= 1")
-    qualificationEventType:
-      allOf:
-        - $ref: "#/QualificationEventType"
-      x-field-extra-annotation: '@NotNull(message = "Qualification event type is required")'
-    eventCount:
+    heatCount:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Heat count is required")
+        @Min(value = 0, message = "Heat count must be >= 0")
+    semiFinalCount:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Semi-final count is required")
+        @Min(value = 0, message = "Semi-final count must be >= 0")
+    finalBCount:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: |-
+        @NotNull(message = "Final B count is required")
+        @Min(value = 0, message = "Final B count must be >= 0")
+    finalACount:
       type: integer
       minimum: 1
       x-field-extra-annotation: |-
-        @NotNull(message = "Event count is required")
-        @Min(value = 1, message = "Event count must be >= 1")
-    stageRank:
-      type: integer
-      minimum: 1
-      x-field-extra-annotation: |-
-        @NotNull(message = "Stage rank is required")
-        @Min(value = 1, message = "Stage rank must be >= 1")
+        @NotNull(message = "Final A count is required")
+        @Min(value = 1, message = "Final A count must be >= 1")
 
-QualificationRuleRequest:
+QualificationProgressionRequest:
   type: object
-  description: Request payload for creating or updating a qualification rule
+  description: Request payload for creating or updating a qualification progression
   required:
-    - qualificationSchemeId
-    - sourceStageId
-    - destinationStageId
+    - qualificationTierId
+    - sourceEvent
+    - destEvent
     - qualifyByPosition
-    - baseQualifyByTime
-    - maxQualifyByTime
-    - isRemainder
+    - qualifyByTime
   properties:
-    qualificationSchemeId:
+    qualificationTierId:
       type: string
       format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Qualification scheme ID is required")'
-    sourceStageId:
+      x-field-extra-annotation: '@NotNull(message = "Qualification tier ID is required")'
+    sourceEvent:
       type: string
-      format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Source stage ID is required")'
-    destinationStageId:
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Source event is required")'
+    destEvent:
       type: string
-      format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Destination stage ID is required")'
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Destination event is required")'
     qualifyByPosition:
       type: integer
       minimum: 0
       x-field-extra-annotation: |-
         @NotNull(message = "Qualify by position is required")
         @Min(value = 0, message = "Qualify by position must be >= 0")
-    baseQualifyByTime:
+    qualifyByTime:
       type: integer
       minimum: 0
       x-field-extra-annotation: |-
-        @NotNull(message = "Base qualify by time is required")
-        @Min(value = 0, message = "Base qualify by time must be >= 0")
-    maxQualifyByTime:
-      type: integer
-      minimum: 0
-      x-field-extra-annotation: |-
-        @NotNull(message = "Max qualify by time is required")
-        @Min(value = 0, message = "Max qualify by time must be >= 0")
-    isRemainder:
-      type: boolean
-      x-field-extra-annotation: '@NotNull(message = "isRemainder is required")'
+        @NotNull(message = "Qualify by time is required")
+        @Min(value = 0, message = "Qualify by time must be >= 0")
 
 CompetitionDisciplineCreateRequest:
   type: object
