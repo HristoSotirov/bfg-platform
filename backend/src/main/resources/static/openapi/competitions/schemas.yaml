@@ -121,6 +121,9 @@ CompetitionGroupDefinitionDto:
     maxAge:
       type: integer
       example: 22
+    maxDisciplinesPerAthlete:
+      type: integer
+      example: 3
     transferFromGroupId:
       type: string
       format: uuid
@@ -130,6 +133,8 @@ CompetitionGroupDefinitionDto:
       type: integer
     transferRounding:
       $ref: "#/TransferRounding"
+    transferredMaxDisciplinesPerPerson:
+      type: integer
     coxRequiredWeightKg:
       type: number
       format: double
@@ -670,6 +675,7 @@ CompetitionGroupDefinitionRequest:
     - gender
     - minAge
     - maxAge
+    - maxDisciplinesPerAthlete
     - isActive
   properties:
     name:
@@ -696,6 +702,12 @@ CompetitionGroupDefinitionRequest:
       x-field-extra-annotation: |-
         @NotNull(message = "Max age is required")
         @Min(value = 0, message = "Max age must be >= 0")
+    maxDisciplinesPerAthlete:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Max disciplines per athlete is required")
+        @Min(value = 1, message = "Max disciplines per athlete must be >= 1")
     transferFromGroupId:
       type: string
       format: uuid
@@ -713,6 +725,11 @@ CompetitionGroupDefinitionRequest:
       description: "Nullable - all transfer fields must be set together or all null"
     transferRounding:
       $ref: "#/TransferRounding"
+      description: "Nullable - all transfer fields must be set together or all null"
+    transferredMaxDisciplinesPerPerson:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: '@Min(value = 1, message = "Transferred max disciplines per person must be >= 1")'
       description: "Nullable - all transfer fields must be set together or all null"
     coxRequiredWeightKg:
       type: number

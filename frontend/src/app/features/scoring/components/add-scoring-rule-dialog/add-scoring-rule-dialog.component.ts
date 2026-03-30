@@ -29,6 +29,7 @@ import { Subject, takeUntil } from 'rxjs';
 export class AddScoringRuleDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() scoringSchemeId = '';
+  @Input() nextPlacement = 1;
 
   @Output() closed = new EventEmitter<void>();
   @Output() added = new EventEmitter<void>();
@@ -63,7 +64,7 @@ export class AddScoringRuleDialogComponent implements OnChanges {
 
   private resetForm(): void {
     this.formData = {
-      placement: null,
+      placement: this.nextPlacement,
       basePoints: null,
     };
     this.error = null;

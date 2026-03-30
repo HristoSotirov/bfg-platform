@@ -116,7 +116,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     const group = this.competitionGroups.find(
       (g) => g.uuid === this.discipline?.competitionGroupId,
     );
-    return group?.name || this.discipline.competitionGroupId;
+    return group ? `${group.shortName || group.name || '-'} (${group.minAge}-${group.maxAge})` : this.discipline.competitionGroupId;
   }
 
   // Group preview dialog
@@ -194,7 +194,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
           this.competitionGroups = response.content || [];
           this.competitionGroupOptions = this.competitionGroups.map((group) => ({
             value: group.uuid || '',
-            label: group.name || '-',
+            label: `${group.shortName || group.name || '-'} (${group.minAge}-${group.maxAge})`,
           }));
           this.loadingGroups = false;
           this.cdr.markForCheck();

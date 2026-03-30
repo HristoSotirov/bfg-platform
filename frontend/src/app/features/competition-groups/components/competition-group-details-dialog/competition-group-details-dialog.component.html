@@ -39,6 +39,10 @@
                   <span class="text-sm font-medium">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисциплини:</span>
+                  <span class="text-sm font-medium">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
                   <span
                     class="text-sm font-medium"
@@ -127,6 +131,15 @@
                 />
               </div>
               <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Макс. дисциплини <span class="text-red-500">*</span>:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.maxDisciplinesPerAthlete"
+                  min="1"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
                 <app-searchable-select-dropdown
                   [options]="statusOptions"
@@ -172,6 +185,10 @@
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Закръгляне:</span>
                     <span class="text-sm font-medium">{{ getRoundingLabel(group.transferRounding) }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисц. (трансф.):</span>
+                    <span class="text-sm font-medium">{{ group.transferredMaxDisciplinesPerPerson != null ? group.transferredMaxDisciplinesPerPerson : "-" }}</span>
                   </div>
                 </div>
               </div>
@@ -222,6 +239,15 @@
                   (ngModelChange)="onRoundingChange($event)"
                   [disabled]="saving">
                 </app-searchable-select-dropdown>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Макс. дисц. (трансф.):</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.transferredMaxDisciplinesPerPerson"
+                  min="1"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
               </div>
 
               <div>

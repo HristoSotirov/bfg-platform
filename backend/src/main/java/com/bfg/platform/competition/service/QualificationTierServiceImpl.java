@@ -110,11 +110,25 @@ public class QualificationTierServiceImpl implements QualificationTierService {
         QualificationTier entity = repository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Qualification tier", uuid));
 
+        validateIsLastTier(entity);
+
         try {
             repository.delete(entity);
             entityManager.flush();
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ConstraintViolationMessageExtractor.extractMessage(e));
+        }
+    }
+
+    private void validateIsLastTier(QualificationTier entity) {
+        List<QualificationTier> tiers = repository.findByQualificationSchemeIdOrderByBoatCountMinAsc(
+                entity.getQualificationSchemeId());
+        if (tiers.isEmpty()) return;
+        QualificationTier lastTier = tiers.get(tiers.size() - 1);
+        if (!lastTier.getId().equals(entity.getId())) {
+            throw new ValidationException(
+                    "Only the last tier can be deleted. " +
+                    "Current last range: " + lastTier.getBoatCountMin() + "-" + lastTier.getBoatCountMax());
         }
     }
 

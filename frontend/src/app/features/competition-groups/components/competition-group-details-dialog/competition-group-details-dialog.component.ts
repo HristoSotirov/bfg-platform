@@ -91,10 +91,12 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     gender: CompetitionGroupGender;
     minAge: number | null;
     maxAge: number | null;
+    maxDisciplinesPerAthlete: number | null;
     transferFromGroupId: string;
     minCrewForTransfer: number | null;
     transferRatio: number | null;
     transferRounding: TransferRounding | '';
+    transferredMaxDisciplinesPerPerson: number | null;
     coxRequiredWeightKg: number | null;
     coxMinWeightKg: number | null;
     lightMaxWeightKg: number | null;
@@ -105,10 +107,12 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     gender: CompetitionGroupGender.Male,
     minAge: null,
     maxAge: null,
+    maxDisciplinesPerAthlete: null,
     transferFromGroupId: '',
     minCrewForTransfer: null,
     transferRatio: null,
     transferRounding: '',
+    transferredMaxDisciplinesPerPerson: null,
     coxRequiredWeightKg: null,
     coxMinWeightKg: null,
     lightMaxWeightKg: null,
@@ -186,7 +190,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
         this.allGroups = response.content || [];
         this.groupOptions = this.allGroups.map((g: any) => ({
           value: g.uuid,
-          label: `${g.name} (${g.minAge}-${g.maxAge})`
+          label: `${g.shortName || g.name} (${g.minAge}-${g.maxAge})`
         }));
         this.cdr.markForCheck();
       }
@@ -228,10 +232,12 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
       gender: this.group.gender || CompetitionGroupGender.Male,
       minAge: this.group.minAge ?? null,
       maxAge: this.group.maxAge ?? null,
+      maxDisciplinesPerAthlete: this.group.maxDisciplinesPerAthlete ?? null,
       transferFromGroupId: this.group.transferFromGroupId || '',
       minCrewForTransfer: this.group.minCrewForTransfer ?? null,
       transferRatio: this.group.transferRatio ?? null,
       transferRounding: this.group.transferRounding || '',
+      transferredMaxDisciplinesPerPerson: this.group.transferredMaxDisciplinesPerPerson ?? null,
       coxRequiredWeightKg: this.group.coxRequiredWeightKg ?? null,
       coxMinWeightKg: this.group.coxMinWeightKg ?? null,
       lightMaxWeightKg: this.group.lightMaxWeightKg ?? null,
@@ -275,10 +281,12 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
       gender: this.editData.gender,
       minAge: this.editData.minAge ?? 0,
       maxAge: this.editData.maxAge ?? 0,
+      maxDisciplinesPerAthlete: this.editData.maxDisciplinesPerAthlete ?? 1,
       transferFromGroupId: this.editData.transferFromGroupId || undefined,
       minCrewForTransfer: this.editData.minCrewForTransfer ?? undefined,
       transferRatio: this.editData.transferRatio ?? undefined,
       transferRounding: (this.editData.transferRounding as TransferRounding) || undefined,
+      transferredMaxDisciplinesPerPerson: this.editData.transferredMaxDisciplinesPerPerson ?? undefined,
       coxRequiredWeightKg: this.editData.coxRequiredWeightKg ?? undefined,
       coxMinWeightKg: this.editData.coxMinWeightKg ?? undefined,
       lightMaxWeightKg: this.editData.lightMaxWeightKg ?? undefined,

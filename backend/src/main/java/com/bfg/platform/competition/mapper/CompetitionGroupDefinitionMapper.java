@@ -24,10 +24,12 @@ public class CompetitionGroupDefinitionMapper {
         dto.setGender(entity.getGender());
         dto.setMinAge(entity.getMinAge());
         dto.setMaxAge(entity.getMaxAge());
+        dto.setMaxDisciplinesPerAthlete(entity.getMaxDisciplinesPerAthlete());
         dto.setTransferFromGroupId(entity.getTransferFromGroupId());
         dto.setMinCrewForTransfer(entity.getMinCrewForTransfer());
         dto.setTransferRatio(entity.getTransferRatio());
         dto.setTransferRounding(entity.getTransferRounding());
+        dto.setTransferredMaxDisciplinesPerPerson(entity.getTransferredMaxDisciplinesPerPerson());
         dto.setCoxRequiredWeightKg(entity.getCoxRequiredWeightKg() != null ? entity.getCoxRequiredWeightKg().doubleValue() : null);
         dto.setCoxMinWeightKg(entity.getCoxMinWeightKg() != null ? entity.getCoxMinWeightKg().doubleValue() : null);
         dto.setLightMaxWeightKg(entity.getLightMaxWeightKg() != null ? entity.getLightMaxWeightKg().doubleValue() : null);
@@ -49,10 +51,12 @@ public class CompetitionGroupDefinitionMapper {
         entity.setGender(request.getGender());
         entity.setMinAge(request.getMinAge());
         entity.setMaxAge(request.getMaxAge());
+        entity.setMaxDisciplinesPerAthlete(request.getMaxDisciplinesPerAthlete());
         entity.setTransferFromGroupId(request.getTransferFromGroupId());
         entity.setMinCrewForTransfer(request.getMinCrewForTransfer());
         entity.setTransferRatio(request.getTransferRatio());
         entity.setTransferRounding(request.getTransferRounding());
+        entity.setTransferredMaxDisciplinesPerPerson(request.getTransferredMaxDisciplinesPerPerson());
         entity.setCoxRequiredWeightKg(request.getCoxRequiredWeightKg() != null ? BigDecimal.valueOf(request.getCoxRequiredWeightKg()) : null);
         entity.setCoxMinWeightKg(request.getCoxMinWeightKg() != null ? BigDecimal.valueOf(request.getCoxMinWeightKg()) : null);
         entity.setLightMaxWeightKg(request.getLightMaxWeightKg() != null ? BigDecimal.valueOf(request.getLightMaxWeightKg()) : null);
@@ -66,10 +70,12 @@ public class CompetitionGroupDefinitionMapper {
         entity.setGender(request.getGender());
         entity.setMinAge(request.getMinAge());
         entity.setMaxAge(request.getMaxAge());
+        entity.setMaxDisciplinesPerAthlete(request.getMaxDisciplinesPerAthlete());
         entity.setTransferFromGroupId(request.getTransferFromGroupId());
         entity.setMinCrewForTransfer(request.getMinCrewForTransfer());
         entity.setTransferRatio(request.getTransferRatio());
         entity.setTransferRounding(request.getTransferRounding());
+        entity.setTransferredMaxDisciplinesPerPerson(request.getTransferredMaxDisciplinesPerPerson());
         entity.setCoxRequiredWeightKg(request.getCoxRequiredWeightKg() != null ? BigDecimal.valueOf(request.getCoxRequiredWeightKg()) : null);
         entity.setCoxMinWeightKg(request.getCoxMinWeightKg() != null ? BigDecimal.valueOf(request.getCoxMinWeightKg()) : null);
         entity.setLightMaxWeightKg(request.getLightMaxWeightKg() != null ? BigDecimal.valueOf(request.getLightMaxWeightKg()) : null);

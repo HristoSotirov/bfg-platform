@@ -113,10 +113,7 @@
                     @for (rule of rules; track rule.uuid) {
                       @if (editingRuleId === rule.uuid) {
                         <tr class="bg-blue-50">
-                          <td class="px-2 py-1.5">
-                            <input type="number" [(ngModel)]="ruleEditData.placement" min="1"
-                              class="w-16 px-1 py-0.5 border border-gray-300 rounded text-sm" />
-                          </td>
+                          <td class="px-2 py-1.5">{{ ruleEditData.placement }}</td>
                           <td class="px-2 py-1.5">
                             <input type="number" [(ngModel)]="ruleEditData.basePoints"
                               class="w-20 px-1 py-0.5 border border-gray-300 rounded text-sm" />
@@ -407,6 +404,7 @@
 <app-add-scoring-rule-dialog
   [isOpen]="isAddRuleDialogOpen"
   [scoringSchemeId]="scheme?.uuid || ''"
+  [nextPlacement]="rules.length > 0 ? (rules[rules.length - 1].placement ?? 0) + 1 : 1"
   (closed)="closeAddRuleDialog()"
   (added)="onRuleAdded()"
 >

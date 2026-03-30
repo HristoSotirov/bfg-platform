@@ -93,7 +93,40 @@
                   </tr>
                 } @else {
                   @for (group of tierGroups; track group.tier.uuid; let i = $index) {
-                    <!-- Tier row -->
+                    @if (editingTierId === group.tier.uuid) {
+                      <!-- Tier edit row -->
+                      <tr class="bg-blue-50">
+                        <td class="px-2 py-1.5 w-20">
+                          <span class="text-xs text-gray-500">{{ tierEditData.boatCountMin }}-{{ tierEditData.boatCountMax }}</span>
+                        </td>
+                        <td class="px-2 py-1.5 text-center w-12">
+                          <input type="number" [(ngModel)]="tierEditData.heatCount" min="0"
+                            class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                        </td>
+                        <td class="px-2 py-1.5 text-center w-12">
+                          <input type="number" [(ngModel)]="tierEditData.semiFinalCount" min="0"
+                            class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                        </td>
+                        <td class="px-2 py-1.5 text-center w-12">
+                          <input type="number" [(ngModel)]="tierEditData.finalBCount" min="0"
+                            class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                        </td>
+                        <td class="px-2 py-1.5 text-center w-12">
+                          <input type="number" [(ngModel)]="tierEditData.finalACount" min="1"
+                            class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                        </td>
+                        <td class="px-2 py-1.5"></td>
+                        <td class="px-2 py-1.5">
+                          <div class="flex gap-3">
+                            <button type="button" class="text-green-600 hover:text-green-800 text-xs"
+                              [disabled]="!isTierEditValid || savingTierEdit" (click)="saveTierEdit()">Запази</button>
+                            <button type="button" class="text-gray-600 hover:text-gray-800 text-xs"
+                              [disabled]="savingTierEdit" (click)="cancelEditingTier()">Отказ</button>
+                          </div>
+                        </td>
+                      </tr>
+                    } @else {
+                    <!-- Tier view row -->
                     <tr class="cursor-pointer hover:bg-gray-50" (click)="toggleTierExpand(i)">
                       <td class="px-2 py-1.5 font-medium w-20" >{{ group.tier.boatCountMin }}-{{ group.tier.boatCountMax }}</td>
                       <td class="px-2 py-1.5 text-center w-12">{{ group.tier.heatCount }}</td>
@@ -104,6 +137,9 @@
                       @if (canEdit && !isEditing) {
                         <td class="px-2 py-1.5" (click)="$event.stopPropagation()">
                           <div class="flex gap-3">
+                            <button type="button" class="text-bfg-blue hover:underline text-xs" (click)="startEditingTier(group.tier)">
+                              Редактирай
+                            </button>
                             <button type="button" class="text-red-600 hover:text-red-800 text-xs" (click)="confirmDeleteTier(group.tier)">
                               Изтрий
                             </button>
@@ -111,6 +147,7 @@
                         </td>
                       }
                     </tr>
+                    }
 
                     <!-- Expanded progressions -->
                     @if (group.expanded) {
@@ -290,48 +327,42 @@
   (closed)="closeAddTierDialog()"
 >
   <div class="space-y-4">
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Мин. лодки <span class="text-red-500">*</span>:</label>
-        <input type="number" [(ngModel)]="addTierData.boatCountMin" min="0"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Макс. лодки <span class="text-red-500">*</span>:</label>
-        <input type="number" [(ngModel)]="addTierData.boatCountMax" min="1"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-      </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Мин. лодки <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.boatCountMin" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
     </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Серии <span class="text-red-500">*</span>:</label>
-        <input type="number" [(ngModel)]="addTierData.heatCount" min="0"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Полуфинали <span class="text-red-500">*</span>:</label>
-        <input type="number" [(ngModel)]="addTierData.semiFinalCount" min="0"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-      </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Макс. лодки <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.boatCountMax" min="1"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
     </div>
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Финал Б <span class="text-red-500">*</span>:</label>
-        <input type="number" [(ngModel)]="addTierData.finalBCount" min="0"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Финал А <span class="text-red-500">*</span>:</label>
-        <input type="number" [(ngModel)]="addTierData.finalACount" min="1"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-      </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Серии <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.heatCount" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Полуфинали <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.semiFinalCount" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Финал Б <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.finalBCount" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Финал А <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.finalACount" min="1"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
     </div>
 
     <div class="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200">
-      @if (error) {
+      @if (addTierError) {
         <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
-          <p class="text-sm text-red-700">{{ error }}</p>
-          <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="error = null">
+          <p class="text-sm text-red-700">{{ addTierError }}</p>
+          <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="addTierError = null">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
             </svg>

@@ -72,6 +72,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
 
   // Add tier dialog
   isAddTierDialogOpen = false;
+  addTierError: string | null = null;
   addTierData = {
     boatCountMin: null as number | null,
     boatCountMax: null as number | null,
@@ -85,6 +86,18 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   // Delete tier
   showDeleteTierConfirm = false;
   tierToDelete: QualificationTierDto | null = null;
+
+  // Inline editing for tiers
+  editingTierId: string | null = null;
+  tierEditData = {
+    boatCountMin: null as number | null,
+    boatCountMax: null as number | null,
+    heatCount: null as number | null,
+    semiFinalCount: null as number | null,
+    finalBCount: null as number | null,
+    finalACount: null as number | null,
+  };
+  savingTierEdit = false;
 
   // Inline editing for progressions
   editingProgressionId: string | null = null;
@@ -147,7 +160,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   }
 
   close(): void {
-    if (this.isEditing || this.editingProgressionId || this.addingProgressionForTierId || this.isAddTierDialogOpen) {
+    if (this.isEditing || this.editingProgressionId || this.addingProgressionForTierId || this.isAddTierDialogOpen || this.editingTierId) {
       this.showEditingWarningDialog = true;
       this.cdr.markForCheck();
       return;
@@ -363,6 +376,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
 
   closeAddTierDialog(): void {
     this.isAddTierDialogOpen = false;
+    this.addTierError = null;
     this.cdr.markForCheck();
   }
 
@@ -381,7 +395,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   saveTier(): void {
     if (!this.scheme?.uuid || !this.isAddTierValid) return;
     this.savingTier = true;
-    this.error = null;
+    this.addTierError = null;
     this.cdr.markForCheck();
 
     const request: QualificationTierRequest = {
@@ -398,7 +412,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
       .createQualificationTier(request)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при създаване на диапазон';
+          this.addTierError = err?.error?.message || 'Грешка при създаване на диапазон';
           this.savingTier = false;
           this.cdr.markForCheck();
           return of(null);
@@ -447,6 +461,78 @@ export class QualificationDetailsDialogComponent implements OnChanges {
         next: () => {
           this.closeDeleteTierConfirm();
           this.loadTiers();
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  // --- Edit tier inline ---
+
+  startEditingTier(tier: QualificationTierDto): void {
+    this.editingTierId = tier.uuid || null;
+    this.tierEditData = {
+      boatCountMin: tier.boatCountMin ?? null,
+      boatCountMax: tier.boatCountMax ?? null,
+      heatCount: tier.heatCount ?? null,
+      semiFinalCount: tier.semiFinalCount ?? null,
+      finalBCount: tier.finalBCount ?? null,
+      finalACount: tier.finalACount ?? null,
+    };
+    this.cdr.markForCheck();
+  }
+
+  cancelEditingTier(): void {
+    this.editingTierId = null;
+    this.cdr.markForCheck();
+  }
+
+  get isTierEditValid(): boolean {
+    return (
+      this.tierEditData.boatCountMin != null &&
+      this.tierEditData.boatCountMax != null &&
+      this.tierEditData.heatCount != null &&
+      this.tierEditData.semiFinalCount != null &&
+      this.tierEditData.finalBCount != null &&
+      this.tierEditData.finalACount != null &&
+      this.tierEditData.finalACount >= 1
+    );
+  }
+
+  saveTierEdit(): void {
+    if (!this.editingTierId || !this.scheme?.uuid || !this.isTierEditValid) return;
+
+    this.savingTierEdit = true;
+    this.error = null;
+    this.cdr.markForCheck();
+
+    const request: QualificationTierRequest = {
+      qualificationSchemeId: this.scheme.uuid,
+      boatCountMin: this.tierEditData.boatCountMin!,
+      boatCountMax: this.tierEditData.boatCountMax!,
+      heatCount: this.tierEditData.heatCount!,
+      semiFinalCount: this.tierEditData.semiFinalCount!,
+      finalBCount: this.tierEditData.finalBCount!,
+      finalACount: this.tierEditData.finalACount!,
+    };
+
+    this.tiersService
+      .updateQualificationTierByUuid(this.editingTierId, request)
+      .pipe(
+        catchError((err) => {
+          this.error = err?.error?.message || 'Грешка при запазване на диапазон';
+          this.savingTierEdit = false;
+          this.cdr.markForCheck();
+          return of(null);
+        }),
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: (result) => {
+          this.savingTierEdit = false;
+          if (result) {
+            this.editingTierId = null;
+            this.loadTiers();
+          }
           this.cdr.markForCheck();
         },
       });
@@ -638,8 +724,11 @@ export class QualificationDetailsDialogComponent implements OnChanges {
     this.tierGroups = [];
     this.loadingTiers = false;
     this.isAddTierDialogOpen = false;
+    this.addTierError = null;
     this.showDeleteTierConfirm = false;
     this.tierToDelete = null;
+    this.editingTierId = null;
+    this.savingTierEdit = false;
     this.editingProgressionId = null;
     this.savingProgression = false;
     this.showDeleteProgressionConfirm = false;

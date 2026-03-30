@@ -43,10 +43,12 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
     gender: '' as CompetitionGroupGender | '',
     minAge: null as number | null,
     maxAge: null as number | null,
+    maxDisciplinesPerAthlete: null as number | null,
     transferFromGroupId: '',
     minCrewForTransfer: null as number | null,
     transferRatio: null as number | null,
     transferRounding: '' as TransferRounding | '',
+    transferredMaxDisciplinesPerPerson: null as number | null,
     coxRequiredWeightKg: null as number | null,
     coxMinWeightKg: null as number | null,
     lightMaxWeightKg: null as number | null,
@@ -101,7 +103,7 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
       next: (response: any) => {
         this.groupOptions = (response.content || []).map((g: any) => ({
           value: g.uuid,
-          label: `${g.name} (${g.minAge}-${g.maxAge})`
+          label: `${g.shortName || g.name} (${g.minAge}-${g.maxAge})`
         }));
         this.cdr.markForCheck();
       }
@@ -115,10 +117,12 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
       gender: '' as CompetitionGroupGender | '',
       minAge: null,
       maxAge: null,
+      maxDisciplinesPerAthlete: null,
       transferFromGroupId: '',
       minCrewForTransfer: null,
       transferRatio: null,
       transferRounding: '',
+      transferredMaxDisciplinesPerPerson: null,
       coxRequiredWeightKg: null,
       coxMinWeightKg: null,
       lightMaxWeightKg: null,
@@ -149,7 +153,8 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
       this.formData.shortName &&
       this.formData.gender &&
       this.formData.minAge != null &&
-      this.formData.maxAge != null
+      this.formData.maxAge != null &&
+      this.formData.maxDisciplinesPerAthlete != null
     );
   }
 
@@ -166,10 +171,12 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
       gender: this.formData.gender as CompetitionGroupGender,
       minAge: this.formData.minAge!,
       maxAge: this.formData.maxAge!,
+      maxDisciplinesPerAthlete: this.formData.maxDisciplinesPerAthlete!,
       transferFromGroupId: this.formData.transferFromGroupId || undefined,
       minCrewForTransfer: this.formData.minCrewForTransfer ?? undefined,
       transferRatio: this.formData.transferRatio ?? undefined,
       transferRounding: (this.formData.transferRounding as TransferRounding) || undefined,
+      transferredMaxDisciplinesPerPerson: this.formData.transferredMaxDisciplinesPerPerson ?? undefined,
       coxRequiredWeightKg: this.formData.coxRequiredWeightKg ?? undefined,
       coxMinWeightKg: this.formData.coxMinWeightKg ?? undefined,
       lightMaxWeightKg: this.formData.lightMaxWeightKg ?? undefined,

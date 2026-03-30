@@ -133,7 +133,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
           this.competitionGroups = response.content || [];
           this.competitionGroupOptions = this.competitionGroups.map((group) => ({
             value: group.uuid || '',
-            label: group.name || '-',
+            label: `${group.shortName || group.name || '-'} (${group.minAge}-${group.maxAge})`,
           }));
           this.loadingGroups = false;
           this.cdr.markForCheck();

@@ -41,6 +41,11 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: max_disciplines_per_athlete
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
                   name: transfer_from_group_id
                   type: UUID
               - column:
@@ -52,6 +57,9 @@ databaseChangeLog:
               - column:
                   name: transfer_rounding
                   type: VARCHAR(20)
+              - column:
+                  name: transferred_max_disciplines_per_person
+                  type: INTEGER
               - column:
                   name: cox_required_weight_kg
                   type: NUMERIC(5,2)

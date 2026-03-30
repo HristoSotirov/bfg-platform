@@ -56,6 +56,9 @@ public class CompetitionGroupDefinition {
     @Column(name = "max_age")
     private Integer maxAge;
 
+    @Column(name = "max_disciplines_per_athlete")
+    private int maxDisciplinesPerAthlete;
+
     @Column(name = "transfer_from_group_id")
     private UUID transferFromGroupId;
 
@@ -75,6 +78,9 @@ public class CompetitionGroupDefinition {
     @Column(name = "transfer_rounding")
     @Enumerated(EnumType.STRING)
     private TransferRounding transferRounding;
+
+    @Column(name = "transferred_max_disciplines_per_person")
+    private Integer transferredMaxDisciplinesPerPerson;
 
     @Column(name = "cox_required_weight_kg")
     private BigDecimal coxRequiredWeightKg;

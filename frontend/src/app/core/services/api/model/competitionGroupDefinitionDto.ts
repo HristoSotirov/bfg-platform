@@ -21,10 +21,12 @@ export interface CompetitionGroupDefinitionDto {
     gender?: CompetitionGroupGender;
     minAge?: number;
     maxAge?: number;
+    maxDisciplinesPerAthlete?: number;
     transferFromGroupId?: string;
     minCrewForTransfer?: number;
     transferRatio?: number;
     transferRounding?: TransferRounding;
+    transferredMaxDisciplinesPerPerson?: number;
     coxRequiredWeightKg?: number;
     coxMinWeightKg?: number;
     lightMaxWeightKg?: number;

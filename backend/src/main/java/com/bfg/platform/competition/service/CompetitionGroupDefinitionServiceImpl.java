@@ -63,7 +63,8 @@ public class CompetitionGroupDefinitionServiceImpl implements CompetitionGroupDe
     public Optional<CompetitionGroupDefinitionDto> create(CompetitionGroupDefinitionRequest request) {
         validateAgeRange(request.getMinAge(), request.getMaxAge());
         validateTransferFields(request.getTransferFromGroupId(), request.getMinCrewForTransfer(),
-                request.getTransferRatio(), request.getTransferRounding() != null ? request.getTransferRounding().name() : null);
+                request.getTransferRatio(), request.getTransferRounding() != null ? request.getTransferRounding().name() : null,
+                request.getTransferredMaxDisciplinesPerPerson());
         validateCoxWeightFields(request.getCoxMinWeightKg(), request.getCoxRequiredWeightKg());
         validateWeightOrder(request.getCoxMinWeightKg(), request.getCoxRequiredWeightKg());
 
@@ -78,7 +79,8 @@ public class CompetitionGroupDefinitionServiceImpl implements CompetitionGroupDe
     public Optional<CompetitionGroupDefinitionDto> update(UUID uuid, CompetitionGroupDefinitionRequest request) {
         validateAgeRange(request.getMinAge(), request.getMaxAge());
         validateTransferFields(request.getTransferFromGroupId(), request.getMinCrewForTransfer(),
-                request.getTransferRatio(), request.getTransferRounding() != null ? request.getTransferRounding().name() : null);
+                request.getTransferRatio(), request.getTransferRounding() != null ? request.getTransferRounding().name() : null,
+                request.getTransferredMaxDisciplinesPerPerson());
         validateCoxWeightFields(request.getCoxMinWeightKg(), request.getCoxRequiredWeightKg());
         validateWeightOrder(request.getCoxMinWeightKg(), request.getCoxRequiredWeightKg());
 
@@ -112,15 +114,18 @@ public class CompetitionGroupDefinitionServiceImpl implements CompetitionGroupDe
     }
 
     private void validateTransferFields(UUID transferGroupId, Integer minCrewForTransfer,
-                                         Integer transferRatio, String transferRounding) {
+                                         Integer transferRatio, String transferRounding,
+                                         Integer transferredMaxDisciplinesPerPerson) {
         boolean hasAny = transferGroupId != null || minCrewForTransfer != null
-                || transferRatio != null || transferRounding != null;
+                || transferRatio != null || transferRounding != null
+                || transferredMaxDisciplinesPerPerson != null;
         boolean hasAll = transferGroupId != null && minCrewForTransfer != null
-                && transferRatio != null && transferRounding != null;
+                && transferRatio != null && transferRounding != null
+                && transferredMaxDisciplinesPerPerson != null;
 
         if (hasAny && !hasAll) {
             throw new ValidationException(
-                    "Transfer fields must be all set or all null: transferGroupId, minCrewForTransfer, transferRatio, transferRounding");
+                    "Transfer fields must be all set or all null: transferGroupId, minCrewForTransfer, transferRatio, transferRounding, transferredMaxDisciplinesPerPerson");
         }
     }
 

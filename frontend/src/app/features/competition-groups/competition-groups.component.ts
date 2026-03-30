@@ -84,10 +84,12 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
     { id: 'gender', label: 'Пол', visible: true },
     { id: 'minAge', label: 'Мин. възраст', visible: true },
     { id: 'maxAge', label: 'Макс. възраст', visible: true },
+    { id: 'maxDisciplinesPerAthlete', label: 'Макс. дисциплини', visible: true },
     { id: 'transferFromGroupId', label: 'Трансфер от група', visible: true },
     { id: 'minCrewForTransfer', label: 'Мин. екипаж', visible: true },
     { id: 'transferRatio', label: 'Съотношение', visible: true },
     { id: 'transferRounding', label: 'Закръгляне', visible: true },
+    { id: 'transferredMaxDisciplinesPerPerson', label: 'Макс. дисц. (трансф.)', visible: true },
     { id: 'coxRequiredWeightKg', label: 'Тегло кокс (изисквано)', visible: true },
     { id: 'coxMinWeightKg', label: 'Тегло кокс (мин.)', visible: true },
     { id: 'lightMaxWeightKg', label: 'Тегло лековес (макс.)', visible: true },
@@ -152,7 +154,7 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
       next: (response: any) => {
         const lookup: Record<string, string> = {};
         (response.content || []).forEach((g: any) => {
-          lookup[g.uuid] = `${g.name} (${g.minAge}-${g.maxAge})`;
+          lookup[g.uuid] = `${g.shortName || g.name} (${g.minAge}-${g.maxAge})`;
         });
         this.groupLookup = lookup;
         this.cdr.markForCheck();

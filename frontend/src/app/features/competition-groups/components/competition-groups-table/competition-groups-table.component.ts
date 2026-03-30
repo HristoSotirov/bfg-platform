@@ -93,6 +93,8 @@ export class CompetitionGroupsTableComponent implements OnInit {
         return group.minAge != null ? String(group.minAge) : '-';
       case 'maxAge':
         return group.maxAge != null ? String(group.maxAge) : '-';
+      case 'maxDisciplinesPerAthlete':
+        return group.maxDisciplinesPerAthlete != null ? String(group.maxDisciplinesPerAthlete) : '-';
       case 'transferFromGroupId':
         return group.transferFromGroupId ? (this.groupLookup[group.transferFromGroupId] || group.transferFromGroupId) : '-';
       case 'minCrewForTransfer':
@@ -101,6 +103,8 @@ export class CompetitionGroupsTableComponent implements OnInit {
         return group.transferRatio != null ? String(group.transferRatio) : '-';
       case 'transferRounding':
         return this.getRoundingLabel(group.transferRounding);
+      case 'transferredMaxDisciplinesPerPerson':
+        return group.transferredMaxDisciplinesPerPerson != null ? String(group.transferredMaxDisciplinesPerPerson) : '-';
       case 'coxRequiredWeightKg':
         return group.coxRequiredWeightKg != null ? String(group.coxRequiredWeightKg) : '-';
       case 'coxMinWeightKg':

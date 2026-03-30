@@ -20,6 +20,7 @@ export interface CompetitionGroupDefinitionRequest {
     gender: CompetitionGroupGender;
     minAge: number;
     maxAge: number;
+    maxDisciplinesPerAthlete: number;
     /**
      * Nullable - all transfer fields must be set together or all null
      */
@@ -33,6 +34,10 @@ export interface CompetitionGroupDefinitionRequest {
      */
     transferRatio?: number;
     transferRounding?: TransferRounding;
+    /**
+     * Nullable - all transfer fields must be set together or all null
+     */
+    transferredMaxDisciplinesPerPerson?: number;
     /**
      * Nullable - both cox weight fields must be set together or both null
      */
