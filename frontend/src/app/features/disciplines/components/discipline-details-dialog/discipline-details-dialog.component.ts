@@ -182,7 +182,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     this.competitionGroupDefinitionsService
-      .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'], 1000, 0)
+      .getAllCompetitionGroupDefinitions('isActive eq true', undefined, ['name_asc'], 1000, 0)
       .pipe(
         catchError(() => {
           return throwError(() => ({ message: 'Грешка при зареждане на състезателните групи' }));

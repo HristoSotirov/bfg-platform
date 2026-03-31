@@ -98,7 +98,7 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
 
   private loadGroups(): void {
     this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
-      undefined, undefined, ['name_asc'] as any, 1000, 0
+      'isActive eq true', undefined, ['name_asc'] as any, 1000, 0
     ).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         this.groupOptions = (response.content || []).map((g: any) => ({

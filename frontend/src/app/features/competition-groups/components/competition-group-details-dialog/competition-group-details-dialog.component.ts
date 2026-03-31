@@ -184,7 +184,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
 
   private loadGroups(): void {
     this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
-      undefined, undefined, ['name_asc'] as any, 1000, 0
+      'isActive eq true', undefined, ['name_asc'] as any, 1000, 0
     ).pipe(takeUntil(this.destroy$)).subscribe({
       next: (response: any) => {
         this.allGroups = response.content || [];
