@@ -80,8 +80,16 @@ export const routes: Routes = [
   {
     path: 'competitions',
     loadComponent: () =>
-      import('./features/coming-soon/coming-soon.component').then(
-        (m) => m.ComingSoonComponent,
+      import('./features/competitions/competitions.component').then(
+        (m) => m.CompetitionsComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'competitions/:uuid',
+    loadComponent: () =>
+      import('./features/competitions/components/competition-details-page/competition-details-page.component').then(
+        (m) => m.CompetitionDetailsPageComponent,
       ),
     canActivate: [AuthGuard],
   },

@@ -13,6 +13,7 @@
  * Status of a competition
  */
 export const CompetitionStatus = {
+    Planned: 'PLANNED',
     Draft: 'DRAFT',
     RegistrationOpen: 'REGISTRATION_OPEN',
     RegistrationClosed: 'REGISTRATION_CLOSED',

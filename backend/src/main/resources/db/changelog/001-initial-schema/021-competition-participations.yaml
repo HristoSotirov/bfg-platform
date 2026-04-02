@@ -1,0 +1,74 @@
+databaseChangeLog:
+  - changeSet:
+      id: 021-competition-participations
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_participations
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: competition_event_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: entry_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: lane
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: finish_status
+                  type: VARCHAR(20)
+                  remarks: "OK, DNS, DNF, DSQ"
+              - column:
+                  name: finish_time_ms
+                  type: INTEGER
+              - column:
+                  name: place
+                  type: INTEGER
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: competition_participations
+            columnNames: competition_event_id, lane
+            constraintName: uq_participation_event_lane
+        - addUniqueConstraint:
+            tableName: competition_participations
+            columnNames: competition_event_id, entry_id
+            constraintName: uq_participation_event_entry
+        - addForeignKeyConstraint:
+            baseTableName: competition_participations
+            baseColumnNames: competition_event_id
+            referencedTableName: competition_timetable_events
+            referencedColumnNames: id
+            constraintName: fk_participation_event
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competition_participations
+            baseColumnNames: entry_id
+            referencedTableName: entries
+            referencedColumnNames: id
+            constraintName: fk_participation_entry
+            onDelete: RESTRICT

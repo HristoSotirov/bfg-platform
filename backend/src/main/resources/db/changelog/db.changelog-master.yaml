@@ -35,31 +35,25 @@ databaseChangeLog:
   - include:
       file: db/changelog/001-initial-schema/014-qualification-progressions.yaml
 
-  # Competition module - templates
+  # Competition module - unified competitions (templates + real)
   - include:
-      file: db/changelog/001-initial-schema/015-competition-templates.yaml
+      file: db/changelog/001-initial-schema/015-competitions.yaml
   - include:
-      file: db/changelog/001-initial-schema/016-competition-template-disciplines.yaml
+      file: db/changelog/001-initial-schema/016-competition-discipline-schemes.yaml
   - include:
-      file: db/changelog/001-initial-schema/017-competition-events-timetable-templates.yaml
+      file: db/changelog/001-initial-schema/018-competition-timetable-events.yaml
 
-  # Competition module - real competition tables
+  # Competition module - runtime tables
   - include:
-      file: db/changelog/001-initial-schema/018-competitions.yaml
+      file: db/changelog/001-initial-schema/019-entries.yaml
   - include:
-      file: db/changelog/001-initial-schema/019-competition-disciplines.yaml
+      file: db/changelog/001-initial-schema/020-crew-members.yaml
   - include:
-      file: db/changelog/001-initial-schema/020-entries.yaml
+      file: db/changelog/001-initial-schema/021-competition-participations.yaml
   - include:
-      file: db/changelog/001-initial-schema/021-crew-members.yaml
+      file: db/changelog/001-initial-schema/022-competition-final-standings.yaml
   - include:
-      file: db/changelog/001-initial-schema/022-competition-events-timetables.yaml
-  - include:
-      file: db/changelog/001-initial-schema/023-competition-participations.yaml
-  - include:
-      file: db/changelog/001-initial-schema/024-competition-final-standings.yaml
-  - include:
-      file: db/changelog/001-initial-schema/025-athlete-weight-measurements.yaml
+      file: db/changelog/001-initial-schema/023-athlete-weight-measurements.yaml
 
   # Functions and triggers
   - include:

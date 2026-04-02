@@ -1,0 +1,55 @@
+databaseChangeLog:
+  - changeSet:
+      id: 016-competition-discipline-schemes
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_discipline_schemes
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: competition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discipline_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: competition_discipline_schemes
+            columnNames: competition_id, discipline_id
+            constraintName: uq_comp_disc_scheme_comp_disc
+        - addForeignKeyConstraint:
+            baseTableName: competition_discipline_schemes
+            baseColumnNames: competition_id
+            referencedTableName: competitions
+            referencedColumnNames: id
+            constraintName: fk_comp_disc_scheme_competition
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competition_discipline_schemes
+            baseColumnNames: discipline_id
+            referencedTableName: discipline_definitions
+            referencedColumnNames: id
+            constraintName: fk_comp_disc_scheme_discipline
+            onDelete: RESTRICT

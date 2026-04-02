@@ -38,8 +38,6 @@ databaseChangeLog:
               - column:
                   name: max_age
                   type: INTEGER
-                  constraints:
-                    nullable: false
               - column:
                   name: max_disciplines_per_athlete
                   type: INTEGER

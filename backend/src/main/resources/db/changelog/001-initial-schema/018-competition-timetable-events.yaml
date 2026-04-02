@@ -1,0 +1,98 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-competition-timetable-events
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_timetable_events
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: competition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_number
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  remarks: "Overall event order for the day (1 to N)"
+              - column:
+                  name: discipline_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: qualification_event_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "H, SF, FB, FA"
+              - column:
+                  name: qualification_stage_number
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 1
+                  remarks: "Which heat/SF (1, 2, 3, 4). Always 1 for FA/FB."
+              - column:
+                  name: day_offset
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  remarks: "Days into competition (0 = first day)"
+              - column:
+                  name: planned_time
+                  type: TIME
+                  constraints:
+                    nullable: false
+                  remarks: "Planned time of day"
+              - column:
+                  name: scheduled_at
+                  type: TIMESTAMPTZ
+                  remarks: "Full datetime (null for templates, set when competition is created from template)"
+              - column:
+                  name: event_status
+                  type: VARCHAR(20)
+                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED. Null for templates."
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: competition_timetable_events
+            columnNames: competition_id, event_number
+            constraintName: uq_timetable_event_comp_event_number
+        - addUniqueConstraint:
+            tableName: competition_timetable_events
+            columnNames: competition_id, discipline_id, qualification_event_type, qualification_stage_number
+            constraintName: uq_timetable_event_comp_disc_type_num
+        - addForeignKeyConstraint:
+            baseTableName: competition_timetable_events
+            baseColumnNames: competition_id
+            referencedTableName: competitions
+            referencedColumnNames: id
+            constraintName: fk_timetable_event_competition
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competition_timetable_events
+            baseColumnNames: discipline_id
+            referencedTableName: discipline_definitions
+            referencedColumnNames: id
+            constraintName: fk_timetable_event_discipline
+            onDelete: RESTRICT

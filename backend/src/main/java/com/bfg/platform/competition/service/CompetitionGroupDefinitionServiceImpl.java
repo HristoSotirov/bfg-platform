@@ -127,6 +127,14 @@ public class CompetitionGroupDefinitionServiceImpl implements CompetitionGroupDe
             throw new ValidationException(
                     "Transfer fields must be all set or all null: transferGroupId, minCrewForTransfer, transferRatio, transferRounding, transferredMaxDisciplinesPerPerson");
         }
+
+        if (transferGroupId != null) {
+            CompetitionGroupDefinition transferGroup = repository.findById(transferGroupId)
+                    .orElseThrow(() -> new ValidationException("Transfer group not found: " + transferGroupId));
+            if (!transferGroup.isActive()) {
+                throw new ValidationException("Transfer group is not active: " + transferGroupId);
+            }
+        }
     }
 
     private void validateCoxWeightFields(Double coxMinWeight, Double coxRequiredWeight) {

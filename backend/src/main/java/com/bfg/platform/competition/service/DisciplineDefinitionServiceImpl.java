@@ -99,6 +99,10 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
         CompetitionGroupDefinition group = groupRepository.findById(request.getCompetitionGroupId())
                 .orElseThrow(() -> new ValidationException("Competition group not found: " + request.getCompetitionGroupId()));
 
+        if (!group.isActive()) {
+            throw new ValidationException("Competition group is not active: " + request.getCompetitionGroupId());
+        }
+
         if (request.getHasCoxswain()) {
             if (group.getCoxRequiredWeightKg() == null || group.getCoxMinWeightKg() == null) {
                 throw new ValidationException("Cannot set hasCoxswain=true: competition group has no cox weight data configured");

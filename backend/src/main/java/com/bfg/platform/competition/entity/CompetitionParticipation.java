@@ -46,7 +46,7 @@ public class CompetitionParticipation {
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private CompetitionEventTimetable competitionEvent;
+    private CompetitionTimetableEvent competitionEvent;
 
     @Column(name = "entry_id")
     private UUID entryId;

@@ -29,6 +29,7 @@ CompetitionStatus:
   type: string
   description: Status of a competition
   enum:
+    - PLANNED
     - DRAFT
     - REGISTRATION_OPEN
     - REGISTRATION_CLOSED
@@ -248,93 +249,6 @@ ScoringRuleDto:
       type: string
       format: date-time
 
-CompetitionTemplateDto:
-  type: object
-  description: Data Transfer Object for competition template
-  properties:
-    uuid:
-      type: string
-      format: uuid
-    shortName:
-      type: string
-      example: "Nat Water 2D"
-    name:
-      type: string
-      example: "National Water Championship 2-Day"
-    durationDays:
-      type: integer
-      example: 2
-    scoringSchemeId:
-      type: string
-      format: uuid
-    qualificationSchemeId:
-      type: string
-      format: uuid
-    isActive:
-      type: boolean
-      example: true
-    createdAt:
-      type: string
-      format: date-time
-    modifiedAt:
-      type: string
-      format: date-time
-
-CompetitionTemplateDisciplineDto:
-  type: object
-  description: Data Transfer Object for competition template discipline assignment
-  properties:
-    uuid:
-      type: string
-      format: uuid
-    competitionTemplateId:
-      type: string
-      format: uuid
-    disciplineId:
-      type: string
-      format: uuid
-    createdAt:
-      type: string
-      format: date-time
-    modifiedAt:
-      type: string
-      format: date-time
-
-CompetitionEventTimetableTemplateDto:
-  type: object
-  description: Data Transfer Object for competition event timetable template
-  properties:
-    uuid:
-      type: string
-      format: uuid
-    competitionTemplateId:
-      type: string
-      format: uuid
-    eventNumber:
-      type: integer
-      example: 1
-    disciplineCode:
-      type: string
-      example: "M1x"
-    qualificationEventType:
-      $ref: "#/QualificationEventType"
-    qualificationStageNumber:
-      type: integer
-      example: 1
-    dayOffset:
-      type: integer
-      example: 0
-    plannedTime:
-      type: string
-      format: time
-      example: "09:00:00"
-    createdAt:
-      type: string
-      format: date-time
-    modifiedAt:
-      type: string
-      format: date-time
-
 QualificationSchemeDto:
   type: object
   description: Data Transfer Object for qualification scheme
@@ -424,31 +338,42 @@ QualificationProgressionDto:
 
 CompetitionDto:
   type: object
-  description: Data Transfer Object for competition
+  description: Data Transfer Object for unified competition (template or real)
   properties:
     uuid:
       type: string
       format: uuid
+    isTemplate:
+      type: boolean
+      example: false
     shortName:
       type: string
       example: "NWC 2025"
     name:
       type: string
       example: "National Water Championship 2025"
+    durationDays:
+      type: integer
+      example: 2
+      description: "Only for templates (isTemplate=true)"
     season:
       type: integer
       example: 2025
+      description: "Only for real competitions (isTemplate=false)"
     location:
       type: string
       example: "Plovdiv"
+      description: "Only for real competitions (isTemplate=false)"
     startDate:
       type: string
       format: date
       example: "2025-06-15"
+      description: "Only for real competitions (isTemplate=false)"
     endDate:
       type: string
       format: date
       example: "2025-06-17"
+      description: "Only for real competitions (isTemplate=false)"
     status:
       $ref: "#/CompetitionStatus"
     scopeType:
@@ -466,9 +391,9 @@ CompetitionDto:
       type: string
       format: date-time
 
-CompetitionDisciplineDto:
+CompetitionDisciplineSchemeDto:
   type: object
-  description: Data Transfer Object for competition discipline assignment
+  description: Data Transfer Object for competition discipline scheme assignment
   properties:
     uuid:
       type: string
@@ -479,6 +404,47 @@ CompetitionDisciplineDto:
     disciplineId:
       type: string
       format: uuid
+    createdAt:
+      type: string
+      format: date-time
+    modifiedAt:
+      type: string
+      format: date-time
+
+CompetitionTimetableEventDto:
+  type: object
+  description: Data Transfer Object for competition timetable event
+  properties:
+    uuid:
+      type: string
+      format: uuid
+    competitionId:
+      type: string
+      format: uuid
+    eventNumber:
+      type: integer
+      example: 1
+    disciplineId:
+      type: string
+      format: uuid
+    qualificationEventType:
+      $ref: "#/QualificationEventType"
+    qualificationStageNumber:
+      type: integer
+      example: 1
+    dayOffset:
+      type: integer
+      example: 0
+    plannedTime:
+      type: string
+      format: time
+      example: "09:00:00"
+    scheduledAt:
+      type: string
+      format: date-time
+      description: "Null for templates"
+    eventStatus:
+      $ref: "#/CompetitionEventStatus"
     createdAt:
       type: string
       format: date-time
@@ -530,42 +496,6 @@ CrewMemberDto:
     cardNumber:
       type: string
       example: "BG001234"
-    createdAt:
-      type: string
-      format: date-time
-    modifiedAt:
-      type: string
-      format: date-time
-
-CompetitionEventTimetableDto:
-  type: object
-  description: Data Transfer Object for competition event timetable
-  properties:
-    uuid:
-      type: string
-      format: uuid
-    competitionId:
-      type: string
-      format: uuid
-    eventNumber:
-      type: integer
-      example: 1
-    disciplineId:
-      type: string
-      format: uuid
-    qualificationEventType:
-      $ref: "#/QualificationEventType"
-    qualificationStageNumber:
-      type: integer
-      example: 1
-    scheduledAt:
-      type: string
-      format: date-time
-    startedAt:
-      type: string
-      format: date-time
-    competitionEventStatus:
-      $ref: "#/CompetitionEventStatus"
     createdAt:
       type: string
       format: date-time
@@ -899,125 +829,6 @@ ScoringRuleRequest:
         @NotNull(message = "Base points is required")
         @DecimalMin(value = "0.0", inclusive = true, message = "Base points must be >= 0")
 
-CompetitionTemplateCreateRequest:
-  type: object
-  description: Request payload for creating a competition template
-  required:
-    - shortName
-    - name
-    - durationDays
-  properties:
-    shortName:
-      type: string
-      minLength: 1
-      x-field-extra-annotation: '@NotBlank(message = "Short name is required")'
-    name:
-      type: string
-      minLength: 1
-      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
-    durationDays:
-      type: integer
-      x-field-extra-annotation: '@NotNull(message = "Duration days is required")'
-    scoringSchemeId:
-      type: string
-      format: uuid
-    qualificationSchemeId:
-      type: string
-      format: uuid
-    isActive:
-      type: boolean
-
-CompetitionTemplateUpdateRequest:
-  type: object
-  description: Request payload for updating a competition template
-  properties:
-    shortName:
-      type: string
-    name:
-      type: string
-    durationDays:
-      type: integer
-    scoringSchemeId:
-      type: string
-      format: uuid
-    qualificationSchemeId:
-      type: string
-      format: uuid
-    isActive:
-      type: boolean
-
-CompetitionTemplateDisciplineCreateRequest:
-  type: object
-  description: Request to assign a discipline to a competition template
-  required:
-    - competitionTemplateId
-    - disciplineId
-  properties:
-    competitionTemplateId:
-      type: string
-      format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Competition template ID is required")'
-    disciplineId:
-      type: string
-      format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
-
-CompetitionEventTimetableTemplateCreateRequest:
-  type: object
-  description: Request payload for creating an event timetable template entry
-  required:
-    - competitionTemplateId
-    - eventNumber
-    - disciplineCode
-    - qualificationEventType
-    - dayOffset
-    - plannedTime
-  properties:
-    competitionTemplateId:
-      type: string
-      format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Competition template ID is required")'
-    eventNumber:
-      type: integer
-      x-field-extra-annotation: '@NotNull(message = "Event number is required")'
-    disciplineCode:
-      type: string
-      minLength: 1
-      x-field-extra-annotation: '@NotBlank(message = "Discipline code is required")'
-    qualificationEventType:
-      allOf:
-        - $ref: "#/QualificationEventType"
-      x-field-extra-annotation: '@NotNull(message = "Qualification event type is required")'
-    qualificationStageNumber:
-      type: integer
-      default: 1
-    dayOffset:
-      type: integer
-      x-field-extra-annotation: '@NotNull(message = "Day offset is required")'
-    plannedTime:
-      type: string
-      format: time
-      example: "09:00:00"
-      x-field-extra-annotation: '@NotNull(message = "Planned time is required")'
-
-CompetitionEventTimetableTemplateUpdateRequest:
-  type: object
-  description: Request payload for updating an event timetable template entry
-  properties:
-    eventNumber:
-      type: integer
-    disciplineCode:
-      type: string
-    qualificationEventType:
-      $ref: "#/QualificationEventType"
-    qualificationStageNumber:
-      type: integer
-    dayOffset:
-      type: integer
-    plannedTime:
-      type: string
-      format: time
-
 QualificationSchemeRequest:
   type: object
   description: Request payload for creating or updating a qualification scheme
@@ -1128,7 +939,69 @@ QualificationProgressionRequest:
         @NotNull(message = "Qualify by time is required")
         @Min(value = 0, message = "Qualify by time must be >= 0")
 
-CompetitionDisciplineCreateRequest:
+CompetitionRequest:
+  type: object
+  description: Request payload for creating or updating a competition (template or real)
+  required:
+    - isTemplate
+    - shortName
+    - name
+    - durationDays
+    - scopeType
+    - scoringSchemeId
+    - qualificationSchemeId
+    - status
+  properties:
+    isTemplate:
+      type: boolean
+      x-field-extra-annotation: '@NotNull(message = "isTemplate is required")'
+    shortName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Short name is required")'
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
+    durationDays:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Duration days is required")
+        @Min(value = 1, message = "Duration days must be >= 1")
+    season:
+      type: integer
+      description: "Required when isTemplate=false"
+    location:
+      type: string
+      description: "Required when isTemplate=false"
+    startDate:
+      type: string
+      format: date
+      description: "Required when isTemplate=false"
+    endDate:
+      type: string
+      format: date
+      description: "Required when isTemplate=false"
+    status:
+      allOf:
+        - $ref: "#/CompetitionStatus"
+      x-field-extra-annotation: '@NotNull(message = "Status is required")'
+      description: "Required when isTemplate=false"
+    scopeType:
+      allOf:
+        - $ref: "../common/schemas.yaml#/ScopeType"
+      x-field-extra-annotation: '@NotNull(message = "Scope type is required")'
+    scoringSchemeId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Scoring scheme ID is required")'
+    qualificationSchemeId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Qualification scheme ID is required")'
+
+CompetitionDisciplineSchemeRequest:
   type: object
   description: Request to assign a discipline to a competition
   required:
@@ -1143,3 +1016,69 @@ CompetitionDisciplineCreateRequest:
       type: string
       format: uuid
       x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
+
+CompetitionTimetableEventRequest:
+  type: object
+  description: Request payload for creating or updating a competition timetable event
+  required:
+    - competitionId
+    - eventNumber
+    - disciplineId
+    - qualificationEventType
+    - qualificationStageNumber
+    - dayOffset
+    - plannedTime
+    - eventStatus
+  properties:
+    competitionId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Competition ID is required")'
+    eventNumber:
+      type: integer
+      x-field-extra-annotation: '@NotNull(message = "Event number is required")'
+    disciplineId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
+    qualificationEventType:
+      allOf:
+        - $ref: "#/QualificationEventType"
+      x-field-extra-annotation: '@NotNull(message = "Qualification event type is required")'
+    qualificationStageNumber:
+      type: integer
+      default: 1
+      x-field-extra-annotation: '@NotNull(message = "Qualification stage number is required")'
+    dayOffset:
+      type: integer
+      x-field-extra-annotation: '@NotNull(message = "Day offset is required")'
+    plannedTime:
+      type: string
+      format: time
+      example: "09:00:00"
+      x-field-extra-annotation: '@NotNull(message = "Planned time is required")'
+    scheduledAt:
+      type: string
+      format: date-time
+      description: "Null for templates; full datetime for real competition events"
+    eventStatus:
+      allOf:
+        - $ref: "#/CompetitionEventStatus"
+      x-field-extra-annotation: '@NotNull(message = "Event status is required")'
+
+CompetitionTimetableEventBulkRequest:
+  type: object
+  description: Request payload for bulk upserting timetable events for a competition
+  required:
+    - competitionId
+    - events
+  properties:
+    competitionId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Competition ID is required")'
+    events:
+      type: array
+      items:
+        $ref: "#/CompetitionTimetableEventRequest"
+      x-field-extra-annotation: '@NotNull(message = "Events list is required")'

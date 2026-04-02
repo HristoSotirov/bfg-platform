@@ -89,27 +89,7 @@ databaseChangeLog:
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
 
-        # Competition module - templates
-        - sql:
-            sql: |
-              CREATE TRIGGER set_competition_templates_modified_at
-                BEFORE INSERT OR UPDATE ON competition_templates
-                FOR EACH ROW
-                EXECUTE FUNCTION set_modified_at();
-        - sql:
-            sql: |
-              CREATE TRIGGER set_competition_template_disciplines_modified_at
-                BEFORE INSERT OR UPDATE ON competition_template_disciplines
-                FOR EACH ROW
-                EXECUTE FUNCTION set_modified_at();
-        - sql:
-            sql: |
-              CREATE TRIGGER set_competition_events_timetable_templates_modified_at
-                BEFORE INSERT OR UPDATE ON competition_events_timetable_templates
-                FOR EACH ROW
-                EXECUTE FUNCTION set_modified_at();
-
-        # Competition module - real competition tables
+        # Competition module - unified competitions
         - sql:
             sql: |
               CREATE TRIGGER set_competitions_modified_at
@@ -118,10 +98,18 @@ databaseChangeLog:
                 EXECUTE FUNCTION set_modified_at();
         - sql:
             sql: |
-              CREATE TRIGGER set_competition_disciplines_modified_at
-                BEFORE INSERT OR UPDATE ON competition_disciplines
+              CREATE TRIGGER set_competition_discipline_schemes_modified_at
+                BEFORE INSERT OR UPDATE ON competition_discipline_schemes
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
+        - sql:
+            sql: |
+              CREATE TRIGGER set_competition_timetable_events_modified_at
+                BEFORE INSERT OR UPDATE ON competition_timetable_events
+                FOR EACH ROW
+                EXECUTE FUNCTION set_modified_at();
+
+        # Competition module - runtime tables
         - sql:
             sql: |
               CREATE TRIGGER set_entries_modified_at
@@ -132,12 +120,6 @@ databaseChangeLog:
             sql: |
               CREATE TRIGGER set_crew_members_modified_at
                 BEFORE INSERT OR UPDATE ON crew_members
-                FOR EACH ROW
-                EXECUTE FUNCTION set_modified_at();
-        - sql:
-            sql: |
-              CREATE TRIGGER set_competition_events_timetables_modified_at
-                BEFORE INSERT OR UPDATE ON competition_events_timetables
                 FOR EACH ROW
                 EXECUTE FUNCTION set_modified_at();
         - sql:

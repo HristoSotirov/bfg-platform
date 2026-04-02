@@ -935,25 +935,27 @@
               code: 409
               message: "Cannot delete scoring rule: it is referenced by other records."
 
-# ── Competition Templates ────────────────────────────────────────────────────
+# ── Competitions (unified — templates + real) ────────────────────────────────
 
-/competition-templates:
+/competitions:
   get:
     tags:
-      - Competition Templates
-    summary: Get all competition templates
-    operationId: getAllCompetitionTemplates
+      - Competitions
+    summary: Get all competitions (templates and real)
+    operationId: getAllCompetitions
     parameters:
       - name: filter
         in: query
-        description: Filter expression (e.g., isActive eq 'true')
+        description: |
+          Filter expression (e.g., isTemplate eq 'true', isActive eq 'true', status eq 'DRAFT').
+          Use isTemplate eq 'true' to list only templates; isTemplate eq 'false' for real competitions.
         schema:
           type: string
       - name: search
         in: query
         required: false
         description: |
-          Free-text search across competition template name and short name (case-insensitive).
+          Free-text search across competition name and short name (case-insensitive).
 
           **Behavior:**
           - Tokenized by whitespace.
@@ -980,8 +982,10 @@
               - name_desc
               - shortName_asc
               - shortName_desc
-              - isActive_asc
-              - isActive_desc
+              - season_asc
+              - season_desc
+              - startDate_asc
+              - startDate_desc
               - createdAt_asc
               - createdAt_desc
           default: ["name_asc"]
@@ -1002,7 +1006,7 @@
           default: 0
     responses:
       "200":
-        description: List of competition templates successfully retrieved
+        description: List of competitions successfully retrieved
         content:
           application/json:
             schema:
@@ -1013,7 +1017,7 @@
                     content:
                       type: array
                       items:
-                        $ref: "../competitions/schemas.yaml#/CompetitionTemplateDto"
+                        $ref: "../competitions/schemas.yaml#/CompetitionDto"
       "500":
         description: Server error
         content:
@@ -1026,22 +1030,22 @@
 
   post:
     tags:
-      - Competition Templates
-    summary: Create a new competition template
-    operationId: createCompetitionTemplate
+      - Competitions
+    summary: Create a new competition (template or real)
+    operationId: createCompetition
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: "../competitions/schemas.yaml#/CompetitionTemplateCreateRequest"
+            $ref: "../competitions/schemas.yaml#/CompetitionRequest"
     responses:
       "201":
-        description: Competition template created successfully
+        description: Competition created successfully
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionTemplateDto"
+              $ref: "../competitions/schemas.yaml#/CompetitionDto"
       "400":
         description: Bad request, validation failed
         content:
@@ -1052,48 +1056,48 @@
               code: 400
               message: "Validation failed."
 
-/competition-templates/{uuid}:
+/competitions/{uuid}:
   get:
     tags:
-      - Competition Templates
-    summary: Get competition template by UUID
-    operationId: getCompetitionTemplateByUuid
+      - Competitions
+    summary: Get competition by UUID
+    operationId: getCompetitionByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the competition template
+        description: UUID of the competition
         schema:
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
     responses:
       "200":
-        description: Competition template details found
+        description: Competition details found
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionTemplateDto"
+              $ref: "../competitions/schemas.yaml#/CompetitionDto"
       "404":
-        description: Competition template not found
+        description: Competition not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition template not found."
+              message: "Competition not found."
 
-  patch:
+  put:
     tags:
-      - Competition Templates
-    summary: Update competition template by UUID
-    operationId: patchCompetitionTemplateByUuid
+      - Competitions
+    summary: Update competition by UUID (full replace)
+    operationId: updateCompetitionByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the competition template
+        description: UUID of the competition
         schema:
           type: string
           format: uuid
@@ -1103,14 +1107,14 @@
       content:
         application/json:
           schema:
-            $ref: "../competitions/schemas.yaml#/CompetitionTemplateUpdateRequest"
+            $ref: "../competitions/schemas.yaml#/CompetitionRequest"
     responses:
       "200":
-        description: Competition template updated successfully
+        description: Competition updated successfully
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionTemplateDto"
+              $ref: "../competitions/schemas.yaml#/CompetitionDto"
       "400":
         description: Bad request - validation error
         content:
@@ -1121,14 +1125,14 @@
               code: 400
               message: "Invalid data format."
       "404":
-        description: Competition template not found
+        description: Competition not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition template not found."
+              message: "Competition not found."
       "409":
         description: Conflict - name/shortName already exists
         content:
@@ -1137,34 +1141,34 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 409
-              message: "Another competition template with the same name or short name already exists."
+              message: "Another competition with the same name or short name already exists."
 
   delete:
     tags:
-      - Competition Templates
-    summary: Delete competition template by UUID
-    operationId: deleteCompetitionTemplateByUuid
+      - Competitions
+    summary: Delete competition by UUID
+    operationId: deleteCompetitionByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the competition template
+        description: UUID of the competition
         schema:
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
     responses:
       "204":
-        description: Competition template deleted successfully (no content)
+        description: Competition deleted successfully (no content)
       "404":
-        description: Competition template not found
+        description: Competition not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition template not found."
+              message: "Competition not found."
       "409":
         description: Conflict - referenced by other records
         content:
@@ -1173,20 +1177,20 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 409
-              message: "Cannot delete competition template: it is referenced by other records."
+              message: "Cannot delete competition: it is referenced by other records."
 
-# ── Competition Template Disciplines (junction) ──────────────────────────────
+# ── Competition Discipline Schemes (unified junction) ─────────────────────────
 
-/competition-template-disciplines:
+/competition-discipline-schemes:
   get:
     tags:
-      - Competition Template Disciplines
-    summary: Get all competition template discipline assignments
-    operationId: getAllCompetitionTemplateDisciplines
+      - Competition Discipline Schemes
+    summary: Get all competition discipline scheme assignments
+    operationId: getAllCompetitionDisciplineSchemes
     parameters:
       - name: filter
         in: query
-        description: Filter expression (e.g., competitionTemplateId eq 'uuid-value')
+        description: Filter expression (e.g., competitionId eq 'uuid-value')
         schema:
           type: string
       - name: top
@@ -1206,7 +1210,7 @@
           default: 0
     responses:
       "200":
-        description: List of competition template discipline assignments successfully retrieved
+        description: List of competition discipline scheme assignments successfully retrieved
         content:
           application/json:
             schema:
@@ -1217,7 +1221,7 @@
                     content:
                       type: array
                       items:
-                        $ref: "../competitions/schemas.yaml#/CompetitionTemplateDisciplineDto"
+                        $ref: "../competitions/schemas.yaml#/CompetitionDisciplineSchemeDto"
       "500":
         description: Server error
         content:
@@ -1230,22 +1234,22 @@
 
   post:
     tags:
-      - Competition Template Disciplines
-    summary: Assign a discipline to a competition template
-    operationId: createCompetitionTemplateDiscipline
+      - Competition Discipline Schemes
+    summary: Assign a discipline to a competition
+    operationId: createCompetitionDisciplineScheme
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: "../competitions/schemas.yaml#/CompetitionTemplateDisciplineCreateRequest"
+            $ref: "../competitions/schemas.yaml#/CompetitionDisciplineSchemeRequest"
     responses:
       "201":
-        description: Competition template discipline assignment created successfully
+        description: Competition discipline scheme assignment created successfully
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionTemplateDisciplineDto"
+              $ref: "../competitions/schemas.yaml#/CompetitionDisciplineSchemeDto"
       "400":
         description: Bad request, validation failed
         content:
@@ -1256,77 +1260,123 @@
               code: 400
               message: "Validation failed."
 
-/competition-template-disciplines/{uuid}:
+/competition-discipline-schemes/{uuid}:
   get:
     tags:
-      - Competition Template Disciplines
-    summary: Get competition template discipline assignment by UUID
-    operationId: getCompetitionTemplateDisciplineByUuid
+      - Competition Discipline Schemes
+    summary: Get competition discipline scheme assignment by UUID
+    operationId: getCompetitionDisciplineSchemeByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the competition template discipline assignment
+        description: UUID of the competition discipline scheme assignment
         schema:
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
     responses:
       "200":
-        description: Competition template discipline assignment details found
+        description: Competition discipline scheme assignment details found
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionTemplateDisciplineDto"
+              $ref: "../competitions/schemas.yaml#/CompetitionDisciplineSchemeDto"
       "404":
-        description: Competition template discipline assignment not found
+        description: Competition discipline scheme assignment not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition template discipline assignment not found."
+              message: "Competition discipline scheme assignment not found."
 
-  delete:
+  put:
     tags:
-      - Competition Template Disciplines
-    summary: Delete competition template discipline assignment by UUID
-    operationId: deleteCompetitionTemplateDisciplineByUuid
+      - Competition Discipline Schemes
+    summary: Update competition discipline scheme assignment by UUID
+    operationId: updateCompetitionDisciplineSchemeByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the competition template discipline assignment
+        description: UUID of the competition discipline scheme assignment
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/CompetitionDisciplineSchemeRequest"
+    responses:
+      "200":
+        description: Competition discipline scheme assignment updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionDisciplineSchemeDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Competition discipline scheme assignment not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition discipline scheme assignment not found."
+
+  delete:
+    tags:
+      - Competition Discipline Schemes
+    summary: Delete competition discipline scheme assignment by UUID
+    operationId: deleteCompetitionDisciplineSchemeByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition discipline scheme assignment
         schema:
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
     responses:
       "204":
-        description: Competition template discipline assignment deleted successfully (no content)
+        description: Competition discipline scheme assignment deleted successfully (no content)
       "404":
-        description: Competition template discipline assignment not found
+        description: Competition discipline scheme assignment not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition template discipline assignment not found."
+              message: "Competition discipline scheme assignment not found."
 
-# ── Competition Event Timetable Templates ─────────────────────────────────────
+# ── Competition Timetable Events ──────────────────────────────────────────────
 
-/competition-event-timetable-templates:
+/competition-timetable-events:
   get:
     tags:
-      - Competition Event Timetable Templates
-    summary: Get all competition event timetable templates
-    operationId: getAllCompetitionEventTimetableTemplates
+      - Competition Timetable Events
+    summary: Get all competition timetable events
+    operationId: getAllCompetitionTimetableEvents
     parameters:
       - name: filter
         in: query
-        description: Filter expression (e.g., competitionTemplateId eq 'uuid-value' and dayOffset eq '0')
+        description: Filter expression (e.g., competitionId eq 'uuid-value' and dayOffset eq '0')
         schema:
           type: string
       - name: orderBy
@@ -1345,6 +1395,8 @@
               - eventNumber_desc
               - plannedTime_asc
               - plannedTime_desc
+              - scheduledAt_asc
+              - scheduledAt_desc
               - createdAt_asc
               - createdAt_desc
           default: ["dayOffset_asc"]
@@ -1365,7 +1417,7 @@
           default: 0
     responses:
       "200":
-        description: List of competition event timetable templates successfully retrieved
+        description: List of competition timetable events successfully retrieved
         content:
           application/json:
             schema:
@@ -1376,7 +1428,7 @@
                     content:
                       type: array
                       items:
-                        $ref: "../competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
+                        $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
       "500":
         description: Server error
         content:
@@ -1389,22 +1441,22 @@
 
   post:
     tags:
-      - Competition Event Timetable Templates
-    summary: Create a new competition event timetable template
-    operationId: createCompetitionEventTimetableTemplate
+      - Competition Timetable Events
+    summary: Create a competition timetable event
+    operationId: createCompetitionTimetableEvent
     requestBody:
       required: true
       content:
         application/json:
           schema:
-            $ref: "../competitions/schemas.yaml#/CompetitionEventTimetableTemplateCreateRequest"
+            $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventRequest"
     responses:
-      "201":
-        description: Competition event timetable template created successfully
+      "200":
+        description: Competition timetable event created successfully
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
+              $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
       "400":
         description: Bad request, validation failed
         content:
@@ -1414,49 +1466,58 @@
             example:
               code: 400
               message: "Validation failed."
-
-/competition-event-timetable-templates/{uuid}:
-  get:
-    tags:
-      - Competition Event Timetable Templates
-    summary: Get competition event timetable template by UUID
-    operationId: getCompetitionEventTimetableTemplateByUuid
-    parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: UUID of the competition event timetable template
-        schema:
-          type: string
-          format: uuid
-        x-parameter-extra-annotation: '@NotNull'
-    responses:
-      "200":
-        description: Competition event timetable template details found
-        content:
-          application/json:
-            schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
       "404":
-        description: Competition event timetable template not found
+        description: Competition not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition event timetable template not found."
+              message: "Competition not found."
 
-  patch:
+/competition-timetable-events/{uuid}:
+  get:
     tags:
-      - Competition Event Timetable Templates
-    summary: Update competition event timetable template by UUID
-    operationId: patchCompetitionEventTimetableTemplateByUuid
+      - Competition Timetable Events
+    summary: Get competition timetable event by UUID
+    operationId: getCompetitionTimetableEventByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the competition event timetable template
+        description: UUID of the competition timetable event
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Competition timetable event details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
+      "404":
+        description: Competition timetable event not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition timetable event not found."
+
+  put:
+    tags:
+      - Competition Timetable Events
+    summary: Update competition timetable event by UUID (full replace)
+    operationId: updateCompetitionTimetableEventByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition timetable event
         schema:
           type: string
           format: uuid
@@ -1466,14 +1527,14 @@
       content:
         application/json:
           schema:
-            $ref: "../competitions/schemas.yaml#/CompetitionEventTimetableTemplateUpdateRequest"
+            $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventRequest"
     responses:
       "200":
-        description: Competition event timetable template updated successfully
+        description: Competition timetable event updated successfully
         content:
           application/json:
             schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
+              $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
       "400":
         description: Bad request - validation error
         content:
@@ -1484,14 +1545,14 @@
               code: 400
               message: "Invalid data format."
       "404":
-        description: Competition event timetable template not found
+        description: Competition timetable event not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition event timetable template not found."
+              message: "Competition timetable event not found."
       "409":
         description: Conflict - duplicate entry
         content:
@@ -1500,34 +1561,34 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 409
-              message: "Another competition event timetable template with the same values already exists."
+              message: "Another competition timetable event with the same values already exists."
 
   delete:
     tags:
-      - Competition Event Timetable Templates
-    summary: Delete competition event timetable template by UUID
-    operationId: deleteCompetitionEventTimetableTemplateByUuid
+      - Competition Timetable Events
+    summary: Delete competition timetable event by UUID
+    operationId: deleteCompetitionTimetableEventByUuid
     parameters:
       - name: uuid
         in: path
         required: true
-        description: UUID of the competition event timetable template
+        description: UUID of the competition timetable event
         schema:
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
     responses:
       "204":
-        description: Competition event timetable template deleted successfully (no content)
+        description: Competition timetable event deleted successfully (no content)
       "404":
-        description: Competition event timetable template not found
+        description: Competition timetable event not found
         content:
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 404
-              message: "Competition event timetable template not found."
+              message: "Competition timetable event not found."
       "409":
         description: Conflict - referenced by other records
         content:
@@ -1536,7 +1597,7 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
             example:
               code: 409
-              message: "Cannot delete competition event timetable template: it is referenced by other records."
+              message: "Cannot delete competition timetable event: it is referenced by other records."
 
 # ── Qualification Schemes ────────────────────────────────────────────────────
 
@@ -2211,146 +2272,6 @@
             example:
               code: 409
               message: "Cannot delete qualification progression: it is referenced by other records."
-
-# ── Competition Disciplines (junction) ───────────────────────────────────────
-
-/competition-disciplines:
-  get:
-    tags:
-      - Competition Disciplines
-    summary: Get all competition discipline assignments
-    operationId: getAllCompetitionDisciplines
-    parameters:
-      - name: filter
-        in: query
-        description: Filter expression (e.g., competitionId eq 'uuid-value')
-        schema:
-          type: string
-      - name: top
-        in: query
-        description: Maximum number of items to return
-        schema:
-          type: integer
-          minimum: 1
-          maximum: 1000
-          default: 100
-      - name: skip
-        in: query
-        description: Number of items to skip
-        schema:
-          type: integer
-          minimum: 0
-          default: 0
-    responses:
-      "200":
-        description: List of competition discipline assignments successfully retrieved
-        content:
-          application/json:
-            schema:
-              allOf:
-                - $ref: "../common/schemas.yaml#/Page"
-                - type: object
-                  properties:
-                    content:
-                      type: array
-                      items:
-                        $ref: "../competitions/schemas.yaml#/CompetitionDisciplineDto"
-      "500":
-        description: Server error
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 500
-              message: "Internal server error. Please try again later."
-
-  post:
-    tags:
-      - Competition Disciplines
-    summary: Assign a discipline to a competition
-    operationId: createCompetitionDiscipline
-    requestBody:
-      required: true
-      content:
-        application/json:
-          schema:
-            $ref: "../competitions/schemas.yaml#/CompetitionDisciplineCreateRequest"
-    responses:
-      "201":
-        description: Competition discipline assignment created successfully
-        content:
-          application/json:
-            schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionDisciplineDto"
-      "400":
-        description: Bad request, validation failed
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 400
-              message: "Validation failed."
-
-/competition-disciplines/{uuid}:
-  get:
-    tags:
-      - Competition Disciplines
-    summary: Get competition discipline assignment by UUID
-    operationId: getCompetitionDisciplineByUuid
-    parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: UUID of the competition discipline assignment
-        schema:
-          type: string
-          format: uuid
-        x-parameter-extra-annotation: '@NotNull'
-    responses:
-      "200":
-        description: Competition discipline assignment details found
-        content:
-          application/json:
-            schema:
-              $ref: "../competitions/schemas.yaml#/CompetitionDisciplineDto"
-      "404":
-        description: Competition discipline assignment not found
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 404
-              message: "Competition discipline assignment not found."
-
-  delete:
-    tags:
-      - Competition Disciplines
-    summary: Delete competition discipline assignment by UUID
-    operationId: deleteCompetitionDisciplineByUuid
-    parameters:
-      - name: uuid
-        in: path
-        required: true
-        description: UUID of the competition discipline assignment
-        schema:
-          type: string
-          format: uuid
-        x-parameter-extra-annotation: '@NotNull'
-    responses:
-      "204":
-        description: Competition discipline assignment deleted successfully (no content)
-      "404":
-        description: Competition discipline assignment not found
-        content:
-          application/json:
-            schema:
-              $ref: "../common/schemas.yaml#/ErrorResponse"
-            example:
-              code: 404
-              message: "Competition discipline assignment not found."
 
 # ── Scoring Scheme Boat Coefficients ─────────────────────────────────────────
 

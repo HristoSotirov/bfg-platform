@@ -1,26 +1,17 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionStatus;
-import com.bfg.platform.gen.model.ScopeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.ToString;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -40,11 +31,17 @@ public class Competition {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "short_name")
+    @Column(name = "is_template", nullable = false)
+    private boolean isTemplate;
+
+    @Column(name = "short_name", nullable = false)
     private String shortName;
 
-    @Column(name = "name")
+    @Column(name = "name", nullable = false)
     private String name;
+
+    @Column(name = "duration_days", nullable = false)
+    private Integer durationDays;
 
     @Column(name = "season")
     private Integer season;
@@ -58,23 +55,17 @@ public class Competition {
     @Column(name = "end_date")
     private LocalDate endDate;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    private CompetitionStatus status;
+    @Column(name = "status", nullable = false)
+    private String status;
 
-    @Column(name = "scope_type")
-    @Enumerated(EnumType.STRING)
-    private ScopeType scopeType;
+    @Column(name = "scope_type", nullable = false)
+    private String scopeType;
 
-    @Column(name = "qualification_scheme_id")
+    @Column(name = "scoring_scheme_id", nullable = false)
+    private UUID scoringSchemeId;
+
+    @Column(name = "qualification_scheme_id", nullable = false)
     private UUID qualificationSchemeId;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "qualification_scheme_id", insertable = false, updatable = false)
-    @Setter(AccessLevel.NONE)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private QualificationScheme qualificationScheme;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

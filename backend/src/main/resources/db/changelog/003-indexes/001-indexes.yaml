@@ -183,45 +183,13 @@ databaseChangeLog:
               - column: { name: qualification_tier_id }
 
         # =============================================
-        # competition_templates
+        # competitions (unified)
         # =============================================
         - createIndex:
-            tableName: competition_templates
-            indexName: idx_comp_templates_scoring_scheme_id
+            tableName: competitions
+            indexName: idx_competitions_is_template
             columns:
-              - column: { name: scoring_scheme_id }
-        - createIndex:
-            tableName: competition_templates
-            indexName: idx_comp_templates_qual_scheme_id
-            columns:
-              - column: { name: qualification_scheme_id }
-
-        # =============================================
-        # competition_template_disciplines
-        # =============================================
-        - createIndex:
-            tableName: competition_template_disciplines
-            indexName: idx_comp_tmpl_disc_template_id
-            columns:
-              - column: { name: competition_template_id }
-        - createIndex:
-            tableName: competition_template_disciplines
-            indexName: idx_comp_tmpl_disc_discipline_id
-            columns:
-              - column: { name: discipline_id }
-
-        # =============================================
-        # competition_events_timetable_templates
-        # =============================================
-        - createIndex:
-            tableName: competition_events_timetable_templates
-            indexName: idx_comp_event_tt_templates_competition_template_id
-            columns:
-              - column: { name: competition_template_id }
-
-        # =============================================
-        # competitions
-        # =============================================
+              - column: { name: is_template }
         - createIndex:
             tableName: competitions
             indexName: idx_competitions_season
@@ -249,18 +217,37 @@ databaseChangeLog:
               - column: { name: qualification_scheme_id }
 
         # =============================================
-        # competition_disciplines
+        # competition_discipline_schemes
         # =============================================
         - createIndex:
-            tableName: competition_disciplines
-            indexName: idx_comp_disc_competition_id
+            tableName: competition_discipline_schemes
+            indexName: idx_comp_disc_scheme_competition_id
             columns:
               - column: { name: competition_id }
         - createIndex:
-            tableName: competition_disciplines
-            indexName: idx_comp_disc_discipline_id
+            tableName: competition_discipline_schemes
+            indexName: idx_comp_disc_scheme_discipline_id
             columns:
               - column: { name: discipline_id }
+
+        # =============================================
+        # competition_timetable_events
+        # =============================================
+        - createIndex:
+            tableName: competition_timetable_events
+            indexName: idx_comp_timetable_event_competition_id
+            columns:
+              - column: { name: competition_id }
+        - createIndex:
+            tableName: competition_timetable_events
+            indexName: idx_comp_timetable_event_discipline_id
+            columns:
+              - column: { name: discipline_id }
+        - createIndex:
+            tableName: competition_timetable_events
+            indexName: idx_comp_timetable_event_status
+            columns:
+              - column: { name: event_status }
 
         # =============================================
         # entries
@@ -294,25 +281,6 @@ databaseChangeLog:
             indexName: idx_crew_members_athlete_id
             columns:
               - column: { name: athlete_id }
-
-        # =============================================
-        # competition_events_timetables
-        # =============================================
-        - createIndex:
-            tableName: competition_events_timetables
-            indexName: idx_comp_event_tt_competition_id
-            columns:
-              - column: { name: competition_id }
-        - createIndex:
-            tableName: competition_events_timetables
-            indexName: idx_comp_event_tt_discipline_id
-            columns:
-              - column: { name: discipline_id }
-        - createIndex:
-            tableName: competition_events_timetables
-            indexName: idx_comp_event_tt_status
-            columns:
-              - column: { name: competition_event_status }
 
         # =============================================
         # competition_participations

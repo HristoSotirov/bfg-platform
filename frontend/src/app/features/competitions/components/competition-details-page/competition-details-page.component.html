@@ -1,0 +1,619 @@
+<div class="h-screen flex flex-col overflow-hidden bg-white">
+  <app-header></app-header>
+
+  <div class="flex-1 flex flex-col overflow-hidden px-4 lg:px-8 py-4">
+
+    <!-- Back + Title -->
+    <div class="flex items-center gap-3 mb-4">
+      <button
+        type="button"
+        class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+        (click)="goBack()"
+      >
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </button>
+
+      @if (loading) {
+        <div class="text-gray-500">Зареждане...</div>
+      } @else if (competition) {
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-3">
+            <h1 class="text-2xl font-bold text-gray-900 truncate">{{ competition.name }}</h1>
+            <span
+              class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0"
+              [class]="competition.isTemplate ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+            >
+              {{ competition.isTemplate ? 'Шаблон' : 'Реално' }}
+            </span>
+            @if (!competition.isTemplate) {
+              <span class="text-sm flex-shrink-0" [class]="getStatusClass(competition.status)">
+                {{ getStatusLabel(competition.status) }}
+              </span>
+            }
+          </div>
+          <p class="text-sm text-gray-500 mt-0.5">{{ competition.shortName }}</p>
+        </div>
+      } @else if (error) {
+        <div class="text-red-500">{{ error }}</div>
+      }
+    </div>
+
+    @if (competition) {
+      <!-- Tab bar -->
+      <div class="border-b border-gray-200 mb-4">
+        <nav class="-mb-px flex gap-1 overflow-x-auto">
+          @for (tab of tabs; track tab.id) {
+            @if (tab.available) {
+              <button
+                type="button"
+                class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+                [class]="activeTab === tab.id
+                  ? 'border-bfg-blue text-bfg-blue'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+                (click)="setTab(tab.id)"
+              >
+                {{ tab.label }}
+              </button>
+            }
+          }
+        </nav>
+      </div>
+
+      <!-- Tab content -->
+      <div class="flex-1 overflow-auto">
+
+        <!-- ===== DETAILS TAB ===== -->
+        @if (activeTab === 'details') {
+          <div class="space-y-6 max-w-5xl">
+
+            <!-- Competition info -->
+            <div class="bg-white border border-gray-200 rounded-lg p-5">
+              <div class="flex items-center justify-between mb-4">
+                <h2 class="text-base font-semibold text-gray-800">Основна информация</h2>
+                @if (canEdit && !isEditing) {
+                  <app-button variant="outline" size="sm" text="Редактирай" (click)="startEditing()"></app-button>
+                }
+              </div>
+
+              @if (!isEditing) {
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2">
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Кратко наименование:</span>
+                    <span class="text-sm font-medium">{{ competition.shortName || '-' }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Пълно наименование:</span>
+                    <span class="text-sm font-medium">{{ competition.name || '-' }}</span>
+                  </div>
+                  @if (competition.isTemplate) {
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Продължителност:</span>
+                      <span class="text-sm font-medium">{{ competition.durationDays ?? '-' }} дни</span>
+                    </div>
+                  } @else {
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Сезон:</span>
+                      <span class="text-sm font-medium">{{ competition.season ?? '-' }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Място:</span>
+                      <span class="text-sm font-medium">{{ competition.location || '-' }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Начална дата:</span>
+                      <span class="text-sm font-medium">{{ formatDate(competition.startDate) }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Крайна дата:</span>
+                      <span class="text-sm font-medium">{{ formatDate(competition.endDate) }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Статус:</span>
+                      <span class="text-sm font-medium" [class]="getStatusClass(competition.status)">
+                        {{ getStatusLabel(competition.status) }}
+                      </span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Обхват:</span>
+                      <span class="text-sm font-medium">{{ getScopeTypeLabel(competition.scopeType) }}</span>
+                    </div>
+                  }
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Създадено на:</span>
+                    <span class="text-sm">{{ formatDate(competition.createdAt) }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Променено на:</span>
+                    <span class="text-sm">{{ formatDate(competition.modifiedAt) }}</span>
+                  </div>
+                </div>
+              } @else {
+                <!-- Edit form -->
+                <div class="space-y-3">
+                  <div class="grid grid-cols-2 gap-3">
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Кратко наименование:</label>
+                      <input type="text" [(ngModel)]="editData.shortName"
+                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Пълно наименование:</label>
+                      <input type="text" [(ngModel)]="editData.name"
+                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                    </div>
+                  </div>
+                  @if (competition.isTemplate) {
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Продължителност (дни):</label>
+                      <input type="number" [(ngModel)]="editData.durationDays" min="1"
+                        class="w-32 px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                    </div>
+                  } @else {
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Начална дата:</label>
+                        <input type="date" [(ngModel)]="editData.startDate"
+                          class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Крайна дата:</label>
+                        <input type="date" [(ngModel)]="editData.endDate"
+                          class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Сезон:</label>
+                        <input type="number" [(ngModel)]="editData.season" min="2000"
+                          class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Място:</label>
+                        <input type="text" [(ngModel)]="editData.location"
+                          class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                      </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
+                        <app-searchable-select-dropdown
+                          [options]="statusOptions"
+                          [(ngModel)]="editData.status"
+                          placeholder="Изберете..."
+                        ></app-searchable-select-dropdown>
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Обхват:</label>
+                        <app-searchable-select-dropdown
+                          [options]="scopeTypeOptions"
+                          [(ngModel)]="editData.scopeType"
+                          placeholder="Изберете..."
+                        ></app-searchable-select-dropdown>
+                      </div>
+                    </div>
+                  }
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Схема за точкуване:</label>
+                    <app-searchable-select-dropdown
+                      [options]="scoringSchemeOptions"
+                      [(ngModel)]="editData.scoringSchemeId"
+                      placeholder="Изберете схема..."
+                      class="max-w-sm"
+                    ></app-searchable-select-dropdown>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Квалификационна схема:</label>
+                    <app-searchable-select-dropdown
+                      [options]="qualificationSchemeOptions"
+                      [(ngModel)]="editData.qualificationSchemeId"
+                      placeholder="Изберете схема..."
+                      class="max-w-sm"
+                    ></app-searchable-select-dropdown>
+                  </div>
+
+                  @if (editError) {
+                    <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                      <p class="text-sm text-red-700">{{ editError }}</p>
+                      <button type="button" class="text-red-400 hover:text-red-600" (click)="editError = null">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  }
+                  <div class="flex gap-3 pt-1">
+                    <app-button variant="outline" size="sm" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
+                    <app-button variant="primary" size="sm" text="Запази" [disabled]="saving" (click)="saveEditing()"></app-button>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Scoring Scheme preview -->
+            <div class="bg-white border border-gray-200 rounded-lg p-5">
+              <h2 class="text-base font-semibold text-gray-800 mb-3">Схема за точкуване</h2>
+              @if (loadingScoring) {
+                <div class="text-sm text-gray-500">Зареждане...</div>
+              } @else if (scoringScheme) {
+                <div class="space-y-1 mb-3">
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-28 flex-shrink-0">Наименование:</span>
+                    <span class="text-sm font-medium">{{ scoringScheme.name }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-28 flex-shrink-0">Статус:</span>
+                    <span class="text-sm font-medium" [class]="scoringScheme.isActive ? 'text-green-600' : 'text-red-600'">
+                      {{ scoringScheme.isActive ? 'Активна' : 'Неактивна' }}
+                    </span>
+                  </div>
+                </div>
+                @if (scoringRules.length > 0) {
+                  <div class="border rounded overflow-hidden max-h-48 overflow-y-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                      <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Място</th>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Базови точки</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200">
+                        @for (rule of scoringRules; track rule.uuid) {
+                          <tr>
+                            <td class="px-3 py-1.5">{{ rule.placement }}</td>
+                            <td class="px-3 py-1.5">{{ rule.basePoints }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              } @else {
+                <div class="text-sm text-gray-400">Не е зададена схема за точкуване</div>
+              }
+            </div>
+
+            <!-- Qualification Scheme preview -->
+            <div class="bg-white border border-gray-200 rounded-lg p-5">
+              <h2 class="text-base font-semibold text-gray-800 mb-3">Квалификационна схема</h2>
+              @if (loadingQualification) {
+                <div class="text-sm text-gray-500">Зареждане...</div>
+              } @else if (qualificationScheme) {
+                <div class="space-y-1 mb-3">
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-28 flex-shrink-0">Наименование:</span>
+                    <span class="text-sm font-medium">{{ qualificationScheme.name }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-28 flex-shrink-0">Брой коридори:</span>
+                    <span class="text-sm font-medium">{{ qualificationScheme.laneCount ?? '-' }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-28 flex-shrink-0">Статус:</span>
+                    <span class="text-sm font-medium" [class]="qualificationScheme.isActive ? 'text-green-600' : 'text-red-600'">
+                      {{ qualificationScheme.isActive ? 'Активна' : 'Неактивна' }}
+                    </span>
+                  </div>
+                </div>
+                @if (qualificationTiers.length > 0) {
+                  <div class="border rounded overflow-hidden max-h-48 overflow-y-auto">
+                    <table class="min-w-full divide-y divide-gray-200 text-sm">
+                      <thead class="bg-gray-50 sticky top-0">
+                        <tr>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Мин. лодки</th>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Макс. лодки</th>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Серии</th>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Полуфинали</th>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Фин. Б</th>
+                          <th class="px-3 py-1.5 text-left text-xs font-medium text-gray-500">Фин. А</th>
+                        </tr>
+                      </thead>
+                      <tbody class="divide-y divide-gray-200">
+                        @for (tier of qualificationTiers; track tier.uuid) {
+                          <tr>
+                            <td class="px-3 py-1.5">{{ tier.boatCountMin }}</td>
+                            <td class="px-3 py-1.5">{{ tier.boatCountMax ?? '∞' }}</td>
+                            <td class="px-3 py-1.5">{{ tier.heatCount }}</td>
+                            <td class="px-3 py-1.5">{{ tier.semiFinalCount }}</td>
+                            <td class="px-3 py-1.5">{{ tier.finalBCount }}</td>
+                            <td class="px-3 py-1.5">{{ tier.finalACount }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                }
+              } @else {
+                <div class="text-sm text-gray-400">Не е зададена квалификационна схема</div>
+              }
+            </div>
+
+          </div>
+        }
+
+        <!-- ===== DISCIPLINES TAB ===== -->
+        @if (activeTab === 'disciplines') {
+          <div class="max-w-3xl space-y-4">
+
+            @if (canEdit) {
+              <div class="bg-white border border-gray-200 rounded-lg p-4">
+                <h3 class="text-sm font-medium text-gray-700 mb-3">Добавяне на дисциплина</h3>
+                <div class="flex items-end gap-3">
+                  <div class="flex-1">
+                    <app-searchable-select-dropdown
+                      [options]="availableDisciplineOptions"
+                      [(ngModel)]="newDisciplineId"
+                      placeholder="Изберете дисциплина..."
+                    ></app-searchable-select-dropdown>
+                  </div>
+                  <app-button
+                    variant="primary"
+                    size="md"
+                    text="Добави"
+                    [disabled]="!newDisciplineId || addingDiscipline"
+                    (click)="addDiscipline()"
+                  ></app-button>
+                </div>
+                @if (addDisciplineError) {
+                  <div class="mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                    <p class="text-sm text-red-700">{{ addDisciplineError }}</p>
+                    <button type="button" class="text-red-400 hover:text-red-600" (click)="addDisciplineError = null">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                      </svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Дисциплина</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Кратко</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Клас лодка</th>
+                    @if (canEdit) {
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500"></th>
+                    }
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  @if (loadingDisciplines) {
+                    <tr>
+                      <td colspan="4" class="px-4 py-6 text-center text-gray-500">Зареждане...</td>
+                    </tr>
+                  } @else {
+                    @for (ds of disciplineSchemes; track ds.uuid) {
+                      <tr>
+                        <td class="px-4 py-3">{{ getDisciplineName(ds.disciplineId) }}</td>
+                        <td class="px-4 py-3">{{ getDisciplineShortName(ds.disciplineId) }}</td>
+                        <td class="px-4 py-3">{{ getDisciplineBoatClass(ds.disciplineId) }}</td>
+                        @if (canEdit) {
+                          <td class="px-4 py-3">
+                            <button
+                              type="button"
+                              class="text-red-600 hover:text-red-800 text-xs"
+                              (click)="confirmDeleteDiscipline(ds)"
+                            >
+                              Изтрий
+                            </button>
+                          </td>
+                        }
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="4" class="px-4 py-8 text-center text-gray-500">
+                          Няма добавени дисциплини
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- ===== TIMETABLE TAB ===== -->
+        @if (activeTab === 'timetable') {
+          <div class="max-w-5xl space-y-4">
+
+            @if (canEdit) {
+              <!-- Add event form -->
+              @if (!showAddTimetableEvent) {
+                <div class="flex justify-end">
+                  <app-button variant="primary" size="sm" text="+ Добави събитие" (click)="openAddTimetableEvent()"></app-button>
+                </div>
+              } @else {
+                <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
+                  <h3 class="text-sm font-medium text-gray-700">Ново събитие</h3>
+                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Номер:</label>
+                      <input type="number" [(ngModel)]="newEvent.eventNumber" min="1"
+                        class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Дисциплина <span class="text-red-500">*</span>:</label>
+                      <app-searchable-select-dropdown
+                        [options]="disciplineOptionsForTimetable"
+                        [(ngModel)]="newEvent.disciplineId"
+                        placeholder="Изберете..."
+                      ></app-searchable-select-dropdown>
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Тип <span class="text-red-500">*</span>:</label>
+                      <app-searchable-select-dropdown
+                        [options]="eventTypeOptions"
+                        [(ngModel)]="newEvent.qualificationEventType"
+                        placeholder="Изберете..."
+                      ></app-searchable-select-dropdown>
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Номер серия:</label>
+                      <input type="number" [(ngModel)]="newEvent.qualificationStageNumber" min="1"
+                        class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Ден (от 0):</label>
+                      <input type="number" [(ngModel)]="newEvent.dayOffset" min="0"
+                        class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                    </div>
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Час (план):</label>
+                      <input type="time" [(ngModel)]="newEvent.plannedTime"
+                        class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                    </div>
+                    @if (!competition.isTemplate) {
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Насрочено:</label>
+                        <input type="datetime-local" [(ngModel)]="newEvent.scheduledAt"
+                          class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                      </div>
+                      <div>
+                        <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
+                        <app-searchable-select-dropdown
+                          [options]="eventStatusOptions"
+                          [(ngModel)]="newEvent.eventStatus"
+                          placeholder="Изберете..."
+                        ></app-searchable-select-dropdown>
+                      </div>
+                    }
+                  </div>
+                  @if (timetableError) {
+                    <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                      <p class="text-sm text-red-700">{{ timetableError }}</p>
+                      <button type="button" class="text-red-400 hover:text-red-600" (click)="timetableError = null">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                      </button>
+                    </div>
+                  }
+                  <div class="flex gap-3">
+                    <app-button variant="outline" size="sm" text="Отказ" [disabled]="savingTimetable" (click)="cancelAddTimetableEvent()"></app-button>
+                    <app-button variant="primary" size="sm" text="Запази" [disabled]="!newEvent.disciplineId || !newEvent.qualificationEventType || savingTimetable" (click)="saveAddTimetableEvent()"></app-button>
+                  </div>
+                </div>
+              }
+            }
+
+            <div class="border border-gray-200 rounded-lg overflow-hidden">
+              <table class="min-w-full divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">#</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Дисциплина</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Тип</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Серия №</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Ден</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Час</th>
+                    @if (!competition.isTemplate) {
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Насрочено</th>
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Статус</th>
+                    }
+                    @if (canEdit) {
+                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500"></th>
+                    }
+                  </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                  @if (loadingTimetable) {
+                    <tr>
+                      <td colspan="9" class="px-4 py-6 text-center text-gray-500">Зареждане...</td>
+                    </tr>
+                  } @else {
+                    @for (event of timetableEvents; track event.uuid) {
+                      <tr>
+                        <td class="px-4 py-3">{{ event.eventNumber }}</td>
+                        <td class="px-4 py-3">{{ getDisciplineName(event.disciplineId) }}</td>
+                        <td class="px-4 py-3">{{ getEventTypLabel(event.qualificationEventType) }}</td>
+                        <td class="px-4 py-3">{{ event.qualificationStageNumber ?? '-' }}</td>
+                        <td class="px-4 py-3">{{ event.dayOffset != null ? 'Ден ' + (event.dayOffset + 1) : '-' }}</td>
+                        <td class="px-4 py-3">{{ event.plannedTime || '-' }}</td>
+                        @if (!competition.isTemplate) {
+                          <td class="px-4 py-3">{{ formatDateTime(event.scheduledAt) }}</td>
+                          <td class="px-4 py-3">{{ getEventStatusLabel(event.eventStatus) }}</td>
+                        }
+                        @if (canEdit) {
+                          <td class="px-4 py-3">
+                            <button
+                              type="button"
+                              class="text-red-600 hover:text-red-800 text-xs"
+                              (click)="confirmDeleteTimetableEvent(event)"
+                            >Изтрий</button>
+                          </td>
+                        }
+                      </tr>
+                    } @empty {
+                      <tr>
+                        <td colspan="9" class="px-4 py-8 text-center text-gray-500">
+                          Няма добавени събития в разписанието
+                        </td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        }
+
+        <!-- ===== ENTRIES / PROGRESSION / RESULTS (coming soon for real competitions) ===== -->
+        @if (activeTab === 'entries' || activeTab === 'progression' || activeTab === 'results') {
+          <div class="flex flex-col items-center justify-center h-64 text-gray-400">
+            <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="text-lg font-medium">Предстои</p>
+            <p class="text-sm mt-1">Функционалността ще бъде добавена скоро</p>
+          </div>
+        }
+
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- Delete timetable event confirm dialog -->
+<app-dialog
+  [isOpen]="showDeleteTimetableConfirm"
+  title="Потвърждение за изтриване"
+  size="md"
+  (closed)="cancelDeleteTimetableEvent()"
+>
+  <div class="py-4">
+    <p class="text-gray-700 mb-6">
+      Сигурни ли сте, че искате да изтриете събитие
+      <strong>#{{ timetableEventToDelete?.eventNumber }}</strong>
+      ({{ getDisciplineName(timetableEventToDelete?.disciplineId) }} – {{ getEventTypLabel(timetableEventToDelete?.qualificationEventType) }})?
+    </p>
+    <div class="flex gap-3 justify-center">
+      <app-button variant="outline" size="md" text="Отказ" (click)="cancelDeleteTimetableEvent()"></app-button>
+      <app-button variant="primary" size="md" text="Изтрий" (click)="deleteTimetableEvent()"></app-button>
+    </div>
+  </div>
+</app-dialog>
+<app-dialog
+  [isOpen]="showDeleteDisciplineConfirm"
+  title="Потвърждение за изтриване"
+  size="md"
+  (closed)="cancelDeleteDiscipline()"
+>
+  <div class="py-4">
+    <p class="text-gray-700 mb-6">
+      Сигурни ли сте, че искате да премахнете
+      <strong>{{ getDisciplineName(disciplineToDelete?.disciplineId) }}</strong>
+      от това състезание?
+    </p>
+    <div class="flex gap-3 justify-center">
+      <app-button variant="outline" size="md" text="Отказ" (click)="cancelDeleteDiscipline()"></app-button>
+      <app-button variant="primary" size="md" text="Изтрий" (click)="deleteDiscipline()"></app-button>
+    </div>
+  </div>
+</app-dialog>

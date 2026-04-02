@@ -79,7 +79,7 @@ paths:
   /accreditations/{accreditationUuid}:
     $ref: "./accreditations/paths.yaml#/~1accreditations~1{accreditationUuid}"
 
-  # Competition definitions & templates
+  # Competition definitions
   /competition-group-definitions:
     $ref: "./competitions/paths.yaml#/~1competition-group-definitions"
   /competition-group-definitions/{uuid}:
@@ -100,18 +100,6 @@ paths:
     $ref: "./competitions/paths.yaml#/~1scoring-scheme-boat-coefficients"
   /scoring-scheme-boat-coefficients/{uuid}:
     $ref: "./competitions/paths.yaml#/~1scoring-scheme-boat-coefficients~1{uuid}"
-  /competition-templates:
-    $ref: "./competitions/paths.yaml#/~1competition-templates"
-  /competition-templates/{uuid}:
-    $ref: "./competitions/paths.yaml#/~1competition-templates~1{uuid}"
-  /competition-template-disciplines:
-    $ref: "./competitions/paths.yaml#/~1competition-template-disciplines"
-  /competition-template-disciplines/{uuid}:
-    $ref: "./competitions/paths.yaml#/~1competition-template-disciplines~1{uuid}"
-  /competition-event-timetable-templates:
-    $ref: "./competitions/paths.yaml#/~1competition-event-timetable-templates"
-  /competition-event-timetable-templates/{uuid}:
-    $ref: "./competitions/paths.yaml#/~1competition-event-timetable-templates~1{uuid}"
   /qualification-schemes:
     $ref: "./competitions/paths.yaml#/~1qualification-schemes"
   /qualification-schemes/{uuid}:
@@ -124,6 +112,20 @@ paths:
     $ref: "./competitions/paths.yaml#/~1qualification-progressions"
   /qualification-progressions/{uuid}:
     $ref: "./competitions/paths.yaml#/~1qualification-progressions~1{uuid}"
+
+  # Competition module - unified competitions
+  /competitions:
+    $ref: "./competitions/paths.yaml#/~1competitions"
+  /competitions/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}"
+  /competition-discipline-schemes:
+    $ref: "./competitions/paths.yaml#/~1competition-discipline-schemes"
+  /competition-discipline-schemes/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1competition-discipline-schemes~1{uuid}"
+  /competition-timetable-events:
+    $ref: "./competitions/paths.yaml#/~1competition-timetable-events"
+  /competition-timetable-events/{uuid}:
+    $ref: "./competitions/paths.yaml#/~1competition-timetable-events~1{uuid}"
 
 components:
   securitySchemes:
@@ -248,12 +250,8 @@ components:
       $ref: "./competitions/schemas.yaml#/ScoringSchemeDto"
     ScoringRuleDto:
       $ref: "./competitions/schemas.yaml#/ScoringRuleDto"
-    CompetitionTemplateDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionTemplateDto"
-    CompetitionTemplateDisciplineDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionTemplateDisciplineDto"
-    CompetitionEventTimetableTemplateDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateDto"
+    ScoringSchemeBoatCoefficientDto:
+      $ref: "./competitions/schemas.yaml#/ScoringSchemeBoatCoefficientDto"
     QualificationSchemeDto:
       $ref: "./competitions/schemas.yaml#/QualificationSchemeDto"
     QualificationTierDto:
@@ -262,14 +260,14 @@ components:
       $ref: "./competitions/schemas.yaml#/QualificationProgressionDto"
     CompetitionDto:
       $ref: "./competitions/schemas.yaml#/CompetitionDto"
-    CompetitionDisciplineDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionDisciplineDto"
+    CompetitionDisciplineSchemeDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionDisciplineSchemeDto"
+    CompetitionTimetableEventDto:
+      $ref: "./competitions/schemas.yaml#/CompetitionTimetableEventDto"
     EntryDto:
       $ref: "./competitions/schemas.yaml#/EntryDto"
     CrewMemberDto:
       $ref: "./competitions/schemas.yaml#/CrewMemberDto"
-    CompetitionEventTimetableDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableDto"
     CompetitionParticipationDto:
       $ref: "./competitions/schemas.yaml#/CompetitionParticipationDto"
     CompetitionFinalStandingDto:
@@ -286,23 +284,17 @@ components:
       $ref: "./competitions/schemas.yaml#/ScoringSchemeRequest"
     ScoringRuleRequest:
       $ref: "./competitions/schemas.yaml#/ScoringRuleRequest"
-    ScoringSchemeBoatCoefficientDto:
-      $ref: "./competitions/schemas.yaml#/ScoringSchemeBoatCoefficientDto"
     ScoringSchemeBoatCoefficientRequest:
       $ref: "./competitions/schemas.yaml#/ScoringSchemeBoatCoefficientRequest"
-    CompetitionTemplateCreateRequest:
-      $ref: "./competitions/schemas.yaml#/CompetitionTemplateCreateRequest"
-    CompetitionTemplateUpdateRequest:
-      $ref: "./competitions/schemas.yaml#/CompetitionTemplateUpdateRequest"
-    CompetitionTemplateDisciplineCreateRequest:
-      $ref: "./competitions/schemas.yaml#/CompetitionTemplateDisciplineCreateRequest"
-    CompetitionEventTimetableTemplateCreateRequest:
-      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateCreateRequest"
-    CompetitionEventTimetableTemplateUpdateRequest:
-      $ref: "./competitions/schemas.yaml#/CompetitionEventTimetableTemplateUpdateRequest"
     QualificationSchemeRequest:
       $ref: "./competitions/schemas.yaml#/QualificationSchemeRequest"
     QualificationTierRequest:
       $ref: "./competitions/schemas.yaml#/QualificationTierRequest"
     QualificationProgressionRequest:
       $ref: "./competitions/schemas.yaml#/QualificationProgressionRequest"
+    CompetitionRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionRequest"
+    CompetitionDisciplineSchemeRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionDisciplineSchemeRequest"
+    CompetitionTimetableEventRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionTimetableEventRequest"

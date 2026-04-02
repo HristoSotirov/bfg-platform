@@ -1,0 +1,102 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-competitions
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competitions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: short_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: duration_days
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+                  remarks: "Required for all competitions and templates"
+              - column:
+                  name: season
+                  type: INTEGER
+                  remarks: "Only for real competitions (is_template=false)"
+              - column:
+                  name: location
+                  type: VARCHAR(255)
+                  remarks: "Only for real competitions (is_template=false)"
+              - column:
+                  name: start_date
+                  type: DATE
+                  remarks: "Only for real competitions (is_template=false)"
+              - column:
+                  name: end_date
+                  type: DATE
+                  remarks: "Only for real competitions (is_template=false)"
+              - column:
+                  name: status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "PLANNED, DRAFT, REGISTRATION_OPEN, REGISTRATION_CLOSED, IN_PROGRESS, COMPLETED, CANCELLED. Only for real competitions."
+              - column:
+                  name: scope_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "INTERNAL, EXTERNAL, NATIONAL."
+              - column:
+                  name: scoring_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: qualification_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_template
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+                  remarks: "true = template, false = real competition"
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: competitions
+            baseColumnNames: scoring_scheme_id
+            referencedTableName: scoring_schemes
+            referencedColumnNames: id
+            constraintName: fk_competition_scoring_scheme
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competitions
+            baseColumnNames: qualification_scheme_id
+            referencedTableName: qualification_schemes
+            referencedColumnNames: id
+            constraintName: fk_competition_qual_scheme
+            onDelete: RESTRICT
