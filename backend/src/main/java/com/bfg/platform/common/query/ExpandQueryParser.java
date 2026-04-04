@@ -43,7 +43,8 @@ public final class ExpandQueryParser {
         Set<String> invalid = new HashSet<>();
         
         for (String field : requested) {
-            if (!expandableFields.contains(field)) {
+            String rootField = field.contains(".") ? field.substring(0, field.indexOf('.')) : field;
+            if (!expandableFields.contains(rootField)) {
                 invalid.add(field);
             }
         }
@@ -54,7 +55,20 @@ public final class ExpandQueryParser {
                 ". Available options: " + expandableFields
             );
         }
-        
+
+        // Validate that parent is explicitly expanded when using nested paths
+        // e.g. discipline.competitionGroup requires discipline to also be present
+        for (String field : requested) {
+            if (field.contains(".")) {
+                String parent = field.substring(0, field.indexOf('.'));
+                if (!requested.contains(parent)) {
+                    throw new IllegalArgumentException(
+                        "Cannot expand '" + field + "' without also expanding '" + parent + "'"
+                    );
+                }
+            }
+        }
+
         return requested;
     }
     

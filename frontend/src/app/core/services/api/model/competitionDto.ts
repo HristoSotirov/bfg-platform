@@ -12,33 +12,31 @@ import { CompetitionStatus } from './competitionStatus';
 
 
 /**
- * Data Transfer Object for unified competition (template or real)
+ * Data Transfer Object for a competition (DRAFT status = template, non-DRAFT = real)
  */
 export interface CompetitionDto { 
     uuid?: string;
-    isTemplate?: boolean;
     shortName?: string;
     name?: string;
-    /**
-     * Only for templates (isTemplate=true)
-     */
-    durationDays?: number;
-    /**
-     * Only for real competitions (isTemplate=false)
-     */
-    season?: number;
-    /**
-     * Only for real competitions (isTemplate=false)
-     */
     location?: string;
-    /**
-     * Only for real competitions (isTemplate=false)
-     */
     startDate?: string;
-    /**
-     * Only for real competitions (isTemplate=false)
-     */
     endDate?: string;
+    /**
+     * Required when status is not DRAFT.
+     */
+    entrySubmissionsOpenAt?: string;
+    /**
+     * Required when status is not DRAFT.
+     */
+    entrySubmissionsClosedAt?: string;
+    /**
+     * Required when status is not DRAFT.
+     */
+    lastChangesBeforeTmAt?: string;
+    /**
+     * Required when status is not DRAFT.
+     */
+    technicalMeetingAt?: string;
     status?: CompetitionStatus;
     scopeType?: ScopeType;
     scoringSchemeId?: string;

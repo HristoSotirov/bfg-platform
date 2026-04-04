@@ -27,8 +27,13 @@ import {
   Subject,
   catchError,
   throwError,
+  Observable,
+  map,
+  tap,
+  take,
 } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-discipline-details-dialog',
@@ -42,6 +47,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() discipline: DisciplineDefinitionDto | null = null;
   @Input() canEdit = false;
+  @Input() groupMap: Record<string, string> = {};
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -69,9 +75,15 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     isActive: true,
   };
 
-  competitionGroups: CompetitionGroupDefinitionDto[] = [];
-  competitionGroupOptions: SearchableSelectOption[] = [];
-  loadingGroups = false;
+  groupSearch = (): Observable<SearchableSelectOption[]> =>
+    fetchAllPages((skip, top) =>
+      this.competitionGroupDefinitionsService
+        .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((groups: any[]) => groups.map((g: any) => ({
+      value: g.uuid || '',
+      label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
+      disabled: !g.isActive,
+    }))));
 
   readonly boatClassOptions: SearchableSelectOption[] = [
     { value: '1X', label: '1X' },
@@ -113,10 +125,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
 
   get competitionGroupName(): string {
     if (!this.discipline?.competitionGroupId) return '-';
-    const group = this.competitionGroups.find(
-      (g) => g.uuid === this.discipline?.competitionGroupId,
-    );
-    return group ? `${group.shortName || group.name || '-'} (${group.minAge}-${group.maxAge})` : this.discipline.competitionGroupId;
+    return this.groupMap[this.discipline.competitionGroupId] || this.discipline.competitionGroupId;
   }
 
   // Group preview dialog
@@ -125,14 +134,17 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
 
   navigateToGroup(): void {
     if (!this.discipline?.competitionGroupId) return;
-    const group = this.competitionGroups.find(
-      (g) => g.uuid === this.discipline?.competitionGroupId,
-    );
-    if (group) {
-      this.selectedGroup = group;
-      this.showGroupDialog = true;
-      this.cdr.markForCheck();
-    }
+    this.competitionGroupDefinitionsService
+      .getCompetitionGroupDefinitionByUuid(this.discipline.competitionGroupId)
+      .pipe(take(1))
+      .subscribe({
+        next: (group) => {
+          this.selectedGroup = group;
+          this.showGroupDialog = true;
+          this.cdr.markForCheck();
+        },
+        error: () => {},
+      });
   }
 
   closeGroupDialog(): void {
@@ -167,7 +179,6 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
       isActive: this.discipline.isActive ?? true,
     };
     this.isEditing = true;
-    this.loadCompetitionGroups();
     this.cdr.markForCheck();
   }
 
@@ -175,37 +186,6 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     this.isEditing = false;
     this.error = null;
     this.cdr.markForCheck();
-  }
-
-  private loadCompetitionGroups(): void {
-    this.loadingGroups = true;
-    this.cdr.markForCheck();
-
-    this.competitionGroupDefinitionsService
-      .getAllCompetitionGroupDefinitions('isActive eq true', undefined, ['name_asc'], 1000, 0)
-      .pipe(
-        catchError(() => {
-          return throwError(() => ({ message: 'Грешка при зареждане на състезателните групи' }));
-        }),
-        takeUntil(this.destroy$),
-      )
-      .subscribe({
-        next: (response) => {
-          this.competitionGroups = response.content || [];
-          this.competitionGroupOptions = this.competitionGroups.map((group) => ({
-            value: group.uuid || '',
-            label: `${group.shortName || group.name || '-'} (${group.minAge}-${group.maxAge})`,
-          }));
-          this.loadingGroups = false;
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.competitionGroups = [];
-          this.competitionGroupOptions = [];
-          this.loadingGroups = false;
-          this.cdr.markForCheck();
-        },
-      });
   }
 
   onCompetitionGroupChange(value: string | null): void {
@@ -359,12 +339,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     this.error = null;
     this.saving = false;
     this.deleting = false;
-    this.competitionGroups = [];
-    this.competitionGroupOptions = [];
-    this.loadingGroups = false;
     this.showEditingWarningDialog = false;
     this.showDeleteConfirmDialog = false;
-    // Load competition groups for display
-    this.loadCompetitionGroups();
   }
 }

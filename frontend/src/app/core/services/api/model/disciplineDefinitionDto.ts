@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { BoatClass } from './boatClass';
+import { CompetitionGroupDefinitionDto } from './competitionGroupDefinitionDto';
 
 
 /**
@@ -18,6 +19,7 @@ export interface DisciplineDefinitionDto {
     name?: string;
     shortName?: string;
     competitionGroupId?: string;
+    competitionGroup?: CompetitionGroupDefinitionDto;
     boatClass?: BoatClass;
     crewSize?: number;
     hasCoxswain?: boolean;

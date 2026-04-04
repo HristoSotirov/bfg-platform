@@ -1,49 +1,22 @@
-<app-dialog [isOpen]="isOpen" title="Добавяне на състезание" size="lg" (closed)="close()">
+<app-dialog [isOpen]="isOpen" title="Добавяне на състезание" size="lg" [tall]="true" (closed)="close()">
   <div class="flex flex-col h-full min-h-0">
-  <div class="space-y-3 flex-1 min-h-0 overflow-y-auto">
+  <div class="space-y-3 flex-1 min-h-0 overflow-y-auto pb-4">
 
+    <!-- 1. Status (DRAFT = template, PLANNED = real) -->
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Тип <span class="text-red-500">*</span>:</label>
       <app-searchable-select-dropdown
-        [options]="isTemplateOptions"
-        [ngModel]="isTemplate ? 'true' : 'false'"
-        (ngModelChange)="onIsTemplateChange($event)"
+        [options]="statusOptions"
+        [ngModel]="formData.status"
+        (ngModelChange)="onStatusChange($event)"
         placeholder="Изберете тип..."
       ></app-searchable-select-dropdown>
     </div>
 
-    <div class="grid grid-cols-2 gap-3">
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Кратко име <span class="text-red-500">*</span>:</label>
-        <input
-          type="text"
-          [(ngModel)]="formData.shortName"
-          placeholder="Кратко наименование"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-        />
-      </div>
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Пълно ime <span class="text-red-500">*</span>:</label>
-        <input
-          type="text"
-          [(ngModel)]="formData.name"
-          placeholder="Пълно наименование"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-        />
-      </div>
-    </div>
+    @if (formData.status) {
 
-    @if (isTemplate) {
-      <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Продължителност (дни) <span class="text-red-500">*</span>:</label>
-        <input
-          type="number"
-          [(ngModel)]="formData.durationDays"
-          min="1"
-          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-        />
-      </div>
-    } @else {
+    @if (!isDraft) {
+      <!-- 2. Use a template -->
       <div class="flex items-center gap-2">
         <button
           type="button"
@@ -53,7 +26,8 @@
           Използвай шаблон
         </button>
         @if (selectedTemplateId) {
-          <span class="text-xs text-gray-500">{{ selectedTemplateName }}</span>
+          <span class="text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-0.5">
+            {{ selectedTemplateName }}@if (selectedTemplateDuration) { · {{ selectedTemplateDuration }} {{ selectedTemplateDuration === 1 ? 'ден' : 'дни' }}}</span>
           <button
             type="button"
             class="text-xs text-red-400 hover:text-red-600"
@@ -63,90 +37,127 @@
       </div>
       @if (showTemplatePicker) {
         <app-searchable-select-dropdown
-          [options]="templateOptions"
+          [staticSearch]="templateSearch"
           [ngModel]="selectedTemplateId"
           (selectionChange)="onUseTemplate($event)"
           placeholder="Изберете шаблон..."
         ></app-searchable-select-dropdown>
       }
+    }
 
+    <!-- 4. Short name -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Кратко име <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.shortName"
+        placeholder="Кратко наименование"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
+    </div>
+
+    <!-- 4b. Name -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Пълно име <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.name"
+        placeholder="Пълно наименование"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
+    </div>
+
+    <!-- 5. Location (all competitions) -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Място <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.location"
+        placeholder="Гр., обект"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
+    </div>
+
+    <!-- 5b. Scope (mandatory for all) -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Обхват <span class="text-red-500">*</span>:</label>
+      <app-searchable-select-dropdown
+        [options]="scopeTypeOptions"
+        [(ngModel)]="formData.scopeType"
+        placeholder="Изберете обхват..."
+      ></app-searchable-select-dropdown>
+    </div>
+
+    <!-- 6. Start date | End date (all competitions) -->
+    <div class="grid grid-cols-2 gap-3">
+      <app-date-picker
+        label="Начална дата"
+        [required]="true"
+        [(ngModel)]="formData.startDate"
+        placeholder="Изберете дата..."
+      ></app-date-picker>
+      <app-date-picker
+        label="Крайна дата"
+        [required]="true"
+        [(ngModel)]="formData.endDate"
+        placeholder="Изберете дата..."
+      ></app-date-picker>
+    </div>
+
+    @if (!isDraft) {
+      <!-- 7. Submissions open | Submissions closed -->
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Начална дата <span class="text-red-500">*</span>:</label>
-          <input
-            type="date"
-            [(ngModel)]="formData.startDate"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Крайна дата <span class="text-red-500">*</span>:</label>
-          <input
-            type="date"
-            [(ngModel)]="formData.endDate"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-          />
-        </div>
+        <app-datetime-picker
+          label="Отваряне на записвания"
+          [required]="true"
+          [(ngModel)]="formData.entrySubmissionsOpenAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
+        <app-datetime-picker
+          label="Затваряне на записвания"
+          [required]="true"
+          [(ngModel)]="formData.entrySubmissionsClosedAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
       </div>
 
+      <!-- 8. Last changes before TM | Technical meeting -->
       <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Сезон <span class="text-red-500">*</span>:</label>
-          <input
-            type="number"
-            [(ngModel)]="formData.season"
-            min="2000"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-          />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Място <span class="text-red-500">*</span>:</label>
-          <input
-            type="text"
-            [(ngModel)]="formData.location"
-            placeholder="Гр., обект"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-          />
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Статус <span class="text-red-500">*</span>:</label>
-          <app-searchable-select-dropdown
-            [options]="statusOptions"
-            [(ngModel)]="formData.status"
-            placeholder="Изберете статус..."
-          ></app-searchable-select-dropdown>
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Обхват <span class="text-red-500">*</span>:</label>
-          <app-searchable-select-dropdown
-            [options]="scopeTypeOptions"
-            [(ngModel)]="formData.scopeType"
-            placeholder="Изберете обхват..."
-          ></app-searchable-select-dropdown>
-        </div>
+        <app-datetime-picker
+          label="Последни промени преди ТС"
+          [required]="true"
+          [(ngModel)]="formData.lastChangesBeforeTmAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
+        <app-datetime-picker
+          label="Техническо съвещание"
+          [required]="true"
+          [(ngModel)]="formData.technicalMeetingAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
       </div>
     }
 
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Схема за точкуване <span class="text-red-500">*</span>:</label>
-      <app-searchable-select-dropdown
-        [options]="scoringSchemeOptions"
-        [(ngModel)]="formData.scoringSchemeId"
-        placeholder="Изберете схема..."
-      ></app-searchable-select-dropdown>
+    <!-- 10. Scoring scheme | Qualification scheme -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Схема за точкуване <span class="text-red-500">*</span>:</label>
+        <app-searchable-select-dropdown
+          [staticSearch]="scoringSchemeSearch"
+          [(ngModel)]="formData.scoringSchemeId"
+          placeholder="Изберете схема..."
+        ></app-searchable-select-dropdown>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Квалификационна схема <span class="text-red-500">*</span>:</label>
+        <app-searchable-select-dropdown
+          [staticSearch]="qualificationSchemeSearch"
+          [(ngModel)]="formData.qualificationSchemeId"
+          placeholder="Изберете схема..."
+        ></app-searchable-select-dropdown>
+      </div>
     </div>
-
-    <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Квалификационна схема <span class="text-red-500">*</span>:</label>
-      <app-searchable-select-dropdown
-        [options]="qualificationSchemeOptions"
-        [(ngModel)]="formData.qualificationSchemeId"
-        placeholder="Изберете схема..."
-      ></app-searchable-select-dropdown>
-    </div>
+    } <!-- end @if (formData.status) -->
 
   </div>
   <div class="bg-white flex flex-col gap-2 pt-4 border-t border-gray-200">

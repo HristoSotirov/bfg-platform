@@ -71,17 +71,13 @@
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Състезателна група <span class="text-red-500">*</span>:</label>
-                @if (loadingGroups) {
-                  <div class="text-xs text-gray-500">Зареждане...</div>
-                } @else {
-                  <app-searchable-select-dropdown
-                    [options]="competitionGroupOptions"
-                    [placeholder]="'Изберете състезателна група'"
-                    [ngModel]="editData.competitionGroupId"
-                    (ngModelChange)="onCompetitionGroupChange($event)"
-                    [disabled]="saving">
-                  </app-searchable-select-dropdown>
-                }
+                <app-searchable-select-dropdown
+                  [staticSearch]="groupSearch"
+                  [placeholder]="'Изберете състезателна група'"
+                  [ngModel]="editData.competitionGroupId"
+                  (ngModelChange)="onCompetitionGroupChange($event)"
+                  [disabled]="saving">
+                </app-searchable-select-dropdown>
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Клас лодка <span class="text-red-500">*</span>:</label>

@@ -24,6 +24,7 @@ export class DisciplinesTableComponent implements OnInit {
   @Input() loading = false;
   @Input() hasMore = false;
   @Input() orderBy: string[] = [];
+  @Input() groupMap: Record<string, string> = {};
 
   @Output() rowClick = new EventEmitter<DisciplineDefinitionDto>();
   @Output() sortChange = new EventEmitter<string[]>();
@@ -87,6 +88,10 @@ export class DisciplinesTableComponent implements OnInit {
 
   getCellValue(discipline: DisciplineDefinitionDto, columnId: string): string {
     switch (columnId) {
+      case 'competitionGroup':
+        return discipline.competitionGroupId
+          ? (this.groupMap[discipline.competitionGroupId] || discipline.competitionGroupId)
+          : '-';
       case 'name':
         return discipline.name || '-';
       case 'shortName':

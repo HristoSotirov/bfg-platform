@@ -200,17 +200,13 @@
                 <label class="block text-xs text-gray-500 mb-0.5"
                   >Администратор:</label
                 >
-                @if (loadingAdmins) {
-                  <div class="text-xs text-gray-500">Зареждане...</div>
-                } @else {
-                  <app-searchable-select-dropdown
-                    [options]="adminOptions"
-                    [placeholder]="'Изберете администратор'"
-                    [ngModel]="editData.clubAdminId"
-                    (ngModelChange)="onAdminSelectionChange($event)"
-                    [disabled]="saving">
-                  </app-searchable-select-dropdown>
-                }
+                <app-searchable-select-dropdown
+                  [serverSearch]="adminSearch"
+                  [placeholder]="'Изберете администратор'"
+                  [ngModel]="editData.clubAdminId"
+                  (ngModelChange)="onAdminSelectionChange($event)"
+                  [disabled]="saving">
+                </app-searchable-select-dropdown>
               </div>
             </div>
           }
@@ -312,17 +308,13 @@
                 <h5 class="text-xs font-medium text-gray-700">
                   Добавяне на треньор
                 </h5>
-                @if (loadingCoachesForAdd) {
-                  <div class="text-xs text-gray-500">Зареждане...</div>
-                } @else {
-                  <app-searchable-select-dropdown
-                    [options]="coachOptions"
-                    [placeholder]="'Изберете треньор'"
-                    [ngModel]="selectedCoachId"
-                    (ngModelChange)="onCoachSelectionChange($event)"
-                    [disabled]="addingCoach">
-                  </app-searchable-select-dropdown>
-                }
+                <app-searchable-select-dropdown
+                  [serverSearch]="coachSearch"
+                  [placeholder]="'Изберете треньор'"
+                  [ngModel]="selectedCoachId"
+                  (ngModelChange)="onCoachSelectionChange($event)"
+                  [disabled]="addingCoach">
+                </app-searchable-select-dropdown>
                 <div class="flex gap-2">
                   <app-button
                     variant="outline"

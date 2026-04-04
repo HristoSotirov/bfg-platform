@@ -85,11 +85,13 @@ export class DialogComponent {
   @Input() size: DialogSize = 'md';
   /** When true, body has no scroll (overflow hidden). Use when content is fixed height. */
   @Input() noScroll = false;
+  @Input() tall = false;
   @Output() closed = new EventEmitter<void>();
 
   get dialogClasses(): string {
     const baseClasses =
-      'relative bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-hidden flex flex-col';
+      'relative bg-white rounded-lg shadow-xl w-full overflow-hidden flex flex-col';
+    const heightClasses = this.tall ? 'h-[90vh]' : 'max-h-[90vh]';
 
     const sizeClasses: Record<DialogSize, string> = {
       sm: 'max-w-sm',
@@ -99,7 +101,7 @@ export class DialogComponent {
       '2xl': 'max-w-6xl',
     };
 
-    return `${baseClasses} ${sizeClasses[this.size]}`;
+    return `${baseClasses} ${heightClasses} ${sizeClasses[this.size]}`;
   }
 
   close(): void {

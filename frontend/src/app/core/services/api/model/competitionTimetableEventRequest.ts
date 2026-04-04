@@ -16,16 +16,10 @@ import { QualificationEventType } from './qualificationEventType';
  */
 export interface CompetitionTimetableEventRequest { 
     competitionId: string;
-    eventNumber: number;
     disciplineId: string;
     qualificationEventType: QualificationEventType;
     qualificationStageNumber: number;
-    dayOffset: number;
-    plannedTime: string;
-    /**
-     * Null for templates; full datetime for real competition events
-     */
-    scheduledAt?: string;
+    scheduledAt: string;
     eventStatus: CompetitionEventStatus;
 }
 export namespace CompetitionTimetableEventRequest {

@@ -20,8 +20,9 @@ import {
   CompetitionGroupGender,
   TransferRounding,
 } from '../../../../core/services/api';
-import { takeUntil, Subject, catchError, throwError } from 'rxjs';
+import { takeUntil, Subject, catchError, throwError, Observable, map } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-competition-group-details-dialog',
@@ -35,6 +36,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() group: CompetitionGroupDefinitionDto | null = null;
   @Input() canEdit = false;
+  @Input() groupMap: Record<string, string> = {};
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -82,8 +84,15 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     if (!group) return false;
     return (group as any).minCrewForTransfer != null && (group as any).transferRatio != null && !!(group as any).transferRounding;
   }
-  groupOptions: SearchableSelectOption[] = [];
-  private allGroups: CompetitionGroupDefinitionDto[] = [];
+  groupSearch = (): Observable<SearchableSelectOption[]> =>
+    fetchAllPages((skip, top) =>
+      this.competitionGroupDefinitionsService
+        .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((groups: any[]) => groups.map((g: any) => ({
+      value: g.uuid || '',
+      label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
+      disabled: !g.isActive,
+    }))));
 
   editData: {
     name: string;
@@ -145,7 +154,6 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen && this.group) {
       this.resetState();
-      this.loadGroups();
     }
     if (changes['isOpen'] && !this.isOpen) {
       this.destroy$.next();
@@ -182,25 +190,10 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     this.closed.emit();
   }
 
-  private loadGroups(): void {
-    this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
-      'isActive eq true', undefined, ['name_asc'] as any, 1000, 0
-    ).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: any) => {
-        this.allGroups = response.content || [];
-        this.groupOptions = this.allGroups.map((g: any) => ({
-          value: g.uuid,
-          label: `${g.shortName || g.name} (${g.minAge}-${g.maxAge})`
-        }));
-        this.cdr.markForCheck();
-      }
-    });
-  }
 
   getGroupName(uuid: string | undefined): string {
     if (!uuid) return '-';
-    const option = this.groupOptions.find(o => o.value === uuid);
-    return option?.label || uuid;
+    return this.groupMap[uuid] || uuid;
   }
 
   // Transfer group preview
@@ -209,12 +202,17 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
 
   openTransferGroupDialog(): void {
     if (!this.group?.transferFromGroupId) return;
-    const found = this.allGroups.find(g => g.uuid === this.group?.transferFromGroupId);
-    if (found) {
-      this.transferGroup = found;
-      this.showTransferGroupDialog = true;
-      this.cdr.markForCheck();
-    }
+    this.competitionGroupDefinitionsService
+      .getCompetitionGroupDefinitionByUuid(this.group.transferFromGroupId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (group) => {
+          this.transferGroup = group;
+          this.showTransferGroupDialog = true;
+          this.cdr.markForCheck();
+        },
+        error: () => {},
+      });
   }
 
   closeTransferGroupDialog(): void {

@@ -10,8 +10,9 @@ import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
-import { DisciplineDefinitionsService } from '../../core/services/api';
+import { DisciplineDefinitionsService, CompetitionGroupDefinitionsService } from '../../core/services/api';
 import { DisciplineDefinitionDto } from '../../core/services/api';
+import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { SystemRole } from '../../core/models/navigation.model';
 import { DisciplinesTableComponent } from './components/disciplines-table/disciplines-table.component';
 import { DisciplineDetailsDialogComponent } from './components/discipline-details-dialog/discipline-details-dialog.component';
@@ -64,6 +65,8 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   loading = false;
   error: string | null = null;
 
+  groupMap: Record<string, string> = {};
+
   userRole: SystemRole | null = null;
 
   filters: DisciplineFilters = {
@@ -80,6 +83,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   columns: DisciplineColumnConfig[] = [
     { id: 'name', label: 'Име', visible: true },
     { id: 'shortName', label: 'Кратко име', visible: true },
+    { id: 'competitionGroup', label: 'Състезателна група', visible: true },
     { id: 'boatClass', label: 'Клас лодка', visible: true },
     { id: 'crewSize', label: 'Размер екипаж', visible: true },
     { id: 'maxCrewFromTransfer', label: 'Макс. прехвърлени', visible: true },
@@ -105,6 +109,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private disciplineDefinitionsService: DisciplineDefinitionsService,
+    private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
   ) {}
@@ -112,6 +117,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadSettings();
     this.initializeUserContext();
+    this.loadGroupMap();
 
     this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       if (params['disciplineId']) {
@@ -123,6 +129,23 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private loadGroupMap(): void {
+    fetchAllPages((skip, top) =>
+      this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
+        undefined, undefined, ['name_asc'] as any, top, skip
+      ) as any
+    ).pipe(takeUntil(this.destroy$)).subscribe({
+      next: (groups: any[]) => {
+        this.groupMap = {};
+        for (const g of groups) {
+          this.groupMap[g.uuid] = `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`;
+        }
+        this.cdr.markForCheck();
+      },
+      error: () => {},
+    });
   }
 
   get canAddDiscipline(): boolean {

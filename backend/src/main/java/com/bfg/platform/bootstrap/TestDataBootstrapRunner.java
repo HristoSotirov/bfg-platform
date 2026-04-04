@@ -49,8 +49,8 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -486,11 +486,8 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         // ── Real competition: Национален шампионат 2026 ──────────────────────
         Competition nationalChampionship = competitionRepository.save(
                 Competition.builder()
-                        .isTemplate(false)
                         .shortName("НШ2026")
                         .name("Национален шампионат по гребане 2026")
-                        .durationDays(3)
-                        .season(2026)
                         .location("Пловдив, Гребна база")
                         .startDate(LocalDate.of(2026, 5, 15))
                         .endDate(LocalDate.of(2026, 5, 17))
@@ -523,83 +520,68 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(nationalChampionship.getId())
-                        .eventNumber(1)
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("H")
                         .qualificationStageNumber(1)
-                        .dayOffset(0)
-                        .plannedTime(LocalTime.of(9, 0))
+                        .scheduledAt(Instant.parse("2026-05-15T09:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(nationalChampionship.getId())
-                        .eventNumber(2)
                         .disciplineId(disc2x.getId())
                         .qualificationEventType("H")
                         .qualificationStageNumber(1)
-                        .dayOffset(0)
-                        .plannedTime(LocalTime.of(10, 0))
+                        .scheduledAt(Instant.parse("2026-05-15T10:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(nationalChampionship.getId())
-                        .eventNumber(3)
                         .disciplineId(disc1xW.getId())
                         .qualificationEventType("H")
                         .qualificationStageNumber(1)
-                        .dayOffset(0)
-                        .plannedTime(LocalTime.of(11, 0))
+                        .scheduledAt(Instant.parse("2026-05-15T11:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(nationalChampionship.getId())
-                        .eventNumber(4)
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("FA")
                         .qualificationStageNumber(1)
-                        .dayOffset(2)
-                        .plannedTime(LocalTime.of(14, 0))
+                        .scheduledAt(Instant.parse("2026-05-17T14:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(nationalChampionship.getId())
-                        .eventNumber(5)
                         .disciplineId(disc2x.getId())
                         .qualificationEventType("FA")
                         .qualificationStageNumber(1)
-                        .dayOffset(2)
-                        .plannedTime(LocalTime.of(15, 0))
+                        .scheduledAt(Instant.parse("2026-05-17T15:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(nationalChampionship.getId())
-                        .eventNumber(6)
                         .disciplineId(disc1xW.getId())
                         .qualificationEventType("FA")
                         .qualificationStageNumber(1)
-                        .dayOffset(2)
-                        .plannedTime(LocalTime.of(16, 0))
+                        .scheduledAt(Instant.parse("2026-05-17T16:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         // ── Real competition: Купа София 2026 (DRAFT/INTERNAL) ──────────────
         Competition cupSofia = competitionRepository.save(
                 Competition.builder()
-                        .isTemplate(false)
                         .shortName("КС2026")
                         .name("Купа София 2026")
-                        .durationDays(2)
-                        .season(2026)
                         .location("София, Панчарево")
                         .startDate(LocalDate.of(2026, 6, 6))
                         .endDate(LocalDate.of(2026, 6, 7))
@@ -624,34 +606,35 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(cupSofia.getId())
-                        .eventNumber(1)
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("H")
                         .qualificationStageNumber(1)
-                        .dayOffset(0)
-                        .plannedTime(LocalTime.of(9, 30))
+                        .scheduledAt(Instant.parse("2026-06-06T09:30:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(cupSofia.getId())
-                        .eventNumber(2)
                         .disciplineId(disc4xJunior.getId())
                         .qualificationEventType("H")
                         .qualificationStageNumber(1)
-                        .dayOffset(0)
-                        .plannedTime(LocalTime.of(10, 30))
+                        .scheduledAt(Instant.parse("2026-06-06T10:30:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         // ── Template competition ──────────────────────────────────────────────
         Competition templateComp = competitionRepository.save(
                 Competition.builder()
-                        .isTemplate(true)
                         .shortName("ШАБ")
                         .name("Шаблон за национален шампионат")
-                        .durationDays(3)
+                        .location("Пловдив, Гребна база")
+                        .startDate(LocalDate.of(2026, 6, 28))
+                        .endDate(LocalDate.of(2026, 6, 29))
+                        .entrySubmissionsOpenAt(Instant.parse("2026-06-01T00:00:00Z"))
+                        .entrySubmissionsClosedAt(Instant.parse("2026-06-20T00:00:00Z"))
+                        .lastChangesBeforeTmAt(Instant.parse("2026-06-26T00:00:00Z"))
+                        .technicalMeetingAt(Instant.parse("2026-06-27T18:00:00Z"))
                         .status("DRAFT")
                         .scopeType("NATIONAL")
                         .scoringSchemeId(scoringScheme.getId())
@@ -673,24 +656,20 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(templateComp.getId())
-                        .eventNumber(1)
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("H")
                         .qualificationStageNumber(1)
-                        .dayOffset(0)
-                        .plannedTime(LocalTime.of(9, 0))
+                        .scheduledAt(Instant.parse("2026-06-28T09:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
         competitionTimetableEventRepository.save(
                 CompetitionTimetableEvent.builder()
                         .competitionId(templateComp.getId())
-                        .eventNumber(2)
                         .disciplineId(disc1xW.getId())
                         .qualificationEventType("H")
                         .qualificationStageNumber(1)
-                        .dayOffset(0)
-                        .plannedTime(LocalTime.of(10, 0))
+                        .scheduledAt(Instant.parse("2026-06-28T10:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 

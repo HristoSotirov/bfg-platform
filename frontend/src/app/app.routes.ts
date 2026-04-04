@@ -94,6 +94,14 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'competitions/:uuid/:tab',
+    loadComponent: () =>
+      import('./features/competitions/components/competition-details-page/competition-details-page.component').then(
+        (m) => m.CompetitionDetailsPageComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'regulations',
     loadComponent: () =>
       import('./features/coming-soon/coming-soon.component').then(

@@ -22,17 +22,13 @@
 
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Състезателна група <span class="text-red-500">*</span>:</label>
-      @if (loadingGroups) {
-        <div class="text-sm text-gray-500">Зареждане...</div>
-      } @else {
-        <app-searchable-select-dropdown
-          [options]="competitionGroupOptions"
-          [placeholder]="'Изберете състезателна група'"
-          [ngModel]="formData.competitionGroupId"
-          (ngModelChange)="onCompetitionGroupChange($event)"
-          [disabled]="saving">
-        </app-searchable-select-dropdown>
-      }
+      <app-searchable-select-dropdown
+        [staticSearch]="groupSearch"
+        [placeholder]="'Изберете състезателна група'"
+        [ngModel]="formData.competitionGroupId"
+        (ngModelChange)="onCompetitionGroupChange($event)"
+        [disabled]="saving">
+      </app-searchable-select-dropdown>
     </div>
 
     <div>

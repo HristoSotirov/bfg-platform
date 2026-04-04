@@ -17,10 +17,10 @@ import {
   DisciplineDefinitionsService,
   DisciplineDefinitionRequest,
   CompetitionGroupDefinitionsService,
-  CompetitionGroupDefinitionDto,
 } from '../../../../core/services/api';
 import { BoatClass } from '../../../../core/services/api/model/boatClass';
-import { takeUntil, Subject, catchError, of } from 'rxjs';
+import { Observable, takeUntil, Subject, map } from 'rxjs';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-add-discipline-dialog',
@@ -50,10 +50,6 @@ export class AddDisciplineDialogComponent implements OnChanges {
     distanceMeters: null as number | null,
     isActive: true,
   };
-
-  competitionGroups: CompetitionGroupDefinitionDto[] = [];
-  competitionGroupOptions: SearchableSelectOption[] = [];
-  loadingGroups = false;
 
   readonly boatClassOptions: SearchableSelectOption[] = [
     { value: '1X', label: '1X' },
@@ -87,10 +83,19 @@ export class AddDisciplineDialogComponent implements OnChanges {
     private cdr: ChangeDetectorRef,
   ) {}
 
+  groupSearch = (): Observable<SearchableSelectOption[]> =>
+    fetchAllPages((skip, top) =>
+      this.competitionGroupDefinitionsService
+        .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((groups: any[]) => groups.map((g: any) => ({
+      value: g.uuid || '',
+      label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
+      disabled: !g.isActive,
+    }))));
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen) {
       this.resetForm();
-      this.loadCompetitionGroups();
     }
     if (changes['isOpen'] && !this.isOpen) {
       this.destroy$.next();
@@ -116,35 +121,6 @@ export class AddDisciplineDialogComponent implements OnChanges {
     };
     this.error = null;
     this.saving = false;
-  }
-
-  private loadCompetitionGroups(): void {
-    this.loadingGroups = true;
-    this.cdr.markForCheck();
-
-    this.competitionGroupDefinitionsService
-      .getAllCompetitionGroupDefinitions('isActive eq true', undefined, ['name_asc'], 1000, 0)
-      .pipe(
-        catchError(() => of({ content: [] })),
-        takeUntil(this.destroy$),
-      )
-      .subscribe({
-        next: (response) => {
-          this.competitionGroups = response.content || [];
-          this.competitionGroupOptions = this.competitionGroups.map((group) => ({
-            value: group.uuid || '',
-            label: `${group.shortName || group.name || '-'} (${group.minAge}-${group.maxAge})`,
-          }));
-          this.loadingGroups = false;
-          this.cdr.markForCheck();
-        },
-        error: () => {
-          this.competitionGroups = [];
-          this.competitionGroupOptions = [];
-          this.loadingGroups = false;
-          this.cdr.markForCheck();
-        },
-      });
   }
 
   onCompetitionGroupChange(value: string | null): void {

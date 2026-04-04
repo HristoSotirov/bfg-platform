@@ -187,16 +187,6 @@ databaseChangeLog:
         # =============================================
         - createIndex:
             tableName: competitions
-            indexName: idx_competitions_is_template
-            columns:
-              - column: { name: is_template }
-        - createIndex:
-            tableName: competitions
-            indexName: idx_competitions_season
-            columns:
-              - column: { name: season }
-        - createIndex:
-            tableName: competitions
             indexName: idx_competitions_status
             columns:
               - column: { name: status }

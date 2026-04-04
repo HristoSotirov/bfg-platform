@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../core/services/scope-visibility.service';
@@ -658,21 +659,22 @@ export class ClubsComponent implements OnInit, OnDestroy {
     const filterString =
       filterParts.length > 0 ? filterParts.join(' and ') : undefined;
 
-    this.clubsService
-      .getAllClubs(
+    fetchAllPages((skip, top) =>
+      this.clubsService.getAllClubs(
         filterString,
         this.filters.search || undefined,
-        this.orderBy as any, // Use same sorting as UI
-        1000, // Maximum allowed by backend
-        0,
-        ['clubAdminUser'] as Array<'clubAdminUser'>, // Expand to get admin name
-      )
+        this.orderBy as any,
+        top,
+        skip,
+        ['clubAdminUser'] as Array<'clubAdminUser'>,
+      ) as any
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: (clubs: any[]) => {
           const visibleColumns = this.columns.filter((col) => col.visible);
 
-          const data = (response.content || []).map((c) => {
+          const data = clubs.map((c) => {
             const row: any = {};
 
             visibleColumns.forEach((col) => {
@@ -689,7 +691,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
                         INTERNAL: 'Вътрешен',
                         EXTERNAL: 'Външен',
                         NATIONAL: 'Национален',
-                      }[c.scopeType] ?? c.scopeType)
+                      } as Record<string, string>)[c.scopeType] ?? c.scopeType
                     : '';
                   break;
                 case 'cardPrefix':

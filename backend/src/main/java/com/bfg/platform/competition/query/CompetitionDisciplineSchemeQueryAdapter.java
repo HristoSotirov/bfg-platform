@@ -20,7 +20,9 @@ public final class CompetitionDisciplineSchemeQueryAdapter {
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
             Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt")),
             Map.entry("modifiedAt_asc", new Sort.Order(Sort.Direction.ASC, "modifiedAt")),
-            Map.entry("modifiedAt_desc", new Sort.Order(Sort.Direction.DESC, "modifiedAt"))
+            Map.entry("modifiedAt_desc", new Sort.Order(Sort.Direction.DESC, "modifiedAt")),
+            Map.entry("discipline.shortName_asc", new Sort.Order(Sort.Direction.ASC, "discipline.shortName")),
+            Map.entry("discipline.shortName_desc", new Sort.Order(Sort.Direction.DESC, "discipline.shortName"))
     );
 
     private CompetitionDisciplineSchemeQueryAdapter() {

@@ -17,15 +17,9 @@ import { QualificationEventType } from './qualificationEventType';
 export interface CompetitionTimetableEventDto { 
     uuid?: string;
     competitionId?: string;
-    eventNumber?: number;
     disciplineId?: string;
     qualificationEventType?: QualificationEventType;
     qualificationStageNumber?: number;
-    dayOffset?: number;
-    plannedTime?: string;
-    /**
-     * Null for templates
-     */
     scheduledAt?: string;
     eventStatus?: CompetitionEventStatus;
     createdAt?: string;

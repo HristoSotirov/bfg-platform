@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { DisciplineDefinitionDto } from './disciplineDefinitionDto';
 
 
 /**
@@ -16,6 +17,7 @@ export interface CompetitionDisciplineSchemeDto {
     uuid?: string;
     competitionId?: string;
     disciplineId?: string;
+    discipline?: DisciplineDefinitionDto;
     createdAt?: string;
     modifiedAt?: string;
 }

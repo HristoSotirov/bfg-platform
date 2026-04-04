@@ -6,6 +6,7 @@ import com.bfg.platform.gen.model.DisciplineDefinitionRequest;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Set;
 
 public class DisciplineDefinitionMapper {
 
@@ -14,6 +15,10 @@ public class DisciplineDefinitionMapper {
     }
 
     public static DisciplineDefinitionDto toDto(DisciplineDefinition entity) {
+        return toDto(entity, null);
+    }
+
+    public static DisciplineDefinitionDto toDto(DisciplineDefinition entity, Set<String> expand) {
         if (entity == null) return null;
 
         DisciplineDefinitionDto dto = new DisciplineDefinitionDto();
@@ -34,6 +39,10 @@ public class DisciplineDefinitionMapper {
         dto.setModifiedAt(entity.getModifiedAt() != null
             ? OffsetDateTime.ofInstant(entity.getModifiedAt(), ZoneOffset.UTC)
             : null);
+
+        if (expand != null && expand.contains("competitionGroup") && entity.getCompetitionGroup() != null) {
+            dto.setCompetitionGroup(CompetitionGroupDefinitionMapper.toDto(entity.getCompetitionGroup()));
+        }
 
         return dto;
     }

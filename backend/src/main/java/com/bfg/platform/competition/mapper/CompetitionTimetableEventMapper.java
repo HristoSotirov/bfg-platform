@@ -6,7 +6,6 @@ import com.bfg.platform.gen.model.CompetitionTimetableEventDto;
 import com.bfg.platform.gen.model.CompetitionTimetableEventRequest;
 import com.bfg.platform.gen.model.QualificationEventType;
 
-import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
@@ -22,14 +21,11 @@ public class CompetitionTimetableEventMapper {
         CompetitionTimetableEventDto dto = new CompetitionTimetableEventDto();
         dto.setUuid(entity.getId());
         dto.setCompetitionId(entity.getCompetitionId());
-        dto.setEventNumber(entity.getEventNumber());
         dto.setDisciplineId(entity.getDisciplineId());
         dto.setQualificationEventType(entity.getQualificationEventType() != null
             ? QualificationEventType.fromValue(entity.getQualificationEventType())
             : null);
         dto.setQualificationStageNumber(entity.getQualificationStageNumber());
-        dto.setDayOffset(entity.getDayOffset());
-        dto.setPlannedTime(entity.getPlannedTime() != null ? entity.getPlannedTime().toString() : null);
         dto.setScheduledAt(entity.getScheduledAt() != null
             ? OffsetDateTime.ofInstant(entity.getScheduledAt(), ZoneOffset.UTC)
             : null);
@@ -49,14 +45,11 @@ public class CompetitionTimetableEventMapper {
     public static CompetitionTimetableEvent fromRequest(CompetitionTimetableEventRequest request) {
         CompetitionTimetableEvent entity = new CompetitionTimetableEvent();
         entity.setCompetitionId(request.getCompetitionId());
-        entity.setEventNumber(request.getEventNumber());
         entity.setDisciplineId(request.getDisciplineId());
         entity.setQualificationEventType(request.getQualificationEventType() != null
             ? request.getQualificationEventType().getValue()
             : null);
         entity.setQualificationStageNumber(request.getQualificationStageNumber());
-        entity.setDayOffset(request.getDayOffset());
-        entity.setPlannedTime(request.getPlannedTime() != null ? LocalTime.parse(request.getPlannedTime()) : null);
         entity.setScheduledAt(request.getScheduledAt() != null
             ? request.getScheduledAt().toInstant()
             : null);
@@ -68,14 +61,11 @@ public class CompetitionTimetableEventMapper {
 
     public static void updateFromRequest(CompetitionTimetableEvent entity, CompetitionTimetableEventRequest request) {
         entity.setCompetitionId(request.getCompetitionId());
-        entity.setEventNumber(request.getEventNumber());
         entity.setDisciplineId(request.getDisciplineId());
         entity.setQualificationEventType(request.getQualificationEventType() != null
             ? request.getQualificationEventType().getValue()
             : null);
         entity.setQualificationStageNumber(request.getQualificationStageNumber());
-        entity.setDayOffset(request.getDayOffset());
-        entity.setPlannedTime(request.getPlannedTime() != null ? LocalTime.parse(request.getPlannedTime()) : null);
         entity.setScheduledAt(request.getScheduledAt() != null
             ? request.getScheduledAt().toInstant()
             : null);

@@ -14,7 +14,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.Instant;
-import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -34,9 +33,6 @@ public class CompetitionTimetableEvent {
     @Column(name = "competition_id", nullable = false)
     private UUID competitionId;
 
-    @Column(name = "event_number", nullable = false)
-    private Integer eventNumber;
-
     @Column(name = "discipline_id", nullable = false)
     private UUID disciplineId;
 
@@ -46,16 +42,10 @@ public class CompetitionTimetableEvent {
     @Column(name = "qualification_stage_number", nullable = false)
     private Integer qualificationStageNumber;
 
-    @Column(name = "day_offset", nullable = false)
-    private Integer dayOffset;
-
-    @Column(name = "planned_time", nullable = false)
-    private LocalTime plannedTime;
-
-    @Column(name = "scheduled_at")
+    @Column(name = "scheduled_at", nullable = false)
     private Instant scheduledAt;
 
-    @Column(name = "event_status")
+    @Column(name = "event_status", nullable = false)
     private String eventStatus;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)

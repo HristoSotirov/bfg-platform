@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../core/services/scope-visibility.service';
@@ -1014,19 +1015,20 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     const filterString =
       filterParts.length > 0 ? filterParts.join(' and ') : undefined;
 
-    this.accreditationsService
-      .getAllAccreditations(
+    fetchAllPages((skip, top) =>
+      this.accreditationsService.getAllAccreditations(
         filterString,
         this.filters.search || undefined,
         this.orderBy as any,
-        1000, // Maximum allowed by backend
-        0,
+        top,
+        skip,
         ['athlete', 'club'] as Array<'athlete' | 'club'>,
-      )
+      ) as any
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: async (response) => {
-          let allAccreditations = response?.content || [];
+        next: async (allItems: any[]) => {
+          let allAccreditations = allItems;
 
           if (
             this.filters.raceGroups.length > 0 &&
@@ -1090,7 +1092,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                           INTERNAL: 'Вътрешен',
                           EXTERNAL: 'Външен',
                           NATIONAL: 'Национален',
-                        }[acc.scopeType] ?? acc.scopeType)
+                        } as Record<string, string>)[acc.scopeType] ?? acc.scopeType
                       : '';
                     break;
                   case 'accreditationNumber':
@@ -1248,25 +1250,25 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       }
     }
 
-    this.clubsService
-      .getAllClubs(
+    fetchAllPages((skip, top) =>
+      this.clubsService.getAllClubs(
         filter, // filter by scope if needed
         undefined, // search
         ['cardPrefix_asc'], // orderBy
-        1000, // top - get all clubs
-        0, // skip
+        top, // top
+        skip, // skip
         ['clubAdminUser'] as Array<'clubAdminUser'>, // expand
         'body',
         false,
         { transferCache: false },
-      )
-      .pipe(
-        catchError(() => of({ content: [], totalElements: 0 })),
+      ) as any
+    ).pipe(
+        catchError(() => of([])),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (response) => {
-          this.allClubs = response.content || [];
+        next: (clubs: any[]) => {
+          this.allClubs = clubs;
           this.cdr.markForCheck();
         },
       });

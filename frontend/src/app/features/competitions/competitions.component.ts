@@ -35,7 +35,6 @@ export interface CompetitionFilterConfig {
 
 export interface CompetitionFilters {
   search: string;
-  isTemplate: string[];
   statuses: string[];
 }
 
@@ -68,7 +67,6 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
 
   filters: CompetitionFilters = {
     search: '',
-    isTemplate: [],
     statuses: [],
   };
   orderBy: string[] = ['name_asc'];
@@ -80,8 +78,7 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
   columns: CompetitionColumnConfig[] = [
     { id: 'shortName', label: 'Кратко име', visible: true },
     { id: 'name', label: 'Име', visible: true },
-    { id: 'isTemplate', label: 'Шаблон', visible: true },
-    { id: 'season', label: 'Сезон', visible: true },
+
     { id: 'status', label: 'Статус', visible: true },
     { id: 'startDate', label: 'Начална дата', visible: true },
     { id: 'endDate', label: 'Крайна дата', visible: false },
@@ -91,7 +88,6 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
   ];
 
   filterConfigs: CompetitionFilterConfig[] = [
-    { id: 'isTemplate', label: 'Тип', visible: true },
     { id: 'status', label: 'Статус', visible: true },
   ];
 
@@ -143,12 +139,6 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [];
-
-    if (this.filters.isTemplate.length > 0 && this.isFilterVisible('isTemplate')) {
-      if (this.filters.isTemplate.length === 1) {
-        filterParts.push(`isTemplate eq ${this.filters.isTemplate[0]}`);
-      }
-    }
 
     if (this.filters.statuses.length > 0 && this.isFilterVisible('status')) {
       if (this.filters.statuses.length === 1) {
@@ -300,7 +290,6 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
         const parsed = JSON.parse(savedFilters);
         this.filters = {
           search: parsed.search || '',
-          isTemplate: parsed.isTemplate || [],
           statuses: parsed.statuses || [],
         };
       } catch (e) {

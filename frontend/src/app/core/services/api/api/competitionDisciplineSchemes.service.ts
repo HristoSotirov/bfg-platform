@@ -170,13 +170,15 @@ export class CompetitionDisciplineSchemesService extends BaseService {
      * @param filter Filter expression (e.g., competitionId eq \&#39;uuid-value\&#39;)
      * @param top Maximum number of items to return
      * @param skip Number of items to skip
+     * @param orderBy Sort fields (multiselect). Supported: discipline.shortName_asc, discipline.shortName_desc, createdAt_asc, createdAt_desc. Requires expand&#x3D;discipline when sorting by discipline fields. 
+     * @param expand Fields to expand (multiselect). Supported: discipline, discipline.competitionGroup 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionDisciplineSchemes200Response>;
-    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionDisciplineSchemes200Response>>;
-    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionDisciplineSchemes200Response>>;
-    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, orderBy?: Array<string>, expand?: Array<string>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionDisciplineSchemes200Response>;
+    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, orderBy?: Array<string>, expand?: Array<string>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionDisciplineSchemes200Response>>;
+    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, orderBy?: Array<string>, expand?: Array<string>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionDisciplineSchemes200Response>>;
+    public getAllCompetitionDisciplineSchemes(filter?: string, top?: number, skip?: number, orderBy?: Array<string>, expand?: Array<string>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
@@ -185,6 +187,18 @@ export class CompetitionDisciplineSchemesService extends BaseService {
           <any>top, 'top');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>skip, 'skip');
+        if (orderBy) {
+            orderBy.forEach((element) => {
+                localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+                  <any>element, 'orderBy');
+            })
+        }
+        if (expand) {
+            expand.forEach((element) => {
+                localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+                  <any>element, 'expand');
+            })
+        }
 
         let localVarHeaders = this.defaultHeaders;
 

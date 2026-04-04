@@ -19,12 +19,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: event_number
-                  type: INTEGER
-                  constraints:
-                    nullable: false
-                  remarks: "Overall event order for the day (1 to N)"
-              - column:
                   name: discipline_id
                   type: UUID
                   constraints:
@@ -43,25 +37,17 @@ databaseChangeLog:
                   defaultValueNumeric: 1
                   remarks: "Which heat/SF (1, 2, 3, 4). Always 1 for FA/FB."
               - column:
-                  name: day_offset
-                  type: INTEGER
-                  constraints:
-                    nullable: false
-                  remarks: "Days into competition (0 = first day)"
-              - column:
-                  name: planned_time
-                  type: TIME
-                  constraints:
-                    nullable: false
-                  remarks: "Planned time of day"
-              - column:
                   name: scheduled_at
                   type: TIMESTAMPTZ
-                  remarks: "Full datetime (null for templates, set when competition is created from template)"
+                  constraints:
+                    nullable: false
+                  remarks: "Full datetime of the event"
               - column:
                   name: event_status
                   type: VARCHAR(20)
-                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED. Null for templates."
+                  constraints:
+                    nullable: false
+                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED"
               - column:
                   name: created_at
                   type: TIMESTAMPTZ
@@ -74,10 +60,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
                   defaultValueComputed: CURRENT_TIMESTAMP
-        - addUniqueConstraint:
-            tableName: competition_timetable_events
-            columnNames: competition_id, event_number
-            constraintName: uq_timetable_event_comp_event_number
         - addUniqueConstraint:
             tableName: competition_timetable_events
             columnNames: competition_id, discipline_id, qualification_event_type, qualification_stage_number

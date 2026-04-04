@@ -33,7 +33,6 @@ import { FilterToggleButtonComponent } from '../../../../shared/components/filte
 export class CompetitionsFiltersComponent implements OnInit {
   @Input() filters: CompetitionFilters = {
     search: '',
-    isTemplate: [],
     statuses: [],
   };
   @Input() filterConfigs: CompetitionFilterConfig[] = [];
@@ -43,11 +42,6 @@ export class CompetitionsFiltersComponent implements OnInit {
 
   searchValue = '';
   filtersExpanded = false;
-
-  readonly isTemplateOptions: DropdownOption[] = [
-    { value: 'true', label: 'Шаблон' },
-    { value: 'false', label: 'Реално' },
-  ];
 
   readonly statusOptions: DropdownOption[] = [
     { value: 'DRAFT', label: 'Чернова' },
@@ -69,16 +63,12 @@ export class CompetitionsFiltersComponent implements OnInit {
   }
 
   hasVisibleFilters(): boolean {
-    return this.isFilterVisible('isTemplate') || this.isFilterVisible('status');
+    return this.isFilterVisible('status');
   }
 
   onSearchChange(value: string): void {
     this.searchValue = value;
     this.searchChange.emit(value);
-  }
-
-  onIsTemplateChange(values: string[]): void {
-    this.emitFiltersChange({ isTemplate: values });
   }
 
   onStatusesChange(values: string[]): void {

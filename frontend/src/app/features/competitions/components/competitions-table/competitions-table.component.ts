@@ -55,7 +55,6 @@ export class CompetitionsTableComponent implements OnInit {
     const sortFieldMap: Record<string, string> = {
       name: 'name',
       shortName: 'shortName',
-      season: 'season',
       startDate: 'startDate',
       createdAt: 'createdAt',
       modifiedAt: 'modifiedAt',
@@ -74,8 +73,7 @@ export class CompetitionsTableComponent implements OnInit {
     switch (columnId) {
       case 'shortName': return c.shortName || '-';
       case 'name': return c.name || '-';
-      case 'isTemplate': return c.isTemplate ? 'Шаблон' : 'Състезание';
-      case 'season': return c.season != null ? String(c.season) : '-';
+      case 'type': return c.status === 'DRAFT' ? 'Шаблон' : 'Реално';
       case 'status': return this.getStatusLabel(c.status as string);
       case 'startDate': return c.startDate ? this.formatDate(c.startDate) : '-';
       case 'endDate': return c.endDate ? this.formatDate(c.endDate) : '-';

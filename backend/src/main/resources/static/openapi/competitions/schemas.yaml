@@ -171,6 +171,8 @@ DisciplineDefinitionDto:
     competitionGroupId:
       type: string
       format: uuid
+    competitionGroup:
+      $ref: "#/CompetitionGroupDefinitionDto"
     boatClass:
       $ref: "#/BoatClass"
     crewSize:
@@ -338,42 +340,44 @@ QualificationProgressionDto:
 
 CompetitionDto:
   type: object
-  description: Data Transfer Object for unified competition (template or real)
+  description: Data Transfer Object for a competition (DRAFT status = template, non-DRAFT = real)
   properties:
     uuid:
       type: string
       format: uuid
-    isTemplate:
-      type: boolean
-      example: false
     shortName:
       type: string
       example: "NWC 2025"
     name:
       type: string
       example: "National Water Championship 2025"
-    durationDays:
-      type: integer
-      example: 2
-      description: "Only for templates (isTemplate=true)"
-    season:
-      type: integer
-      example: 2025
-      description: "Only for real competitions (isTemplate=false)"
     location:
       type: string
       example: "Plovdiv"
-      description: "Only for real competitions (isTemplate=false)"
     startDate:
       type: string
       format: date
       example: "2025-06-15"
-      description: "Only for real competitions (isTemplate=false)"
     endDate:
       type: string
       format: date
       example: "2025-06-17"
-      description: "Only for real competitions (isTemplate=false)"
+    entrySubmissionsOpenAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
+    entrySubmissionsClosedAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
+    lastChangesBeforeTmAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
+    technicalMeetingAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
     status:
       $ref: "#/CompetitionStatus"
     scopeType:
@@ -404,6 +408,8 @@ CompetitionDisciplineSchemeDto:
     disciplineId:
       type: string
       format: uuid
+    discipline:
+      $ref: "#/DisciplineDefinitionDto"
     createdAt:
       type: string
       format: date-time
@@ -421,9 +427,6 @@ CompetitionTimetableEventDto:
     competitionId:
       type: string
       format: uuid
-    eventNumber:
-      type: integer
-      example: 1
     disciplineId:
       type: string
       format: uuid
@@ -432,17 +435,9 @@ CompetitionTimetableEventDto:
     qualificationStageNumber:
       type: integer
       example: 1
-    dayOffset:
-      type: integer
-      example: 0
-    plannedTime:
-      type: string
-      format: time
-      example: "09:00:00"
     scheduledAt:
       type: string
       format: date-time
-      description: "Null for templates"
     eventStatus:
       $ref: "#/CompetitionEventStatus"
     createdAt:
@@ -941,20 +936,18 @@ QualificationProgressionRequest:
 
 CompetitionRequest:
   type: object
-  description: Request payload for creating or updating a competition (template or real)
+  description: Request payload for creating or updating a competition (DRAFT status = template, non-DRAFT = real)
   required:
-    - isTemplate
     - shortName
     - name
-    - durationDays
+    - location
     - scopeType
     - scoringSchemeId
     - qualificationSchemeId
     - status
+    - startDate
+    - endDate
   properties:
-    isTemplate:
-      type: boolean
-      x-field-extra-annotation: '@NotNull(message = "isTemplate is required")'
     shortName:
       type: string
       minLength: 1
@@ -963,31 +956,38 @@ CompetitionRequest:
       type: string
       minLength: 1
       x-field-extra-annotation: '@NotBlank(message = "Name is required")'
-    durationDays:
-      type: integer
-      minimum: 1
-      x-field-extra-annotation: |-
-        @NotNull(message = "Duration days is required")
-        @Min(value = 1, message = "Duration days must be >= 1")
-    season:
-      type: integer
-      description: "Required when isTemplate=false"
     location:
       type: string
-      description: "Required when isTemplate=false"
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Location is required")'
     startDate:
       type: string
       format: date
-      description: "Required when isTemplate=false"
+      x-field-extra-annotation: '@NotNull(message = "Start date is required")'
     endDate:
       type: string
       format: date
-      description: "Required when isTemplate=false"
+      x-field-extra-annotation: '@NotNull(message = "End date is required")'
+    entrySubmissionsOpenAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
+    entrySubmissionsClosedAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
+    lastChangesBeforeTmAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
+    technicalMeetingAt:
+      type: string
+      format: date-time
+      description: "Required when status is not DRAFT."
     status:
       allOf:
         - $ref: "#/CompetitionStatus"
       x-field-extra-annotation: '@NotNull(message = "Status is required")'
-      description: "Required when isTemplate=false"
     scopeType:
       allOf:
         - $ref: "../common/schemas.yaml#/ScopeType"
@@ -1022,21 +1022,16 @@ CompetitionTimetableEventRequest:
   description: Request payload for creating or updating a competition timetable event
   required:
     - competitionId
-    - eventNumber
     - disciplineId
     - qualificationEventType
     - qualificationStageNumber
-    - dayOffset
-    - plannedTime
+    - scheduledAt
     - eventStatus
   properties:
     competitionId:
       type: string
       format: uuid
       x-field-extra-annotation: '@NotNull(message = "Competition ID is required")'
-    eventNumber:
-      type: integer
-      x-field-extra-annotation: '@NotNull(message = "Event number is required")'
     disciplineId:
       type: string
       format: uuid
@@ -1049,18 +1044,10 @@ CompetitionTimetableEventRequest:
       type: integer
       default: 1
       x-field-extra-annotation: '@NotNull(message = "Qualification stage number is required")'
-    dayOffset:
-      type: integer
-      x-field-extra-annotation: '@NotNull(message = "Day offset is required")'
-    plannedTime:
-      type: string
-      format: time
-      example: "09:00:00"
-      x-field-extra-annotation: '@NotNull(message = "Planned time is required")'
     scheduledAt:
       type: string
       format: date-time
-      description: "Null for templates; full datetime for real competition events"
+      x-field-extra-annotation: '@NotNull(message = "Scheduled at is required")'
     eventStatus:
       allOf:
         - $ref: "#/CompetitionEventStatus"

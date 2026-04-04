@@ -982,8 +982,6 @@
               - name_desc
               - shortName_asc
               - shortName_desc
-              - season_asc
-              - season_desc
               - startDate_asc
               - startDate_desc
               - createdAt_asc
@@ -1208,6 +1206,28 @@
           type: integer
           minimum: 0
           default: 0
+      - name: orderBy
+        in: query
+        description: |
+          Sort fields (multiselect). Supported: discipline.shortName_asc, discipline.shortName_desc, createdAt_asc, createdAt_desc.
+          Requires expand=discipline when sorting by discipline fields.
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
+      - name: expand
+        in: query
+        description: |
+          Fields to expand (multiselect).
+          Supported: discipline, discipline.competitionGroup
+        style: form
+        explode: true
+        schema:
+          type: array
+          items:
+            type: string
     responses:
       "200":
         description: List of competition discipline scheme assignments successfully retrieved
@@ -1376,7 +1396,7 @@
     parameters:
       - name: filter
         in: query
-        description: Filter expression (e.g., competitionId eq 'uuid-value' and dayOffset eq '0')
+        description: Filter expression (e.g., competitionId eq 'uuid-value')
         schema:
           type: string
       - name: orderBy
@@ -1389,17 +1409,11 @@
           items:
             type: string
             enum:
-              - dayOffset_asc
-              - dayOffset_desc
-              - eventNumber_asc
-              - eventNumber_desc
-              - plannedTime_asc
-              - plannedTime_desc
               - scheduledAt_asc
               - scheduledAt_desc
               - createdAt_asc
               - createdAt_desc
-          default: ["dayOffset_asc"]
+          default: ["scheduledAt_asc"]
       - name: top
         in: query
         description: Maximum number of items to return

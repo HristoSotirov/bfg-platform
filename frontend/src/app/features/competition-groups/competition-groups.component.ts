@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
 import { CompetitionGroupDefinitionsService } from '../../core/services/api';
@@ -148,17 +149,17 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
   }
 
   private loadGroupLookup(): void {
-    this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
-      undefined, undefined, ['name_asc'] as any, 1000, 0
-    ).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: any) => {
-        const lookup: Record<string, string> = {};
-        (response.content || []).forEach((g: any) => {
-          lookup[g.uuid] = `${g.shortName || g.name} (${g.minAge}-${g.maxAge})`;
-        });
-        this.groupLookup = lookup;
-        this.cdr.markForCheck();
-      }
+    fetchAllPages((skip, top) =>
+      this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
+        undefined, undefined, ['name_asc'] as any, top, skip
+      ) as any
+    ).pipe(takeUntil(this.destroy$)).subscribe((groups: any[]) => {
+      const lookup: Record<string, string> = {};
+      groups.forEach((g: any) => {
+        lookup[g.uuid] = `${g.shortName || g.name} (${g.minAge}-${g.maxAge})`;
+      });
+      this.groupLookup = lookup;
+      this.cdr.markForCheck();
     });
   }
 

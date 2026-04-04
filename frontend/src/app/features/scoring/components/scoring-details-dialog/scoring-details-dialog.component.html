@@ -52,22 +52,24 @@
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Тип:</label>
-                <app-searchable-select-dropdown
-                  [options]="scoringTypeOptions"
-                  [(ngModel)]="editData.scoringType"
-                  placeholder="Изберете тип..."
-                  class="w-full max-w-md"
-                ></app-searchable-select-dropdown>
+                <div class="max-w-md">
+                  <app-searchable-select-dropdown
+                    [options]="scoringTypeOptions"
+                    [(ngModel)]="editData.scoringType"
+                    placeholder="Изберете тип..."
+                  ></app-searchable-select-dropdown>
+                </div>
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
-                <app-searchable-select-dropdown
-                  [options]="statusOptions"
-                  [ngModel]="editData.isActive ? 'true' : 'false'"
-                  (ngModelChange)="editData.isActive = $event === 'true'"
-                  placeholder="Изберете статус..."
-                  class="w-full max-w-md"
-                ></app-searchable-select-dropdown>
+                <div class="max-w-md">
+                  <app-searchable-select-dropdown
+                    [options]="statusOptions"
+                    [ngModel]="editData.isActive ? 'true' : 'false'"
+                    (ngModelChange)="editData.isActive = $event === 'true'"
+                    placeholder="Изберете статус..."
+                  ></app-searchable-select-dropdown>
+                </div>
               </div>
             </div>
           }

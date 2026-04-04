@@ -81,7 +81,7 @@
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Група за трансфер:</label>
           <app-searchable-select-dropdown
-            [options]="groupOptions"
+            [staticSearch]="groupSearch"
             [(ngModel)]="formData.transferFromGroupId"
             placeholder="Изберете група..."
           ></app-searchable-select-dropdown>

@@ -12,32 +12,30 @@ import { CompetitionStatus } from './competitionStatus';
 
 
 /**
- * Request payload for creating or updating a competition (template or real)
+ * Request payload for creating or updating a competition (DRAFT status = template, non-DRAFT = real)
  */
 export interface CompetitionRequest { 
-    isTemplate: boolean;
     shortName: string;
     name: string;
-    durationDays: number;
+    location: string;
+    startDate: string;
+    endDate: string;
     /**
-     * Required when isTemplate=false
+     * Required when status is not DRAFT.
      */
-    season?: number;
+    entrySubmissionsOpenAt?: string;
     /**
-     * Required when isTemplate=false
+     * Required when status is not DRAFT.
      */
-    location?: string;
+    entrySubmissionsClosedAt?: string;
     /**
-     * Required when isTemplate=false
+     * Required when status is not DRAFT.
      */
-    startDate?: string;
+    lastChangesBeforeTmAt?: string;
     /**
-     * Required when isTemplate=false
+     * Required when status is not DRAFT.
      */
-    endDate?: string;
-    /**
-     * Required when isTemplate=false
-     */
+    technicalMeetingAt?: string;
     status: CompetitionStatus;
     scopeType: ScopeType;
     scoringSchemeId: string;

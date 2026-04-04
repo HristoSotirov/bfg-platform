@@ -29,6 +29,7 @@ import {
   BoatClass,
 } from '../../../../core/services/api';
 import { Subject, takeUntil, catchError, of, throwError } from 'rxjs';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-scoring-details-dialog',
@@ -192,20 +193,21 @@ export class ScoringDetailsDialogComponent implements OnChanges {
     this.loadingRules = true;
     this.cdr.markForCheck();
 
-    this.scoringRulesService
-      .getAllScoringRules(
-        `scoringSchemeId eq '${this.scheme.uuid}'`,
+    fetchAllPages((skip, top) =>
+      this.scoringRulesService.getAllScoringRules(
+        `scoringSchemeId eq '${this.scheme!.uuid}'`,
         ['placement_asc'],
-        1000,
-        0,
-      )
+        top,
+        skip,
+      ) as any
+    )
       .pipe(
-        catchError(() => of({ content: [] })),
+        catchError(() => of([])),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (response) => {
-          this.rules = response.content || [];
+        next: (rules: any[]) => {
+          this.rules = rules;
           this.loadingRules = false;
           this.cdr.markForCheck();
         },
@@ -332,19 +334,20 @@ export class ScoringDetailsDialogComponent implements OnChanges {
     this.loadingCoefficients = true;
     this.cdr.markForCheck();
 
-    this.scoringSchemeBoatCoefficientsService
-      .getAllScoringSchemeBoatCoefficients(
-        `scoringSchemeId eq '${this.scheme.uuid}'`,
-        1000,
-        0,
-      )
+    fetchAllPages((skip, top) =>
+      this.scoringSchemeBoatCoefficientsService.getAllScoringSchemeBoatCoefficients(
+        `scoringSchemeId eq '${this.scheme!.uuid}'`,
+        top,
+        skip,
+      ) as any
+    )
       .pipe(
-        catchError(() => of({ content: [] })),
+        catchError(() => of([])),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (response) => {
-          this.coefficients = (response.content || []).sort((a, b) => {
+        next: (coefficients: any[]) => {
+          this.coefficients = coefficients.sort((a, b) => {
             const orderA = this.boatClassOrder[a.boatClass || ''] ?? 99;
             const orderB = this.boatClassOrder[b.boatClass || ''] ?? 99;
             return orderA - orderB;

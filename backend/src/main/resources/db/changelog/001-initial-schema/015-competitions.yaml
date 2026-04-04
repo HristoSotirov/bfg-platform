@@ -24,19 +24,10 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: duration_days
-                  type: INTEGER
-                  constraints:
-                    nullable: false
-                  remarks: "Required for all competitions and templates"
-              - column:
-                  name: season
-                  type: INTEGER
-                  remarks: "Only for real competitions (is_template=false)"
-              - column:
                   name: location
                   type: VARCHAR(255)
-                  remarks: "Only for real competitions (is_template=false)"
+                  constraints:
+                    nullable: false
               - column:
                   name: start_date
                   type: DATE
@@ -45,6 +36,22 @@ databaseChangeLog:
                   name: end_date
                   type: DATE
                   remarks: "Only for real competitions (is_template=false)"
+              - column:
+                  name: entry_submissions_open_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Entry submissions open at this datetime."
+              - column:
+                  name: entry_submissions_closed_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Entry submissions close at this datetime."
+              - column:
+                  name: last_changes_before_tm_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Deadline for last changes before technical meeting."
+              - column:
+                  name: technical_meeting_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Technical meeting datetime."
               - column:
                   name: status
                   type: VARCHAR(20)
@@ -67,13 +74,6 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
-              - column:
-                  name: is_template
-                  type: BOOLEAN
-                  constraints:
-                    nullable: false
-                  defaultValueBoolean: false
-                  remarks: "true = template, false = real competition"
               - column:
                   name: created_at
                   type: TIMESTAMPTZ

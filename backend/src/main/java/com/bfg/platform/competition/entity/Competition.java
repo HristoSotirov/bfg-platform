@@ -31,20 +31,11 @@ public class Competition {
     @Setter(AccessLevel.NONE)
     private UUID id;
 
-    @Column(name = "is_template", nullable = false)
-    private boolean isTemplate;
-
     @Column(name = "short_name", nullable = false)
     private String shortName;
 
     @Column(name = "name", nullable = false)
     private String name;
-
-    @Column(name = "duration_days", nullable = false)
-    private Integer durationDays;
-
-    @Column(name = "season")
-    private Integer season;
 
     @Column(name = "location")
     private String location;
@@ -54,6 +45,18 @@ public class Competition {
 
     @Column(name = "end_date")
     private LocalDate endDate;
+
+    @Column(name = "entry_submissions_open_at")
+    private Instant entrySubmissionsOpenAt;
+
+    @Column(name = "entry_submissions_closed_at")
+    private Instant entrySubmissionsClosedAt;
+
+    @Column(name = "last_changes_before_tm_at")
+    private Instant lastChangesBeforeTmAt;
+
+    @Column(name = "technical_meeting_at")
+    private Instant technicalMeetingAt;
 
     @Column(name = "status", nullable = false)
     private String status;

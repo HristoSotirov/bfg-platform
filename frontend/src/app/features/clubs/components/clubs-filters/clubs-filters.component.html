@@ -3,9 +3,8 @@
     <div class="w-full sm:flex-1 sm:min-w-[180px] sm:max-w-[180px]">
       <app-search-bar
         [searchValue]="searchValue"
-        (searchValueChange)="searchValue = $event"
-        (searchChange)="onSearchChange($event)"
-        placeholder="Потърси... (Enter за търсене)"
+        (searchValueChange)="onSearchChange($event)"
+        placeholder="Потърси..."
         [showIcon]="true"
         [showClearButton]="false"
         inputClasses="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"

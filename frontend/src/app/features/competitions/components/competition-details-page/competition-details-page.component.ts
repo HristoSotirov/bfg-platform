@@ -8,7 +8,8 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil, catchError, of, forkJoin } from 'rxjs';
+import { Subject, takeUntil, catchError, of, forkJoin, Observable, map } from 'rxjs';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -16,6 +17,8 @@ import {
   SearchableSelectDropdownComponent,
   SearchableSelectOption,
 } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
+import { DateTimePickerComponent } from '../../../../shared/components/datetime-picker/datetime-picker.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
   CompetitionsService,
@@ -37,7 +40,6 @@ import {
   QualificationTiersService,
   QualificationTierDto,
   DisciplineDefinitionsService,
-  DisciplineDefinitionDto,
   QualificationEventType,
   CompetitionEventStatus,
 } from '../../../../core/services/api';
@@ -56,6 +58,8 @@ type Tab = 'details' | 'disciplines' | 'timetable' | 'entries' | 'progression' |
     ButtonComponent,
     DialogComponent,
     SearchableSelectDropdownComponent,
+    DatePickerComponent,
+    DateTimePickerComponent,
   ],
   templateUrl: './competition-details-page.component.html',
   styleUrl: './competition-details-page.component.scss',
@@ -88,10 +92,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   // Disciplines
   disciplineSchemes: CompetitionDisciplineSchemeDto[] = [];
-  disciplineDetails: Map<string, DisciplineDefinitionDto> = new Map();
   loadingDisciplines = false;
-  allDisciplines: DisciplineDefinitionDto[] = [];
-  disciplineOptions: SearchableSelectOption[] = [];
   newDisciplineId = '';
   addingDiscipline = false;
   addDisciplineError: string | null = null;
@@ -105,10 +106,24 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   // Add timetable event
   showAddTimetableEvent = false;
   savingTimetable = false;
+  newEventScheduledAt = '';
   timetableError: string | null = null;
   newEvent: Partial<CompetitionTimetableEventRequest> = {};
   showDeleteTimetableConfirm = false;
   timetableEventToDelete: CompetitionTimetableEventDto | null = null;
+
+  // Edit timetable event
+  editingTimetableUuid: string | null = null;
+  editTimetableData: Partial<CompetitionTimetableEventRequest> = {};
+  editTimetableScheduledAt = '';
+  editTimetableError: string | null = null;
+
+  // Edit warning
+  showEditingWarningDialog = false;
+
+  get hasUnsavedEdits(): boolean {
+    return !!this.editingTimetableUuid || this.showAddTimetableEvent;
+  }
 
   readonly eventTypeOptions: SearchableSelectOption[] = [
     { value: QualificationEventType.H, label: 'Серия' },
@@ -125,11 +140,33 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     { value: CompetitionEventStatus.Postponed, label: 'Отложено' },
   ];
 
-  // Option lists for editing
-  scoringSchemeOptions: SearchableSelectOption[] = [];
-  qualificationSchemeOptions: SearchableSelectOption[] = [];
-  allScoringSchemes: ScoringSchemeDto[] = [];
-  allQualificationSchemes: QualificationSchemeDto[] = [];
+  // Option lists for editing — static search (load all on open, filter in-memory)
+  scoringSchemeSearch = (): Observable<SearchableSelectOption[]> =>
+    fetchAllPages((skip, top) =>
+      this.scoringSchemesService.getAllScoringSchemes(undefined, undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((items: any[]) => items.map((s: any) => ({
+      value: s.uuid || '',
+      label: s.name || '',
+      disabled: !s.isActive,
+    }))));
+
+  qualificationSchemeSearch = (): Observable<SearchableSelectOption[]> =>
+    fetchAllPages((skip, top) =>
+      this.qualificationSchemesService.getAllQualificationSchemes(undefined, undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((items: any[]) => items.map((s: any) => ({
+      value: s.uuid || '',
+      label: s.name || '',
+      disabled: !s.isActive,
+    }))));
+
+  disciplineSearch = (): Observable<SearchableSelectOption[]> =>
+    fetchAllPages((skip, top) =>
+      this.disciplineDefinitionsService.getAllDisciplineDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((items: any[]) => items.map((d: any) => ({
+      value: d.uuid || '',
+      label: d.name || '',
+      disabled: !d.isActive || this.disciplineSchemes.some((ds) => ds.disciplineId === d.uuid),
+    }))));
 
   userRole: SystemRole | null = null;
 
@@ -172,13 +209,19 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const uuid = params.get('uuid');
-      if (uuid) {
+      const tab = params.get('tab') as Tab | null;
+      if (tab && this.isValidTab(tab)) {
+        this.activeTab = tab;
+      } else if (!tab) {
+        this.activeTab = 'details';
+      }
+      if (uuid && uuid !== this.competition?.uuid) {
         this.loadCompetition(uuid);
+      } else {
+        // Competition already loaded — trigger lazy tab loads if needed
+        this.triggerTabLoad(this.activeTab);
       }
     });
-
-    this.loadSchemeLists();
-    this.loadAllDisciplines();
   }
 
   ngOnDestroy(): void {
@@ -191,7 +234,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   get tabs(): { id: Tab; label: string; available: boolean }[] {
-    const isReal = !this.competition?.isTemplate;
+    const isReal = this.competition?.status !== 'DRAFT';
     return [
       { id: 'details', label: 'Детайли', available: true },
       { id: 'disciplines', label: 'Дисциплини', available: true },
@@ -203,14 +246,30 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   setTab(tab: Tab): void {
+    if (tab === this.activeTab) return;
+    if (this.hasUnsavedEdits) {
+      this.showEditingWarningDialog = true;
+      this.cdr.markForCheck();
+      return;
+    }
     this.activeTab = tab;
+    const uuid = this.competition?.uuid ?? this.route.snapshot.paramMap.get('uuid');
+    this.router.navigate(['/competitions', uuid, tab], { replaceUrl: true });
+    this.triggerTabLoad(tab);
+    this.cdr.markForCheck();
+  }
+
+  private triggerTabLoad(tab: Tab): void {
     if (tab === 'disciplines' && this.disciplineSchemes.length === 0 && !this.loadingDisciplines) {
       this.loadDisciplines();
     }
     if (tab === 'timetable' && this.timetableEvents.length === 0 && !this.loadingTimetable) {
       this.loadTimetable();
     }
-    this.cdr.markForCheck();
+  }
+
+  private isValidTab(tab: string): tab is Tab {
+    return ['details', 'disciplines', 'timetable', 'entries', 'progression', 'results'].includes(tab);
   }
 
   goBack(): void {
@@ -241,6 +300,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.loadScoringSchemeData(competition.scoringSchemeId);
           this.loadQualificationSchemeData(competition.qualificationSchemeId);
           this.loadDisciplines();
+          this.triggerTabLoad(this.activeTab);
         }
         this.cdr.markForCheck();
       });
@@ -253,20 +313,22 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
     forkJoin({
       scheme: this.scoringSchemesService.getScoringSchemeByUuid(schemeId),
-      rules: this.scoringRulesService.getAllScoringRules(
-        `scoringSchemeId eq '${schemeId}'`,
-        ['placement_asc'] as any,
-        100,
-        0,
+      rules: fetchAllPages((skip, top) =>
+        this.scoringRulesService.getAllScoringRules(
+          `scoringSchemeId eq '${schemeId}'`,
+          ['placement_asc'] as any,
+          top,
+          skip,
+        ) as any
       ),
     })
       .pipe(
-        catchError(() => of({ scheme: null, rules: { content: [] } })),
+        catchError(() => of({ scheme: null, rules: [] })),
         takeUntil(this.destroy$),
       )
       .subscribe((result: any) => {
         this.scoringScheme = result.scheme;
-        this.scoringRules = result.rules?.content || [];
+        this.scoringRules = result.rules || [];
         this.loadingScoring = false;
         this.cdr.markForCheck();
       });
@@ -279,20 +341,22 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
     forkJoin({
       scheme: this.qualificationSchemesService.getQualificationSchemeByUuid(schemeId),
-      tiers: this.qualificationTiersService.getAllQualificationTiers(
-        `qualificationSchemeId eq '${schemeId}'`,
-        ['boatCountMin_asc'] as any,
-        200,
-        0,
+      tiers: fetchAllPages((skip, top) =>
+        this.qualificationTiersService.getAllQualificationTiers(
+          `qualificationSchemeId eq '${schemeId}'`,
+          ['boatCountMin_asc'] as any,
+          top,
+          skip,
+        ) as any
       ),
     })
       .pipe(
-        catchError(() => of({ scheme: null, tiers: { content: [] } })),
+        catchError(() => of({ scheme: null, tiers: [] })),
         takeUntil(this.destroy$),
       )
       .subscribe((result: any) => {
         this.qualificationScheme = result.scheme;
-        this.qualificationTiers = result.tiers?.content || [];
+        this.qualificationTiers = result.tiers || [];
         this.loadingQualification = false;
         this.cdr.markForCheck();
       });
@@ -303,33 +367,21 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.loadingDisciplines = true;
     this.cdr.markForCheck();
 
-    this.disciplineSchemesService
-      .getAllCompetitionDisciplineSchemes(
-        `competitionId eq '${this.competition.uuid}'`,
-        100,
-        0,
-      )
+    fetchAllPages((skip, top) =>
+      this.disciplineSchemesService.getAllCompetitionDisciplineSchemes(
+        `competitionId eq '${this.competition!.uuid}'`,
+        top,
+        skip,
+        ['discipline.shortName_asc'],
+        ['discipline', 'discipline.competitionGroup'],
+      ) as any
+    )
       .pipe(
-        catchError(() => of({ content: [] })),
+        catchError(() => of([])),
         takeUntil(this.destroy$),
       )
-      .subscribe((resp: any) => {
-        this.disciplineSchemes = resp.content || [];
-        // Load details for each discipline
-        const ids = this.disciplineSchemes
-          .map((ds) => ds.disciplineId)
-          .filter((id): id is string => !!id);
-        ids.forEach((id) => {
-          if (!this.disciplineDetails.has(id)) {
-            this.disciplineDefinitionsService
-              .getDisciplineDefinitionByUuid(id)
-              .pipe(takeUntil(this.destroy$))
-              .subscribe((d) => {
-                this.disciplineDetails.set(id, d);
-                this.cdr.markForCheck();
-              });
-          }
-        });
+      .subscribe((schemes: any[]) => {
+        this.disciplineSchemes = schemes;
         this.loadingDisciplines = false;
         this.cdr.markForCheck();
       });
@@ -340,60 +392,21 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.loadingTimetable = true;
     this.cdr.markForCheck();
 
-    this.timetableEventsService
-      .getAllCompetitionTimetableEvents(
-        `competitionId eq '${this.competition.uuid}'`,
-        ['eventNumber_asc'] as any,
-        200,
-        0,
-      )
+    fetchAllPages((skip, top) =>
+      this.timetableEventsService.getAllCompetitionTimetableEvents(
+        `competitionId eq '${this.competition!.uuid}'`,
+        ['scheduledAt_asc'] as any,
+        top,
+        skip,
+      ) as any
+    )
       .pipe(
-        catchError(() => of({ content: [] })),
+        catchError(() => of([])),
         takeUntil(this.destroy$),
       )
-      .subscribe((resp: any) => {
-        this.timetableEvents = resp.content || [];
+      .subscribe((events: any[]) => {
+        this.timetableEvents = events;
         this.loadingTimetable = false;
-        this.cdr.markForCheck();
-      });
-  }
-
-  private loadSchemeLists(): void {
-    this.scoringSchemesService
-      .getAllScoringSchemes('isActive eq true', undefined, ['name_asc'] as any, 200, 0)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((resp: any) => {
-        this.allScoringSchemes = resp.content || [];
-        this.scoringSchemeOptions = this.allScoringSchemes.map((s) => ({
-          value: s.uuid || '',
-          label: s.name || '',
-        }));
-        this.cdr.markForCheck();
-      });
-
-    this.qualificationSchemesService
-      .getAllQualificationSchemes('isActive eq true', undefined, ['name_asc'] as any, 200, 0)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((resp: any) => {
-        this.allQualificationSchemes = resp.content || [];
-        this.qualificationSchemeOptions = this.allQualificationSchemes.map((s) => ({
-          value: s.uuid || '',
-          label: s.name || '',
-        }));
-        this.cdr.markForCheck();
-      });
-  }
-
-  private loadAllDisciplines(): void {
-    this.disciplineDefinitionsService
-      .getAllDisciplineDefinitions('isActive eq true', undefined, ['name_asc'] as any, 500, 0)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((resp: any) => {
-        this.allDisciplines = resp.content || [];
-        this.disciplineOptions = this.allDisciplines.map((d) => ({
-          value: d.uuid || '',
-          label: d.name || '',
-        }));
         this.cdr.markForCheck();
       });
   }
@@ -403,14 +416,15 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   startEditing(): void {
     if (!this.competition) return;
     this.editData = {
-      isTemplate: this.competition.isTemplate,
       shortName: this.competition.shortName,
       name: this.competition.name,
-      durationDays: this.competition.durationDays || undefined,
-      season: this.competition.season,
       location: this.competition.location,
       startDate: this.competition.startDate,
       endDate: this.competition.endDate,
+      entrySubmissionsOpenAt: this.competition.entrySubmissionsOpenAt as any,
+      entrySubmissionsClosedAt: this.competition.entrySubmissionsClosedAt as any,
+      lastChangesBeforeTmAt: this.competition.lastChangesBeforeTmAt as any,
+      technicalMeetingAt: this.competition.technicalMeetingAt as any,
       status: this.competition.status as CompetitionStatus,
       scopeType: this.competition.scopeType as any,
       scoringSchemeId: this.competition.scoringSchemeId,
@@ -427,14 +441,36 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
+  private appendZ(val: any): any {
+    if (!val) return val;
+    const s = String(val);
+    return s.endsWith('Z') || s.includes('+') ? s : s + 'Z';
+  }
+
   saveEditing(): void {
     if (!this.competition?.uuid) return;
     this.saving = true;
     this.editError = null;
     this.cdr.markForCheck();
 
+    const request: CompetitionRequest = {
+      ...(this.editData as CompetitionRequest),
+      entrySubmissionsOpenAt: this.editData.entrySubmissionsOpenAt
+        ? this.appendZ(this.editData.entrySubmissionsOpenAt) as any
+        : undefined,
+      entrySubmissionsClosedAt: this.editData.entrySubmissionsClosedAt
+        ? this.appendZ(this.editData.entrySubmissionsClosedAt) as any
+        : undefined,
+      lastChangesBeforeTmAt: this.editData.lastChangesBeforeTmAt
+        ? this.appendZ(this.editData.lastChangesBeforeTmAt) as any
+        : undefined,
+      technicalMeetingAt: this.editData.technicalMeetingAt
+        ? this.appendZ(this.editData.technicalMeetingAt) as any
+        : undefined,
+    };
+
     this.competitionsService
-      .updateCompetitionByUuid(this.competition.uuid, this.editData as CompetitionRequest)
+      .updateCompetitionByUuid(this.competition.uuid, request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (updated) => {
@@ -455,11 +491,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   // ===== DISCIPLINES TAB =====
-
-  get availableDisciplineOptions(): SearchableSelectOption[] {
-    const assigned = new Set(this.disciplineSchemes.map((ds) => ds.disciplineId));
-    return this.disciplineOptions.filter((o) => !assigned.has(o.value));
-  }
 
   addDiscipline(): void {
     if (!this.competition?.uuid || !this.newDisciplineId) return;
@@ -521,19 +552,47 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  getDisciplineName(disciplineId: string | undefined): string {
-    if (!disciplineId) return '-';
-    return this.disciplineDetails.get(disciplineId)?.name || disciplineId;
+  getDisciplineName(ds: CompetitionDisciplineSchemeDto): string {
+    return (ds as any).discipline?.name || ds.disciplineId || '-';
   }
 
-  getDisciplineShortName(disciplineId: string | undefined): string {
-    if (!disciplineId) return '-';
-    return this.disciplineDetails.get(disciplineId)?.shortName || '-';
+  getDisciplineShortName(ds: CompetitionDisciplineSchemeDto): string {
+    return (ds as any).discipline?.shortName || '-';
   }
 
-  getDisciplineBoatClass(disciplineId: string | undefined): string {
+  getDisciplineBoatClass(ds: CompetitionDisciplineSchemeDto): string {
+    return (ds as any).discipline?.boatClass || '-';
+  }
+
+  getGroupName(ds: CompetitionDisciplineSchemeDto): string {
+    return (ds as any).discipline?.competitionGroup?.name || 'Без група';
+  }
+
+  getDisciplineNameById(disciplineId: string | undefined): string {
     if (!disciplineId) return '-';
-    return this.disciplineDetails.get(disciplineId)?.boatClass || '-';
+    const ds = this.disciplineSchemes.find((s) => s.disciplineId === disciplineId);
+    return ds ? this.getDisciplineName(ds) : disciplineId;
+  }
+
+  get disciplinesByGroup(): { groupId: string | undefined; groupName: string; groupShortName: string; disciplines: CompetitionDisciplineSchemeDto[] }[] {
+    const map = new Map<string, CompetitionDisciplineSchemeDto[]>();
+    for (const ds of this.disciplineSchemes) {
+      const groupId = (ds as any).discipline?.competitionGroup?.uuid || '';
+      if (!map.has(groupId)) map.set(groupId, []);
+      map.get(groupId)!.push(ds);
+    }
+    return Array.from(map.entries())
+      .map(([groupId, disciplines]) => {
+        const group = (disciplines[0] as any).discipline?.competitionGroup;
+        const groupShortName = group?.shortName || group?.name || '';
+        return {
+          groupId: groupId || undefined,
+          groupName: group?.name || 'Без група',
+          groupShortName,
+          disciplines,
+        };
+      })
+      .sort((a, b) => a.groupShortName.localeCompare(b.groupShortName, 'bg'));
   }
 
   // ===== TIMETABLE TAB =====
@@ -541,22 +600,17 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   get disciplineOptionsForTimetable(): SearchableSelectOption[] {
     return this.disciplineSchemes.map((ds) => ({
       value: ds.disciplineId || '',
-      label: this.getDisciplineName(ds.disciplineId),
+      label: this.getDisciplineName(ds),
     }));
   }
 
   openAddTimetableEvent(): void {
-    const nextNumber = (this.timetableEvents.length > 0
-      ? Math.max(...this.timetableEvents.map((e) => e.eventNumber ?? 0)) + 1
-      : 1);
+    const defaultDate = this.competition?.startDate ?? '';
+    this.newEventScheduledAt = defaultDate ? defaultDate + 'T09:00:00Z' : '';
     this.newEvent = {
       competitionId: this.competition?.uuid,
-      eventNumber: nextNumber,
       qualificationEventType: QualificationEventType.H,
       qualificationStageNumber: 1,
-      dayOffset: 0,
-      plannedTime: '09:00',
-      eventStatus: CompetitionEventStatus.Scheduled,
     };
     this.showAddTimetableEvent = true;
     this.timetableError = null;
@@ -566,6 +620,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   cancelAddTimetableEvent(): void {
     this.showAddTimetableEvent = false;
     this.newEvent = {};
+    this.newEventScheduledAt = '';
     this.timetableError = null;
     this.cdr.markForCheck();
   }
@@ -576,13 +631,20 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.timetableError = null;
     this.cdr.markForCheck();
 
+    const request: CompetitionTimetableEventRequest = {
+      ...(this.newEvent as CompetitionTimetableEventRequest),
+      eventStatus: CompetitionEventStatus.Scheduled,
+      scheduledAt: this.newEventScheduledAt || undefined as any,
+    };
+
     this.timetableEventsService
-      .createCompetitionTimetableEvent(this.newEvent as CompetitionTimetableEventRequest)
+      .createCompetitionTimetableEvent(request)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
           this.showAddTimetableEvent = false;
           this.newEvent = {};
+          this.newEventScheduledAt = '';
           this.savingTimetable = false;
           this.loadTimetable();
         },
@@ -598,6 +660,59 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.timetableEventToDelete = event;
     this.showDeleteTimetableConfirm = true;
     this.cdr.markForCheck();
+  }
+
+  startEditTimetableEvent(event: CompetitionTimetableEventDto): void {
+    this.editingTimetableUuid = event.uuid!;
+    this.editTimetableError = null;
+    const isoStr = event.scheduledAt as unknown as string;
+    this.editTimetableScheduledAt = isoStr || '';
+    this.editTimetableData = {
+      competitionId: event.competitionId!,
+      disciplineId: event.disciplineId!,
+      qualificationEventType: event.qualificationEventType! as any,
+      qualificationStageNumber: event.qualificationStageNumber ?? undefined,
+      eventStatus: event.eventStatus! as any,
+    };
+    this.cdr.markForCheck();
+  }
+
+  cancelEditTimetableEvent(): void {
+    this.editingTimetableUuid = null;
+    this.editTimetableData = {};
+    this.editTimetableScheduledAt = '';
+    this.editTimetableError = null;
+    this.cdr.markForCheck();
+  }
+
+  saveEditTimetableEvent(): void {
+    if (!this.editingTimetableUuid) return;
+    this.savingTimetable = true;
+    this.editTimetableError = null;
+    this.cdr.markForCheck();
+
+    const request: CompetitionTimetableEventRequest = {
+      ...(this.editTimetableData as CompetitionTimetableEventRequest),
+      scheduledAt: this.editTimetableScheduledAt || undefined as any,
+    };
+
+    this.timetableEventsService
+      .updateCompetitionTimetableEventByUuid(this.editingTimetableUuid, request)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.editingTimetableUuid = null;
+          this.editTimetableData = {};
+          this.editTimetableScheduledAt = '';
+          this.savingTimetable = false;
+          this.loadTimetable();
+        },
+        error: (err) => {
+          this.editTimetableError = err?.error?.message || 'Грешка при запис';
+          this.savingTimetable = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   cancelDeleteTimetableEvent(): void {
@@ -661,7 +776,25 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   formatDateTime(dateStr: string | undefined): string {
     if (!dateStr) return '-';
     try {
-      return new Date(dateStr).toLocaleString('bg-BG');
+      return new Date(dateStr).toLocaleString('bg-BG', { timeZone: 'Europe/Sofia' });
+    } catch {
+      return dateStr;
+    }
+  }
+
+  formatDateOnly(dateStr: string | undefined): string {
+    if (!dateStr) return '-';
+    try {
+      return new Date(dateStr).toLocaleDateString('bg-BG', { timeZone: 'Europe/Sofia' });
+    } catch {
+      return dateStr;
+    }
+  }
+
+  formatTimeOnly(dateStr: string | undefined): string {
+    if (!dateStr) return '-';
+    try {
+      return new Date(dateStr).toLocaleTimeString('bg-BG', { hour: '2-digit', minute: '2-digit', timeZone: 'Europe/Sofia' });
     } catch {
       return dateStr;
     }

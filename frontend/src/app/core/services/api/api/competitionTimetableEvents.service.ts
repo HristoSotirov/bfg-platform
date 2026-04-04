@@ -167,17 +167,17 @@ export class CompetitionTimetableEventsService extends BaseService {
 
     /**
      * Get all competition timetable events
-     * @param filter Filter expression (e.g., competitionId eq \&#39;uuid-value\&#39; and dayOffset eq \&#39;0\&#39;)
+     * @param filter Filter expression (e.g., competitionId eq \&#39;uuid-value\&#39;)
      * @param orderBy Predefined ordering (multiselect)
      * @param top Maximum number of items to return
      * @param skip Number of items to skip
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'dayOffset_asc' | 'dayOffset_desc' | 'eventNumber_asc' | 'eventNumber_desc' | 'plannedTime_asc' | 'plannedTime_desc' | 'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionTimetableEvents200Response>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'dayOffset_asc' | 'dayOffset_desc' | 'eventNumber_asc' | 'eventNumber_desc' | 'plannedTime_asc' | 'plannedTime_desc' | 'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionTimetableEvents200Response>>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'dayOffset_asc' | 'dayOffset_desc' | 'eventNumber_asc' | 'eventNumber_desc' | 'plannedTime_asc' | 'plannedTime_desc' | 'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionTimetableEvents200Response>>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'dayOffset_asc' | 'dayOffset_desc' | 'eventNumber_asc' | 'eventNumber_desc' | 'plannedTime_asc' | 'plannedTime_desc' | 'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionTimetableEvents200Response>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionTimetableEvents200Response>>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionTimetableEvents200Response>>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,

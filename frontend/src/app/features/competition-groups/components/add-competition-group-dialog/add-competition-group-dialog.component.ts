@@ -19,7 +19,8 @@ import {
   CompetitionGroupGender,
   TransferRounding,
 } from '../../../../core/services/api';
-import { takeUntil, Subject } from 'rxjs';
+import { takeUntil, Subject, Observable, map } from 'rxjs';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-add-competition-group-dialog',
@@ -57,7 +58,16 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
 
   saving = false;
   error: string | null = null;
-  groupOptions: SearchableSelectOption[] = [];
+
+  groupSearch = (): Observable<SearchableSelectOption[]> =>
+    fetchAllPages((skip, top) =>
+      this.competitionGroupDefinitionsService
+        .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((groups: any[]) => groups.map((g: any) => ({
+      value: g.uuid || '',
+      label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
+      disabled: !g.isActive,
+    }))));
 
   readonly genderOptions: SearchableSelectOption[] = [
     { value: CompetitionGroupGender.Male, label: 'Мъже' },
@@ -85,7 +95,6 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen) {
       this.resetForm();
-      this.loadGroups();
     }
     if (changes['isOpen'] && !this.isOpen) {
       this.destroy$.next();
@@ -94,20 +103,6 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
 
   close(): void {
     this.closed.emit();
-  }
-
-  private loadGroups(): void {
-    this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
-      'isActive eq true', undefined, ['name_asc'] as any, 1000, 0
-    ).pipe(takeUntil(this.destroy$)).subscribe({
-      next: (response: any) => {
-        this.groupOptions = (response.content || []).map((g: any) => ({
-          value: g.uuid,
-          label: `${g.shortName || g.name} (${g.minAge}-${g.maxAge})`
-        }));
-        this.cdr.markForCheck();
-      }
-    });
   }
 
   private resetForm(): void {

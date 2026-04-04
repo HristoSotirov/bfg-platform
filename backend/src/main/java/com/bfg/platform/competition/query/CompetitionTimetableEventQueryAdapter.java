@@ -16,16 +16,9 @@ import java.util.Set;
 
 public final class CompetitionTimetableEventQueryAdapter {
     private static final Sort DEFAULT_SORT = Sort.by(
-            new Sort.Order(Sort.Direction.ASC, "dayOffset"),
-            new Sort.Order(Sort.Direction.ASC, "eventNumber")
+            new Sort.Order(Sort.Direction.ASC, "scheduledAt")
     );
     private static final Map<String, Sort.Order> ORDER_MAP = Map.ofEntries(
-            Map.entry("dayOffset_asc", new Sort.Order(Sort.Direction.ASC, "dayOffset")),
-            Map.entry("dayOffset_desc", new Sort.Order(Sort.Direction.DESC, "dayOffset")),
-            Map.entry("eventNumber_asc", new Sort.Order(Sort.Direction.ASC, "eventNumber")),
-            Map.entry("eventNumber_desc", new Sort.Order(Sort.Direction.DESC, "eventNumber")),
-            Map.entry("plannedTime_asc", new Sort.Order(Sort.Direction.ASC, "plannedTime")),
-            Map.entry("plannedTime_desc", new Sort.Order(Sort.Direction.DESC, "plannedTime")),
             Map.entry("scheduledAt_asc", new Sort.Order(Sort.Direction.ASC, "scheduledAt")),
             Map.entry("scheduledAt_desc", new Sort.Order(Sort.Direction.DESC, "scheduledAt")),
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
@@ -71,7 +64,7 @@ public final class CompetitionTimetableEventQueryAdapter {
                     QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
                 case "competitionId", "disciplineId" ->
                     QueryAdapterHelpers.uuidPredicate(root, cb, field, op, valueRaw);
-                case "eventNumber", "qualificationStageNumber", "dayOffset" ->
+                case "qualificationStageNumber" ->
                     QueryAdapterHelpers.integerPredicate(root, cb, field, op, valueRaw);
                 case "scheduledAt", "startedAt", "createdAt", "modifiedAt" ->
                     QueryAdapterHelpers.instantPredicate(root, cb, field, op, valueRaw);
@@ -82,7 +75,7 @@ public final class CompetitionTimetableEventQueryAdapter {
         @Override
         public Predicate buildRange(Root<CompetitionTimetableEvent> root, CriteriaBuilder cb, String field, String minValue, String maxValue) {
             return switch (field) {
-                case "eventNumber", "qualificationStageNumber", "dayOffset" ->
+                case "qualificationStageNumber" ->
                     QueryAdapterHelpers.integerRangePredicate(root, cb, field, minValue, maxValue);
                 case "scheduledAt", "startedAt", "createdAt", "modifiedAt" ->
                     QueryAdapterHelpers.instantRangePredicate(root, cb, field, minValue, maxValue);

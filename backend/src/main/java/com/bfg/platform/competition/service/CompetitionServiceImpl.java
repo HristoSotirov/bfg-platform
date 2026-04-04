@@ -25,6 +25,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -64,7 +65,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     @Override
     @Transactional
     public Optional<CompetitionDto> create(CompetitionRequest request) {
-        validate(request);
+        validateCreate(request);
         Competition entity = CompetitionMapper.fromRequest(request);
         Competition saved = repository.save(entity);
         entityManager.flush();
@@ -95,6 +96,17 @@ public class CompetitionServiceImpl implements CompetitionService {
         }
     }
 
+    private void validateCreate(CompetitionRequest request) {
+        if (request.getStatus() == null) {
+            throw new ValidationException("Status is required");
+        }
+        String statusValue = request.getStatus().getValue();
+        if (!"DRAFT".equals(statusValue) && !"PLANNED".equals(statusValue)) {
+            throw new ValidationException("Status must be DRAFT or PLANNED");
+        }
+        validate(request);
+    }
+
     private void validate(CompetitionRequest request) {
         scoringSchemeRepository.findById(request.getScoringSchemeId())
                 .filter(s -> s.isActive())
@@ -104,29 +116,66 @@ public class CompetitionServiceImpl implements CompetitionService {
                 .filter(q -> q.isActive())
                 .orElseThrow(() -> new ValidationException("Qualification scheme not found or not active"));
 
-        if (Boolean.FALSE.equals(request.getIsTemplate())) {
-            if (request.getSeason() == null) {
-                throw new ValidationException("Season is required for real competitions");
-            }
-            if (request.getLocation() == null || request.getLocation().isBlank()) {
-                throw new ValidationException("Location is required for real competitions");
-            }
-            if (request.getStartDate() == null) {
-                throw new ValidationException("Start date is required for real competitions");
-            }
-            if (request.getEndDate() == null) {
-                throw new ValidationException("End date is required for real competitions");
-            }
+        // location is required for all competitions (templates and real)
+        if (request.getLocation() == null || request.getLocation().isBlank()) {
+            throw new ValidationException("Location is required");
+        }
 
-            LocalDate start = request.getStartDate();
-            LocalDate end = request.getEndDate();
-            if (!end.isAfter(start) && !end.isEqual(start)) {
-                throw new ValidationException("End date must be on or after start date");
+        // status is required
+        if (request.getStatus() == null) {
+            throw new ValidationException("Status is required");
+        }
+
+        boolean isDraft = "DRAFT".equals(request.getStatus().getValue());
+        if (!isDraft) {
+            if (request.getEntrySubmissionsOpenAt() == null) {
+                throw new ValidationException("Entry submissions open date/time is required");
             }
-            long actualDays = start.until(end, java.time.temporal.ChronoUnit.DAYS) + 1;
-            if (actualDays != request.getDurationDays()) {
-                throw new ValidationException(
-                    "Duration days (" + request.getDurationDays() + ") must match the number of days between start and end date (" + actualDays + ")");
+            if (request.getEntrySubmissionsClosedAt() == null) {
+                throw new ValidationException("Entry submissions closed date/time is required");
+            }
+            if (request.getLastChangesBeforeTmAt() == null) {
+                throw new ValidationException("Last changes before TM date/time is required");
+            }
+            if (request.getTechnicalMeetingAt() == null) {
+                throw new ValidationException("Technical meeting date/time is required");
+            }
+        }
+
+        // startDate and endDate are required for all competitions (templates and real)
+        if (request.getStartDate() == null) {
+            throw new ValidationException("Start date is required");
+        }
+        if (request.getEndDate() == null) {
+            throw new ValidationException("End date is required");
+        }
+
+        LocalDate start = request.getStartDate();
+        LocalDate end = request.getEndDate();
+        if (!end.isAfter(start) && !end.isEqual(start)) {
+            throw new ValidationException("End date must be on or after start date");
+        }
+
+        if (request.getEntrySubmissionsOpenAt() != null && request.getEntrySubmissionsClosedAt() != null
+                && request.getLastChangesBeforeTmAt() != null && request.getTechnicalMeetingAt() != null) {
+            // Chronological order: submissionsOpen < submissionsClosed < lastChangesTM < technicalMeeting < startDate
+            Instant submissionsOpen = request.getEntrySubmissionsOpenAt().toInstant();
+            Instant submissionsClosed = request.getEntrySubmissionsClosedAt().toInstant();
+            Instant lastChangesTm = request.getLastChangesBeforeTmAt().toInstant();
+            Instant technicalMeeting = request.getTechnicalMeetingAt().toInstant();
+            Instant startInstant = start.atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+
+            if (!submissionsOpen.isBefore(submissionsClosed)) {
+                throw new ValidationException("Entry submissions open date/time must be before entry submissions closed date/time");
+            }
+            if (!submissionsClosed.isBefore(lastChangesTm)) {
+                throw new ValidationException("Entry submissions closed date/time must be before last changes before TM date/time");
+            }
+            if (!lastChangesTm.isBefore(technicalMeeting)) {
+                throw new ValidationException("Last changes before TM date/time must be before technical meeting date/time");
+            }
+            if (!technicalMeeting.isBefore(startInstant)) {
+                throw new ValidationException("Technical meeting date/time must be before competition start date");
             }
         }
     }

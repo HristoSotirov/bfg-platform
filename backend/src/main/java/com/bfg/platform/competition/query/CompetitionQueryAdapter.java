@@ -23,8 +23,6 @@ public final class CompetitionQueryAdapter {
             Map.entry("name_desc", new Sort.Order(Sort.Direction.DESC, "name")),
             Map.entry("shortName_asc", new Sort.Order(Sort.Direction.ASC, "shortName")),
             Map.entry("shortName_desc", new Sort.Order(Sort.Direction.DESC, "shortName")),
-            Map.entry("season_asc", new Sort.Order(Sort.Direction.ASC, "season")),
-            Map.entry("season_desc", new Sort.Order(Sort.Direction.DESC, "season")),
             Map.entry("startDate_asc", new Sort.Order(Sort.Direction.ASC, "startDate")),
             Map.entry("startDate_desc", new Sort.Order(Sort.Direction.DESC, "startDate")),
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
@@ -105,10 +103,6 @@ public final class CompetitionQueryAdapter {
             return switch (field) {
                 case "name", "shortName", "location", "status", "scopeType" ->
                     QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
-                case "isTemplate" ->
-                    QueryAdapterHelpers.booleanPredicate(root, cb, field, op, valueRaw);
-                case "season" ->
-                    QueryAdapterHelpers.integerPredicate(root, cb, field, op, valueRaw);
                 case "scoringSchemeId", "qualificationSchemeId" ->
                     QueryAdapterHelpers.uuidPredicate(root, cb, field, op, valueRaw);
                 case "createdAt", "modifiedAt" ->
@@ -120,8 +114,6 @@ public final class CompetitionQueryAdapter {
         @Override
         public Predicate buildRange(Root<Competition> root, CriteriaBuilder cb, String field, String minValue, String maxValue) {
             return switch (field) {
-                case "season" ->
-                    QueryAdapterHelpers.integerRangePredicate(root, cb, field, minValue, maxValue);
                 case "createdAt", "modifiedAt" ->
                     QueryAdapterHelpers.instantRangePredicate(root, cb, field, minValue, maxValue);
                 default -> throw new IllegalArgumentException("Range operator not supported for field: " + field);
@@ -135,8 +127,6 @@ public final class CompetitionQueryAdapter {
                     QueryAdapterHelpers.stringInPredicate(root, cb, field, values);
                 case "scoringSchemeId", "qualificationSchemeId" ->
                     QueryAdapterHelpers.uuidInPredicate(root, cb, field, values);
-                case "isTemplate" ->
-                    QueryAdapterHelpers.booleanInPredicate(root, cb, field, values);
                 default -> throw new IllegalArgumentException("In operator not supported for field: " + field);
             };
         }

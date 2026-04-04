@@ -45,17 +45,13 @@
 
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Администратор:</label>
-      @if (loadingAdmins) {
-        <div class="text-sm text-gray-500">Зареждане...</div>
-      } @else {
-        <app-searchable-select-dropdown
-          [options]="adminOptions"
-          [placeholder]="'Изберете администратор'"
-          [ngModel]="formData.clubAdminId"
-          (ngModelChange)="onAdminSelectionChange($event)"
-          [disabled]="saving">
-        </app-searchable-select-dropdown>
-      }
+      <app-searchable-select-dropdown
+        [serverSearch]="adminSearch"
+        [placeholder]="'Изберете администратор'"
+        [ngModel]="formData.clubAdminId"
+        (ngModelChange)="onAdminSelectionChange($event)"
+        [disabled]="saving">
+      </app-searchable-select-dropdown>
     </div>
 
     

@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -27,8 +28,8 @@ public class CompetitionDisciplineSchemeController implements CompetitionDiscipl
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
     public ResponseEntity<GetAllCompetitionDisciplineSchemes200Response> getAllCompetitionDisciplineSchemes(
-            String filter, Integer top, Integer skip) {
-        var page = service.getAll(filter, top, skip);
+            String filter, Integer top, Integer skip, List<String> orderBy, List<String> expand) {
+        var page = service.getAll(filter, orderBy, top, skip, expand);
         return ResponseEntity.ok(PageConverter.toResponse(page, GetAllCompetitionDisciplineSchemes200Response.class));
     }
 

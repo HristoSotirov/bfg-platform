@@ -25,6 +25,7 @@ import {
   QualificationProgressionsService,
 } from '../../../../core/services/api';
 import { Subject, takeUntil, catchError, of, throwError } from 'rxjs';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 interface TierWithProgressions {
   tier: QualificationTierDto;
@@ -177,20 +178,20 @@ export class QualificationDetailsDialogComponent implements OnChanges {
     this.loadingTiers = true;
     this.cdr.markForCheck();
 
-    this.tiersService
-      .getAllQualificationTiers(
-        `qualificationSchemeId eq '${this.scheme.uuid}'`,
+    fetchAllPages((skip, top) =>
+      this.tiersService.getAllQualificationTiers(
+        `qualificationSchemeId eq '${this.scheme!.uuid}'`,
         ['boatCountMin_asc'],
-        100,
-        0,
-      )
+        top,
+        skip,
+      ) as any
+    )
       .pipe(
-        catchError(() => of({ content: [] })),
+        catchError(() => of([])),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (response) => {
-          const tiers = response.content || [];
+        next: (tiers: any[]) => {
           const previouslyExpanded = new Set(
             this.tierGroups.filter(g => g.expanded).map(g => g.tier.uuid)
           );
@@ -217,21 +218,22 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   }
 
   private loadProgressionsForTier(tierId: string, index: number): void {
-    this.progressionsService
-      .getAllQualificationProgressions(
+    fetchAllPages((skip, top) =>
+      this.progressionsService.getAllQualificationProgressions(
         `qualificationTierId eq '${tierId}'`,
         ['createdAt_asc'],
-        100,
-        0,
-      )
+        top,
+        skip,
+      ) as any
+    )
       .pipe(
-        catchError(() => of({ content: [] })),
+        catchError(() => of([])),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (response) => {
+        next: (progressions: any[]) => {
           if (this.tierGroups[index]) {
-            this.tierGroups[index].progressions = (response.content || []).sort((a, b) => {
+            this.tierGroups[index].progressions = progressions.sort((a, b) => {
               const sourceA = this.eventOrder[a.sourceEvent || ''] ?? 99;
               const sourceB = this.eventOrder[b.sourceEvent || ''] ?? 99;
               if (sourceA !== sourceB) return sourceA - sourceB;

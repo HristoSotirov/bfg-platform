@@ -20,14 +20,19 @@ public class CompetitionMapper {
 
         CompetitionDto dto = new CompetitionDto();
         dto.setUuid(entity.getId());
-        dto.setIsTemplate(entity.isTemplate());
         dto.setShortName(entity.getShortName());
         dto.setName(entity.getName());
-        dto.setDurationDays(entity.getDurationDays());
-        dto.setSeason(entity.getSeason());
         dto.setLocation(entity.getLocation());
         dto.setStartDate(entity.getStartDate());
         dto.setEndDate(entity.getEndDate());
+        dto.setEntrySubmissionsOpenAt(entity.getEntrySubmissionsOpenAt() != null
+            ? OffsetDateTime.ofInstant(entity.getEntrySubmissionsOpenAt(), ZoneOffset.UTC) : null);
+        dto.setEntrySubmissionsClosedAt(entity.getEntrySubmissionsClosedAt() != null
+            ? OffsetDateTime.ofInstant(entity.getEntrySubmissionsClosedAt(), ZoneOffset.UTC) : null);
+        dto.setLastChangesBeforeTmAt(entity.getLastChangesBeforeTmAt() != null
+            ? OffsetDateTime.ofInstant(entity.getLastChangesBeforeTmAt(), ZoneOffset.UTC) : null);
+        dto.setTechnicalMeetingAt(entity.getTechnicalMeetingAt() != null
+            ? OffsetDateTime.ofInstant(entity.getTechnicalMeetingAt(), ZoneOffset.UTC) : null);
         dto.setStatus(entity.getStatus() != null ? CompetitionStatus.fromValue(entity.getStatus()) : null);
         dto.setScopeType(entity.getScopeType() != null ? ScopeType.fromValue(entity.getScopeType()) : null);
         dto.setScoringSchemeId(entity.getScoringSchemeId());
@@ -44,14 +49,19 @@ public class CompetitionMapper {
 
     public static Competition fromRequest(CompetitionRequest request) {
         Competition entity = new Competition();
-        entity.setTemplate(request.getIsTemplate());
         entity.setShortName(request.getShortName());
         entity.setName(request.getName());
-        entity.setDurationDays(request.getDurationDays());
-        entity.setSeason(request.getSeason());
         entity.setLocation(request.getLocation());
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
+        entity.setEntrySubmissionsOpenAt(request.getEntrySubmissionsOpenAt() != null
+            ? request.getEntrySubmissionsOpenAt().toInstant() : null);
+        entity.setEntrySubmissionsClosedAt(request.getEntrySubmissionsClosedAt() != null
+            ? request.getEntrySubmissionsClosedAt().toInstant() : null);
+        entity.setLastChangesBeforeTmAt(request.getLastChangesBeforeTmAt() != null
+            ? request.getLastChangesBeforeTmAt().toInstant() : null);
+        entity.setTechnicalMeetingAt(request.getTechnicalMeetingAt() != null
+            ? request.getTechnicalMeetingAt().toInstant() : null);
         entity.setStatus(request.getStatus() != null ? request.getStatus().getValue() : null);
         entity.setScopeType(request.getScopeType() != null ? request.getScopeType().getValue() : null);
         entity.setScoringSchemeId(request.getScoringSchemeId());
@@ -60,14 +70,19 @@ public class CompetitionMapper {
     }
 
     public static void updateFromRequest(Competition entity, CompetitionRequest request) {
-        entity.setTemplate(request.getIsTemplate());
         entity.setShortName(request.getShortName());
         entity.setName(request.getName());
-        entity.setDurationDays(request.getDurationDays());
-        entity.setSeason(request.getSeason());
         entity.setLocation(request.getLocation());
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
+        entity.setEntrySubmissionsOpenAt(request.getEntrySubmissionsOpenAt() != null
+            ? request.getEntrySubmissionsOpenAt().toInstant() : null);
+        entity.setEntrySubmissionsClosedAt(request.getEntrySubmissionsClosedAt() != null
+            ? request.getEntrySubmissionsClosedAt().toInstant() : null);
+        entity.setLastChangesBeforeTmAt(request.getLastChangesBeforeTmAt() != null
+            ? request.getLastChangesBeforeTmAt().toInstant() : null);
+        entity.setTechnicalMeetingAt(request.getTechnicalMeetingAt() != null
+            ? request.getTechnicalMeetingAt().toInstant() : null);
         entity.setStatus(request.getStatus() != null ? request.getStatus().getValue() : null);
         entity.setScopeType(request.getScopeType() != null ? request.getScopeType().getValue() : null);
         entity.setScoringSchemeId(request.getScoringSchemeId());

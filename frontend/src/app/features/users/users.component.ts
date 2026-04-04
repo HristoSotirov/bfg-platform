@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../core/services/scope-visibility.service';
@@ -591,21 +592,22 @@ export class UsersComponent implements OnInit, OnDestroy {
     const filterString =
       filterParts.length > 0 ? filterParts.join(' and ') : undefined;
 
-    this.usersService
-      .getAllUsers(
+    fetchAllPages((skip, top) =>
+      this.usersService.getAllUsers(
         filterString,
         this.filters.search || undefined,
         this.orderBy as any,
-        1000, // Maximum allowed by backend
-        0,
+        top,
+        skip,
         undefined,
-      )
+      ) as any
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: (users: any[]) => {
           const visibleColumns = this.columns.filter((col) => col.visible);
 
-          const data = (response.content || []).map((u) => {
+          const data = users.map((u) => {
             const row: any = {};
 
             visibleColumns.forEach((col) => {
@@ -631,7 +633,7 @@ export class UsersComponent implements OnInit, OnDestroy {
                         INTERNAL: 'Вътрешен',
                         EXTERNAL: 'Външен',
                         NATIONAL: 'Национален',
-                      }[u.scopeType] ?? u.scopeType)
+                      } as Record<string, string>)[u.scopeType] ?? u.scopeType
                     : '';
                   break;
                 case 'isActive':

@@ -35,12 +35,12 @@
               class="px-4 py-3 text-sm whitespace-nowrap"
               [class]="column.id === 'status' ? getStatusClass(competition) : 'text-gray-900'"
             >
-              @if (column.id === 'isTemplate') {
+              @if (column.id === 'type') {
                 <span
                   class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium"
-                  [class]="competition.isTemplate ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+                  [class]="competition.status === 'DRAFT' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
                 >
-                  {{ competition.isTemplate ? 'Шаблон' : 'Състезание' }}
+                  {{ competition.status === 'DRAFT' ? 'Шаблон' : 'Реално' }}
                 </span>
               } @else {
                 {{ getCellValue(competition, column.id) }}
