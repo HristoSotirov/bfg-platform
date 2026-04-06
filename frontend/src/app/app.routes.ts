@@ -83,38 +83,6 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'competition-groups',
-    loadComponent: () =>
-      import('./features/competition-groups/competition-groups.component').then(
-        (m) => m.CompetitionGroupsComponent,
-      ),
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'disciplines',
-    loadComponent: () =>
-      import('./features/disciplines/disciplines.component').then(
-        (m) => m.DisciplinesComponent,
-      ),
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'scoring',
-    loadComponent: () =>
-      import('./features/scoring/scoring.component').then(
-        (m) => m.ScoringComponent,
-      ),
-    canActivate: [AuthGuard],
-  },
-  {
-    path: 'qualification',
-    loadComponent: () =>
-      import('./features/qualification/qualification.component').then(
-        (m) => m.QualificationComponent,
-      ),
-    canActivate: [AuthGuard],
-  },
-  {
     path: 'regulations',
     loadComponent: () =>
       import('./features/rules/rules.component').then((m) => m.RulesComponent),
