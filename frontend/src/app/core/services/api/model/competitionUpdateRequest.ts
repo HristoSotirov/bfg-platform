@@ -12,9 +12,9 @@ import { CompetitionType } from './competitionType';
 
 
 /**
- * Request payload for creating or updating a competition
+ * Request payload for updating a competition
  */
-export interface CompetitionRequest { 
+export interface CompetitionUpdateRequest { 
     shortName: string;
     name: string;
     location: string;
@@ -39,10 +39,9 @@ export interface CompetitionRequest {
     scoringSchemeId: string;
     qualificationSchemeId: string;
     competitionType: CompetitionType;
-    isTemplate: boolean;
-    status?: CompetitionStatus;
+    status: CompetitionStatus;
 }
-export namespace CompetitionRequest {
+export namespace CompetitionUpdateRequest {
 }
 
 

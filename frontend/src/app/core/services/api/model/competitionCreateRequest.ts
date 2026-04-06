@@ -7,14 +7,13 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { CompetitionStatus } from './competitionStatus';
 import { CompetitionType } from './competitionType';
 
 
 /**
- * Request payload for creating or updating a competition
+ * Request payload for creating a competition
  */
-export interface CompetitionRequest { 
+export interface CompetitionCreateRequest { 
     shortName: string;
     name: string;
     location: string;
@@ -40,9 +39,8 @@ export interface CompetitionRequest {
     qualificationSchemeId: string;
     competitionType: CompetitionType;
     isTemplate: boolean;
-    status?: CompetitionStatus;
 }
-export namespace CompetitionRequest {
+export namespace CompetitionCreateRequest {
 }
 
 

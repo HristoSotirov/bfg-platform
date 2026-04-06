@@ -9,6 +9,7 @@
  */
 import { CompetitionEventStatus } from './competitionEventStatus';
 import { QualificationEventType } from './qualificationEventType';
+import { DisciplineDefinitionDto } from './disciplineDefinitionDto';
 
 
 /**
@@ -18,8 +19,8 @@ export interface CompetitionTimetableEventDto {
     uuid?: string;
     competitionId?: string;
     disciplineId?: string;
+    discipline?: DisciplineDefinitionDto;
     qualificationEventType?: QualificationEventType;
-    qualificationStageNumber?: number;
     scheduledAt?: string;
     eventStatus?: CompetitionEventStatus;
     createdAt?: string;

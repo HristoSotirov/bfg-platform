@@ -19,15 +19,15 @@ import {
 } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
 import { DateTimePickerComponent } from '../../../../shared/components/datetime-picker/datetime-picker.component';
+import { DisciplineDetailsDialogComponent } from '../../../disciplines/components/discipline-details-dialog/discipline-details-dialog.component';
+import { CompetitionGroupDetailsDialogComponent } from '../../../competition-groups/components/competition-group-details-dialog/competition-group-details-dialog.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
   CompetitionsService,
   CompetitionDto,
-  CompetitionRequest,
+  CompetitionUpdateRequest,
   CompetitionStatus,
-  CompetitionDisciplineSchemeDto,
-  CompetitionDisciplineSchemesService,
-  CompetitionDisciplineSchemeRequest,
+  CompetitionType,
   CompetitionTimetableEventDto,
   CompetitionTimetableEventRequest,
   CompetitionTimetableEventsService,
@@ -39,9 +39,10 @@ import {
   QualificationSchemeDto,
   QualificationTiersService,
   QualificationTierDto,
-  DisciplineDefinitionsService,
   QualificationEventType,
   CompetitionEventStatus,
+  DisciplineDefinitionDto,
+  CompetitionGroupDefinitionDto,
 } from '../../../../core/services/api';
 import { SystemRole } from '../../../../core/models/navigation.model';
 
@@ -60,6 +61,8 @@ type Tab = 'details' | 'disciplines' | 'timetable' | 'entries' | 'progression' |
     SearchableSelectDropdownComponent,
     DatePickerComponent,
     DateTimePickerComponent,
+    DisciplineDetailsDialogComponent,
+    CompetitionGroupDetailsDialogComponent,
   ],
   templateUrl: './competition-details-page.component.html',
   styleUrl: './competition-details-page.component.scss',
@@ -78,7 +81,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   isEditing = false;
   saving = false;
   editError: string | null = null;
-  editData: Partial<CompetitionRequest> = {};
+  editData: Partial<CompetitionUpdateRequest> = {};
 
   // Scoring scheme data
   scoringScheme: ScoringSchemeDto | null = null;
@@ -90,14 +93,80 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   qualificationTiers: QualificationTierDto[] = [];
   loadingQualification = false;
 
-  // Disciplines
-  disciplineSchemes: CompetitionDisciplineSchemeDto[] = [];
-  loadingDisciplines = false;
-  newDisciplineId = '';
-  addingDiscipline = false;
-  addDisciplineError: string | null = null;
-  showDeleteDisciplineConfirm = false;
-  disciplineToDelete: CompetitionDisciplineSchemeDto | null = null;
+  // Disciplines (derived from timetable — no separate CRUD)
+  get timetableDisciplines(): { disciplineId: string; label: string }[] {
+    const seen = new Set<string>();
+    return this.timetableEvents
+      .filter((e) => e.disciplineId && !seen.has(e.disciplineId!) && seen.add(e.disciplineId!))
+      .map((e) => ({
+        disciplineId: e.disciplineId!,
+        label: e.discipline?.shortName || e.discipline?.name || e.disciplineId!,
+      }));
+  }
+
+  // Groups + disciplines for the disciplines tab, derived from expanded timetable data
+  get disciplinesByGroup(): { groupId: string; groupName: string; group: CompetitionGroupDefinitionDto | null; disciplines: { disciplineId: string; label: string; fullName: string; dto: DisciplineDefinitionDto | null }[] }[] {
+    const groupMap = new Map<string, { groupId: string; groupName: string; group: CompetitionGroupDefinitionDto | null; disciplines: { disciplineId: string; label: string; fullName: string; dto: DisciplineDefinitionDto | null }[] }>();
+    const seenDisciplines = new Set<string>();
+
+    for (const e of this.timetableEvents) {
+      if (!e.disciplineId || seenDisciplines.has(e.disciplineId)) continue;
+      seenDisciplines.add(e.disciplineId);
+
+      const disc = e.discipline;
+      const groupId = disc?.competitionGroupId || 'unknown';
+      const groupName = disc?.competitionGroup?.shortName || disc?.competitionGroup?.name || 'Без група';
+
+      if (!groupMap.has(groupId)) {
+        groupMap.set(groupId, { groupId, groupName, group: disc?.competitionGroup ?? null, disciplines: [] });
+      }
+      groupMap.get(groupId)!.disciplines.push({
+        disciplineId: e.disciplineId,
+        label: disc?.shortName || disc?.name || e.disciplineId,
+        fullName: disc?.name || disc?.shortName || e.disciplineId,
+        dto: disc ?? null,
+      });
+    }
+
+    return Array.from(groupMap.values()).sort((a, b) => a.groupName.localeCompare(b.groupName));
+  }
+
+  // Discipline / group detail dialogs
+  selectedDiscipline: DisciplineDefinitionDto | null = null;
+  selectedGroup: CompetitionGroupDefinitionDto | null = null;
+
+  get groupMap(): Record<string, string> {
+    const map: Record<string, string> = {};
+    for (const e of this.timetableEvents) {
+      const disc = e.discipline;
+      if (disc?.competitionGroupId && disc.competitionGroup) {
+        map[disc.competitionGroupId] = disc.competitionGroup.shortName || disc.competitionGroup.name || disc.competitionGroupId;
+      }
+    }
+    return map;
+  }
+
+  openDisciplineDetails(dto: DisciplineDefinitionDto | null): void {
+    if (!dto) return;
+    this.selectedDiscipline = dto;
+    this.cdr.markForCheck();
+  }
+
+  openGroupDetails(group: CompetitionGroupDefinitionDto | null): void {
+    if (!group) return;
+    this.selectedGroup = group;
+    this.cdr.markForCheck();
+  }
+
+  closeDisciplineDetails(): void {
+    this.selectedDiscipline = null;
+    this.cdr.markForCheck();
+  }
+
+  closeGroupDetails(): void {
+    this.selectedGroup = null;
+    this.cdr.markForCheck();
+  }
 
   // Timetable
   timetableEvents: CompetitionTimetableEventDto[] = [];
@@ -125,13 +194,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     return !!this.editingTimetableUuid || this.showAddTimetableEvent;
   }
 
-  readonly eventTypeOptions: SearchableSelectOption[] = [
-    { value: QualificationEventType.H, label: 'Серия' },
-    { value: QualificationEventType.Sf, label: 'Полуфинал' },
-    { value: QualificationEventType.Fb, label: 'Финал Б' },
-    { value: QualificationEventType.Fa, label: 'Финал А' },
-  ];
-
   readonly eventStatusOptions: SearchableSelectOption[] = [
     { value: CompetitionEventStatus.Scheduled, label: 'Насрочено' },
     { value: CompetitionEventStatus.InProgress, label: 'В ход' },
@@ -139,6 +201,19 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     { value: CompetitionEventStatus.Cancelled, label: 'Отменено' },
     { value: CompetitionEventStatus.Postponed, label: 'Отложено' },
   ];
+
+  get eventTypeOptions(): SearchableSelectOption[] {
+    const type = this.competition?.competitionType as string | undefined;
+    if (type === 'ERG' || type === 'NATIONAL_TEAM_TEST') {
+      return [{ value: QualificationEventType.H, label: 'Серия' }];
+    }
+    return [
+      { value: QualificationEventType.H, label: 'Серия' },
+      { value: QualificationEventType.Sf, label: 'Полуфинал' },
+      { value: QualificationEventType.Fb, label: 'Финал Б' },
+      { value: QualificationEventType.Fa, label: 'Финал А' },
+    ];
+  }
 
   // Option lists for editing — static search (load all on open, filter in-memory)
   scoringSchemeSearch = (): Observable<SearchableSelectOption[]> =>
@@ -159,19 +234,9 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       disabled: !s.isActive,
     }))));
 
-  disciplineSearch = (): Observable<SearchableSelectOption[]> =>
-    fetchAllPages((skip, top) =>
-      this.disciplineDefinitionsService.getAllDisciplineDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
-    ).pipe(map((items: any[]) => items.map((d: any) => ({
-      value: d.uuid || '',
-      label: d.name || '',
-      disabled: !d.isActive || this.disciplineSchemes.some((ds) => ds.disciplineId === d.uuid),
-    }))));
-
   userRole: SystemRole | null = null;
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: CompetitionStatus.Draft, label: 'Чернова' },
     { value: CompetitionStatus.Planned, label: 'Планирано' },
     { value: CompetitionStatus.RegistrationOpen, label: 'Регистрация' },
     { value: CompetitionStatus.RegistrationClosed, label: 'Затворена регистрация' },
@@ -180,10 +245,10 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     { value: CompetitionStatus.Cancelled, label: 'Отменено' },
   ];
 
-  readonly scopeTypeOptions: SearchableSelectOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Международен' },
-    { value: 'NATIONAL', label: 'Национален' },
+  readonly competitionTypeOptions: SearchableSelectOption[] = [
+    { value: 'STANDARD', label: 'Стандартно (вода)' },
+    { value: 'ERG', label: 'Ергометър' },
+    { value: 'NATIONAL_TEAM_TEST', label: 'Тест национален отбор' },
   ];
 
   constructor(
@@ -191,13 +256,11 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     private router: Router,
     private authService: AuthService,
     private competitionsService: CompetitionsService,
-    private disciplineSchemesService: CompetitionDisciplineSchemesService,
     private timetableEventsService: CompetitionTimetableEventsService,
     private scoringSchemesService: ScoringSchemesService,
     private scoringRulesService: ScoringRulesService,
     private qualificationSchemesService: QualificationSchemesService,
     private qualificationTiersService: QualificationTiersService,
-    private disciplineDefinitionsService: DisciplineDefinitionsService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -212,8 +275,9 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       const tab = params.get('tab') as Tab | null;
       if (tab && this.isValidTab(tab)) {
         this.activeTab = tab;
-      } else if (!tab) {
-        this.activeTab = 'details';
+      } else if (!tab && uuid) {
+        this.router.navigate(['/competitions', uuid, 'details'], { replaceUrl: true });
+        return;
       }
       if (uuid && uuid !== this.competition?.uuid) {
         this.loadCompetition(uuid);
@@ -234,7 +298,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   get tabs(): { id: Tab; label: string; available: boolean }[] {
-    const isReal = this.competition?.status !== 'DRAFT';
+    const isReal = !this.competition?.isTemplate;
     return [
       { id: 'details', label: 'Детайли', available: true },
       { id: 'disciplines', label: 'Дисциплини', available: true },
@@ -260,10 +324,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   private triggerTabLoad(tab: Tab): void {
-    if (tab === 'disciplines' && this.disciplineSchemes.length === 0 && !this.loadingDisciplines) {
-      this.loadDisciplines();
-    }
-    if (tab === 'timetable' && this.timetableEvents.length === 0 && !this.loadingTimetable) {
+    if ((tab === 'timetable' || tab === 'disciplines') && this.timetableEvents.length === 0 && !this.loadingTimetable) {
       this.loadTimetable();
     }
   }
@@ -299,7 +360,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         if (competition) {
           this.loadScoringSchemeData(competition.scoringSchemeId);
           this.loadQualificationSchemeData(competition.qualificationSchemeId);
-          this.loadDisciplines();
           this.triggerTabLoad(this.activeTab);
         }
         this.cdr.markForCheck();
@@ -362,31 +422,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  loadDisciplines(): void {
-    if (!this.competition?.uuid) return;
-    this.loadingDisciplines = true;
-    this.cdr.markForCheck();
-
-    fetchAllPages((skip, top) =>
-      this.disciplineSchemesService.getAllCompetitionDisciplineSchemes(
-        `competitionId eq '${this.competition!.uuid}'`,
-        top,
-        skip,
-        ['discipline.shortName_asc'],
-        ['discipline', 'discipline.competitionGroup'],
-      ) as any
-    )
-      .pipe(
-        catchError(() => of([])),
-        takeUntil(this.destroy$),
-      )
-      .subscribe((schemes: any[]) => {
-        this.disciplineSchemes = schemes;
-        this.loadingDisciplines = false;
-        this.cdr.markForCheck();
-      });
-  }
-
   loadTimetable(): void {
     if (!this.competition?.uuid) return;
     this.loadingTimetable = true;
@@ -398,6 +433,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         ['scheduledAt_asc'] as any,
         top,
         skip,
+        ['discipline', 'discipline.competitionGroup'] as any,
       ) as any
     )
       .pipe(
@@ -426,9 +462,9 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       lastChangesBeforeTmAt: this.competition.lastChangesBeforeTmAt as any,
       technicalMeetingAt: this.competition.technicalMeetingAt as any,
       status: this.competition.status as CompetitionStatus,
-      scopeType: this.competition.scopeType as any,
       scoringSchemeId: this.competition.scoringSchemeId,
       qualificationSchemeId: this.competition.qualificationSchemeId,
+      competitionType: this.competition.competitionType as CompetitionType,
     };
     this.isEditing = true;
     this.editError = null;
@@ -453,8 +489,8 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.editError = null;
     this.cdr.markForCheck();
 
-    const request: CompetitionRequest = {
-      ...(this.editData as CompetitionRequest),
+    const request: CompetitionUpdateRequest = {
+      ...(this.editData as CompetitionUpdateRequest),
       entrySubmissionsOpenAt: this.editData.entrySubmissionsOpenAt
         ? this.appendZ(this.editData.entrySubmissionsOpenAt) as any
         : undefined,
@@ -490,117 +526,12 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ===== DISCIPLINES TAB =====
-
-  addDiscipline(): void {
-    if (!this.competition?.uuid || !this.newDisciplineId) return;
-    this.addingDiscipline = true;
-    this.addDisciplineError = null;
-    this.cdr.markForCheck();
-
-    const request: CompetitionDisciplineSchemeRequest = {
-      competitionId: this.competition.uuid,
-      disciplineId: this.newDisciplineId,
-    };
-
-    this.disciplineSchemesService
-      .createCompetitionDisciplineScheme(request)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.newDisciplineId = '';
-          this.addingDiscipline = false;
-          this.loadDisciplines();
-        },
-        error: (err) => {
-          this.addDisciplineError = err?.error?.message || 'Грешка при добавяне';
-          this.addingDiscipline = false;
-          this.cdr.markForCheck();
-        },
-      });
-  }
-
-  confirmDeleteDiscipline(ds: CompetitionDisciplineSchemeDto): void {
-    this.disciplineToDelete = ds;
-    this.showDeleteDisciplineConfirm = true;
-    this.cdr.markForCheck();
-  }
-
-  cancelDeleteDiscipline(): void {
-    this.disciplineToDelete = null;
-    this.showDeleteDisciplineConfirm = false;
-    this.cdr.markForCheck();
-  }
-
-  deleteDiscipline(): void {
-    if (!this.disciplineToDelete?.uuid) return;
-    this.disciplineSchemesService
-      .deleteCompetitionDisciplineSchemeByUuid(this.disciplineToDelete.uuid)
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: () => {
-          this.disciplineToDelete = null;
-          this.showDeleteDisciplineConfirm = false;
-          this.loadDisciplines();
-        },
-        error: (err) => {
-          this.addDisciplineError = err?.error?.message || 'Грешка при изтриване';
-          this.disciplineToDelete = null;
-          this.showDeleteDisciplineConfirm = false;
-          this.cdr.markForCheck();
-        },
-      });
-  }
-
-  getDisciplineName(ds: CompetitionDisciplineSchemeDto): string {
-    return (ds as any).discipline?.name || ds.disciplineId || '-';
-  }
-
-  getDisciplineShortName(ds: CompetitionDisciplineSchemeDto): string {
-    return (ds as any).discipline?.shortName || '-';
-  }
-
-  getDisciplineBoatClass(ds: CompetitionDisciplineSchemeDto): string {
-    return (ds as any).discipline?.boatClass || '-';
-  }
-
-  getGroupName(ds: CompetitionDisciplineSchemeDto): string {
-    return (ds as any).discipline?.competitionGroup?.name || 'Без група';
-  }
-
-  getDisciplineNameById(disciplineId: string | undefined): string {
-    if (!disciplineId) return '-';
-    const ds = this.disciplineSchemes.find((s) => s.disciplineId === disciplineId);
-    return ds ? this.getDisciplineName(ds) : disciplineId;
-  }
-
-  get disciplinesByGroup(): { groupId: string | undefined; groupName: string; groupShortName: string; disciplines: CompetitionDisciplineSchemeDto[] }[] {
-    const map = new Map<string, CompetitionDisciplineSchemeDto[]>();
-    for (const ds of this.disciplineSchemes) {
-      const groupId = (ds as any).discipline?.competitionGroup?.uuid || '';
-      if (!map.has(groupId)) map.set(groupId, []);
-      map.get(groupId)!.push(ds);
-    }
-    return Array.from(map.entries())
-      .map(([groupId, disciplines]) => {
-        const group = (disciplines[0] as any).discipline?.competitionGroup;
-        const groupShortName = group?.shortName || group?.name || '';
-        return {
-          groupId: groupId || undefined,
-          groupName: group?.name || 'Без група',
-          groupShortName,
-          disciplines,
-        };
-      })
-      .sort((a, b) => a.groupShortName.localeCompare(b.groupShortName, 'bg'));
-  }
-
   // ===== TIMETABLE TAB =====
 
   get disciplineOptionsForTimetable(): SearchableSelectOption[] {
-    return this.disciplineSchemes.map((ds) => ({
-      value: ds.disciplineId || '',
-      label: this.getDisciplineName(ds),
+    return this.timetableDisciplines.map((d) => ({
+      value: d.disciplineId,
+      label: d.label,
     }));
   }
 
@@ -610,7 +541,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.newEvent = {
       competitionId: this.competition?.uuid,
       qualificationEventType: QualificationEventType.H,
-      qualificationStageNumber: 1,
     };
     this.showAddTimetableEvent = true;
     this.timetableError = null;
@@ -671,7 +601,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       competitionId: event.competitionId!,
       disciplineId: event.disciplineId!,
       qualificationEventType: event.qualificationEventType! as any,
-      qualificationStageNumber: event.qualificationStageNumber ?? undefined,
       eventStatus: event.eventStatus! as any,
     };
     this.cdr.markForCheck();
@@ -741,6 +670,12 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  getDisciplineNameById(disciplineId: string | undefined): string {
+    if (!disciplineId) return '-';
+    const d = this.timetableDisciplines.find((d) => d.disciplineId === disciplineId);
+    return d ? d.label : disciplineId;
+  }
+
   getEventTypLabel(type: string | undefined): string {
     const labels: Record<string, string> = {
       H: 'Серия',
@@ -800,6 +735,15 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     }
   }
 
+  getCompetitionTypeLabel(type: string | undefined): string {
+    const labels: Record<string, string> = {
+      STANDARD: 'Стандартно (вода)',
+      ERG: 'Ергометър',
+      NATIONAL_TEAM_TEST: 'Тест национален отбор',
+    };
+    return type ? (labels[type] ?? type) : '-';
+  }
+
   getStatusLabel(status: string | undefined): string {
     const labels: Record<string, string> = {
       DRAFT: 'Чернова',
@@ -824,14 +768,5 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       CANCELLED: 'text-red-600',
     };
     return status ? (classes[status] ?? 'text-gray-900') : 'text-gray-900';
-  }
-
-  getScopeTypeLabel(scopeType: string | undefined): string {
-    const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Международен',
-      NATIONAL: 'Национален',
-    };
-    return scopeType ? (labels[scopeType] ?? scopeType) : '-';
   }
 }

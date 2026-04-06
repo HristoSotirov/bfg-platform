@@ -118,10 +118,6 @@ paths:
     $ref: "./competitions/paths.yaml#/~1competitions"
   /competitions/{uuid}:
     $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}"
-  /competition-discipline-schemes:
-    $ref: "./competitions/paths.yaml#/~1competition-discipline-schemes"
-  /competition-discipline-schemes/{uuid}:
-    $ref: "./competitions/paths.yaml#/~1competition-discipline-schemes~1{uuid}"
   /competition-timetable-events:
     $ref: "./competitions/paths.yaml#/~1competition-timetable-events"
   /competition-timetable-events/{uuid}:
@@ -234,6 +230,8 @@ components:
       $ref: "./competitions/schemas.yaml#/CompetitionStatus"
     CompetitionEventStatus:
       $ref: "./competitions/schemas.yaml#/CompetitionEventStatus"
+    CompetitionType:
+      $ref: "./competitions/schemas.yaml#/CompetitionType"
     FinishStatus:
       $ref: "./competitions/schemas.yaml#/FinishStatus"
     SeatPosition:
@@ -260,8 +258,6 @@ components:
       $ref: "./competitions/schemas.yaml#/QualificationProgressionDto"
     CompetitionDto:
       $ref: "./competitions/schemas.yaml#/CompetitionDto"
-    CompetitionDisciplineSchemeDto:
-      $ref: "./competitions/schemas.yaml#/CompetitionDisciplineSchemeDto"
     CompetitionTimetableEventDto:
       $ref: "./competitions/schemas.yaml#/CompetitionTimetableEventDto"
     EntryDto:
@@ -292,9 +288,9 @@ components:
       $ref: "./competitions/schemas.yaml#/QualificationTierRequest"
     QualificationProgressionRequest:
       $ref: "./competitions/schemas.yaml#/QualificationProgressionRequest"
-    CompetitionRequest:
-      $ref: "./competitions/schemas.yaml#/CompetitionRequest"
-    CompetitionDisciplineSchemeRequest:
-      $ref: "./competitions/schemas.yaml#/CompetitionDisciplineSchemeRequest"
+    CompetitionCreateRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionCreateRequest"
+    CompetitionUpdateRequest:
+      $ref: "./competitions/schemas.yaml#/CompetitionUpdateRequest"
     CompetitionTimetableEventRequest:
       $ref: "./competitions/schemas.yaml#/CompetitionTimetableEventRequest"

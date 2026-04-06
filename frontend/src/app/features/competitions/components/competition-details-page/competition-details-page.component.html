@@ -23,11 +23,11 @@
             <h1 class="text-2xl font-bold text-gray-900 truncate">{{ competition.name }}</h1>
             <span
               class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium flex-shrink-0"
-              [class]="competition.status === 'DRAFT' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
+              [class]="competition.isTemplate ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'"
             >
-              {{ competition.status === 'DRAFT' ? 'Шаблон' : 'Реално' }}
+              {{ competition.isTemplate ? 'Шаблон' : 'Реално' }}
             </span>
-            @if (competition.status !== 'DRAFT') {
+            @if (!competition.isTemplate) {
               <span class="text-sm flex-shrink-0" [class]="getStatusClass(competition.status)">
                 {{ getStatusLabel(competition.status) }}
               </span>
@@ -43,7 +43,7 @@
     @if (competition) {
       <!-- Tab bar -->
       <div class="border-b border-gray-200 mb-4">
-        <nav class="-mb-px flex gap-1 overflow-x-auto">
+        <nav class="-mb-px flex gap-1 overflow-x-auto tab-nav">
           @for (tab of tabs; track tab.id) {
             @if (tab.available) {
               <button
@@ -92,7 +92,20 @@
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-36 flex-shrink-0">Място:</span>
                     <span class="text-sm font-medium">{{ competition.location || '-' }}</span>
-                  </div>                  <div class="flex items-baseline">
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Формат:</span>
+                    <span class="text-sm font-medium">{{ getCompetitionTypeLabel(competition.competitionType) }}</span>
+                  </div>
+                  @if (!competition.isTemplate) {
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Статус:</span>
+                      <span class="text-sm font-medium" [class]="getStatusClass(competition.status)">
+                        {{ getStatusLabel(competition.status) }}
+                      </span>
+                    </div>
+                  }
+                  <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-36 flex-shrink-0">Начална дата:</span>
                     <span class="text-sm font-medium">{{ formatDate(competition.startDate) }}</span>
                   </div>
@@ -100,7 +113,7 @@
                     <span class="text-xs text-gray-500 w-36 flex-shrink-0">Крайна дата:</span>
                     <span class="text-sm font-medium">{{ formatDate(competition.endDate) }}</span>
                   </div>
-                  @if (competition.status !== 'DRAFT') {
+                  @if (!competition.isTemplate) {
                     <div class="flex items-baseline">
                       <span class="text-xs text-gray-500 w-36 flex-shrink-0">Отв. записвания:</span>
                       <span class="text-sm font-medium">{{ formatDateTime(competition.entrySubmissionsOpenAt) }}</span>
@@ -117,16 +130,6 @@
                       <span class="text-xs text-gray-500 w-36 flex-shrink-0">Техн. съвещание:</span>
                       <span class="text-sm font-medium">{{ formatDateTime(competition.technicalMeetingAt) }}</span>
                     </div>
-                    <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Статус:</span>
-                      <span class="text-sm font-medium" [class]="getStatusClass(competition.status)">
-                        {{ getStatusLabel(competition.status) }}
-                      </span>
-                    </div>
-                    <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Обхват:</span>
-                      <span class="text-sm font-medium">{{ getScopeTypeLabel(competition.scopeType) }}</span>
-                    </div>
                   }
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-36 flex-shrink-0">Създадено на:</span>
@@ -140,28 +143,49 @@
               } @else {
                 <!-- Edit form -->
                 <div class="space-y-3">
-                  <!-- Short name | Name -->
-                  <div class="grid grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Кратко наименование:</label>
-                      <input type="text" [(ngModel)]="editData.shortName"
-                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-                    </div>
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Пълно наименование:</label>
-                      <input type="text" [(ngModel)]="editData.name"
-                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
-                    </div>
+                  <!-- Short name -->
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Кратко наименование:</label>
+                    <input type="text" [(ngModel)]="editData.shortName"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
 
-                  <!-- Location (all competitions) -->
+                  <!-- Name -->
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Пълно наименование:</label>
+                    <input type="text" [(ngModel)]="editData.name"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+
                   <div>
                     <label class="block text-xs text-gray-500 mb-0.5">Място:</label>
                     <input type="text" [(ngModel)]="editData.location"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
 
-                  <!-- Start date | End date (all competitions) -->
+                  <!-- Competition type -->
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Формат:</label>
+                    <app-searchable-select-dropdown
+                      [options]="competitionTypeOptions"
+                      [(ngModel)]="editData.competitionType"
+                      placeholder="Изберете формат..."
+                    ></app-searchable-select-dropdown>
+                  </div>
+
+                  @if (!competition.isTemplate) {
+                    <!-- Status -->
+                    <div>
+                      <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
+                      <app-searchable-select-dropdown
+                        [options]="statusOptions"
+                        [(ngModel)]="editData.status"
+                        placeholder="Изберете..."
+                      ></app-searchable-select-dropdown>
+                    </div>
+                  }
+
+                  <!-- Start date | End date -->
                   <div class="grid grid-cols-2 gap-3">
                     <app-date-picker
                       label="Начална дата"
@@ -179,7 +203,7 @@
                     ></app-date-picker>
                   </div>
 
-                  @if (competition.status !== 'DRAFT') {
+                  @if (!competition.isTemplate) {
                     <!-- Submissions open | Submissions closed -->
                     <div class="grid grid-cols-2 gap-3">
                       <app-datetime-picker
@@ -214,26 +238,6 @@
                         placeholder="Изберете дата и час..."
                         size="sm"
                       ></app-datetime-picker>
-                    </div>
-
-                    <!-- Status | Scope -->
-                    <div class="grid grid-cols-2 gap-3">
-                      <div>
-                        <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
-                        <app-searchable-select-dropdown
-                          [options]="statusOptions"
-                          [(ngModel)]="editData.status"
-                          placeholder="Изберете..."
-                        ></app-searchable-select-dropdown>
-                      </div>
-                      <div>
-                        <label class="block text-xs text-gray-500 mb-0.5">Обхват:</label>
-                        <app-searchable-select-dropdown
-                          [options]="scopeTypeOptions"
-                          [(ngModel)]="editData.scopeType"
-                          placeholder="Изберете..."
-                        ></app-searchable-select-dropdown>
-                      </div>
                     </div>
                   }
 
@@ -384,88 +388,49 @@
         <!-- ===== DISCIPLINES TAB ===== -->
         @if (activeTab === 'disciplines') {
           <div class="max-w-3xl space-y-4">
+            <p class="text-sm text-gray-500">Дисциплините се извеждат от разписанието на събитията.</p>
 
-            @if (canEdit) {
-              <div class="bg-white border border-gray-200 rounded-lg p-4">
-                <h3 class="text-sm font-medium text-gray-700 mb-3">Добавяне на дисциплина</h3>
-                <div class="flex items-end gap-3">
-                  <div class="flex-1">
-                    <app-searchable-select-dropdown
-                      [staticSearch]="disciplineSearch"
-                      [(ngModel)]="newDisciplineId"
-                      placeholder="Изберете дисциплина..."
-                    ></app-searchable-select-dropdown>
+            @if (loadingTimetable) {
+              <div class="text-sm text-gray-500">Зареждане...</div>
+            } @else if (disciplinesByGroup.length === 0) {
+              <div class="text-sm text-gray-400">Няма дисциплини (добавете събития в разписанието)</div>
+            } @else {
+              @for (group of disciplinesByGroup; track group.groupId) {
+                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                  <div class="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
+                    <button
+                      type="button"
+                      class="text-sm font-semibold"
+                      [class]="group.group ? 'text-bfg-blue hover:underline' : 'text-gray-700 cursor-default'"
+                      (click)="openGroupDetails(group.group)"
+                    >{{ group.groupName }}</button>
+                    <span class="text-xs text-gray-400">({{ group.disciplines.length }})</span>
                   </div>
-                  <app-button
-                    variant="primary"
-                    size="md"
-                    text="Добави"
-                    [disabled]="!newDisciplineId || addingDiscipline"
-                    (click)="addDiscipline()"
-                  ></app-button>
-                </div>
-                @if (addDisciplineError) {
-                  <div class="mt-2 px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
-                    <p class="text-sm text-red-700">{{ addDisciplineError }}</p>
-                    <button type="button" class="text-red-400 hover:text-red-600" (click)="addDisciplineError = null">
-                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
-                  </div>
-                }
-              </div>
-            }
-
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
-              <table class="min-w-full divide-y divide-gray-200 text-sm">
-                <thead class="bg-gray-50">
-                  <tr>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Дисциплина</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Кратко</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Клас лодка</th>
-                    @if (canEdit) {
-                      <th class="px-4 py-3 text-left text-xs font-medium text-gray-500"></th>
-                    }
-                  </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                  @if (loadingDisciplines) {
-                    <tr>
-                      <td colspan="4" class="px-4 py-6 text-center text-gray-500">Зареждане...</td>
-                    </tr>
-                  } @else if (disciplinesByGroup.length === 0) {
-                    <tr>
-                      <td colspan="4" class="px-4 py-8 text-center text-gray-500">Няма добавени дисциплини</td>
-                    </tr>
-                  } @else {
-                    @for (group of disciplinesByGroup; track group.groupId) {
-                      <tr class="bg-gray-50">
-                        <td [attr.colspan]="canEdit ? 4 : 3" class="px-4 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                          {{ group.groupShortName || group.groupName }}
-                        </td>
+                  <table class="min-w-full divide-y divide-gray-100 text-sm">
+                    <thead class="bg-white">
+                      <tr>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Кратко наименование</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Пълно наименование</th>
                       </tr>
-                      @for (ds of group.disciplines; track ds.uuid) {
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-100">
+                      @for (d of group.disciplines; track d.disciplineId) {
                         <tr class="hover:bg-gray-50">
-                          <td class="px-4 py-3 pl-6">{{ getDisciplineName(ds) }}</td>
-                          <td class="px-4 py-3">{{ getDisciplineShortName(ds) }}</td>
-                          <td class="px-4 py-3">{{ getDisciplineBoatClass(ds) }}</td>
-                          @if (canEdit) {
-                            <td class="px-4 py-3">
-                              <button
-                                type="button"
-                                class="text-red-600 hover:text-red-800 text-xs"
-                                (click)="confirmDeleteDiscipline(ds)"
-                              >Изтрий</button>
-                            </td>
-                          }
+                          <td class="px-4 py-2 font-medium">
+                            <button
+                              type="button"
+                              class="text-bfg-blue hover:underline"
+                              (click)="openDisciplineDetails(d.dto)"
+                            >{{ d.label }}</button>
+                          </td>
+                          <td class="px-4 py-2 text-gray-600">{{ d.fullName }}</td>
                         </tr>
                       }
-                    }
-                  }
-                </tbody>
-              </table>
-            </div>
+                    </tbody>
+                  </table>
+                </div>
+              }
+            }
           </div>
         }
 
@@ -482,7 +447,7 @@
               } @else {
                 <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
                   <h3 class="text-sm font-medium text-gray-700">Ново събитие</h3>
-                  <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                  <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div>
                       <label class="block text-xs text-gray-500 mb-0.5">Дисциплина <span class="text-red-500">*</span>:</label>
                       <app-searchable-select-dropdown
@@ -498,11 +463,6 @@
                         [(ngModel)]="newEvent.qualificationEventType"
                         placeholder="Изберете..."
                       ></app-searchable-select-dropdown>
-                    </div>
-                    <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Номер серия <span class="text-red-500">*</span>:</label>
-                      <input type="number" [(ngModel)]="newEvent.qualificationStageNumber" min="1"
-                        class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                     </div>
                     <div>
                       <app-datetime-picker
@@ -526,7 +486,7 @@
                   }
                   <div class="flex gap-3">
                     <app-button variant="outline" size="sm" text="Отказ" [disabled]="savingTimetable" (click)="cancelAddTimetableEvent()"></app-button>
-                    <app-button variant="primary" size="sm" text="Запази" [disabled]="!newEvent.disciplineId || !newEvent.qualificationEventType || !newEvent.qualificationStageNumber || !newEventScheduledAt || savingTimetable" (click)="saveAddTimetableEvent()"></app-button>
+                    <app-button variant="primary" size="sm" text="Запази" [disabled]="!newEvent.disciplineId || !newEvent.qualificationEventType || !newEventScheduledAt || savingTimetable" (click)="saveAddTimetableEvent()"></app-button>
                   </div>
                 </div>
               }
@@ -539,7 +499,6 @@
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">#</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Дисциплина</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Тип</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Серия №</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Дата</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Час</th>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Статус</th>
@@ -551,7 +510,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                   @if (loadingTimetable) {
                     <tr>
-                      <td colspan="9" class="px-4 py-6 text-center text-gray-500">Зареждане...</td>
+                      <td colspan="7" class="px-4 py-6 text-center text-gray-500">Зареждане...</td>
                     </tr>
                   } @else {
                     @for (event of timetableEvents; track event.uuid; let i = $index) {
@@ -571,10 +530,6 @@
                               [(ngModel)]="editTimetableData.qualificationEventType"
                               placeholder="Тип..."
                             ></app-searchable-select-dropdown>
-                          </td>
-                          <td class="px-4 py-2">
-                            <input type="number" [(ngModel)]="editTimetableData.qualificationStageNumber" min="1"
-                              class="w-16 px-2 py-1 border border-gray-300 rounded text-sm" />
                           </td>
                           <td class="px-4 py-2" colspan="2">
                             <app-datetime-picker
@@ -603,9 +558,14 @@
                       } @else {
                         <tr class="hover:bg-gray-50">
                           <td class="px-4 py-3">{{ i + 1 }}</td>
-                          <td class="px-4 py-3">{{ getDisciplineNameById(event.disciplineId) }}</td>
+                          <td class="px-4 py-3">
+                            <button
+                              type="button"
+                              class="text-bfg-blue hover:underline"
+                              (click)="openDisciplineDetails(event.discipline ?? null)"
+                            >{{ event.discipline?.shortName || event.discipline?.name || event.disciplineId }}</button>
+                          </td>
                           <td class="px-4 py-3">{{ getEventTypLabel(event.qualificationEventType) }}</td>
-                          <td class="px-4 py-3">{{ event.qualificationStageNumber ?? '-' }}</td>
                           <td class="px-4 py-3">{{ formatDateOnly(event.scheduledAt) }}</td>
                           <td class="px-4 py-3">{{ formatTimeOnly(event.scheduledAt) }}</td>
                           <td class="px-4 py-3">{{ getEventStatusLabel(event.eventStatus) }}</td>
@@ -621,7 +581,7 @@
                       }
                     } @empty {
                       <tr>
-                        <td colspan="9" class="px-4 py-8 text-center text-gray-500">
+                        <td colspan="7" class="px-4 py-8 text-center text-gray-500">
                           Няма добавени събития в разписанието
                         </td>
                       </tr>
@@ -683,21 +643,21 @@
     </div>
   </div>
 </app-dialog>
-<app-dialog
-  [isOpen]="showDeleteDisciplineConfirm"
-  title="Потвърждение за изтриване"
-  size="md"
-  (closed)="cancelDeleteDiscipline()"
->
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">
-      Сигурни ли сте, че искате да премахнете
-      <strong>{{ getDisciplineNameById(disciplineToDelete?.disciplineId) }}</strong>
-      от това състезание?
-    </p>
-    <div class="flex gap-3 justify-center">
-      <app-button variant="outline" size="md" text="Отказ" (click)="cancelDeleteDiscipline()"></app-button>
-      <app-button variant="primary" size="md" text="Изтрий" (click)="deleteDiscipline()"></app-button>
-    </div>
-  </div>
-</app-dialog>
+
+<!-- Discipline details dialog -->
+<app-discipline-details-dialog
+  [isOpen]="!!selectedDiscipline"
+  [discipline]="selectedDiscipline"
+  [canEdit]="false"
+  [groupMap]="groupMap"
+  (closed)="closeDisciplineDetails()"
+></app-discipline-details-dialog>
+
+<!-- Competition group details dialog -->
+<app-competition-group-details-dialog
+  [isOpen]="!!selectedGroup"
+  [group]="selectedGroup"
+  [canEdit]="false"
+  [groupMap]="groupMap"
+  (closed)="closeGroupDetails()"
+></app-competition-group-details-dialog>

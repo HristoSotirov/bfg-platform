@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CompetitionTimetableEventService {
-    Page<CompetitionTimetableEventDto> getAll(String filter, List<String> orderBy, Integer top, Integer skip);
+    Page<CompetitionTimetableEventDto> getAll(String filter, List<String> orderBy, Integer top, Integer skip, List<String> expand);
     Optional<CompetitionTimetableEventDto> getByUuid(UUID uuid);
     Optional<CompetitionTimetableEventDto> create(CompetitionTimetableEventRequest request);
     Optional<CompetitionTimetableEventDto> update(UUID uuid, CompetitionTimetableEventRequest request);

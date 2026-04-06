@@ -5,8 +5,9 @@ import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.util.PageConverter;
 import com.bfg.platform.competition.service.CompetitionService;
 import com.bfg.platform.gen.api.CompetitionsApi;
+import com.bfg.platform.gen.model.CompetitionCreateRequest;
 import com.bfg.platform.gen.model.CompetitionDto;
-import com.bfg.platform.gen.model.CompetitionRequest;
+import com.bfg.platform.gen.model.CompetitionUpdateRequest;
 import com.bfg.platform.gen.model.GetAllCompetitions200Response;
 import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
@@ -37,7 +38,7 @@ public class CompetitionController implements CompetitionsApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<CompetitionDto> createCompetition(
-            @Valid @RequestBody CompetitionRequest request) {
+            @Valid @RequestBody CompetitionCreateRequest request) {
         return service.create(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create competition"));
@@ -54,7 +55,7 @@ public class CompetitionController implements CompetitionsApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<CompetitionDto> updateCompetitionByUuid(
-            UUID uuid, @Valid @RequestBody CompetitionRequest request) {
+            UUID uuid, @Valid @RequestBody CompetitionUpdateRequest request) {
         return service.update(uuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Competition", uuid));

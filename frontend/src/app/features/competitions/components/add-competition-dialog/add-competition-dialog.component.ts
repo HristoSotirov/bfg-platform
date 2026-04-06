@@ -20,19 +20,16 @@ import { DatePickerComponent } from '../../../../shared/components/date-picker/d
 import { DateTimePickerComponent } from '../../../../shared/components/datetime-picker/datetime-picker.component';
 import {
   CompetitionsService,
-  CompetitionRequest,
-  CompetitionStatus,
+  CompetitionCreateRequest,
+  CompetitionType,
   CompetitionDto,
   ScoringSchemesService,
   QualificationSchemesService,
-  CompetitionDisciplineSchemesService,
   CompetitionTimetableEventsService,
-  CompetitionDisciplineSchemeRequest,
   CompetitionTimetableEventRequest,
-  CompetitionDisciplineSchemeDto,
   CompetitionTimetableEventDto,
 } from '../../../../core/services/api';
-import { Subject, takeUntil, of, from, concatMap, catchError, toArray, Observable, map, tap } from 'rxjs';
+import { Subject, takeUntil, of, from, concatMap, catchError, toArray, Observable, map } from 'rxjs';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
@@ -69,14 +66,14 @@ export class AddCompetitionDialogComponent implements OnChanges {
     entrySubmissionsClosedAt: '',
     lastChangesBeforeTmAt: '',
     technicalMeetingAt: '',
-    status: '' as string,
-    scopeType: '' as string,
     scoringSchemeId: '',
     qualificationSchemeId: '',
+    competitionType: '' as string,
+    isTemplate: false,
   };
 
-  get isDraft(): boolean {
-    return this.formData.status === CompetitionStatus.Draft;
+  get isTemplate(): boolean {
+    return this.formData.isTemplate;
   }
 
   private cachedTemplates: CompetitionDto[] = [];
@@ -102,7 +99,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
   templateSearch = (): Observable<SearchableSelectOption[]> =>
     fetchAllPages((skip, top) =>
       this.competitionsService.getAllCompetitions(
-        "status eq 'DRAFT'", undefined, ['name_asc'] as any, top, skip
+        "isTemplate eq true", undefined, ['name_asc'] as any, top, skip
       ) as any
     ).pipe(map((items: any[]) => {
       this.cachedTemplates = items;
@@ -116,15 +113,10 @@ export class AddCompetitionDialogComponent implements OnChanges {
       });
     }));
 
-  readonly statusOptions: SearchableSelectOption[] = [
-    { value: CompetitionStatus.Draft, label: 'Шаблон (Чернова)' },
-    { value: CompetitionStatus.Planned, label: 'Реално (Планирано)' },
-  ];
-
-  readonly scopeTypeOptions: SearchableSelectOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Международен' },
-    { value: 'NATIONAL', label: 'Национален' },
+  readonly competitionTypeOptions: SearchableSelectOption[] = [
+    { value: 'STANDARD', label: 'Стандартно (вода)' },
+    { value: 'ERG', label: 'Ергометър' },
+    { value: 'NATIONAL_TEAM_TEST', label: 'Тест национален отбор' },
   ];
 
   saving = false;
@@ -138,7 +130,6 @@ export class AddCompetitionDialogComponent implements OnChanges {
     private competitionsService: CompetitionsService,
     private scoringSchemesService: ScoringSchemesService,
     private qualificationSchemesService: QualificationSchemesService,
-    private disciplineSchemesService: CompetitionDisciplineSchemesService,
     private timetableEventsService: CompetitionTimetableEventsService,
     private cdr: ChangeDetectorRef,
   ) {}
@@ -161,9 +152,8 @@ export class AddCompetitionDialogComponent implements OnChanges {
     if (!this.formData.scoringSchemeId || !this.formData.qualificationSchemeId) return false;
     if (!this.formData.startDate || !this.formData.endDate) return false;
     if (!this.formData.location) return false;
-    if (!this.formData.scopeType) return false;
-    if (!this.formData.status) return false;
-    if (!this.isDraft) {
+    if (!this.formData.competitionType) return false;
+    if (!this.isTemplate) {
       if (!this.formData.entrySubmissionsOpenAt || !this.formData.entrySubmissionsClosedAt) return false;
       if (!this.formData.lastChangesBeforeTmAt || !this.formData.technicalMeetingAt) return false;
     }
@@ -188,9 +178,9 @@ export class AddCompetitionDialogComponent implements OnChanges {
     return days > 0 ? days : null;
   }
 
-  onStatusChange(value: string): void {
-    this.formData.status = value;
-    if (this.isDraft) {
+  onTemplateToggle(isTemplate: boolean): void {
+    this.formData.isTemplate = isTemplate;
+    if (isTemplate) {
       this.selectedTemplateId = '';
       this.showTemplatePicker = false;
       this.copyPartialError = null;
@@ -208,7 +198,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
     this.formData.location = template.location || '';
     this.formData.scoringSchemeId = template.scoringSchemeId || '';
     this.formData.qualificationSchemeId = template.qualificationSchemeId || '';
-    this.formData.scopeType = template.scopeType || 'INTERNAL';
+    this.formData.competitionType = (template.competitionType as string) || '';
     this.cdr.markForCheck();
   }
 
@@ -225,20 +215,20 @@ export class AddCompetitionDialogComponent implements OnChanges {
     this.copyPartialError = null;
     this.cdr.markForCheck();
 
-    const request: CompetitionRequest = {
+    const request: CompetitionCreateRequest = {
       shortName: this.formData.shortName,
       name: this.formData.name,
       location: this.formData.location,
       startDate: this.formData.startDate,
       endDate: this.formData.endDate,
-      entrySubmissionsOpenAt: this.isDraft ? undefined : (this.formData.entrySubmissionsOpenAt || undefined),
-      entrySubmissionsClosedAt: this.isDraft ? undefined : (this.formData.entrySubmissionsClosedAt || undefined),
-      lastChangesBeforeTmAt: this.isDraft ? undefined : (this.formData.lastChangesBeforeTmAt || undefined),
-      technicalMeetingAt: this.isDraft ? undefined : (this.formData.technicalMeetingAt || undefined),
-      status: (this.formData.status as CompetitionStatus),
-      scopeType: this.formData.scopeType as any,
+      entrySubmissionsOpenAt: this.isTemplate ? undefined : (this.formData.entrySubmissionsOpenAt || undefined),
+      entrySubmissionsClosedAt: this.isTemplate ? undefined : (this.formData.entrySubmissionsClosedAt || undefined),
+      lastChangesBeforeTmAt: this.isTemplate ? undefined : (this.formData.lastChangesBeforeTmAt || undefined),
+      technicalMeetingAt: this.isTemplate ? undefined : (this.formData.technicalMeetingAt || undefined),
       scoringSchemeId: this.formData.scoringSchemeId,
       qualificationSchemeId: this.formData.qualificationSchemeId,
+      competitionType: (this.formData.competitionType as CompetitionType),
+      isTemplate: this.formData.isTemplate,
     };
 
     this.competitionsService
@@ -251,7 +241,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
             this.added.emit();
             return;
           }
-          this.copyFromTemplate(created.uuid, this.selectedTemplateId);
+          this.copyTimetableEventsFromTemplate(created.uuid, this.selectedTemplateId);
         },
         error: (err) => {
           this.saving = false;
@@ -261,49 +251,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
       });
   }
 
-  private copyFromTemplate(newUuid: string, templateId: string): void {
-    // Load disciplines
-    fetchAllPages((skip, top) =>
-      this.disciplineSchemesService.getAllCompetitionDisciplineSchemes(
-        `competitionId eq '${templateId}'`, top, skip
-      ) as any
-    )
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (disciplines: any[]) => {
-          // Copy disciplines sequentially, catch each individually
-          from(disciplines)
-            .pipe(
-              concatMap((d) =>
-                this.disciplineSchemesService
-                  .createCompetitionDisciplineScheme({
-                    competitionId: newUuid,
-                    disciplineId: d.disciplineId!,
-                  } as CompetitionDisciplineSchemeRequest)
-                  .pipe(catchError(() => of(null)))
-              ),
-              toArray(),
-              takeUntil(this.destroy$),
-            )
-            .subscribe((disciplineResults) => {
-              const disciplineOk = disciplineResults.filter((r) => r !== null).length;
-              const disciplineFailed = disciplines.length - disciplineOk;
-              this.copyTimetableEvents(newUuid, templateId, disciplines.length, disciplineOk, disciplineFailed);
-            });
-        },
-        error: () => {
-          this.copyTimetableEvents(newUuid, templateId, 0, 0, 0);
-        },
-      });
-  }
-
-  private copyTimetableEvents(
-    newUuid: string,
-    templateId: string,
-    disciplineTotal: number,
-    disciplineOk: number,
-    disciplineFailed: number,
-  ): void {
+  private copyTimetableEventsFromTemplate(newUuid: string, templateId: string): void {
     fetchAllPages((skip, top) =>
       this.timetableEventsService.getAllCompetitionTimetableEvents(
         `competitionId eq '${templateId}'`, undefined, top, skip
@@ -318,7 +266,6 @@ export class AddCompetitionDialogComponent implements OnChanges {
             return;
           }
 
-          // Use the template's startDate as the day-offset anchor
           const template = this.cachedTemplates.find((t) => t.uuid === templateId);
           const templateStartStr = template?.startDate;
           if (!templateStartStr || !this.formData.startDate) {
@@ -330,7 +277,6 @@ export class AddCompetitionDialogComponent implements OnChanges {
           const templateStart = new Date(templateStartStr + 'T00:00:00Z');
           const newStart = new Date(this.formData.startDate + 'T00:00:00Z');
 
-          // Map each template event by day offset from template startDate
           const mappedEvents = events
             .filter((e) => e.scheduledAt)
             .map((e) => {
@@ -344,12 +290,10 @@ export class AddCompetitionDialogComponent implements OnChanges {
                 competitionId: newUuid,
                 disciplineId: e.disciplineId!,
                 qualificationEventType: e.qualificationEventType!,
-                qualificationStageNumber: e.qualificationStageNumber!,
                 scheduledAt: newDayStr + 'T' + timePart,
                 eventStatus: e.eventStatus!,
               } as CompetitionTimetableEventRequest;
-            })
-            .filter((e): e is CompetitionTimetableEventRequest => e !== null);
+            });
 
           const timetableErrors: string[] = [];
           from(mappedEvents)
@@ -371,16 +315,9 @@ export class AddCompetitionDialogComponent implements OnChanges {
 
               this.saving = false;
 
-              if (disciplineFailed > 0 || eventsFailed > 0) {
-                const parts: string[] = [];
-                if (disciplineTotal > 0) {
-                  parts.push(`Дисциплини: ${disciplineOk}/${disciplineTotal} ОК`);
-                }
-                if (events.length > 0) {
-                  parts.push(`Разписание: ${eventsOk}/${mappedEvents.length} ОК`);
-                }
+              if (eventsFailed > 0) {
                 const errorDetail = timetableErrors.length > 0 ? ` (${timetableErrors[0]})` : '';
-                this.copyPartialError = `${parts.join(', ')}${errorDetail} — провалените могат да се добавят ръчно.`;
+                this.copyPartialError = `Разписание: ${eventsOk}/${mappedEvents.length} ОК${errorDetail} — провалените могат да се добавят ръчно.`;
                 this.cdr.markForCheck();
               } else {
                 this.added.emit();
@@ -389,11 +326,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
         },
         error: () => {
           this.saving = false;
-          if (disciplineFailed > 0) {
-            this.copyPartialError = `Дисциплини: ${disciplineOk}/${disciplineTotal} ОК, Разписание: неуспешно — провалените могат да се добавят ръчно.`;
-          } else {
-            this.copyPartialError = 'Разписанието не успя да се копира — може да се добави ръчно.';
-          }
+          this.copyPartialError = 'Разписанието не успя да се копира — може да се добави ръчно.';
           this.cdr.markForCheck();
         },
       });
@@ -410,10 +343,10 @@ export class AddCompetitionDialogComponent implements OnChanges {
       entrySubmissionsClosedAt: '',
       lastChangesBeforeTmAt: '',
       technicalMeetingAt: '',
-      status: '',
-      scopeType: '',
       scoringSchemeId: '',
       qualificationSchemeId: '',
+      competitionType: '',
+      isTemplate: false,
     };
     this.error = null;
     this.saving = false;

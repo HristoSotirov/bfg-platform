@@ -171,13 +171,14 @@ export class CompetitionTimetableEventsService extends BaseService {
      * @param orderBy Predefined ordering (multiselect)
      * @param top Maximum number of items to return
      * @param skip Number of items to skip
+     * @param expand Related entities to expand (e.g., discipline)
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionTimetableEvents200Response>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionTimetableEvents200Response>>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionTimetableEvents200Response>>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline'>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionTimetableEvents200Response>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline'>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionTimetableEvents200Response>>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline'>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionTimetableEvents200Response>>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline'>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
@@ -190,6 +191,10 @@ export class CompetitionTimetableEventsService extends BaseService {
           <any>top, 'top');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>skip, 'skip');
+        if (expand) {
+            localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+                [...expand].join(COLLECTION_FORMATS['csv']), 'expand');
+        }
 
         let localVarHeaders = this.defaultHeaders;
 

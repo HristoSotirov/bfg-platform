@@ -9,13 +9,11 @@ import com.bfg.platform.club.repository.ClubCoachRepository;
 import com.bfg.platform.club.service.ClubCoachService;
 import com.bfg.platform.club.service.ClubService;
 import com.bfg.platform.competition.entity.Competition;
-import com.bfg.platform.competition.entity.CompetitionDisciplineScheme;
 import com.bfg.platform.competition.entity.CompetitionGroupDefinition;
 import com.bfg.platform.competition.entity.CompetitionTimetableEvent;
 import com.bfg.platform.competition.entity.DisciplineDefinition;
 import com.bfg.platform.competition.entity.QualificationScheme;
 import com.bfg.platform.competition.entity.ScoringScheme;
-import com.bfg.platform.competition.repository.CompetitionDisciplineSchemeRepository;
 import com.bfg.platform.competition.repository.CompetitionGroupDefinitionRepository;
 import com.bfg.platform.competition.repository.CompetitionRepository;
 import com.bfg.platform.competition.repository.CompetitionTimetableEventRepository;
@@ -77,7 +75,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
     private final CompetitionGroupDefinitionRepository competitionGroupDefinitionRepository;
     private final DisciplineDefinitionRepository disciplineDefinitionRepository;
     private final CompetitionRepository competitionRepository;
-    private final CompetitionDisciplineSchemeRepository competitionDisciplineSchemeRepository;
     private final CompetitionTimetableEventRepository competitionTimetableEventRepository;
 
     @Override
@@ -492,28 +489,10 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .startDate(LocalDate.of(2026, 5, 15))
                         .endDate(LocalDate.of(2026, 5, 17))
                         .status("PLANNED")
-                        .scopeType("NATIONAL")
                         .scoringSchemeId(scoringScheme.getId())
                         .qualificationSchemeId(qualScheme.getId())
-                        .build());
-
-        // Assign disciplines to national championship
-        competitionDisciplineSchemeRepository.save(
-                CompetitionDisciplineScheme.builder()
-                        .competitionId(nationalChampionship.getId())
-                        .disciplineId(disc1x.getId())
-                        .build());
-
-        competitionDisciplineSchemeRepository.save(
-                CompetitionDisciplineScheme.builder()
-                        .competitionId(nationalChampionship.getId())
-                        .disciplineId(disc2x.getId())
-                        .build());
-
-        competitionDisciplineSchemeRepository.save(
-                CompetitionDisciplineScheme.builder()
-                        .competitionId(nationalChampionship.getId())
-                        .disciplineId(disc1xW.getId())
+                        .competitionType("STANDARD")
+                        .isTemplate(false)
                         .build());
 
         // Timetable events for national championship (3 disciplines, 3 days)
@@ -522,7 +501,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(nationalChampionship.getId())
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("H")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-05-15T09:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -532,7 +510,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(nationalChampionship.getId())
                         .disciplineId(disc2x.getId())
                         .qualificationEventType("H")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-05-15T10:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -542,7 +519,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(nationalChampionship.getId())
                         .disciplineId(disc1xW.getId())
                         .qualificationEventType("H")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-05-15T11:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -552,7 +528,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(nationalChampionship.getId())
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("FA")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-05-17T14:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -562,7 +537,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(nationalChampionship.getId())
                         .disciplineId(disc2x.getId())
                         .qualificationEventType("FA")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-05-17T15:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -572,12 +546,11 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(nationalChampionship.getId())
                         .disciplineId(disc1xW.getId())
                         .qualificationEventType("FA")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-05-17T16:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
 
-        // ── Real competition: Купа София 2026 (DRAFT/INTERNAL) ──────────────
+        // ── Real competition: Купа София 2026 ──────────────────────────────────
         Competition cupSofia = competitionRepository.save(
                 Competition.builder()
                         .shortName("КС2026")
@@ -585,22 +558,11 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .location("София, Панчарево")
                         .startDate(LocalDate.of(2026, 6, 6))
                         .endDate(LocalDate.of(2026, 6, 7))
-                        .status("DRAFT")
-                        .scopeType("INTERNAL")
+                        .status("PLANNED")
                         .scoringSchemeId(scoringScheme2.getId())
                         .qualificationSchemeId(qualScheme2.getId())
-                        .build());
-
-        competitionDisciplineSchemeRepository.save(
-                CompetitionDisciplineScheme.builder()
-                        .competitionId(cupSofia.getId())
-                        .disciplineId(disc1x.getId())
-                        .build());
-
-        competitionDisciplineSchemeRepository.save(
-                CompetitionDisciplineScheme.builder()
-                        .competitionId(cupSofia.getId())
-                        .disciplineId(disc4xJunior.getId())
+                        .competitionType("STANDARD")
+                        .isTemplate(false)
                         .build());
 
         competitionTimetableEventRepository.save(
@@ -608,7 +570,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(cupSofia.getId())
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("H")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-06-06T09:30:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -618,7 +579,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(cupSofia.getId())
                         .disciplineId(disc4xJunior.getId())
                         .qualificationEventType("H")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-06-06T10:30:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -631,26 +591,11 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .location("Пловдив, Гребна база")
                         .startDate(LocalDate.of(2026, 6, 28))
                         .endDate(LocalDate.of(2026, 6, 29))
-                        .entrySubmissionsOpenAt(Instant.parse("2026-06-01T00:00:00Z"))
-                        .entrySubmissionsClosedAt(Instant.parse("2026-06-20T00:00:00Z"))
-                        .lastChangesBeforeTmAt(Instant.parse("2026-06-26T00:00:00Z"))
-                        .technicalMeetingAt(Instant.parse("2026-06-27T18:00:00Z"))
-                        .status("DRAFT")
-                        .scopeType("NATIONAL")
+                        .status("PLANNED")
                         .scoringSchemeId(scoringScheme.getId())
                         .qualificationSchemeId(qualScheme.getId())
-                        .build());
-
-        competitionDisciplineSchemeRepository.save(
-                CompetitionDisciplineScheme.builder()
-                        .competitionId(templateComp.getId())
-                        .disciplineId(disc1x.getId())
-                        .build());
-
-        competitionDisciplineSchemeRepository.save(
-                CompetitionDisciplineScheme.builder()
-                        .competitionId(templateComp.getId())
-                        .disciplineId(disc1xW.getId())
+                        .competitionType("STANDARD")
+                        .isTemplate(true)
                         .build());
 
         competitionTimetableEventRepository.save(
@@ -658,7 +603,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(templateComp.getId())
                         .disciplineId(disc1x.getId())
                         .qualificationEventType("H")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-06-28T09:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());
@@ -668,7 +612,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                         .competitionId(templateComp.getId())
                         .disciplineId(disc1xW.getId())
                         .qualificationEventType("H")
-                        .qualificationStageNumber(1)
                         .scheduledAt(Instant.parse("2026-06-28T10:00:00Z"))
                         .eventStatus("SCHEDULED")
                         .build());

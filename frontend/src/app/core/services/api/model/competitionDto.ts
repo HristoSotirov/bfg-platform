@@ -7,12 +7,12 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ScopeType } from './scopeType';
 import { CompetitionStatus } from './competitionStatus';
+import { CompetitionType } from './competitionType';
 
 
 /**
- * Data Transfer Object for a competition (DRAFT status = template, non-DRAFT = real)
+ * Data Transfer Object for a competition
  */
 export interface CompetitionDto { 
     uuid?: string;
@@ -22,25 +22,26 @@ export interface CompetitionDto {
     startDate?: string;
     endDate?: string;
     /**
-     * Required when status is not DRAFT.
+     * Required when isTemplate is false.
      */
     entrySubmissionsOpenAt?: string;
     /**
-     * Required when status is not DRAFT.
+     * Required when isTemplate is false.
      */
     entrySubmissionsClosedAt?: string;
     /**
-     * Required when status is not DRAFT.
+     * Required when isTemplate is false.
      */
     lastChangesBeforeTmAt?: string;
     /**
-     * Required when status is not DRAFT.
+     * Required when isTemplate is false.
      */
     technicalMeetingAt?: string;
     status?: CompetitionStatus;
-    scopeType?: ScopeType;
+    isTemplate?: boolean;
     scoringSchemeId?: string;
     qualificationSchemeId?: string;
+    competitionType?: CompetitionType;
     createdAt?: string;
     modifiedAt?: string;
 }

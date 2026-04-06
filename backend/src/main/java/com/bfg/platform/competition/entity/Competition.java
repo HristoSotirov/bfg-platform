@@ -61,14 +61,17 @@ public class Competition {
     @Column(name = "status", nullable = false)
     private String status;
 
-    @Column(name = "scope_type", nullable = false)
-    private String scopeType;
-
     @Column(name = "scoring_scheme_id", nullable = false)
     private UUID scoringSchemeId;
 
     @Column(name = "qualification_scheme_id", nullable = false)
     private UUID qualificationSchemeId;
+
+    @Column(name = "competition_type", nullable = false)
+    private String competitionType;
+
+    @Column(name = "is_template", nullable = false)
+    private boolean isTemplate;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

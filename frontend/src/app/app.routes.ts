@@ -78,6 +78,18 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'regulations',
+    loadComponent: () =>
+      import('./features/rules/rules.component').then((m) => m.RulesComponent),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'regulations/:tab',
+    loadComponent: () =>
+      import('./features/rules/rules.component').then((m) => m.RulesComponent),
+    canActivate: [AuthGuard],
+  },
+  {
     path: 'competitions',
     loadComponent: () =>
       import('./features/competitions/competitions.component').then(
@@ -101,15 +113,6 @@ export const routes: Routes = [
       ),
     canActivate: [AuthGuard],
   },
-  {
-    path: 'regulations',
-    loadComponent: () =>
-      import('./features/coming-soon/coming-soon.component').then(
-        (m) => m.ComingSoonComponent,
-      ),
-    canActivate: [AuthGuard],
-  },
-
   // Fallback
   { path: '**', redirectTo: '/' },
 ];

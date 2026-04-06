@@ -8,6 +8,7 @@ import com.bfg.platform.gen.model.QualificationEventType;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.Set;
 
 public class CompetitionTimetableEventMapper {
 
@@ -16,6 +17,10 @@ public class CompetitionTimetableEventMapper {
     }
 
     public static CompetitionTimetableEventDto toDto(CompetitionTimetableEvent entity) {
+        return toDto(entity, null);
+    }
+
+    public static CompetitionTimetableEventDto toDto(CompetitionTimetableEvent entity, Set<String> expand) {
         if (entity == null) return null;
 
         CompetitionTimetableEventDto dto = new CompetitionTimetableEventDto();
@@ -25,7 +30,6 @@ public class CompetitionTimetableEventMapper {
         dto.setQualificationEventType(entity.getQualificationEventType() != null
             ? QualificationEventType.fromValue(entity.getQualificationEventType())
             : null);
-        dto.setQualificationStageNumber(entity.getQualificationStageNumber());
         dto.setScheduledAt(entity.getScheduledAt() != null
             ? OffsetDateTime.ofInstant(entity.getScheduledAt(), ZoneOffset.UTC)
             : null);
@@ -39,6 +43,12 @@ public class CompetitionTimetableEventMapper {
             ? OffsetDateTime.ofInstant(entity.getModifiedAt(), ZoneOffset.UTC)
             : null);
 
+        if (expand != null && expand.contains("discipline") && entity.getDiscipline() != null) {
+            Set<String> disciplineExpand = expand.contains("discipline.competitionGroup")
+                    ? Set.of("competitionGroup") : null;
+            dto.setDiscipline(DisciplineDefinitionMapper.toDto(entity.getDiscipline(), disciplineExpand));
+        }
+
         return dto;
     }
 
@@ -49,7 +59,6 @@ public class CompetitionTimetableEventMapper {
         entity.setQualificationEventType(request.getQualificationEventType() != null
             ? request.getQualificationEventType().getValue()
             : null);
-        entity.setQualificationStageNumber(request.getQualificationStageNumber());
         entity.setScheduledAt(request.getScheduledAt() != null
             ? request.getScheduledAt().toInstant()
             : null);
@@ -65,7 +74,6 @@ public class CompetitionTimetableEventMapper {
         entity.setQualificationEventType(request.getQualificationEventType() != null
             ? request.getQualificationEventType().getValue()
             : null);
-        entity.setQualificationStageNumber(request.getQualificationStageNumber());
         entity.setScheduledAt(request.getScheduledAt() != null
             ? request.getScheduledAt().toInstant()
             : null);

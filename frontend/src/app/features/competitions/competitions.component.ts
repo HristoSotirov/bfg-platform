@@ -78,7 +78,8 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
   columns: CompetitionColumnConfig[] = [
     { id: 'shortName', label: 'Кратко име', visible: true },
     { id: 'name', label: 'Име', visible: true },
-
+    { id: 'type', label: 'Тип', visible: true },
+    { id: 'competitionType', label: 'Вид', visible: true },
     { id: 'status', label: 'Статус', visible: true },
     { id: 'startDate', label: 'Начална дата', visible: true },
     { id: 'endDate', label: 'Крайна дата', visible: false },

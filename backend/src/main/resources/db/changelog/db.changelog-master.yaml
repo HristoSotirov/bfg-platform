@@ -39,8 +39,6 @@ databaseChangeLog:
   - include:
       file: db/changelog/001-initial-schema/015-competitions.yaml
   - include:
-      file: db/changelog/001-initial-schema/016-competition-discipline-schemes.yaml
-  - include:
       file: db/changelog/001-initial-schema/018-competition-timetable-events.yaml
 
   # Competition module - runtime tables

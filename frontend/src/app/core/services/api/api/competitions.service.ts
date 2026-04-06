@@ -17,9 +17,11 @@ import { CustomHttpParameterCodec }                          from '../encoder';
 import { Observable }                                        from 'rxjs';
 
 // @ts-ignore
+import { CompetitionCreateRequest } from '../model/competitionCreateRequest';
+// @ts-ignore
 import { CompetitionDto } from '../model/competitionDto';
 // @ts-ignore
-import { CompetitionRequest } from '../model/competitionRequest';
+import { CompetitionUpdateRequest } from '../model/competitionUpdateRequest';
 // @ts-ignore
 import { ErrorResponse } from '../model/errorResponse';
 // @ts-ignore
@@ -43,16 +45,16 @@ export class CompetitionsService extends BaseService {
 
     /**
      * Create a new competition (template or real)
-     * @param competitionRequest 
+     * @param competitionCreateRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public createCompetition(competitionRequest: CompetitionRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CompetitionDto>;
-    public createCompetition(competitionRequest: CompetitionRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CompetitionDto>>;
-    public createCompetition(competitionRequest: CompetitionRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CompetitionDto>>;
-    public createCompetition(competitionRequest: CompetitionRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
-        if (competitionRequest === null || competitionRequest === undefined) {
-            throw new Error('Required parameter competitionRequest was null or undefined when calling createCompetition.');
+    public createCompetition(competitionCreateRequest: CompetitionCreateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CompetitionDto>;
+    public createCompetition(competitionCreateRequest: CompetitionCreateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CompetitionDto>>;
+    public createCompetition(competitionCreateRequest: CompetitionCreateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CompetitionDto>>;
+    public createCompetition(competitionCreateRequest: CompetitionCreateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (competitionCreateRequest === null || competitionCreateRequest === undefined) {
+            throw new Error('Required parameter competitionCreateRequest was null or undefined when calling createCompetition.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -97,7 +99,7 @@ export class CompetitionsService extends BaseService {
         return this.httpClient.request<CompetitionDto>('post', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: competitionRequest,
+                body: competitionCreateRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,
@@ -298,19 +300,19 @@ export class CompetitionsService extends BaseService {
     /**
      * Update competition by UUID (full replace)
      * @param uuid UUID of the competition
-     * @param competitionRequest 
+     * @param competitionUpdateRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public updateCompetitionByUuid(uuid: string, competitionRequest: CompetitionRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CompetitionDto>;
-    public updateCompetitionByUuid(uuid: string, competitionRequest: CompetitionRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CompetitionDto>>;
-    public updateCompetitionByUuid(uuid: string, competitionRequest: CompetitionRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CompetitionDto>>;
-    public updateCompetitionByUuid(uuid: string, competitionRequest: CompetitionRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateCompetitionByUuid(uuid: string, competitionUpdateRequest: CompetitionUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CompetitionDto>;
+    public updateCompetitionByUuid(uuid: string, competitionUpdateRequest: CompetitionUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CompetitionDto>>;
+    public updateCompetitionByUuid(uuid: string, competitionUpdateRequest: CompetitionUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CompetitionDto>>;
+    public updateCompetitionByUuid(uuid: string, competitionUpdateRequest: CompetitionUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (uuid === null || uuid === undefined) {
             throw new Error('Required parameter uuid was null or undefined when calling updateCompetitionByUuid.');
         }
-        if (competitionRequest === null || competitionRequest === undefined) {
-            throw new Error('Required parameter competitionRequest was null or undefined when calling updateCompetitionByUuid.');
+        if (competitionUpdateRequest === null || competitionUpdateRequest === undefined) {
+            throw new Error('Required parameter competitionUpdateRequest was null or undefined when calling updateCompetitionByUuid.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -355,7 +357,7 @@ export class CompetitionsService extends BaseService {
         return this.httpClient.request<CompetitionDto>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: competitionRequest,
+                body: competitionUpdateRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

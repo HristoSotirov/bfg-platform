@@ -14,7 +14,6 @@
  */
 export const CompetitionStatus = {
     Planned: 'PLANNED',
-    Draft: 'DRAFT',
     RegistrationOpen: 'REGISTRATION_OPEN',
     RegistrationClosed: 'REGISTRATION_CLOSED',
     InProgress: 'IN_PROGRESS',

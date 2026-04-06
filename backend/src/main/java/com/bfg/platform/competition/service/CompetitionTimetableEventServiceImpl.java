@@ -4,7 +4,6 @@ import com.bfg.platform.competition.entity.Competition;
 import com.bfg.platform.competition.entity.CompetitionTimetableEvent;
 import com.bfg.platform.competition.mapper.CompetitionTimetableEventMapper;
 import com.bfg.platform.competition.query.CompetitionTimetableEventQueryAdapter;
-import com.bfg.platform.competition.repository.CompetitionDisciplineSchemeRepository;
 import com.bfg.platform.competition.repository.CompetitionRepository;
 import com.bfg.platform.competition.repository.CompetitionTimetableEventRepository;
 import com.bfg.platform.common.exception.ConflictException;
@@ -13,14 +12,23 @@ import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.common.repository.DynamicEntityGraph;
 import com.bfg.platform.gen.model.CompetitionEventStatus;
 import com.bfg.platform.gen.model.CompetitionTimetableEventDto;
 import com.bfg.platform.gen.model.CompetitionTimetableEventRequest;
+import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
@@ -33,6 +41,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -41,12 +50,13 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
 
     private final CompetitionTimetableEventRepository repository;
     private final CompetitionRepository competitionRepository;
-    private final CompetitionDisciplineSchemeRepository disciplineSchemeRepository;
     private final EntityManager entityManager;
 
     @Override
     @Transactional(readOnly = true)
-    public Page<CompetitionTimetableEventDto> getAll(String filter, List<String> orderBy, Integer top, Integer skip) {
+    public Page<CompetitionTimetableEventDto> getAll(String filter, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
+        Set<String> requestedExpand = ExpandQueryParser.parse(expand, CompetitionTimetableEvent.class);
+
         EnhancedFilterExpressionParser.ParseResult<CompetitionTimetableEvent> filterResult =
                 CompetitionTimetableEventQueryAdapter.parseFilter(filter, null);
         Specification<CompetitionTimetableEvent> spec = filterResult.getSpecification();
@@ -55,7 +65,16 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
         Sort sort = sortResult.getSort();
         Pageable pageable = OffsetBasedPageRequest.of(skip, top, sort);
 
-        return repository.findAll(spec, pageable).map(CompetitionTimetableEventMapper::toDto);
+        Page<CompetitionTimetableEvent> page;
+        if (!requestedExpand.isEmpty()) {
+            EntityGraph<CompetitionTimetableEvent> entityGraph =
+                    DynamicEntityGraph.create(entityManager, CompetitionTimetableEvent.class, requestedExpand);
+            page = findAllWithEntityGraph(spec, pageable, entityGraph);
+        } else {
+            page = repository.findAll(spec, pageable);
+        }
+
+        return page.map(e -> CompetitionTimetableEventMapper.toDto(e, requestedExpand));
     }
 
     @Override
@@ -69,10 +88,8 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
     public Optional<CompetitionTimetableEventDto> create(CompetitionTimetableEventRequest request) {
         Competition competition = loadCompetition(request.getCompetitionId());
         validateScheduledAt(request.getScheduledAt(), competition);
-        validateDisciplineAssigned(request.getCompetitionId(), request.getDisciplineId());
-        if (request.getQualificationStageNumber() == null) {
-            throw new ValidationException("Qualification stage number is required");
-        }
+        validateForCompetitionType(competition.getCompetitionType(),
+                request.getQualificationEventType() != null ? request.getQualificationEventType().getValue() : null);
         if (request.getEventStatus() != CompetitionEventStatus.SCHEDULED) {
             throw new ValidationException("Event status must be SCHEDULED on creation");
         }
@@ -88,7 +105,8 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
     public Optional<CompetitionTimetableEventDto> update(UUID uuid, CompetitionTimetableEventRequest request) {
         Competition competition = loadCompetition(request.getCompetitionId());
         validateScheduledAt(request.getScheduledAt(), competition);
-        validateDisciplineAssigned(request.getCompetitionId(), request.getDisciplineId());
+        validateForCompetitionType(competition.getCompetitionType(),
+                request.getQualificationEventType() != null ? request.getQualificationEventType().getValue() : null);
 
         CompetitionTimetableEvent existing = repository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Competition timetable event", uuid));
@@ -132,10 +150,56 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
         }
     }
 
-    private void validateDisciplineAssigned(UUID competitionId, UUID disciplineId) {
-        if (disciplineId == null) return;
-        if (!disciplineSchemeRepository.existsByCompetitionIdAndDisciplineId(competitionId, disciplineId)) {
-            throw new ValidationException("Discipline is not assigned to this competition: " + disciplineId);
+    private void validateForCompetitionType(String competitionType, String eventType) {
+        if (competitionType == null || "STANDARD".equals(competitionType)) {
+            return;
         }
+        if ("ERG".equals(competitionType) || "NATIONAL_TEAM_TEST".equals(competitionType)) {
+            if (!"H".equals(eventType)) {
+                throw new ValidationException("Only H (heat) events are valid for competition type " + competitionType);
+            }
+        }
+    }
+
+    private Page<CompetitionTimetableEvent> findAllWithEntityGraph(
+            Specification<CompetitionTimetableEvent> spec,
+            Pageable pageable,
+            EntityGraph<CompetitionTimetableEvent> entityGraph) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<CompetitionTimetableEvent> query = cb.createQuery(CompetitionTimetableEvent.class);
+        Root<CompetitionTimetableEvent> root = query.from(CompetitionTimetableEvent.class);
+
+        Predicate predicate = spec != null ? spec.toPredicate(root, query, cb) : cb.conjunction();
+        if (predicate != null) {
+            query.where(predicate);
+        }
+
+        if (pageable.getSort().isSorted()) {
+            List<jakarta.persistence.criteria.Order> orders = new java.util.ArrayList<>();
+            pageable.getSort().forEach(order -> {
+                jakarta.persistence.criteria.Path<?> path = root.get(order.getProperty());
+                orders.add(order.isAscending() ? cb.asc(path) : cb.desc(path));
+            });
+            query.orderBy(orders);
+        }
+
+        TypedQuery<CompetitionTimetableEvent> typedQuery = entityManager.createQuery(query);
+        if (entityGraph != null) {
+            typedQuery.setHint("jakarta.persistence.loadgraph", entityGraph);
+        }
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        List<CompetitionTimetableEvent> content = typedQuery.getResultList();
+
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<CompetitionTimetableEvent> countRoot = countQuery.from(CompetitionTimetableEvent.class);
+        Predicate countPredicate = spec != null ? spec.toPredicate(countRoot, countQuery, cb) : cb.conjunction();
+        if (countPredicate != null) {
+            countQuery.where(countPredicate);
+        }
+        countQuery.select(cb.count(countRoot));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        return new PageImpl<>(content, pageable, total);
     }
 }

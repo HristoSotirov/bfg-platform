@@ -30,13 +30,6 @@ databaseChangeLog:
                     nullable: false
                   remarks: "H, SF, FB, FA"
               - column:
-                  name: qualification_stage_number
-                  type: INTEGER
-                  constraints:
-                    nullable: false
-                  defaultValueNumeric: 1
-                  remarks: "Which heat/SF (1, 2, 3, 4). Always 1 for FA/FB."
-              - column:
                   name: scheduled_at
                   type: TIMESTAMPTZ
                   constraints:
@@ -62,8 +55,8 @@ databaseChangeLog:
                   defaultValueComputed: CURRENT_TIMESTAMP
         - addUniqueConstraint:
             tableName: competition_timetable_events
-            columnNames: competition_id, discipline_id, qualification_event_type, qualification_stage_number
-            constraintName: uq_timetable_event_comp_disc_type_num
+            columnNames: competition_id, discipline_id, qualification_event_type, scheduled_at
+            constraintName: uq_timetable_event_comp_disc_type_time
         - addForeignKeyConstraint:
             baseTableName: competition_timetable_events
             baseColumnNames: competition_id

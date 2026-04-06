@@ -192,11 +192,6 @@ databaseChangeLog:
               - column: { name: status }
         - createIndex:
             tableName: competitions
-            indexName: idx_competitions_scope_type
-            columns:
-              - column: { name: scope_type }
-        - createIndex:
-            tableName: competitions
             indexName: idx_competitions_scoring_scheme_id
             columns:
               - column: { name: scoring_scheme_id }
@@ -205,20 +200,6 @@ databaseChangeLog:
             indexName: idx_competitions_qual_scheme_id
             columns:
               - column: { name: qualification_scheme_id }
-
-        # =============================================
-        # competition_discipline_schemes
-        # =============================================
-        - createIndex:
-            tableName: competition_discipline_schemes
-            indexName: idx_comp_disc_scheme_competition_id
-            columns:
-              - column: { name: competition_id }
-        - createIndex:
-            tableName: competition_discipline_schemes
-            indexName: idx_comp_disc_scheme_discipline_id
-            columns:
-              - column: { name: discipline_id }
 
         # =============================================
         # competition_timetable_events

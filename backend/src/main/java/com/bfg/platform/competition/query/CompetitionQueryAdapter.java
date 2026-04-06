@@ -101,8 +101,10 @@ public final class CompetitionQueryAdapter {
         @Override
         public Predicate build(Root<Competition> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
             return switch (field) {
-                case "name", "shortName", "location", "status", "scopeType" ->
+                case "name", "shortName", "location", "status" ->
                     QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
+                case "isTemplate" ->
+                    QueryAdapterHelpers.booleanPredicate(root, cb, field, op, valueRaw);
                 case "scoringSchemeId", "qualificationSchemeId" ->
                     QueryAdapterHelpers.uuidPredicate(root, cb, field, op, valueRaw);
                 case "createdAt", "modifiedAt" ->
@@ -123,7 +125,7 @@ public final class CompetitionQueryAdapter {
         @Override
         public Predicate buildIn(Root<Competition> root, CriteriaBuilder cb, String field, List<String> values) {
             return switch (field) {
-                case "name", "shortName", "status", "scopeType" ->
+                case "name", "shortName", "status" ->
                     QueryAdapterHelpers.stringInPredicate(root, cb, field, values);
                 case "scoringSchemeId", "qualificationSchemeId" ->
                     QueryAdapterHelpers.uuidInPredicate(root, cb, field, values);

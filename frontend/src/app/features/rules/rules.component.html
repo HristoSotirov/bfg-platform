@@ -1,0 +1,311 @@
+<div class="h-screen flex flex-col overflow-hidden bg-white">
+  <app-header></app-header>
+
+  <div class="flex-1 flex flex-col overflow-hidden px-4 lg:px-8 py-4">
+
+    <!-- Title -->
+    <div class="flex items-center gap-3 mb-4">
+      <a routerLink="/" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">Правилник</h1>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="border-b border-gray-200 mb-4">
+      <nav class="-mb-px flex gap-1 overflow-x-auto tab-nav">
+        @for (tab of tabs; track tab.id) {
+          <button
+            type="button"
+            class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors whitespace-nowrap"
+            [class]="activeTab === tab.id
+              ? 'border-bfg-blue text-bfg-blue'
+              : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+            (click)="setTab(tab.id)"
+          >{{ tab.label }}</button>
+        }
+      </nav>
+    </div>
+
+    <!-- Tab content -->
+    <div class="flex-1 flex flex-col overflow-hidden">
+
+      <!-- ===== GROUPS TAB ===== -->
+      @if (activeTab === 'groups') {
+        <app-competition-groups-filters
+          [filters]="groupFilters"
+          [filterConfigs]="groupFilterConfigs"
+          (filtersChange)="onGroupFiltersChange($event)"
+          (searchChange)="groupFilters.search = $event; loadGroups()"
+        ></app-competition-groups-filters>
+
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <div class="text-sm text-gray-600">Брой групи: <span class="font-semibold">{{ groupsTotalElements }}</span></div>
+          <div class="flex items-center gap-2 ml-auto">
+            @if (canEdit) {
+              <app-button variant="white" size="md" text="Добавяне на група" (click)="isGroupAddOpen = true"></app-button>
+            }
+            <button type="button" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" (click)="isGroupSettingsOpen = true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-hidden bg-white rounded-lg border border-gray-200">
+          @if (groupsLoading && groups.length === 0) {
+            <div class="flex items-center justify-center h-full text-gray-500">Зареждане...</div>
+          } @else if (groupsError) {
+            <div class="flex items-center justify-center h-full text-red-500">{{ groupsError }}</div>
+          } @else {
+            <app-competition-groups-table
+              [groups]="groups"
+              [columns]="groupColumns"
+              [groupLookup]="groupLookup"
+              [loading]="groupsLoading"
+              [hasMore]="groupsHasMore"
+              [orderBy]="groupOrderBy"
+              (rowClick)="openGroupDetails($event)"
+              (sortChange)="onGroupSortChange($event)"
+              (loadMore)="groupsSkip = groupsSkip + pageSize; loadGroups(false)"
+            ></app-competition-groups-table>
+          }
+        </div>
+      }
+
+      <!-- ===== DISCIPLINES TAB ===== -->
+      @if (activeTab === 'disciplines') {
+        <app-disciplines-filters
+          [filters]="disciplineFilters"
+          [filterConfigs]="disciplineFilterConfigs"
+          (filtersChange)="onDisciplineFiltersChange($event)"
+          (searchChange)="disciplineFilters.search = $event; loadDisciplines()"
+        ></app-disciplines-filters>
+
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <div class="text-sm text-gray-600">Брой дисциплини: <span class="font-semibold">{{ disciplinesTotalElements }}</span></div>
+          <div class="flex items-center gap-2 ml-auto">
+            @if (canEdit) {
+              <app-button variant="white" size="md" text="Добавяне на дисциплина" (click)="isDisciplineAddOpen = true"></app-button>
+            }
+            <button type="button" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" (click)="isDisciplineSettingsOpen = true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-hidden bg-white rounded-lg border border-gray-200">
+          @if (disciplinesLoading && disciplines.length === 0) {
+            <div class="flex items-center justify-center h-full text-gray-500">Зареждане...</div>
+          } @else if (disciplinesError) {
+            <div class="flex items-center justify-center h-full text-red-500">{{ disciplinesError }}</div>
+          } @else {
+            <app-disciplines-table
+              [disciplines]="disciplines"
+              [columns]="disciplineColumns"
+              [groupMap]="groupLookup"
+              [loading]="disciplinesLoading"
+              [hasMore]="disciplinesHasMore"
+              [orderBy]="disciplineOrderBy"
+              (rowClick)="openDisciplineDetails($event)"
+              (sortChange)="onDisciplineSortChange($event)"
+              (loadMore)="disciplinesSkip = disciplinesSkip + pageSize; loadDisciplines(false)"
+            ></app-disciplines-table>
+          }
+        </div>
+      }
+
+      <!-- ===== SCORING TAB ===== -->
+      @if (activeTab === 'scoring') {
+        <app-scoring-filters
+          [filters]="scoringFilters"
+          [filterConfigs]="scoringFilterConfigs"
+          (filtersChange)="onScoringFiltersChange($event)"
+          (searchChange)="scoringFilters.search = $event; loadScoringSchemes()"
+        ></app-scoring-filters>
+
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <div class="text-sm text-gray-600">Брой схеми: <span class="font-semibold">{{ scoringTotalElements }}</span></div>
+          <div class="flex items-center gap-2 ml-auto">
+            @if (canEdit) {
+              <app-button variant="white" size="md" text="Добавяне на схема" (click)="isScoringAddOpen = true"></app-button>
+            }
+            <button type="button" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" (click)="isScoringSettingsOpen = true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-hidden bg-white rounded-lg border border-gray-200">
+          @if (scoringLoading && scoringSchemes.length === 0) {
+            <div class="flex items-center justify-center h-full text-gray-500">Зареждане...</div>
+          } @else if (scoringError) {
+            <div class="flex items-center justify-center h-full text-red-500">{{ scoringError }}</div>
+          } @else {
+            <app-scoring-table
+              [schemes]="scoringSchemes"
+              [columns]="scoringColumns"
+              [loading]="scoringLoading"
+              [hasMore]="scoringHasMore"
+              [orderBy]="scoringOrderBy"
+              (rowClick)="openScoringDetails($event)"
+              (sortChange)="onScoringSortChange($event)"
+              (loadMore)="scoringSkip = scoringSkip + pageSize; loadScoringSchemes(false)"
+            ></app-scoring-table>
+          }
+        </div>
+      }
+
+      <!-- ===== QUALIFICATION TAB ===== -->
+      @if (activeTab === 'qualification') {
+        <app-qualification-filters
+          [filters]="qualificationFilters"
+          [filterConfigs]="qualificationFilterConfigs"
+          (filtersChange)="onQualificationFiltersChange($event)"
+          (searchChange)="qualificationFilters.search = $event; loadQualificationSchemes()"
+        ></app-qualification-filters>
+
+        <div class="flex items-center justify-between gap-4 mb-4">
+          <div class="text-sm text-gray-600">Брой схеми: <span class="font-semibold">{{ qualificationTotalElements }}</span></div>
+          <div class="flex items-center gap-2 ml-auto">
+            @if (canEdit) {
+              <app-button variant="white" size="md" text="Добавяне на схема" (click)="isQualificationAddOpen = true"></app-button>
+            }
+            <button type="button" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors" (click)="isQualificationSettingsOpen = true">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="flex-1 overflow-hidden bg-white rounded-lg border border-gray-200">
+          @if (qualificationLoading && qualificationSchemes.length === 0) {
+            <div class="flex items-center justify-center h-full text-gray-500">Зареждане...</div>
+          } @else if (qualificationError) {
+            <div class="flex items-center justify-center h-full text-red-500">{{ qualificationError }}</div>
+          } @else {
+            <app-qualification-table
+              [schemes]="qualificationSchemes"
+              [columns]="qualificationColumns"
+              [loading]="qualificationLoading"
+              [hasMore]="qualificationHasMore"
+              [orderBy]="qualificationOrderBy"
+              (rowClick)="openQualificationDetails($event)"
+              (sortChange)="onQualificationSortChange($event)"
+              (loadMore)="qualificationSkip = qualificationSkip + pageSize; loadQualificationSchemes(false)"
+            ></app-qualification-table>
+          }
+        </div>
+      }
+
+    </div>
+  </div>
+</div>
+
+<!-- Groups dialogs -->
+<app-competition-group-details-dialog
+  [isOpen]="isGroupDetailsOpen"
+  [group]="selectedGroup"
+  [canEdit]="canEdit"
+  [groupMap]="groupLookup"
+  (closed)="closeGroupDetails()"
+  (saved)="onGroupSaved()"
+  (deleted)="onGroupDeleted()"
+></app-competition-group-details-dialog>
+
+<app-add-competition-group-dialog
+  [isOpen]="isGroupAddOpen"
+  (closed)="isGroupAddOpen = false"
+  (added)="onGroupAdded()"
+></app-add-competition-group-dialog>
+
+<app-competition-groups-settings-dialog
+  [isOpen]="isGroupSettingsOpen"
+  [columns]="groupColumns"
+  [filterConfigs]="groupFilterConfigs"
+  (closed)="isGroupSettingsOpen = false"
+  (settingsChange)="onGroupSettingsChange($event)"
+></app-competition-groups-settings-dialog>
+
+<!-- Disciplines dialogs -->
+<app-discipline-details-dialog
+  [isOpen]="isDisciplineDetailsOpen"
+  [discipline]="selectedDiscipline"
+  [canEdit]="canEdit"
+  [groupMap]="groupLookup"
+  (closed)="closeDisciplineDetails()"
+  (saved)="onDisciplineSaved()"
+  (deleted)="onDisciplineDeleted()"
+></app-discipline-details-dialog>
+
+<app-add-discipline-dialog
+  [isOpen]="isDisciplineAddOpen"
+  (closed)="isDisciplineAddOpen = false"
+  (added)="onDisciplineAdded()"
+></app-add-discipline-dialog>
+
+<app-disciplines-settings-dialog
+  [isOpen]="isDisciplineSettingsOpen"
+  [columns]="disciplineColumns"
+  [filterConfigs]="disciplineFilterConfigs"
+  (closed)="isDisciplineSettingsOpen = false"
+  (settingsChange)="onDisciplineSettingsChange($event)"
+></app-disciplines-settings-dialog>
+
+<!-- Scoring dialogs -->
+<app-scoring-details-dialog
+  [isOpen]="isScoringDetailsOpen"
+  [scheme]="selectedScoringScheme"
+  [canEdit]="canEdit"
+  (closed)="closeScoringDetails()"
+  (saved)="onScoringSaved()"
+></app-scoring-details-dialog>
+
+<app-add-scoring-dialog
+  [isOpen]="isScoringAddOpen"
+  (closed)="isScoringAddOpen = false"
+  (added)="onScoringAdded()"
+></app-add-scoring-dialog>
+
+<app-scoring-settings-dialog
+  [isOpen]="isScoringSettingsOpen"
+  [columns]="scoringColumns"
+  [filterConfigs]="scoringFilterConfigs"
+  (closed)="isScoringSettingsOpen = false"
+  (settingsChange)="onScoringSettingsChange($event)"
+></app-scoring-settings-dialog>
+
+<!-- Qualification dialogs -->
+<app-qualification-details-dialog
+  [isOpen]="isQualificationDetailsOpen"
+  [scheme]="selectedQualificationScheme"
+  [canEdit]="canEdit"
+  (closed)="closeQualificationDetails()"
+  (saved)="onQualificationSaved()"
+></app-qualification-details-dialog>
+
+<app-add-qualification-dialog
+  [isOpen]="isQualificationAddOpen"
+  (closed)="isQualificationAddOpen = false"
+  (added)="onQualificationAdded()"
+></app-add-qualification-dialog>
+
+<app-qualification-settings-dialog
+  [isOpen]="isQualificationSettingsOpen"
+  [columns]="qualificationColumns"
+  [filterConfigs]="qualificationFilterConfigs"
+  (closed)="isQualificationSettingsOpen = false"
+  (settingsChange)="onQualificationSettingsChange($event)"
+></app-qualification-settings-dialog>

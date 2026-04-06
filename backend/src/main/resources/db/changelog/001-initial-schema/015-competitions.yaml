@@ -59,12 +59,6 @@ databaseChangeLog:
                     nullable: false
                   remarks: "PLANNED, DRAFT, REGISTRATION_OPEN, REGISTRATION_CLOSED, IN_PROGRESS, COMPLETED, CANCELLED. Only for real competitions."
               - column:
-                  name: scope_type
-                  type: VARCHAR(20)
-                  constraints:
-                    nullable: false
-                  remarks: "INTERNAL, EXTERNAL, NATIONAL."
-              - column:
                   name: scoring_scheme_id
                   type: UUID
                   constraints:
@@ -74,6 +68,19 @@ databaseChangeLog:
                   type: UUID
                   constraints:
                     nullable: false
+              - column:
+                  name: competition_type
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                  remarks: "STANDARD, ERG, NATIONAL_TEAM_TEST"
+              - column:
+                  name: is_template
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+                  remarks: "true = reusable template, false = real competition"
               - column:
                   name: created_at
                   type: TIMESTAMPTZ

@@ -73,7 +73,8 @@ export class CompetitionsTableComponent implements OnInit {
     switch (columnId) {
       case 'shortName': return c.shortName || '-';
       case 'name': return c.name || '-';
-      case 'type': return c.status === 'DRAFT' ? 'Шаблон' : 'Реално';
+      case 'type': return c.isTemplate ? 'Шаблон' : 'Реално';
+      case 'competitionType': return this.getCompetitionTypeLabel(c.competitionType as string);
       case 'status': return this.getStatusLabel(c.status as string);
       case 'startDate': return c.startDate ? this.formatDate(c.startDate) : '-';
       case 'endDate': return c.endDate ? this.formatDate(c.endDate) : '-';
@@ -82,6 +83,15 @@ export class CompetitionsTableComponent implements OnInit {
       case 'modifiedAt': return this.formatDate(c.modifiedAt);
       default: return '-';
     }
+  }
+
+  getCompetitionTypeLabel(type: string | undefined): string {
+    const labels: Record<string, string> = {
+      STANDARD: 'Стандартно (вода)',
+      ERG: 'Ергометър',
+      NATIONAL_TEAM_TEST: 'Тест национален отбор',
+    };
+    return type ? (labels[type] ?? type) : '-';
   }
 
   getStatusLabel(status: string | undefined): string {

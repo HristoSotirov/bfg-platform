@@ -18,7 +18,6 @@ export interface CompetitionTimetableEventRequest {
     competitionId: string;
     disciplineId: string;
     qualificationEventType: QualificationEventType;
-    qualificationStageNumber: number;
     scheduledAt: string;
     eventStatus: CompetitionEventStatus;
 }

@@ -5,6 +5,7 @@ import com.bfg.platform.competition.mapper.CompetitionMapper;
 import com.bfg.platform.competition.query.CompetitionQueryAdapter;
 import com.bfg.platform.competition.repository.CompetitionRepository;
 import com.bfg.platform.competition.repository.QualificationSchemeRepository;
+import com.bfg.platform.competition.repository.QualificationTierRepository;
 import com.bfg.platform.competition.repository.ScoringSchemeRepository;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
@@ -13,8 +14,9 @@ import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.gen.model.CompetitionCreateRequest;
 import com.bfg.platform.gen.model.CompetitionDto;
-import com.bfg.platform.gen.model.CompetitionRequest;
+import com.bfg.platform.gen.model.CompetitionUpdateRequest;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -38,6 +41,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     private final CompetitionRepository repository;
     private final ScoringSchemeRepository scoringSchemeRepository;
     private final QualificationSchemeRepository qualificationSchemeRepository;
+    private final QualificationTierRepository qualificationTierRepository;
     private final EntityManager entityManager;
 
     @Override
@@ -64,9 +68,10 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     @Transactional
-    public Optional<CompetitionDto> create(CompetitionRequest request) {
+    public Optional<CompetitionDto> create(CompetitionCreateRequest request) {
         validateCreate(request);
         Competition entity = CompetitionMapper.fromRequest(request);
+        entity.setStatus("PLANNED");
         Competition saved = repository.save(entity);
         entityManager.flush();
         return Optional.of(CompetitionMapper.toDto(saved));
@@ -74,10 +79,10 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     @Override
     @Transactional
-    public Optional<CompetitionDto> update(UUID uuid, CompetitionRequest request) {
-        validate(request);
+    public Optional<CompetitionDto> update(UUID uuid, CompetitionUpdateRequest request) {
         return repository.findById(uuid)
                 .map(entity -> {
+                    validateUpdate(request, entity.isTemplate());
                     CompetitionMapper.updateFromRequest(entity, request);
                     Competition saved = repository.save(entity);
                     return CompetitionMapper.toDto(saved);
@@ -96,88 +101,111 @@ public class CompetitionServiceImpl implements CompetitionService {
         }
     }
 
-    private void validateCreate(CompetitionRequest request) {
-        if (request.getStatus() == null) {
-            throw new ValidationException("Status is required");
-        }
-        String statusValue = request.getStatus().getValue();
-        if (!"DRAFT".equals(statusValue) && !"PLANNED".equals(statusValue)) {
-            throw new ValidationException("Status must be DRAFT or PLANNED");
-        }
-        validate(request);
-    }
+    private void validateCreate(CompetitionCreateRequest request) {
+        validateScoringAndQualification(request.getScoringSchemeId(), request.getQualificationSchemeId(),
+                request.getCompetitionType() != null ? request.getCompetitionType().getValue() : null);
 
-    private void validate(CompetitionRequest request) {
-        scoringSchemeRepository.findById(request.getScoringSchemeId())
-                .filter(s -> s.isActive())
-                .orElseThrow(() -> new ValidationException("Scoring scheme not found or not active"));
-
-        qualificationSchemeRepository.findById(request.getQualificationSchemeId())
-                .filter(q -> q.isActive())
-                .orElseThrow(() -> new ValidationException("Qualification scheme not found or not active"));
-
-        // location is required for all competitions (templates and real)
         if (request.getLocation() == null || request.getLocation().isBlank()) {
             throw new ValidationException("Location is required");
         }
 
-        // status is required
-        if (request.getStatus() == null) {
-            throw new ValidationException("Status is required");
+        boolean isTemplate = Boolean.TRUE.equals(request.getIsTemplate());
+        if (!isTemplate) {
+            requireDateTimes(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
+                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt());
         }
 
-        boolean isDraft = "DRAFT".equals(request.getStatus().getValue());
-        if (!isDraft) {
-            if (request.getEntrySubmissionsOpenAt() == null) {
-                throw new ValidationException("Entry submissions open date/time is required");
-            }
-            if (request.getEntrySubmissionsClosedAt() == null) {
-                throw new ValidationException("Entry submissions closed date/time is required");
-            }
-            if (request.getLastChangesBeforeTmAt() == null) {
-                throw new ValidationException("Last changes before TM date/time is required");
-            }
-            if (request.getTechnicalMeetingAt() == null) {
-                throw new ValidationException("Technical meeting date/time is required");
-            }
-        }
-
-        // startDate and endDate are required for all competitions (templates and real)
-        if (request.getStartDate() == null) {
-            throw new ValidationException("Start date is required");
-        }
-        if (request.getEndDate() == null) {
-            throw new ValidationException("End date is required");
-        }
-
-        LocalDate start = request.getStartDate();
-        LocalDate end = request.getEndDate();
-        if (!end.isAfter(start) && !end.isEqual(start)) {
-            throw new ValidationException("End date must be on or after start date");
-        }
-
-        if (request.getEntrySubmissionsOpenAt() != null && request.getEntrySubmissionsClosedAt() != null
-                && request.getLastChangesBeforeTmAt() != null && request.getTechnicalMeetingAt() != null) {
-            // Chronological order: submissionsOpen < submissionsClosed < lastChangesTM < technicalMeeting < startDate
-            Instant submissionsOpen = request.getEntrySubmissionsOpenAt().toInstant();
-            Instant submissionsClosed = request.getEntrySubmissionsClosedAt().toInstant();
-            Instant lastChangesTm = request.getLastChangesBeforeTmAt().toInstant();
-            Instant technicalMeeting = request.getTechnicalMeetingAt().toInstant();
-            Instant startInstant = start.atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
-
-            if (!submissionsOpen.isBefore(submissionsClosed)) {
-                throw new ValidationException("Entry submissions open date/time must be before entry submissions closed date/time");
-            }
-            if (!submissionsClosed.isBefore(lastChangesTm)) {
-                throw new ValidationException("Entry submissions closed date/time must be before last changes before TM date/time");
-            }
-            if (!lastChangesTm.isBefore(technicalMeeting)) {
-                throw new ValidationException("Last changes before TM date/time must be before technical meeting date/time");
-            }
-            if (!technicalMeeting.isBefore(startInstant)) {
-                throw new ValidationException("Technical meeting date/time must be before competition start date");
-            }
+        validateDates(request.getStartDate(), request.getEndDate());
+        if (!isTemplate) {
+            validateChronology(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
+                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt(), request.getStartDate());
         }
     }
 
+    private void validateUpdate(CompetitionUpdateRequest request, boolean isTemplate) {
+        validateScoringAndQualification(request.getScoringSchemeId(), request.getQualificationSchemeId(),
+                request.getCompetitionType() != null ? request.getCompetitionType().getValue() : null);
+
+        if (request.getLocation() == null || request.getLocation().isBlank()) {
+            throw new ValidationException("Location is required");
+        }
+
+        if (!isTemplate) {
+            requireDateTimes(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
+                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt());
+        }
+
+        validateDates(request.getStartDate(), request.getEndDate());
+        if (!isTemplate) {
+            validateChronology(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
+                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt(), request.getStartDate());
+        }
+    }
+
+    private void validateScoringAndQualification(UUID scoringSchemeId, UUID qualificationSchemeId, String compType) {
+        scoringSchemeRepository.findById(scoringSchemeId)
+                .filter(s -> s.isActive())
+                .orElseThrow(() -> new ValidationException("Scoring scheme not found or not active"));
+
+        qualificationSchemeRepository.findById(qualificationSchemeId)
+                .filter(q -> q.isActive())
+                .orElseThrow(() -> new ValidationException("Qualification scheme not found or not active"));
+
+        if (compType != null) {
+            validateQualificationSchemeForType(compType, qualificationSchemeId);
+        }
+    }
+
+    private void requireDateTimes(OffsetDateTime openAt, OffsetDateTime closedAt,
+                                   OffsetDateTime lastChangesTm, OffsetDateTime technicalMeeting) {
+        if (openAt == null) throw new ValidationException("Entry submissions open date/time is required");
+        if (closedAt == null) throw new ValidationException("Entry submissions closed date/time is required");
+        if (lastChangesTm == null) throw new ValidationException("Last changes before TM date/time is required");
+        if (technicalMeeting == null) throw new ValidationException("Technical meeting date/time is required");
+    }
+
+    private void validateDates(LocalDate startDate, LocalDate endDate) {
+        if (startDate == null) throw new ValidationException("Start date is required");
+        if (endDate == null) throw new ValidationException("End date is required");
+        if (!endDate.isAfter(startDate) && !endDate.isEqual(startDate)) {
+            throw new ValidationException("End date must be on or after start date");
+        }
+    }
+
+    private void validateChronology(OffsetDateTime openAt, OffsetDateTime closedAt,
+                                     OffsetDateTime lastChangesTm, OffsetDateTime technicalMeeting,
+                                     LocalDate startDate) {
+        if (openAt == null || closedAt == null || lastChangesTm == null || technicalMeeting == null) return;
+
+        Instant submissionsOpen = openAt.toInstant();
+        Instant submissionsClosed = closedAt.toInstant();
+        Instant lastChangesTmInst = lastChangesTm.toInstant();
+        Instant technicalMeetingInst = technicalMeeting.toInstant();
+        Instant startInstant = startDate.atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+
+        if (!submissionsOpen.isBefore(submissionsClosed)) {
+            throw new ValidationException("Entry submissions open date/time must be before entry submissions closed date/time");
+        }
+        if (!submissionsClosed.isBefore(lastChangesTmInst)) {
+            throw new ValidationException("Entry submissions closed date/time must be before last changes before TM date/time");
+        }
+        if (!lastChangesTmInst.isBefore(technicalMeetingInst)) {
+            throw new ValidationException("Last changes before TM date/time must be before technical meeting date/time");
+        }
+        if (!technicalMeetingInst.isBefore(startInstant)) {
+            throw new ValidationException("Technical meeting date/time must be before competition start date");
+        }
+    }
+
+    private void validateQualificationSchemeForType(String competitionType, UUID qualificationSchemeId) {
+        if ("STANDARD".equals(competitionType)) return;
+        boolean incompatible = qualificationTierRepository
+                .findByQualificationSchemeIdOrderByBoatCountMinAsc(qualificationSchemeId)
+                .stream()
+                .anyMatch(t -> t.getSemiFinalCount() > 0 || t.getFinalACount() > 0 || t.getFinalBCount() > 0);
+        if (incompatible) {
+            throw new ValidationException(
+                "Qualification scheme has SF/FA/FB tiers — not compatible with competition type " + competitionType);
+        }
+    }
 }

@@ -33,12 +33,12 @@ public final class ExpandConfig {
                 .addExpandableField("uploadedByClub", com.bfg.platform.club.entity.Club.class, JoinType.LEFT)
                 .build());
 
-        register(com.bfg.platform.competition.entity.CompetitionDisciplineScheme.class, EntityExpandConfig.builder()
-                .addExpandableField("discipline", com.bfg.platform.competition.entity.DisciplineDefinition.class, JoinType.LEFT)
-                .build());
-
         register(com.bfg.platform.competition.entity.DisciplineDefinition.class, EntityExpandConfig.builder()
                 .addExpandableField("competitionGroup", com.bfg.platform.competition.entity.CompetitionGroupDefinition.class, JoinType.LEFT)
+                .build());
+
+        register(com.bfg.platform.competition.entity.CompetitionTimetableEvent.class, EntityExpandConfig.builder()
+                .addExpandableField("discipline", com.bfg.platform.competition.entity.DisciplineDefinition.class, JoinType.LEFT)
                 .build());
     }
     

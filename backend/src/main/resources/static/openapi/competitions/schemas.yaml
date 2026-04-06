@@ -30,7 +30,6 @@ CompetitionStatus:
   description: Status of a competition
   enum:
     - PLANNED
-    - DRAFT
     - REGISTRATION_OPEN
     - REGISTRATION_CLOSED
     - IN_PROGRESS
@@ -46,6 +45,14 @@ CompetitionEventStatus:
     - FINISHED
     - CANCELLED
     - POSTPONED
+
+CompetitionType:
+  type: string
+  description: Type/format of the competition
+  enum:
+    - STANDARD
+    - ERG
+    - NATIONAL_TEAM_TEST
 
 FinishStatus:
   type: string
@@ -340,7 +347,7 @@ QualificationProgressionDto:
 
 CompetitionDto:
   type: object
-  description: Data Transfer Object for a competition (DRAFT status = template, non-DRAFT = real)
+  description: Data Transfer Object for a competition
   properties:
     uuid:
       type: string
@@ -365,51 +372,31 @@ CompetitionDto:
     entrySubmissionsOpenAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
+      description: "Required when isTemplate is false."
     entrySubmissionsClosedAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
+      description: "Required when isTemplate is false."
     lastChangesBeforeTmAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
+      description: "Required when isTemplate is false."
     technicalMeetingAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
+      description: "Required when isTemplate is false."
     status:
       $ref: "#/CompetitionStatus"
-    scopeType:
-      $ref: "../common/schemas.yaml#/ScopeType"
+    isTemplate:
+      type: boolean
     scoringSchemeId:
       type: string
       format: uuid
     qualificationSchemeId:
       type: string
       format: uuid
-    createdAt:
-      type: string
-      format: date-time
-    modifiedAt:
-      type: string
-      format: date-time
-
-CompetitionDisciplineSchemeDto:
-  type: object
-  description: Data Transfer Object for competition discipline scheme assignment
-  properties:
-    uuid:
-      type: string
-      format: uuid
-    competitionId:
-      type: string
-      format: uuid
-    disciplineId:
-      type: string
-      format: uuid
-    discipline:
-      $ref: "#/DisciplineDefinitionDto"
+    competitionType:
+      $ref: "#/CompetitionType"
     createdAt:
       type: string
       format: date-time
@@ -430,11 +417,10 @@ CompetitionTimetableEventDto:
     disciplineId:
       type: string
       format: uuid
+    discipline:
+      $ref: "#/DisciplineDefinitionDto"
     qualificationEventType:
       $ref: "#/QualificationEventType"
-    qualificationStageNumber:
-      type: integer
-      example: 1
     scheduledAt:
       type: string
       format: date-time
@@ -934,19 +920,19 @@ QualificationProgressionRequest:
         @NotNull(message = "Qualify by time is required")
         @Min(value = 0, message = "Qualify by time must be >= 0")
 
-CompetitionRequest:
+CompetitionCreateRequest:
   type: object
-  description: Request payload for creating or updating a competition (DRAFT status = template, non-DRAFT = real)
+  description: Request payload for creating a competition
   required:
     - shortName
     - name
     - location
-    - scopeType
     - scoringSchemeId
     - qualificationSchemeId
-    - status
     - startDate
     - endDate
+    - competitionType
+    - isTemplate
   properties:
     shortName:
       type: string
@@ -971,27 +957,19 @@ CompetitionRequest:
     entrySubmissionsOpenAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
+      description: "Required when isTemplate is false."
     entrySubmissionsClosedAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
+      description: "Required when isTemplate is false."
     lastChangesBeforeTmAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
+      description: "Required when isTemplate is false."
     technicalMeetingAt:
       type: string
       format: date-time
-      description: "Required when status is not DRAFT."
-    status:
-      allOf:
-        - $ref: "#/CompetitionStatus"
-      x-field-extra-annotation: '@NotNull(message = "Status is required")'
-    scopeType:
-      allOf:
-        - $ref: "../common/schemas.yaml#/ScopeType"
-      x-field-extra-annotation: '@NotNull(message = "Scope type is required")'
+      description: "Required when isTemplate is false."
     scoringSchemeId:
       type: string
       format: uuid
@@ -1000,22 +978,80 @@ CompetitionRequest:
       type: string
       format: uuid
       x-field-extra-annotation: '@NotNull(message = "Qualification scheme ID is required")'
+    competitionType:
+      allOf:
+        - $ref: "#/CompetitionType"
+      x-field-extra-annotation: '@NotNull(message = "Competition type is required")'
+    isTemplate:
+      type: boolean
+      x-field-extra-annotation: '@NotNull(message = "isTemplate is required")'
 
-CompetitionDisciplineSchemeRequest:
+CompetitionUpdateRequest:
   type: object
-  description: Request to assign a discipline to a competition
+  description: Request payload for updating a competition
   required:
-    - competitionId
-    - disciplineId
+    - shortName
+    - name
+    - location
+    - scoringSchemeId
+    - qualificationSchemeId
+    - startDate
+    - endDate
+    - competitionType
+    - status
   properties:
-    competitionId:
+    shortName:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Short name is required")'
+    name:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Name is required")'
+    location:
+      type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "Location is required")'
+    startDate:
+      type: string
+      format: date
+      x-field-extra-annotation: '@NotNull(message = "Start date is required")'
+    endDate:
+      type: string
+      format: date
+      x-field-extra-annotation: '@NotNull(message = "End date is required")'
+    entrySubmissionsOpenAt:
+      type: string
+      format: date-time
+      description: "Required when isTemplate is false."
+    entrySubmissionsClosedAt:
+      type: string
+      format: date-time
+      description: "Required when isTemplate is false."
+    lastChangesBeforeTmAt:
+      type: string
+      format: date-time
+      description: "Required when isTemplate is false."
+    technicalMeetingAt:
+      type: string
+      format: date-time
+      description: "Required when isTemplate is false."
+    scoringSchemeId:
       type: string
       format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Competition ID is required")'
-    disciplineId:
+      x-field-extra-annotation: '@NotNull(message = "Scoring scheme ID is required")'
+    qualificationSchemeId:
       type: string
       format: uuid
-      x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
+      x-field-extra-annotation: '@NotNull(message = "Qualification scheme ID is required")'
+    competitionType:
+      allOf:
+        - $ref: "#/CompetitionType"
+      x-field-extra-annotation: '@NotNull(message = "Competition type is required")'
+    status:
+      allOf:
+        - $ref: "#/CompetitionStatus"
+      x-field-extra-annotation: '@NotNull(message = "Status is required")'
 
 CompetitionTimetableEventRequest:
   type: object
@@ -1024,7 +1060,6 @@ CompetitionTimetableEventRequest:
     - competitionId
     - disciplineId
     - qualificationEventType
-    - qualificationStageNumber
     - scheduledAt
     - eventStatus
   properties:
@@ -1040,10 +1075,6 @@ CompetitionTimetableEventRequest:
       allOf:
         - $ref: "#/QualificationEventType"
       x-field-extra-annotation: '@NotNull(message = "Qualification event type is required")'
-    qualificationStageNumber:
-      type: integer
-      default: 1
-      x-field-extra-annotation: '@NotNull(message = "Qualification stage number is required")'
     scheduledAt:
       type: string
       format: date-time

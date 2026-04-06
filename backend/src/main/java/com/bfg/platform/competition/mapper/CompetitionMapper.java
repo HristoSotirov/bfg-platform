@@ -1,10 +1,11 @@
 package com.bfg.platform.competition.mapper;
 
 import com.bfg.platform.competition.entity.Competition;
+import com.bfg.platform.gen.model.CompetitionCreateRequest;
 import com.bfg.platform.gen.model.CompetitionDto;
-import com.bfg.platform.gen.model.CompetitionRequest;
 import com.bfg.platform.gen.model.CompetitionStatus;
-import com.bfg.platform.gen.model.ScopeType;
+import com.bfg.platform.gen.model.CompetitionType;
+import com.bfg.platform.gen.model.CompetitionUpdateRequest;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -34,9 +35,10 @@ public class CompetitionMapper {
         dto.setTechnicalMeetingAt(entity.getTechnicalMeetingAt() != null
             ? OffsetDateTime.ofInstant(entity.getTechnicalMeetingAt(), ZoneOffset.UTC) : null);
         dto.setStatus(entity.getStatus() != null ? CompetitionStatus.fromValue(entity.getStatus()) : null);
-        dto.setScopeType(entity.getScopeType() != null ? ScopeType.fromValue(entity.getScopeType()) : null);
         dto.setScoringSchemeId(entity.getScoringSchemeId());
         dto.setQualificationSchemeId(entity.getQualificationSchemeId());
+        dto.setCompetitionType(entity.getCompetitionType() != null ? CompetitionType.fromValue(entity.getCompetitionType()) : null);
+        dto.setIsTemplate(entity.isTemplate());
         dto.setCreatedAt(entity.getCreatedAt() != null
             ? OffsetDateTime.ofInstant(entity.getCreatedAt(), ZoneOffset.UTC)
             : null);
@@ -47,7 +49,7 @@ public class CompetitionMapper {
         return dto;
     }
 
-    public static Competition fromRequest(CompetitionRequest request) {
+    public static Competition fromRequest(CompetitionCreateRequest request) {
         Competition entity = new Competition();
         entity.setShortName(request.getShortName());
         entity.setName(request.getName());
@@ -62,14 +64,14 @@ public class CompetitionMapper {
             ? request.getLastChangesBeforeTmAt().toInstant() : null);
         entity.setTechnicalMeetingAt(request.getTechnicalMeetingAt() != null
             ? request.getTechnicalMeetingAt().toInstant() : null);
-        entity.setStatus(request.getStatus() != null ? request.getStatus().getValue() : null);
-        entity.setScopeType(request.getScopeType() != null ? request.getScopeType().getValue() : null);
         entity.setScoringSchemeId(request.getScoringSchemeId());
         entity.setQualificationSchemeId(request.getQualificationSchemeId());
+        entity.setCompetitionType(request.getCompetitionType() != null ? request.getCompetitionType().getValue() : null);
+        entity.setTemplate(Boolean.TRUE.equals(request.getIsTemplate()));
         return entity;
     }
 
-    public static void updateFromRequest(Competition entity, CompetitionRequest request) {
+    public static void updateFromRequest(Competition entity, CompetitionUpdateRequest request) {
         entity.setShortName(request.getShortName());
         entity.setName(request.getName());
         entity.setLocation(request.getLocation());
@@ -84,8 +86,9 @@ public class CompetitionMapper {
         entity.setTechnicalMeetingAt(request.getTechnicalMeetingAt() != null
             ? request.getTechnicalMeetingAt().toInstant() : null);
         entity.setStatus(request.getStatus() != null ? request.getStatus().getValue() : null);
-        entity.setScopeType(request.getScopeType() != null ? request.getScopeType().getValue() : null);
         entity.setScoringSchemeId(request.getScoringSchemeId());
         entity.setQualificationSchemeId(request.getQualificationSchemeId());
+        entity.setCompetitionType(request.getCompetitionType() != null ? request.getCompetitionType().getValue() : null);
+        // isTemplate is intentionally not updated — it is immutable after creation
     }
 }
