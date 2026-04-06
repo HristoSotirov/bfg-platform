@@ -20,6 +20,7 @@ import { AddDisciplineDialogComponent } from './components/add-discipline-dialog
 import { DisciplinesSettingsDialogComponent } from './components/disciplines-settings-dialog/disciplines-settings-dialog.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { DisciplinesFiltersComponent } from './components/disciplines-filters/disciplines-filters.component';
+import { DropdownOption } from '../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 
 export interface DisciplineColumnConfig {
   id: string;
@@ -32,11 +33,11 @@ export interface DisciplineFilterConfig {
   label: string;
   visible: boolean;
 }
-
 export interface DisciplineFilters {
   search: string;
   boatClasses: string[];
   statuses: string[];
+  competitionGroupIds: string[];
 }
 
 @Component({
@@ -66,6 +67,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   error: string | null = null;
 
   groupMap: Record<string, string> = {};
+  groupOptions: DropdownOption[] = [];
 
   userRole: SystemRole | null = null;
 
@@ -73,6 +75,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
     search: '',
     boatClasses: [],
     statuses: [],
+    competitionGroupIds: [],
   };
   orderBy: string[] = ['name_asc'];
 
@@ -96,6 +99,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   ];
 
   filterConfigs: DisciplineFilterConfig[] = [
+    { id: 'competitionGroup', label: 'Състезателна група', visible: true },
     { id: 'boatClass', label: 'Клас лодка', visible: true },
     { id: 'status', label: 'Статус', visible: true },
   ];
@@ -134,13 +138,15 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   private loadGroupMap(): void {
     fetchAllPages((skip, top) =>
       this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
-        undefined, undefined, ['name_asc'] as any, top, skip
+        undefined, undefined, ['shortName_asc'] as any, top, skip
       ) as any
     ).pipe(takeUntil(this.destroy$)).subscribe({
       next: (groups: any[]) => {
         this.groupMap = {};
+        this.groupOptions = [];
         for (const g of groups) {
           this.groupMap[g.uuid] = `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`;
+          this.groupOptions.push({ value: g.uuid, label: g.shortName || g.name || '-' });
         }
         this.cdr.markForCheck();
       },
@@ -205,6 +211,17 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
           .map((s) => `isActive eq ${s}`)
           .join(' or ');
         filterParts.push(`(${statusConditions})`);
+      }
+    }
+
+    if (this.filters.competitionGroupIds.length > 0 && this.isFilterVisible('competitionGroup')) {
+      if (this.filters.competitionGroupIds.length === 1) {
+        filterParts.push(`competitionGroupId eq '${this.filters.competitionGroupIds[0]}'`);
+      } else {
+        const groupConditions = this.filters.competitionGroupIds
+          .map((id) => `competitionGroupId eq '${id}'`)
+          .join(' or ');
+        filterParts.push(`(${groupConditions})`);
       }
     }
 
@@ -423,6 +440,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
           search: parsed.search || '',
           boatClasses: parsed.boatClasses || [],
           statuses: parsed.statuses || [],
+          competitionGroupIds: parsed.competitionGroupIds || [],
         };
       } catch (e) {
         console.error('Error loading filter values:', e);

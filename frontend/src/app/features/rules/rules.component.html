@@ -82,6 +82,7 @@
         <app-disciplines-filters
           [filters]="disciplineFilters"
           [filterConfigs]="disciplineFilterConfigs"
+          [groupOptions]="disciplineGroupOptions"
           (filtersChange)="onDisciplineFiltersChange($event)"
           (searchChange)="disciplineFilters.search = $event; loadDisciplines()"
         ></app-disciplines-filters>

@@ -6,7 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -21,7 +21,6 @@ import { ClubDto } from '../../core/services/api';
 import { SystemRole } from '../../core/models/navigation.model';
 import { ClubsTableComponent } from './components/clubs-table/clubs-table.component';
 import { ClubsFiltersComponent } from './components/clubs-filters/clubs-filters.component';
-import { ClubDetailsDialogComponent } from './components/club-details-dialog/club-details-dialog.component';
 import { AddClubDialogComponent } from './components/add-club-dialog/add-club-dialog.component';
 import { ClubMigrationDialogComponent } from './components/club-migration-dialog/club-migration-dialog.component';
 import { ClubSettingsDialogComponent } from './components/club-settings-dialog/club-settings-dialog.component';
@@ -59,7 +58,6 @@ export interface ClubFilters {
     HeaderComponent,
     ClubsTableComponent,
     ClubsFiltersComponent,
-    ClubDetailsDialogComponent,
     AddClubDialogComponent,
     ClubMigrationDialogComponent,
     ClubSettingsDialogComponent,
@@ -109,12 +107,9 @@ export class ClubsComponent implements OnInit, OnDestroy {
     // Note: 'scopeType' filter is added dynamically based on user permissions
   ];
 
-  isDetailsDialogOpen = false;
   isAddDialogOpen = false;
   isMigrationDialogOpen = false;
   isSettingsDialogOpen = false;
-
-  selectedClub: ClubDto | null = null;
 
   exporting = false;
   mobileMenuOpen = false;
@@ -148,6 +143,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
     private scopeVisibility: ScopeVisibilityService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -382,15 +378,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
   }
 
   openDetailsDialog(club: ClubDto): void {
-    this.selectedClub = club;
-    this.isDetailsDialogOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeDetailsDialog(): void {
-    this.isDetailsDialogOpen = false;
-    this.selectedClub = null;
-    this.cdr.markForCheck();
+    this.router.navigate(['/clubs', club.uuid]);
   }
 
   openAddDialog(): void {
@@ -547,32 +535,6 @@ export class ClubsComponent implements OnInit, OnDestroy {
         // ignore
       }
     }
-  }
-
-  onLogoUploaded(updatedClub: ClubDto): void {
-    // Only update the selected club data, don't reload the table or close dialog
-    this.selectedClub = updatedClub;
-    this.cdr.markForCheck();
-  }
-
-  onClubSaved(): void {
-    // Refresh the selected club to show updated data
-    if (this.selectedClub?.uuid) {
-      this.clubsService
-        .getClubByUuid(this.selectedClub.uuid, ['clubAdminUser'])
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (updatedClub) => {
-            this.selectedClub = updatedClub;
-            this.cdr.markForCheck();
-          },
-          error: () => {
-            // If refresh fails, just reload the list
-          },
-        });
-    }
-    // Refresh the clubs list in the background
-    this.loadClubs();
   }
 
   onClubAdded(): void {

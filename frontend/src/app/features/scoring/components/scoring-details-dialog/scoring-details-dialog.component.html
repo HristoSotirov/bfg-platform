@@ -9,6 +9,7 @@
     <a
       slot="header-extra"
       [routerLink]="permalinkRoute"
+      (click)="close()"
       class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
       title="Отвори страницата"
     >
@@ -134,13 +135,13 @@
                           </td>
                           <td class="px-2 py-1.5">
                             <div class="flex gap-3">
-                              <button type="button" class="text-green-600 hover:text-green-800 text-xs"
-                                [disabled]="!isRuleEditValid || savingRule" (click)="saveRule()">
-                                Запази
+                              <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                [disabled]="!isRuleEditValid || savingRule" (click)="saveRule()" title="Запази">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                               </button>
-                              <button type="button" class="text-gray-600 hover:text-gray-800 text-xs"
-                                [disabled]="savingRule" (click)="cancelEditingRule()">
-                                Отказ
+                              <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                [disabled]="savingRule" (click)="cancelEditingRule()" title="Отказ">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                               </button>
                             </div>
                           </td>
@@ -151,14 +152,14 @@
                           <td class="px-2 py-1.5">{{ rule.basePoints }}</td>
                           @if (canEdit && !isEditing) {
                             <td class="px-2 py-1.5">
-                              <div class="flex gap-3">
-                                <button type="button" class="text-bfg-blue hover:underline text-xs"
-                                  (click)="startEditingRule(rule)">
-                                  Редактирай
+                              <div class="flex gap-2">
+                                <button type="button" class="text-bfg-blue hover:text-bfg-blue/70"
+                                  (click)="startEditingRule(rule)" title="Редактирай">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
-                                <button type="button" class="text-red-600 hover:text-red-800 text-xs"
-                                  (click)="confirmDeleteRule(rule)">
-                                  Изтрий
+                                <button type="button" class="text-red-400 hover:text-red-600"
+                                  (click)="confirmDeleteRule(rule)" title="Изтрий">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                               </div>
                             </td>
@@ -229,13 +230,13 @@
                           </td>
                           <td class="px-2 py-1.5">
                             <div class="flex gap-3">
-                              <button type="button" class="text-green-600 hover:text-green-800 text-xs"
-                                [disabled]="!isCoeffEditValid || savingCoefficient" (click)="saveCoefficient()">
-                                Запази
+                              <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                [disabled]="!isCoeffEditValid || savingCoefficient" (click)="saveCoefficient()" title="Запази">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                               </button>
-                              <button type="button" class="text-gray-600 hover:text-gray-800 text-xs"
-                                [disabled]="savingCoefficient" (click)="cancelEditingCoefficient()">
-                                Отказ
+                              <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                [disabled]="savingCoefficient" (click)="cancelEditingCoefficient()" title="Отказ">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                               </button>
                             </div>
                           </td>
@@ -246,14 +247,14 @@
                           <td class="px-2 py-1.5">{{ coeff.coefficient }}</td>
                           @if (canEdit && !isEditing) {
                             <td class="px-2 py-1.5">
-                              <div class="flex gap-3">
-                                <button type="button" class="text-bfg-blue hover:underline text-xs"
-                                  (click)="startEditingCoefficient(coeff)">
-                                  Редактирай
+                              <div class="flex gap-2">
+                                <button type="button" class="text-bfg-blue hover:text-bfg-blue/70"
+                                  (click)="startEditingCoefficient(coeff)" title="Редактирай">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
-                                <button type="button" class="text-red-600 hover:text-red-800 text-xs"
-                                  (click)="confirmDeleteCoefficient(coeff)">
-                                  Изтрий
+                                <button type="button" class="text-red-400 hover:text-red-600"
+                                  (click)="confirmDeleteCoefficient(coeff)" title="Изтрий">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                               </div>
                             </td>
@@ -374,7 +375,7 @@
       >
       </app-button>
       <app-button
-        variant="primary"
+        variant="danger"
         size="md"
         text="Изтрий"
         (click)="deleteRule()"
@@ -404,7 +405,7 @@
       >
       </app-button>
       <app-button
-        variant="primary"
+        variant="danger"
         size="md"
         text="Изтрий"
         (click)="deleteCoefficient()"

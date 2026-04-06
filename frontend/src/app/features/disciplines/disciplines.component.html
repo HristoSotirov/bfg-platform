@@ -27,6 +27,7 @@
     <app-disciplines-filters
       [filters]="filters"
       [filterConfigs]="filterConfigs"
+      [groupOptions]="groupOptions"
       (filtersChange)="onFiltersChange($event)"
       (searchChange)="onSearchChange($event)"
     >
@@ -118,6 +119,7 @@
   [canEdit]="canEditDiscipline"
   [groupMap]="groupMap"
   (closed)="closeDetailsDialog()"
+  (navigated)="closeDetailsDialog()"
   (saved)="onDisciplineSaved()"
   (deleted)="onDisciplineDeleted()"
 >

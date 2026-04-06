@@ -151,7 +151,7 @@ export class AccreditationsTableComponent implements OnInit {
       lastName: 'athlete.lastName',
       gender: 'athlete.gender',
       dateOfBirth: 'athlete.dateOfBirth',
-      raceGroup: 'athlete.dateOfBirth', // Sort by dateOfBirth for race group
+      raceGroup: 'athlete.dateOfBirth', // kept for compatibility but column removed
       clubShortName: 'club.name',
       clubName: 'club.name',
       accreditationNumber: 'accreditationNumber',

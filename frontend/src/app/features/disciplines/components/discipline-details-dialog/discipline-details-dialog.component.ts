@@ -54,6 +54,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
   @Output() deleted = new EventEmitter<void>();
+  @Output() navigated = new EventEmitter<void>();
 
   private destroy$ = new Subject<void>();
 
@@ -158,6 +159,14 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     this.cdr.markForCheck();
   }
 
+  onGroupDialogNavigated(): void {
+    this.closeGroupDialog();
+    this.error = null;
+    this.isEditing = false;
+    this.closed.emit();
+    this.navigated.emit();
+  }
+
   close(): void {
     if (this.isEditing) {
       this.showEditingWarningDialog = true;
@@ -166,6 +175,13 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     }
     this.error = null;
     this.closed.emit();
+  }
+
+  onPermalinkClick(): void {
+    this.error = null;
+    this.isEditing = false;
+    this.closed.emit();
+    this.navigated.emit();
   }
 
   startEditing(): void {

@@ -6,7 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -20,7 +20,6 @@ import {
 } from '../../core/services/api';
 import { UsersTableComponent } from './components/users-table/users-table.component';
 import { UsersFiltersComponent } from './components/users-filters/users-filters.component';
-import { UserDetailsDialogComponent } from './components/user-details-dialog/user-details-dialog.component';
 import { AddUserDialogComponent } from './components/add-user-dialog/add-user-dialog.component';
 import { UserSettingsDialogComponent } from './components/user-settings-dialog/user-settings-dialog.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -58,7 +57,6 @@ export interface UserFilters {
     HeaderComponent,
     UsersTableComponent,
     UsersFiltersComponent,
-    UserDetailsDialogComponent,
     AddUserDialogComponent,
     UserSettingsDialogComponent,
     ButtonComponent,
@@ -109,11 +107,8 @@ export class UsersComponent implements OnInit, OnDestroy {
     // Note: 'scopeType' filter is added dynamically based on user permissions
   ];
 
-  isDetailsDialogOpen = false;
   isAddDialogOpen = false;
   isSettingsDialogOpen = false;
-
-  selectedUser: UserDto | null = null;
 
   exporting = false;
   mobileMenuOpen = false;
@@ -141,6 +136,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private usersService: UsersService,
     private scopeVisibility: ScopeVisibilityService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -334,15 +330,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   openDetailsDialog(user: UserDto): void {
-    this.selectedUser = user;
-    this.isDetailsDialogOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeDetailsDialog(): void {
-    this.isDetailsDialogOpen = false;
-    this.selectedUser = null;
-    this.cdr.markForCheck();
+    this.router.navigate(['/users', user.uuid]);
   }
 
   openAddDialog(): void {
@@ -492,11 +480,6 @@ export class UsersComponent implements OnInit, OnDestroy {
         // ignore
       }
     }
-  }
-
-  onUserSaved(): void {
-    this.loadUsers();
-    this.closeDetailsDialog();
   }
 
   onUserAdded(): void {

@@ -58,6 +58,7 @@ import { AddQualificationDialogComponent } from '../qualification/components/add
 import { QualificationSettingsDialogComponent } from '../qualification/components/qualification-settings-dialog/qualification-settings-dialog.component';
 import { QualificationFiltersComponent } from '../qualification/components/qualification-filters/qualification-filters.component';
 import { QualificationFilters, QualificationColumnConfig, QualificationFilterConfig } from '../qualification/qualification.component';
+import { DropdownOption } from '../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 
 type RulesTab = 'groups' | 'disciplines' | 'scoring' | 'qualification';
 
@@ -152,7 +153,7 @@ export class RulesComponent implements OnInit, OnDestroy {
   disciplinesHasMore = true;
   disciplinesLoaded = false;
 
-  disciplineFilters: DisciplineFilters = { search: '', boatClasses: [], statuses: [] };
+  disciplineFilters: DisciplineFilters = { search: '', boatClasses: [], statuses: [], competitionGroupIds: [] };
   disciplineOrderBy: string[] = ['name_asc'];
 
   disciplineColumns: DisciplineColumnConfig[] = [
@@ -171,9 +172,12 @@ export class RulesComponent implements OnInit, OnDestroy {
   ];
 
   disciplineFilterConfigs: DisciplineFilterConfig[] = [
+    { id: 'competitionGroup', label: 'Състезателна група', visible: true },
     { id: 'boatClass', label: 'Клас лодка', visible: true },
     { id: 'status', label: 'Статус', visible: true },
   ];
+
+  disciplineGroupOptions: DropdownOption[] = [];
 
   isDisciplineAddOpen = false;
   isDisciplineSettingsOpen = false;
@@ -313,14 +317,17 @@ export class RulesComponent implements OnInit, OnDestroy {
   private loadGroupLookup(): void {
     fetchAllPages((skip, top) =>
       this.competitionGroupDefinitionsService.getAllCompetitionGroupDefinitions(
-        undefined, undefined, ['name_asc'] as any, top, skip
+        undefined, undefined, ['shortName_asc'] as any, top, skip
       ) as any
     ).pipe(takeUntil(this.destroy$)).subscribe((groups: any[]) => {
       const lookup: Record<string, string> = {};
+      const options: DropdownOption[] = [];
       groups.forEach((g: any) => {
         lookup[g.uuid] = `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`;
+        options.push({ value: g.uuid, label: g.shortName || g.name || '-' });
       });
       this.groupLookup = lookup;
+      this.disciplineGroupOptions = options;
       this.cdr.markForCheck();
     });
   }
@@ -415,6 +422,11 @@ export class RulesComponent implements OnInit, OnDestroy {
       filterParts.push(this.disciplineFilters.statuses.length === 1
         ? `isActive eq ${this.disciplineFilters.statuses[0]}`
         : `(${this.disciplineFilters.statuses.map(s => `isActive eq ${s}`).join(' or ')})`);
+    }
+    if (this.disciplineFilters.competitionGroupIds.length > 0) {
+      filterParts.push(this.disciplineFilters.competitionGroupIds.length === 1
+        ? `competitionGroupId eq '${this.disciplineFilters.competitionGroupIds[0]}'`
+        : `(${this.disciplineFilters.competitionGroupIds.map(id => `competitionGroupId eq '${id}'`).join(' or ')})`);
     }
 
     this.disciplineDefinitionsService.getAllDisciplineDefinitions(

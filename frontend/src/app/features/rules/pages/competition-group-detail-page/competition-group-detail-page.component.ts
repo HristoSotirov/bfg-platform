@@ -17,6 +17,7 @@ import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../..
 import { CompetitionGroupDetailsDialogComponent } from '../../../competition-groups/components/competition-group-details-dialog/competition-group-details-dialog.component';
 import { DisciplinesTableComponent } from '../../../disciplines/components/disciplines-table/disciplines-table.component';
 import { DisciplineDetailsDialogComponent } from '../../../disciplines/components/discipline-details-dialog/discipline-details-dialog.component';
+import { AddDisciplineDialogComponent } from '../../../disciplines/components/add-discipline-dialog/add-discipline-dialog.component';
 import {
   CompetitionGroupDefinitionsService,
   CompetitionGroupDefinitionDto,
@@ -25,7 +26,9 @@ import {
   TransferRounding,
   DisciplineDefinitionsService,
   DisciplineDefinitionDto,
+  DisciplineDefinitionRequest,
 } from '../../../../core/services/api';
+import { BoatClass } from '../../../../core/services/api/model/boatClass';
 import { AuthService } from '../../../../core/services/auth.service';
 import { SystemRole } from '../../../../core/models/navigation.model';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
@@ -44,6 +47,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
     CompetitionGroupDetailsDialogComponent,
     DisciplinesTableComponent,
     DisciplineDetailsDialogComponent,
+    AddDisciplineDialogComponent,
   ],
   templateUrl: './competition-group-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -143,6 +147,41 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   selectedDiscipline: DisciplineDefinitionDto | null = null;
   disciplinePermalinkRoute: string[] | null = null;
 
+  isAddDisciplineDialogOpen = false;
+
+  // Inline discipline editing
+  editingDisciplineId: string | null = null;
+  savingDiscipline = false;
+  disciplineToDelete: DisciplineDefinitionDto | null = null;
+  showDeleteDisciplineConfirm = false;
+  disciplineEditData: {
+    name: string;
+    shortName: string;
+    boatClass: string;
+    crewSize: number | null;
+    maxCrewFromTransfer: number | null;
+    hasCoxswain: string;
+    isLightweight: string;
+    distanceMeters: number | null;
+    isActive: string;
+  } = {
+    name: '', shortName: '', boatClass: '', crewSize: null,
+    maxCrewFromTransfer: null, hasCoxswain: 'false', isLightweight: 'false',
+    distanceMeters: null, isActive: 'true',
+  };
+
+  readonly boatClassOptions: SearchableSelectOption[] = [
+    { value: '1X', label: '1X' }, { value: '2X', label: '2X' },
+    { value: '2+', label: '2+' }, { value: '2-', label: '2-' },
+    { value: '4X', label: '4X' }, { value: '4X+', label: '4X+' },
+    { value: '4+', label: '4+' }, { value: '4-', label: '4-' },
+    { value: '8+', label: '8+' }, { value: 'ERGO', label: 'ERGO' },
+  ];
+
+  readonly booleanOptions: SearchableSelectOption[] = [
+    { value: 'true', label: 'Да' }, { value: 'false', label: 'Не' },
+  ];
+
   showTransferSchemaDialog = false;
 
   get hasTransferData(): boolean {
@@ -193,6 +232,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       if (uuid) {
         const isNewUuid = this.group?.uuid !== uuid;
         if (isNewUuid) {
+          this.closeAllDialogs();
           this.loadGroup(uuid);
           this.loadGroupLookup();
         }
@@ -283,6 +323,99 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  openAddDisciplineDialog(): void {
+    this.isAddDisciplineDialogOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  closeAddDisciplineDialog(): void {
+    this.isAddDisciplineDialogOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  onDisciplineAdded(): void {
+    this.isAddDisciplineDialogOpen = false;
+    this.loadDisciplines();
+  }
+
+  startEditingDiscipline(d: DisciplineDefinitionDto): void {
+    this.editingDisciplineId = d.uuid!;
+    this.disciplineEditData = {
+      name: d.name || '',
+      shortName: d.shortName || '',
+      boatClass: d.boatClass || '',
+      crewSize: d.crewSize ?? null,
+      maxCrewFromTransfer: d.maxCrewFromTransfer ?? null,
+      hasCoxswain: d.hasCoxswain ? 'true' : 'false',
+      isLightweight: d.isLightweight ? 'true' : 'false',
+      distanceMeters: d.distanceMeters ?? null,
+      isActive: d.isActive ? 'true' : 'false',
+    };
+    this.cdr.markForCheck();
+  }
+
+  cancelEditingDiscipline(): void {
+    this.editingDisciplineId = null;
+    this.cdr.markForCheck();
+  }
+
+  saveDiscipline(): void {
+    if (!this.editingDisciplineId) return;
+    this.savingDiscipline = true;
+    this.cdr.markForCheck();
+    const request: DisciplineDefinitionRequest = {
+      name: this.disciplineEditData.name,
+      shortName: this.disciplineEditData.shortName,
+      competitionGroupId: this.group!.uuid!,
+      boatClass: this.disciplineEditData.boatClass as BoatClass,
+      crewSize: this.disciplineEditData.crewSize ?? 1,
+      maxCrewFromTransfer: this.disciplineEditData.maxCrewFromTransfer ?? 0,
+      hasCoxswain: this.disciplineEditData.hasCoxswain === 'true',
+      isLightweight: this.disciplineEditData.isLightweight === 'true',
+      distanceMeters: this.disciplineEditData.distanceMeters ?? 0,
+      isActive: this.disciplineEditData.isActive === 'true',
+    };
+    this.disciplineDefinitionsService
+      .updateDisciplineDefinitionByUuid(this.editingDisciplineId, request)
+      .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
+      .subscribe((updated) => {
+        this.savingDiscipline = false;
+        this.editingDisciplineId = null;
+        if (updated) {
+          const idx = this.disciplines.findIndex(d => d.uuid === (updated as any).uuid);
+          if (idx !== -1) this.disciplines = [...this.disciplines.slice(0, idx), updated as DisciplineDefinitionDto, ...this.disciplines.slice(idx + 1)];
+        }
+        this.cdr.markForCheck();
+      });
+  }
+
+  confirmDeleteDiscipline(d: DisciplineDefinitionDto): void {
+    this.disciplineToDelete = d;
+    this.showDeleteDisciplineConfirm = true;
+    this.cdr.markForCheck();
+  }
+
+  cancelDeleteDiscipline(): void {
+    this.disciplineToDelete = null;
+    this.showDeleteDisciplineConfirm = false;
+    this.cdr.markForCheck();
+  }
+
+  executeDeleteDiscipline(): void {
+    if (!this.disciplineToDelete?.uuid) return;
+    const uuid = this.disciplineToDelete.uuid;
+    this.showDeleteDisciplineConfirm = false;
+    this.cdr.markForCheck();
+    this.disciplineDefinitionsService
+      .deleteDisciplineDefinitionByUuid(uuid)
+      .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
+      .subscribe(() => {
+        this.disciplines = this.disciplines.filter(d => d.uuid !== uuid);
+        this.disciplineToDelete = null;
+        this.cdr.markForCheck();
+      });
+  }
+
   openDisciplineDetails(discipline: DisciplineDefinitionDto): void {
     this.selectedDiscipline = discipline;
     this.disciplinePermalinkRoute = ['/regulations/disciplines', discipline.uuid!];
@@ -355,6 +488,19 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     this.transferGroup = null;
     this.transferGroupPermalinkRoute = null;
     this.cdr.markForCheck();
+  }
+
+  closeAllDialogs(): void {
+    this.showTransferGroupDialog = false;
+    this.transferGroup = null;
+    this.transferGroupPermalinkRoute = null;
+    this.showDisciplineDialog = false;
+    this.selectedDiscipline = null;
+    this.disciplinePermalinkRoute = null;
+    this.isAddDisciplineDialogOpen = false;
+    this.editingDisciplineId = null;
+    this.showDeleteDisciplineConfirm = false;
+    this.disciplineToDelete = null;
   }
 
   startEditing(): void {

@@ -89,5 +89,12 @@ public class AccreditationController implements AccreditationsApi {
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Accreditation", accreditationUuid));
     }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
+    public ResponseEntity<Void> deleteAccreditation(UUID accreditationUuid) {
+        accreditationService.deleteAccreditation(accreditationUuid);
+        return ResponseEntity.noContent().build();
+    }
 }
 

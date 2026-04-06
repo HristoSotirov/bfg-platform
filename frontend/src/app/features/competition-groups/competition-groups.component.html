@@ -118,6 +118,7 @@
   [canEdit]="canEdit"
   [groupMap]="groupLookup"
   (closed)="closeDetailsDialog()"
+  (navigated)="closeDetailsDialog()"
   (saved)="onGroupSaved()"
   (deleted)="onGroupDeleted()"
 >

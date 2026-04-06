@@ -32,6 +32,8 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 })
 export class AddDisciplineDialogComponent implements OnChanges {
   @Input() isOpen = false;
+  @Input() defaultGroupId: string = '';
+  @Input() defaultGroupName: string = '';
 
   @Output() closed = new EventEmitter<void>();
   @Output() added = new EventEmitter<void>();
@@ -110,7 +112,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
     this.formData = {
       name: '',
       shortName: '',
-      competitionGroupId: '',
+      competitionGroupId: this.defaultGroupId || '',
       boatClass: '',
       crewSize: null,
       maxCrewFromTransfer: null,

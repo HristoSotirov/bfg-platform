@@ -22,13 +22,17 @@
 
     <div>
       <label class="block text-sm font-medium text-gray-700 mb-1">Състезателна група <span class="text-red-500">*</span>:</label>
-      <app-searchable-select-dropdown
-        [staticSearch]="groupSearch"
-        [placeholder]="'Изберете състезателна група'"
-        [ngModel]="formData.competitionGroupId"
-        (ngModelChange)="onCompetitionGroupChange($event)"
-        [disabled]="saving">
-      </app-searchable-select-dropdown>
+      @if (defaultGroupId) {
+        <p class="text-sm text-gray-900 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg">{{ defaultGroupName || defaultGroupId }}</p>
+      } @else {
+        <app-searchable-select-dropdown
+          [staticSearch]="groupSearch"
+          [placeholder]="'Изберете състезателна група'"
+          [ngModel]="formData.competitionGroupId"
+          (ngModelChange)="onCompetitionGroupChange($event)"
+          [disabled]="saving">
+        </app-searchable-select-dropdown>
+      }
     </div>
 
     <div>

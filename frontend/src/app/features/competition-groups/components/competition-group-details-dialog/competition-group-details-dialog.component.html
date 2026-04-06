@@ -9,6 +9,7 @@
     <a
       slot="header-extra"
       [routerLink]="permalinkRoute"
+      (click)="onPermalinkClick()"
       class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
       title="Отвори страницата"
     >
@@ -454,7 +455,7 @@
     <a
       slot="header-extra"
       [routerLink]="transferGroupPermalinkRoute"
-      (click)="closeTransferGroupDialog()"
+      (click)="onTransferGroupPermalinkClick()"
       class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
       title="Отвори страницата"
     >

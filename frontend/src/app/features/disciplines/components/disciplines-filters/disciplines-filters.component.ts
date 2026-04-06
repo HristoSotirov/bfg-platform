@@ -35,8 +35,10 @@ export class DisciplinesFiltersComponent implements OnInit {
     search: '',
     boatClasses: [],
     statuses: [],
+    competitionGroupIds: [],
   };
   @Input() filterConfigs: DisciplineFilterConfig[] = [];
+  @Input() groupOptions: DropdownOption[] = [];
 
   @Output() filtersChange = new EventEmitter<DisciplineFilters>();
   @Output() searchChange = new EventEmitter<string>();
@@ -73,7 +75,7 @@ export class DisciplinesFiltersComponent implements OnInit {
   }
 
   hasVisibleFilters(): boolean {
-    return this.isFilterVisible('boatClass') || this.isFilterVisible('status');
+    return this.isFilterVisible('competitionGroup') || this.isFilterVisible('boatClass') || this.isFilterVisible('status');
   }
 
   onSearchChange(value: string): void {
@@ -87,6 +89,10 @@ export class DisciplinesFiltersComponent implements OnInit {
 
   onStatusesChange(values: string[]): void {
     this.emitFiltersChange({ statuses: values });
+  }
+
+  onGroupsChange(values: string[]): void {
+    this.emitFiltersChange({ competitionGroupIds: values });
   }
 
   private emitFiltersChange(changes: Partial<DisciplineFilters>): void {

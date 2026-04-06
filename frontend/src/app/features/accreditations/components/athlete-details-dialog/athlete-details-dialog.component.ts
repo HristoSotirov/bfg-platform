@@ -324,6 +324,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
       raceGroup: this.getRaceGroup(),
       lastAccreditationClub: lastAcc?.club?.shortName ?? '-',
       lastAccreditationYear: lastAcc?.year ?? 0,
+      lastAccreditationNumber: lastAcc?.accreditationNumber ?? '-',
       lastAccreditationStatus: this.getStatusLabel(lastAcc?.status),
     };
   }

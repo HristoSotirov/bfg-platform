@@ -43,6 +43,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
   @Output() deleted = new EventEmitter<void>();
+  @Output() navigated = new EventEmitter<void>();
 
   private destroy$ = new Subject<void>();
 
@@ -192,6 +193,13 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     this.closed.emit();
   }
 
+  onPermalinkClick(): void {
+    this.error = null;
+    this.isEditing = false;
+    this.closed.emit();
+    this.navigated.emit();
+  }
+
 
   getGroupName(uuid: string | undefined): string {
     if (!uuid) return '-';
@@ -224,6 +232,14 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     this.transferGroup = null;
     this.transferGroupPermalinkRoute = null;
     this.cdr.markForCheck();
+  }
+
+  onTransferGroupPermalinkClick(): void {
+    this.closeTransferGroupDialog();
+    this.error = null;
+    this.isEditing = false;
+    this.closed.emit();
+    this.navigated.emit();
   }
 
   startEditing(): void {

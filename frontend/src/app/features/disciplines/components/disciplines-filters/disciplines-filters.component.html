@@ -11,6 +11,23 @@
       ></app-search-bar>
     </div>
 
+    @if (isFilterVisible("competitionGroup")) {
+      <div
+        [class.hidden]="!filtersExpanded"
+        class="sm:block w-full sm:w-[220px]"
+      >
+        <label class="block text-xs font-medium text-gray-500 mb-1">Състезателна група:</label>
+        <app-multi-select-dropdown
+          [options]="groupOptions"
+          [multiple]="true"
+          placeholder="Всички групи"
+          [ngModel]="filters.competitionGroupIds || []"
+          (selectionChange)="onGroupsChange($event)"
+        >
+        </app-multi-select-dropdown>
+      </div>
+    }
+
     @if (hasVisibleFilters() && isFilterVisible("boatClass")) {
       <div
         [class.hidden]="!filtersExpanded"

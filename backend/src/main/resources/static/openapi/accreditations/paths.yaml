@@ -277,6 +277,31 @@
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
+  delete:
+    tags:
+      - Accreditations
+    summary: Delete accreditation
+    description: Deletes an accreditation by UUID. Only FEDERATION_ADMIN and APP_ADMIN can delete accreditations.
+    operationId: deleteAccreditation
+    parameters:
+      - name: accreditationUuid
+        in: path
+        required: true
+        description: UUID of the accreditation
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{accreditation.uuid.required}")'
+    responses:
+      "204":
+        description: Accreditation deleted successfully
+      "404":
+        description: Accreditation not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
   patch:
     tags:
       - Accreditations

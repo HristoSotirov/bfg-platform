@@ -9,6 +9,7 @@
     <a
       slot="header-extra"
       [routerLink]="permalinkRoute"
+      (click)="onPermalinkClick()"
       class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
       title="Отвори страницата"
     >
@@ -329,7 +330,9 @@
   [isOpen]="showGroupDialog"
   [group]="selectedGroup"
   [canEdit]="false"
+  [groupMap]="groupMap"
   [permalinkRoute]="groupPermalinkRoute"
   (closed)="closeGroupDialog()"
+  (navigated)="onGroupDialogNavigated()"
 >
 </app-competition-group-details-dialog>

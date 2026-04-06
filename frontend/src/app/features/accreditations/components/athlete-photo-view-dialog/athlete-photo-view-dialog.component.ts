@@ -10,6 +10,7 @@ export interface AthletePhotoViewInfo {
   raceGroup: string;
   lastAccreditationClub: string;
   lastAccreditationYear: number;
+  lastAccreditationNumber: string;
   lastAccreditationStatus: string;
 }
 

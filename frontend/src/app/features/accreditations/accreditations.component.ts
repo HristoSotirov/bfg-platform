@@ -6,7 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -14,20 +14,22 @@ import { AuthService } from '../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../core/services/scope-visibility.service';
 import {
   AccreditationsService,
+  AthletesService,
   ClubsService,
   ClubCoachesService,
   ScopeType,
 } from '../../core/services/api';
-import { calculateRaceGroup } from '../../shared/utils/race-group.util';
-import { AccreditationDto, ClubDto } from '../../core/services/api';
+import { AccreditationDto, AthleteDto, ClubDto } from '../../core/services/api';
 import { SystemRole } from '../../core/models/navigation.model';
 import { AccreditationsTableComponent } from './components/accreditations-table/accreditations-table.component';
+import { AthletesTableComponent } from './components/athletes-table/athletes-table.component';
+import { AthletesFiltersComponent } from './components/athletes-filters/athletes-filters.component';
 import { AccreditationsFiltersComponent } from './components/accreditations-filters/accreditations-filters.component';
-import { AthleteDetailsDialogComponent } from './components/athlete-details-dialog/athlete-details-dialog.component';
 import { AddAthleteDialogComponent } from './components/add-athlete-dialog/add-athlete-dialog.component';
 import { RenewAccreditationDialogComponent } from './components/renew-accreditation-dialog/renew-accreditation-dialog.component';
 import { BatchMedicalDialogComponent } from './components/batch-medical-dialog/batch-medical-dialog.component';
 import { AccreditationSettingsDialogComponent } from './components/accreditation-settings-dialog/accreditation-settings-dialog.component';
+import { AthletesSettingsDialogComponent } from './components/athletes-settings-dialog/athletes-settings-dialog.component';
 import { MigrationDialogComponent } from './components/migration-dialog/migration-dialog.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import {
@@ -47,12 +49,26 @@ export interface FilterConfig {
   visible: boolean;
 }
 
+export interface AthleteFilterConfig {
+  id: string;
+  label: string;
+  visible: boolean;
+}
+
+export interface AthleteFilters {
+  search: string;
+  genders: string[];
+  birthYears: number[];
+  scopeTypes: string[];
+}
+
 export interface AccreditationFilters {
   search: string;
   statuses: string[];
-  years: number[];
+  genders: string[];
+  birthYears: number[]; // Athlete birth years
   clubs: string[]; // Club UUIDs
-  raceGroups: string[]; // Race group codes (M12, W12, etc.)
+  years: number[];
   scopeTypes: string[]; // INTERNAL, EXTERNAL, NATIONAL – from cache only
 }
 
@@ -64,12 +80,14 @@ export interface AccreditationFilters {
     RouterModule,
     HeaderComponent,
     AccreditationsTableComponent,
+    AthletesTableComponent,
+    AthletesFiltersComponent,
     AccreditationsFiltersComponent,
-    AthleteDetailsDialogComponent,
     AddAthleteDialogComponent,
     RenewAccreditationDialogComponent,
     BatchMedicalDialogComponent,
     AccreditationSettingsDialogComponent,
+    AthletesSettingsDialogComponent,
     MigrationDialogComponent,
     ButtonComponent,
     MobileActionMenuComponent,
@@ -81,10 +99,48 @@ export interface AccreditationFilters {
 export class AccreditationsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
+  activeTab: 'accreditations' | 'athletes' = 'accreditations';
+
   accreditations: AccreditationDto[] = [];
   totalElements = 0;
   loading = false;
   error: string | null = null;
+
+  // Athletes tab
+  athletes: AthleteDto[] = [];
+  athletesTotalElements = 0;
+  athletesLoading = false;
+  athletesSkip = 0;
+  athletesHasMore = false;
+  private athletesLoaded = false;
+
+  athleteFilters: AthleteFilters = {
+    search: '',
+    genders: [],
+    birthYears: [],
+    scopeTypes: [],
+  };
+  athleteFilterConfigs: AthleteFilterConfig[] = [
+    { id: 'gender', label: 'Пол', visible: true },
+    { id: 'birthYear', label: 'Година на раждане', visible: true },
+  ];
+  availableBirthYears: number[] = [];
+  athleteOrderBy: string[] = ['lastName_asc'];
+
+  athleteColumns: ColumnConfig[] = [
+    { id: 'lastName', label: 'Фамилия', visible: true },
+    { id: 'firstName', label: 'Иme', visible: true },
+    { id: 'middleName', label: 'Презиме', visible: true },
+    { id: 'dateOfBirth', label: 'Дата на раждане', visible: true },
+    { id: 'gender', label: 'Пол', visible: true },
+    { id: 'scopeType', label: 'Тип', visible: false },
+    { id: 'medicalExaminationDue', label: 'Мед. преглед до', visible: false },
+    { id: 'insurance', label: 'Застраховка', visible: false },
+    { id: 'registeredOn', label: 'Регистриран на', visible: false },
+    { id: 'modifiedAt', label: 'Променен на', visible: false },
+  ];
+
+  isAthletesSettingsDialogOpen = false;
 
   userRole: SystemRole | null = null;
   userClub: ClubDto | null = null;
@@ -93,9 +149,10 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   filters: AccreditationFilters = {
     search: '',
     statuses: [],
-    years: [],
+    genders: [],
+    birthYears: [],
     clubs: [],
-    raceGroups: [],
+    years: [],
     scopeTypes: [],
   };
   orderBy: string[] = ['accreditationNumber_asc'];
@@ -110,7 +167,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     { id: 'lastName', label: 'Фамилия', visible: true },
     { id: 'gender', label: 'Пол', visible: true },
     { id: 'dateOfBirth', label: 'Дата на раждане', visible: true },
-    { id: 'raceGroup', label: 'Състез. група', visible: true },
     { id: 'scopeType', label: 'Тип', visible: true },
     { id: 'clubShortName', label: 'Клуб', visible: true },
     { id: 'accreditationNumber', label: 'Номер', visible: true },
@@ -123,20 +179,18 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   ];
 
   filterConfigs: FilterConfig[] = [
-    { id: 'status', label: 'Статус', visible: true },
+    { id: 'gender', label: 'Пол', visible: true },
+    { id: 'birthYear', label: 'Година на раждане', visible: true },
     { id: 'year', label: 'Година', visible: true },
-    { id: 'raceGroup', label: 'Състез. група', visible: true },
+    { id: 'status', label: 'Статус', visible: true },
     // Note: 'club' and 'scopeType' filters are added dynamically based on user permissions
   ];
 
-  isDetailsDialogOpen = false;
   isAddDialogOpen = false;
   isRenewDialogOpen = false;
   isSettingsDialogOpen = false;
   isMigrationDialogOpen = false;
   isBatchMedicalDialogOpen = false;
-
-  selectedAccreditation: AccreditationDto | null = null;
   selectedAccreditations = new Set<string>();
 
   exporting = false;
@@ -188,20 +242,38 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
 
   allClubs: ClubDto[] = [];
   availableYears: number[] = [];
+  availableAccreditationBirthYears: number[] = [];
 
   constructor(
     private authService: AuthService,
     private accreditationsService: AccreditationsService,
+    private athletesService: AthletesService,
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
     private scopeVisibility: ScopeVisibilityService,
+    private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
   ) {}
 
   ngOnInit(): void {
     this.loadSettings();
-    this.loadFilters(); // Load saved filters before initializing
+    this.loadFilters();
     this.initializeUserContext();
+
+    this.route.queryParamMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
+      const tab = params.get('tab');
+      if (tab === 'athletes') {
+        this.activeTab = 'athletes';
+        if (!this.athletesLoaded) {
+          this.loadBirthYearRange();
+          this.loadAthletes();
+        }
+      } else {
+        this.activeTab = 'accreditations';
+      }
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
@@ -234,6 +306,16 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       }
       const scopeCol = this.columns.find((c) => c.id === 'scopeType');
       if (scopeCol) scopeCol.visible = true;
+
+      // Athletes scope filter
+      if (!this.athleteFilterConfigs.find((f) => f.id === 'scopeType')) {
+        this.athleteFilterConfigs = [
+          ...this.athleteFilterConfigs,
+          { id: 'scopeType', label: 'Тип', visible: true },
+        ];
+      }
+      const athleteScopeCol = this.athleteColumns.find((c) => c.id === 'scopeType');
+      if (athleteScopeCol) athleteScopeCol.visible = true;
     } else {
       this.filterConfigs = this.filterConfigs.filter(
         (f) => f.id !== 'scopeType',
@@ -241,14 +323,20 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       const scopeCol = this.columns.find((c) => c.id === 'scopeType');
       if (scopeCol) scopeCol.visible = false;
       this.filters.scopeTypes = [];
+
+      // Athletes
+      this.athleteFilterConfigs = this.athleteFilterConfigs.filter((f) => f.id !== 'scopeType');
+      const athleteScopeCol = this.athleteColumns.find((c) => c.id === 'scopeType');
+      if (athleteScopeCol) athleteScopeCol.visible = false;
+      this.athleteFilters.scopeTypes = [];
     }
 
     // Club filter visibility - hide for EXTERNAL/NATIONAL users
     if (this.showClubFilter) {
       // Ensure club filter is in the list if user can see it
       if (!this.filterConfigs.find((f) => f.id === 'club')) {
-        // Insert club filter after year filter
-        const yearIndex = this.filterConfigs.findIndex((f) => f.id === 'year');
+        // Insert club filter after birthYear filter
+        const yearIndex = this.filterConfigs.findIndex((f) => f.id === 'birthYear');
         if (yearIndex >= 0) {
           this.filterConfigs = [
             ...this.filterConfigs.slice(0, yearIndex + 1),
@@ -491,14 +579,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       )
       .subscribe({
         next: (response: any) => {
-          let accreditations = response.content || [];
-
-          if (
-            this.filters.raceGroups.length > 0 &&
-            this.isFilterVisible('raceGroup')
-          ) {
-            accreditations = this.filterByRaceGroup(accreditations);
-          }
+          const accreditations = response.content || [];
 
           if (reset) {
             this.accreditations = accreditations;
@@ -541,6 +622,17 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       }
     }
 
+    if (this.filters.genders.length > 0 && this.isFilterVisible('gender')) {
+      if (this.filters.genders.length === 1) {
+        filterParts.push(`athlete.gender eq '${this.filters.genders[0]}'`);
+      } else {
+        const genderConditions = this.filters.genders
+          .map((g) => `athlete.gender eq '${g}'`)
+          .join(' or ');
+        filterParts.push(`(${genderConditions})`);
+      }
+    }
+
     if (this.filters.years.length > 0 && this.isFilterVisible('year')) {
       if (this.filters.years.length === 1) {
         filterParts.push(`year eq ${this.filters.years[0]}`);
@@ -550,6 +642,15 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           .join(' or ');
         filterParts.push(`(${yearConditions})`);
       }
+    }
+
+    if (this.filters.birthYears.length > 0 && this.isFilterVisible('birthYear')) {
+      const birthYearConditions = this.filters.birthYears.map((y) => {
+        const start = `${y}-01-01`;
+        const end = `${y}-12-31`;
+        return `(athlete.dateOfBirth ge '${start}' and athlete.dateOfBirth le '${end}')`;
+      });
+      filterParts.push(birthYearConditions.length === 1 ? birthYearConditions[0] : `(${birthYearConditions.join(' or ')})`);
     }
 
     // Club filter - use user's selection if visible, otherwise use default from component's userClub or ScopeVisibilityService
@@ -668,12 +769,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
         .subscribe({
           next: (response: any) => {
             let list = response?.content || [];
-            if (
-              this.filters.raceGroups.length > 0 &&
-              this.isFilterVisible('raceGroup')
-            ) {
-              list = this.filterByRaceGroup(list);
-            }
             for (const acc of list) {
               if (acc.uuid) {
                 collected.add(acc.uuid);
@@ -713,15 +808,121 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   }
 
   openDetailsDialog(accreditation: AccreditationDto): void {
-    this.selectedAccreditation = accreditation;
-    this.isDetailsDialogOpen = true;
-    this.cdr.markForCheck();
+    this.router.navigate(['/athletes', accreditation.athleteId]);
   }
 
-  closeDetailsDialog(): void {
-    this.isDetailsDialogOpen = false;
-    this.selectedAccreditation = null;
+  onAthleteRowClick(athlete: AthleteDto): void {
+    this.router.navigate(['/athletes', athlete.uuid]);
+  }
+
+  setTab(tab: 'accreditations' | 'athletes'): void {
+    this.router.navigate([], { queryParams: { tab: tab === 'accreditations' ? null : tab }, queryParamsHandling: 'merge', replaceUrl: true });
+  }
+
+  loadAthletes(reset = true): void {
+    if (reset) {
+      this.athletesSkip = 0;
+      this.athletes = [];
+      this.athletesHasMore = false;
+    }
+    if (this.athletesLoading) return;
+    this.athletesLoading = true;
+    this.athletesLoaded = true;
     this.cdr.markForCheck();
+
+    const filter = this.buildAthleteFilterString();
+
+    this.athletesService
+      .getAllAthletes(filter, this.athleteFilters.search || undefined, this.athleteOrderBy as any, 50, this.athletesSkip)
+      .pipe(
+        catchError(() => of({ content: [], totalElements: 0 })),
+        takeUntil(this.destroy$),
+      )
+      .subscribe({
+        next: (response: any) => {
+          const items: AthleteDto[] = response.content || [];
+          this.athletes = reset ? items : [...this.athletes, ...items];
+          this.athletesTotalElements = response.totalElements || 0;
+          this.athletesHasMore = this.athletes.length < this.athletesTotalElements;
+          this.athletesLoading = false;
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  loadBirthYearRange(): void {
+    this.athletesService
+      .getAllAthletes(undefined, undefined, ['dateOfBirth_asc'] as any, 1, 0)
+      .pipe(catchError(() => of({ content: [] })), takeUntil(this.destroy$))
+      .subscribe((res: any) => {
+        const oldest = res.content?.[0]?.dateOfBirth;
+        this.athletesService
+          .getAllAthletes(undefined, undefined, ['dateOfBirth_desc'] as any, 1, 0)
+          .pipe(catchError(() => of({ content: [] })), takeUntil(this.destroy$))
+          .subscribe((res2: any) => {
+            const youngest = res2.content?.[0]?.dateOfBirth;
+            if (oldest && youngest) {
+              const oldestYear = new Date(oldest).getFullYear();
+              const youngestYear = new Date(youngest).getFullYear();
+              this.availableBirthYears = [];
+              for (let y = youngestYear; y >= oldestYear; y--) {
+                this.availableBirthYears.push(y);
+              }
+            }
+            this.cdr.markForCheck();
+          });
+      });
+  }
+
+  private buildAthleteFilterString(): string | undefined {
+    const parts: string[] = [];
+    if (this.athleteFilters.genders.length > 0) {
+      if (this.athleteFilters.genders.length === 1) {
+        parts.push(`gender eq '${this.athleteFilters.genders[0]}'`);
+      } else {
+        parts.push(`(${this.athleteFilters.genders.map((g) => `gender eq '${g}'`).join(' or ')})`);
+      }
+    }
+    if (this.athleteFilters.birthYears.length > 0) {
+      const yearConditions = this.athleteFilters.birthYears.map((y) => {
+        const start = `${y}-01-01`;
+        const end = `${y}-12-31`;
+        return `(dateOfBirth ge '${start}' and dateOfBirth le '${end}')`;
+      });
+      parts.push(yearConditions.length === 1 ? yearConditions[0] : `(${yearConditions.join(' or ')})`);
+    }
+    if (this.athleteFilters.scopeTypes.length > 0) {
+      if (this.athleteFilters.scopeTypes.length === 1) {
+        parts.push(`scopeType eq '${this.athleteFilters.scopeTypes[0]}'`);
+      } else {
+        parts.push(`(${this.athleteFilters.scopeTypes.map((s) => `scopeType eq '${s}'`).join(' or ')})`);
+      }
+    }
+    return parts.length > 0 ? parts.join(' and ') : undefined;
+  }
+
+  onAthleteFiltersChange(filters: AthleteFilters): void {
+    this.athleteFilters = { ...filters };
+    this.saveAthleteSettings();
+    this.loadAthletes();
+  }
+
+  onAthleteSearchChange(search: string): void {
+    this.athleteFilters.search = search;
+    this.saveAthleteSettings();
+    this.loadAthletes();
+  }
+
+  onAthleteSortChange(orderBy: string[]): void {
+    this.athleteOrderBy = orderBy;
+    this.saveAthleteSettings();
+    this.loadAthletes();
+  }
+
+  loadMoreAthletes(): void {
+    if (this.athletesLoading || !this.athletesHasMore) return;
+    this.athletesSkip += 50;
+    this.loadAthletes(false);
   }
 
   openAddDialog(): void {
@@ -789,11 +990,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  onAthleteUpdated(): void {
-    this.loadAccreditations();
-    this.closeDetailsDialog();
-  }
-
   onRenewalComplete(): void {
     this.loadAccreditations();
     this.selectedAccreditations = new Set();
@@ -818,19 +1014,21 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       const oldFilter = oldFilterConfigs.find((f) => f.id === newFilter.id);
       if (oldFilter && oldFilter.visible && !newFilter.visible) {
         if (newFilter.id === 'status') this.filters.statuses = [];
+        if (newFilter.id === 'gender') this.filters.genders = [];
         if (newFilter.id === 'year') this.filters.years = [];
         if (newFilter.id === 'club') this.filters.clubs = [];
-        if (newFilter.id === 'raceGroup') this.filters.raceGroups = [];
+        if (newFilter.id === 'birthYear') this.filters.birthYears = [];
         if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
       } else if (
         (oldFilter && !oldFilter.visible && newFilter.visible) ||
         (!oldFilter && newFilter.visible)
       ) {
         if (newFilter.id === 'status') this.filters.statuses = [];
+        if (newFilter.id === 'gender') this.filters.genders = [];
         if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
         if (newFilter.id === 'year') this.filters.years = [];
         if (newFilter.id === 'club') this.filters.clubs = [];
-        if (newFilter.id === 'raceGroup') this.filters.raceGroups = [];
+        if (newFilter.id === 'birthYear') this.filters.birthYears = [];
       }
     });
 
@@ -853,6 +1051,40 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     );
   }
 
+  private saveAthleteSettings(): void {
+    localStorage.setItem('athletes_columns', JSON.stringify(this.athleteColumns));
+    localStorage.setItem('athletes_filterConfigs', JSON.stringify(this.athleteFilterConfigs));
+    localStorage.setItem('athletes_filters', JSON.stringify(this.athleteFilters));
+    localStorage.setItem('athletes_orderBy', JSON.stringify(this.athleteOrderBy));
+  }
+
+  openAthletesSettingsDialog(): void {
+    this.isAthletesSettingsDialogOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  closeAthletesSettingsDialog(): void {
+    this.isAthletesSettingsDialogOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  onAthleteSettingsChange(settings: { columns: ColumnConfig[]; filterConfigs: AthleteFilterConfig[] }): void {
+    // Clear filter values for filters that were just hidden
+    settings.filterConfigs.forEach((newFilter) => {
+      const oldFilter = this.athleteFilterConfigs.find((f) => f.id === newFilter.id);
+      if (oldFilter && oldFilter.visible && !newFilter.visible) {
+        if (newFilter.id === 'gender') this.athleteFilters.genders = [];
+        if (newFilter.id === 'birthYear') this.athleteFilters.birthYears = [];
+        if (newFilter.id === 'scopeType') this.athleteFilters.scopeTypes = [];
+      }
+    });
+    this.athleteColumns = settings.columns;
+    this.athleteFilterConfigs = settings.filterConfigs;
+    this.saveAthleteSettings();
+    this.loadAthletes();
+    this.cdr.markForCheck();
+  }
+
   private saveFilters(): void {
     localStorage.setItem(
       'accreditations_filters',
@@ -872,9 +1104,10 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
         this.filters = {
           search: parsed.search || '',
           statuses: parsed.statuses || [],
-          years: parsed.years ?? [],
+          genders: parsed.genders || [],
+          birthYears: parsed.birthYears ?? [],
           clubs: parsed.clubs ?? [],
-          raceGroups: parsed.raceGroups ?? [],
+          years: parsed.years ?? [],
           scopeTypes: parsed.scopeTypes ?? [],
         };
       } catch (e) {
@@ -925,6 +1158,56 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
         });
       } catch (e) {
         console.error('Error loading filter settings:', e);
+      }
+    }
+
+    const savedAthleteColumns = localStorage.getItem('athletes_columns');
+    if (savedAthleteColumns) {
+      try {
+        const parsed = JSON.parse(savedAthleteColumns);
+        this.athleteColumns = this.athleteColumns.map((col) => {
+          const saved = parsed.find((p: ColumnConfig) => p.id === col.id);
+          return saved ? { ...col, visible: saved.visible } : col;
+        });
+      } catch (e) {
+        console.error('Error loading athlete column settings:', e);
+      }
+    }
+
+    const savedAthleteFilterConfigs = localStorage.getItem('athletes_filterConfigs');
+    if (savedAthleteFilterConfigs) {
+      try {
+        const parsed = JSON.parse(savedAthleteFilterConfigs);
+        this.athleteFilterConfigs = this.athleteFilterConfigs.map((f) => {
+          const saved = parsed.find((p: AthleteFilterConfig) => p.id === f.id);
+          return saved ? { ...f, visible: saved.visible } : f;
+        });
+      } catch (e) {
+        console.error('Error loading athlete filter config settings:', e);
+      }
+    }
+
+    const savedAthleteFilters = localStorage.getItem('athletes_filters');
+    if (savedAthleteFilters) {
+      try {
+        const parsed = JSON.parse(savedAthleteFilters);
+        this.athleteFilters = {
+          search: parsed.search || '',
+          genders: parsed.genders || [],
+          birthYears: parsed.birthYears || [],
+          scopeTypes: parsed.scopeTypes || [],
+        };
+      } catch (e) {
+        console.error('Error loading athlete filter values:', e);
+      }
+    }
+
+    const savedAthleteOrderBy = localStorage.getItem('athletes_orderBy');
+    if (savedAthleteOrderBy) {
+      try {
+        this.athleteOrderBy = JSON.parse(savedAthleteOrderBy);
+      } catch (e) {
+        console.error('Error loading athlete orderBy:', e);
       }
     }
   }
@@ -1030,13 +1313,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
         next: async (allItems: any[]) => {
           let allAccreditations = allItems;
 
-          if (
-            this.filters.raceGroups.length > 0 &&
-            this.isFilterVisible('raceGroup')
-          ) {
-            allAccreditations = this.filterByRaceGroup(allAccreditations);
-          }
-
           if (allAccreditations.length === 0) {
             this.error = 'Няма данни за експорт';
             this.exporting = false;
@@ -1075,13 +1351,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                     row[col.label] = this.formatDateForExcel(
                       acc.athlete?.dateOfBirth,
                     );
-                    break;
-                  case 'raceGroup':
-                    const raceGroup = calculateRaceGroup(
-                      acc.athlete?.dateOfBirth,
-                      acc.athlete?.gender,
-                    );
-                    row[col.label] = raceGroup.label || '';
                     break;
                   case 'clubShortName':
                     row[col.label] = acc.club?.shortName || '';
@@ -1225,6 +1494,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   private loadFilterData(): void {
     this.loadClubs();
     this.loadYears();
+    this.loadAccreditationBirthYearRange();
   }
 
   private loadClubs(): void {
@@ -1330,19 +1600,28 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       });
   }
 
-  private filterByRaceGroup(
-    accreditations: AccreditationDto[],
-  ): AccreditationDto[] {
-    if (this.filters.raceGroups.length === 0) {
-      return accreditations;
-    }
-
-    return accreditations.filter((acc) => {
-      const raceGroup = calculateRaceGroup(
-        acc.athlete?.dateOfBirth,
-        acc.athlete?.gender,
-      );
-      return this.filters.raceGroups.includes(raceGroup.code);
-    });
+  private loadAccreditationBirthYearRange(): void {
+    this.athletesService
+      .getAllAthletes(undefined, undefined, ['dateOfBirth_asc'] as any, 1, 0)
+      .pipe(catchError(() => of({ content: [] })), takeUntil(this.destroy$))
+      .subscribe((res: any) => {
+        const oldest = res.content?.[0]?.dateOfBirth;
+        this.athletesService
+          .getAllAthletes(undefined, undefined, ['dateOfBirth_desc'] as any, 1, 0)
+          .pipe(catchError(() => of({ content: [] })), takeUntil(this.destroy$))
+          .subscribe((res2: any) => {
+            const youngest = res2.content?.[0]?.dateOfBirth;
+            if (oldest && youngest) {
+              const oldestYear = new Date(oldest).getFullYear();
+              const youngestYear = new Date(youngest).getFullYear();
+              this.availableAccreditationBirthYears = [];
+              for (let y = youngestYear; y >= oldestYear; y--) {
+                this.availableAccreditationBirthYears.push(y);
+              }
+            }
+            this.cdr.markForCheck();
+          });
+      });
   }
+
 }
