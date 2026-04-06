@@ -1,0 +1,236 @@
+<div class="h-screen flex flex-col overflow-hidden bg-white">
+  <app-header></app-header>
+
+  <div class="flex-1 flex flex-col overflow-hidden px-4 lg:px-8 py-4">
+
+    <!-- Back row + title -->
+    <div class="flex items-center gap-3 mb-4">
+      <a [routerLink]="['/regulations', 'disciplines']" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900 break-words min-w-0">{{ discipline?.name || 'Дисциплина' }}</h1>
+    </div>
+
+    @if (loading) {
+      <div class="flex items-center justify-center flex-1 text-gray-500">Зареждане...</div>
+    } @else if (error) {
+      <div class="flex items-center justify-center flex-1 text-red-500">{{ error }}</div>
+    } @else if (discipline) {
+
+      <!-- Tab bar -->
+      <div class="border-b border-gray-200 mb-4">
+        <nav class="-mb-px flex gap-1">
+          <button type="button"
+            class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors border-bfg-blue text-bfg-blue">
+            Детайли
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab content -->
+      <div class="flex-1 overflow-y-auto">
+        <div class="max-w-4xl">
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Left column -->
+            <div class="space-y-2">
+              @if (!isEditing) {
+                <div class="space-y-4">
+                  <div class="space-y-1">
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Ime:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.name || "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Кратко ime:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.shortName || "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Состезателна група:</span>
+                      @if (discipline.competitionGroupId) {
+                        <button type="button" class="text-sm font-medium text-bfg-blue hover:underline cursor-pointer"
+                          (click)="openGroupDialog()">
+                          {{ competitionGroupName }}
+                        </button>
+                      } @else {
+                        <span class="text-sm font-medium break-all min-w-0">-</span>
+                      }
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Клас лодка:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.boatClass || "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Размер екипаж:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.crewSize != null ? discipline.crewSize : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Макс. прехвърлени:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.maxCrewFromTransfer != null ? discipline.maxCrewFromTransfer : "-" }}</span>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="space-y-1.5">
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Ime <span class="text-red-500">*</span>:</label>
+                    <input type="text" [(ngModel)]="editData.name"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Кратко ime <span class="text-red-500">*</span>:</label>
+                    <input type="text" [(ngModel)]="editData.shortName"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Состезателна група <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown
+                      [staticSearch]="groupSearch" [placeholder]="'Изберете состезателна група'"
+                      [ngModel]="editData.competitionGroupId" (ngModelChange)="onCompetitionGroupChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Клас лодка <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown
+                      [options]="boatClassOptions" [placeholder]="'Изберете клас лодка'"
+                      [ngModel]="editData.boatClass" (ngModelChange)="onBoatClassChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Размер екипаж <span class="text-red-500">*</span>:</label>
+                    <input type="number" [(ngModel)]="editData.crewSize" min="1"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Макс. прехвърлени <span class="text-red-500">*</span>:</label>
+                    <input type="number" [(ngModel)]="editData.maxCrewFromTransfer" min="0"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Right column -->
+            <div class="space-y-2">
+              @if (!isEditing) {
+                <div class="space-y-4">
+                  <div class="space-y-1">
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Кокс:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.hasCoxswain ? "Да" : "Не" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Лековес:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.isLightweight ? "Да" : "Не" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Дистанция (м):</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.distanceMeters != null ? discipline.distanceMeters : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Статус:</span>
+                      <span class="text-sm font-medium break-all min-w-0" [class]="discipline.isActive ? 'text-green-600' : 'text-red-600'">
+                        {{ discipline.isActive ? "Активен" : "Неактивен" }}
+                      </span>
+                    </div>
+                  </div>
+                  <div class="pt-2 border-t border-gray-200">
+                    <div class="space-y-1">
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Създадена на:</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(discipline.createdAt) }}</span>
+                      </div>
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Променена на:</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(discipline.modifiedAt) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="space-y-1.5">
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Кокс <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown [options]="booleanOptions" [placeholder]="'Изберете'"
+                      [ngModel]="editData.hasCoxswain ? 'true' : 'false'" (ngModelChange)="onHasCoxswainChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Лековес <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown [options]="booleanOptions" [placeholder]="'Изберете'"
+                      [ngModel]="editData.isLightweight ? 'true' : 'false'" (ngModelChange)="onIsLightweightChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Дистанция (м) <span class="text-red-500">*</span>:</label>
+                    <input type="number" [(ngModel)]="editData.distanceMeters" min="0"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Статус <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown [options]="statusOptions" [placeholder]="'Изберете статус'"
+                      [ngModel]="editData.isActive ? 'true' : 'false'" (ngModelChange)="onStatusChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="mt-6 flex flex-col gap-2">
+            @if (saveError) {
+              <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                <p class="text-sm text-red-700">{{ saveError }}</p>
+                <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="saveError = null">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            }
+            <div class="flex items-center gap-2">
+              @if (!isEditing) {
+                @if (canEdit) {
+                  <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
+                  <app-button variant="outline" size="md" text="Изтрий" [disabled]="deleting" (click)="confirmDelete()"></app-button>
+                }
+              } @else {
+                <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
+                <app-button variant="primary" size="md" text="Запази" [disabled]="saving" (click)="save()"></app-button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Group Preview Dialog -->
+<app-competition-group-details-dialog
+  [isOpen]="showGroupDialog"
+  [group]="selectedGroup"
+  [canEdit]="false"
+  [permalinkRoute]="groupPermalinkRoute"
+  (closed)="closeGroupDialog()">
+</app-competition-group-details-dialog>
+
+<!-- Delete confirmation -->
+<app-dialog [isOpen]="showDeleteConfirmDialog" title="Потвърждение за изтриване" size="md" (closed)="showDeleteConfirmDialog = false">
+  <div class="py-4">
+    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете тази дисциплина?</p>
+    <div class="flex gap-3 justify-center">
+      <app-button variant="outline" size="md" text="Отказ" (click)="showDeleteConfirmDialog = false"></app-button>
+      <app-button variant="primary" size="md" text="Изтрий" (click)="deleteDiscipline()"></app-button>
+    </div>
+  </div>
+</app-dialog>
