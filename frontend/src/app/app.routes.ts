@@ -90,6 +90,58 @@ export const routes: Routes = [
     canActivate: [AuthGuard],
   },
   {
+    path: 'regulations/groups/:uuid/:tab',
+    loadComponent: () =>
+      import('./features/rules/pages/competition-group-detail-page/competition-group-detail-page.component').then(
+        (m) => m.CompetitionGroupDetailPageComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'regulations/groups/:uuid',
+    redirectTo: 'regulations/groups/:uuid/details',
+    pathMatch: 'full',
+  },
+  {
+    path: 'regulations/disciplines/:uuid/:tab',
+    loadComponent: () =>
+      import('./features/rules/pages/discipline-detail-page/discipline-detail-page.component').then(
+        (m) => m.DisciplineDetailPageComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'regulations/disciplines/:uuid',
+    redirectTo: 'regulations/disciplines/:uuid/details',
+    pathMatch: 'full',
+  },
+  {
+    path: 'regulations/scoring/:uuid/:tab',
+    loadComponent: () =>
+      import('./features/rules/pages/scoring-detail-page/scoring-detail-page.component').then(
+        (m) => m.ScoringDetailPageComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'regulations/scoring/:uuid',
+    redirectTo: 'regulations/scoring/:uuid/details',
+    pathMatch: 'full',
+  },
+  {
+    path: 'regulations/qualification/:uuid/:tab',
+    loadComponent: () =>
+      import('./features/rules/pages/qualification-detail-page/qualification-detail-page.component').then(
+        (m) => m.QualificationDetailPageComponent,
+      ),
+    canActivate: [AuthGuard],
+  },
+  {
+    path: 'regulations/qualification/:uuid',
+    redirectTo: 'regulations/qualification/:uuid/details',
+    pathMatch: 'full',
+  },
+  {
     path: 'competitions',
     loadComponent: () =>
       import('./features/competitions/competitions.component').then(

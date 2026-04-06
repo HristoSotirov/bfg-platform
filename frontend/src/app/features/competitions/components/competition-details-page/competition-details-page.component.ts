@@ -134,6 +134,8 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   // Discipline / group detail dialogs
   selectedDiscipline: DisciplineDefinitionDto | null = null;
   selectedGroup: CompetitionGroupDefinitionDto | null = null;
+  disciplinePermalinkRoute: string[] | null = null;
+  groupPermalinkRoute: string[] | null = null;
 
   get groupMap(): Record<string, string> {
     const map: Record<string, string> = {};
@@ -149,22 +151,26 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   openDisciplineDetails(dto: DisciplineDefinitionDto | null): void {
     if (!dto) return;
     this.selectedDiscipline = dto;
+    this.disciplinePermalinkRoute = dto.uuid ? ['/regulations/disciplines', dto.uuid] : null;
     this.cdr.markForCheck();
   }
 
   openGroupDetails(group: CompetitionGroupDefinitionDto | null): void {
     if (!group) return;
     this.selectedGroup = group;
+    this.groupPermalinkRoute = group.uuid ? ['/regulations/groups', group.uuid] : null;
     this.cdr.markForCheck();
   }
 
   closeDisciplineDetails(): void {
     this.selectedDiscipline = null;
+    this.disciplinePermalinkRoute = null;
     this.cdr.markForCheck();
   }
 
   closeGroupDetails(): void {
     this.selectedGroup = null;
+    this.groupPermalinkRoute = null;
     this.cdr.markForCheck();
   }
 

@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -38,7 +39,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-discipline-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, CompetitionGroupDetailsDialogComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, CompetitionGroupDetailsDialogComponent],
   templateUrl: './discipline-details-dialog.component.html',
   styleUrl: './discipline-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,6 +49,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   @Input() discipline: DisciplineDefinitionDto | null = null;
   @Input() canEdit = false;
   @Input() groupMap: Record<string, string> = {};
+  @Input() permalinkRoute: string[] | null = null;
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -131,6 +133,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   // Group preview dialog
   showGroupDialog = false;
   selectedGroup: CompetitionGroupDefinitionDto | null = null;
+  groupPermalinkRoute: string[] | null = null;
 
   navigateToGroup(): void {
     if (!this.discipline?.competitionGroupId) return;
@@ -140,6 +143,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
       .subscribe({
         next: (group) => {
           this.selectedGroup = group;
+          this.groupPermalinkRoute = ['/regulations/groups', group.uuid!];
           this.showGroupDialog = true;
           this.cdr.markForCheck();
         },
@@ -150,6 +154,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   closeGroupDialog(): void {
     this.showGroupDialog = false;
     this.selectedGroup = null;
+    this.groupPermalinkRoute = null;
     this.cdr.markForCheck();
   }
 

@@ -5,6 +5,18 @@
   [noScroll]="true"
   (closed)="close()"
 >
+  @if (permalinkRoute) {
+    <a
+      slot="header-extra"
+      [routerLink]="permalinkRoute"
+      class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
+      title="Отвори страницата"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+      </svg>
+    </a>
+  }
   @if (group) {
     <div class="flex flex-col max-h-[calc(90vh-120px)]">
       <div class="flex-1 overflow-y-auto space-y-2">
@@ -20,32 +32,32 @@
               <div class="space-y-1">
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Име:</span>
-                  <span class="text-sm font-medium">{{ group.name || "-" }}</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.name || "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
-                  <span class="text-sm font-medium">{{ group.shortName || "-" }}</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.shortName || "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Пол:</span>
-                  <span class="text-sm font-medium">{{ getGenderLabel(group.gender) }}</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ getGenderLabel(group.gender) }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
-                  <span class="text-sm font-medium">{{ group.minAge != null ? group.minAge : "-" }}</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.minAge != null ? group.minAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
-                  <span class="text-sm font-medium">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисциплини:</span>
-                  <span class="text-sm font-medium">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
                   <span
-                    class="text-sm font-medium"
+                    class="text-sm font-medium break-all min-w-0"
                     [class]="group.isActive ? 'text-green-600' : 'text-red-600'"
                   >
                     {{ group.isActive ? "Активен" : "Неактивен" }}
@@ -58,15 +70,15 @@
                 <div class="space-y-1">
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Лек макс. тегло (кг):</span>
-                    <span class="text-sm font-medium">{{ group.lightMaxWeightKg != null ? group.lightMaxWeightKg : "-" }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.lightMaxWeightKg != null ? group.lightMaxWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви мин. тегло (кг):</span>
-                    <span class="text-sm font-medium">{{ group.coxMinWeightKg != null ? group.coxMinWeightKg : "-" }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinWeightKg != null ? group.coxMinWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви изискв. тегло (кг):</span>
-                    <span class="text-sm font-medium">{{ group.coxRequiredWeightKg != null ? group.coxRequiredWeightKg : "-" }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.coxRequiredWeightKg != null ? group.coxRequiredWeightKg : "-" }}</span>
                   </div>
                 </div>
               </div>
@@ -76,11 +88,11 @@
                 <div class="space-y-1">
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Създадена на:</span>
-                    <span class="text-sm font-medium">{{ formatDateTime(group.createdAt) }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.createdAt) }}</span>
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Променена на:</span>
-                    <span class="text-sm font-medium">{{ formatDateTime(group.modifiedAt) }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.modifiedAt) }}</span>
                   </div>
                 </div>
               </div>
@@ -171,24 +183,24 @@
                         {{ getGroupName(group.transferFromGroupId) }}
                       </button>
                     } @else {
-                      <span class="text-sm font-medium">-</span>
+                      <span class="text-sm font-medium break-all min-w-0">-</span>
                     }
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. екипаж:</span>
-                    <span class="text-sm font-medium">{{ group.minCrewForTransfer != null ? group.minCrewForTransfer : "-" }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.minCrewForTransfer != null ? group.minCrewForTransfer : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Коефициент:</span>
-                    <span class="text-sm font-medium">{{ group.transferRatio != null ? group.transferRatio : "-" }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferRatio != null ? group.transferRatio : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Закръгляне:</span>
-                    <span class="text-sm font-medium">{{ getRoundingLabel(group.transferRounding) }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ getRoundingLabel(group.transferRounding) }}</span>
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисц. (трансф.):</span>
-                    <span class="text-sm font-medium">{{ group.transferredMaxDisciplinesPerPerson != null ? group.transferredMaxDisciplinesPerPerson : "-" }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerPerson != null ? group.transferredMaxDisciplinesPerPerson : "-" }}</span>
                   </div>
                 </div>
               </div>
@@ -438,32 +450,45 @@
   size="lg"
   (closed)="closeTransferGroupDialog()"
 >
+  @if (transferGroupPermalinkRoute) {
+    <a
+      slot="header-extra"
+      [routerLink]="transferGroupPermalinkRoute"
+      (click)="closeTransferGroupDialog()"
+      class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
+      title="Отвори страницата"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+      </svg>
+    </a>
+  }
   @if (transferGroup) {
     <div class="space-y-4 py-2">
       <div class="space-y-1">
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Име:</span>
-          <span class="text-sm font-medium">{{ transferGroup.name || "-" }}</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.name || "-" }}</span>
         </div>
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
-          <span class="text-sm font-medium">{{ transferGroup.shortName || "-" }}</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.shortName || "-" }}</span>
         </div>
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Пол:</span>
-          <span class="text-sm font-medium">{{ getGenderLabel(transferGroup.gender) }}</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ getGenderLabel(transferGroup.gender) }}</span>
         </div>
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
-          <span class="text-sm font-medium">{{ transferGroup.minAge != null ? transferGroup.minAge : "-" }}</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.minAge != null ? transferGroup.minAge : "-" }}</span>
         </div>
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
-          <span class="text-sm font-medium">{{ transferGroup.maxAge != null ? transferGroup.maxAge : "-" }}</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.maxAge != null ? transferGroup.maxAge : "-" }}</span>
         </div>
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
-          <span class="text-sm font-medium" [class]="transferGroup.isActive ? 'text-green-600' : 'text-red-600'">
+          <span class="text-sm font-medium break-all min-w-0" [class]="transferGroup.isActive ? 'text-green-600' : 'text-red-600'">
             {{ transferGroup.isActive ? "Активен" : "Неактивен" }}
           </span>
         </div>

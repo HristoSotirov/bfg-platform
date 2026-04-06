@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -20,7 +21,6 @@ import {
   CompetitionGroupDefinitionDto,
 } from '../../core/services/api';
 import { CompetitionGroupsTableComponent } from '../competition-groups/components/competition-groups-table/competition-groups-table.component';
-import { CompetitionGroupDetailsDialogComponent } from '../competition-groups/components/competition-group-details-dialog/competition-group-details-dialog.component';
 import { AddCompetitionGroupDialogComponent } from '../competition-groups/components/add-competition-group-dialog/add-competition-group-dialog.component';
 import { CompetitionGroupsSettingsDialogComponent } from '../competition-groups/components/competition-groups-settings-dialog/competition-groups-settings-dialog.component';
 import { CompetitionGroupsFiltersComponent } from '../competition-groups/components/competition-groups-filters/competition-groups-filters.component';
@@ -32,7 +32,6 @@ import {
   DisciplineDefinitionDto,
 } from '../../core/services/api';
 import { DisciplinesTableComponent } from '../disciplines/components/disciplines-table/disciplines-table.component';
-import { DisciplineDetailsDialogComponent } from '../disciplines/components/discipline-details-dialog/discipline-details-dialog.component';
 import { AddDisciplineDialogComponent } from '../disciplines/components/add-discipline-dialog/add-discipline-dialog.component';
 import { DisciplinesSettingsDialogComponent } from '../disciplines/components/disciplines-settings-dialog/disciplines-settings-dialog.component';
 import { DisciplinesFiltersComponent } from '../disciplines/components/disciplines-filters/disciplines-filters.component';
@@ -44,7 +43,6 @@ import {
   ScoringSchemeDto,
 } from '../../core/services/api';
 import { ScoringTableComponent } from '../scoring/components/scoring-table/scoring-table.component';
-import { ScoringDetailsDialogComponent } from '../scoring/components/scoring-details-dialog/scoring-details-dialog.component';
 import { AddScoringDialogComponent } from '../scoring/components/add-scoring-dialog/add-scoring-dialog.component';
 import { ScoringSettingsDialogComponent } from '../scoring/components/scoring-settings-dialog/scoring-settings-dialog.component';
 import { ScoringFiltersComponent } from '../scoring/components/scoring-filters/scoring-filters.component';
@@ -56,7 +54,6 @@ import {
   QualificationSchemeDto,
 } from '../../core/services/api';
 import { QualificationTableComponent } from '../qualification/components/qualification-table/qualification-table.component';
-import { QualificationDetailsDialogComponent } from '../qualification/components/qualification-details-dialog/qualification-details-dialog.component';
 import { AddQualificationDialogComponent } from '../qualification/components/add-qualification-dialog/add-qualification-dialog.component';
 import { QualificationSettingsDialogComponent } from '../qualification/components/qualification-settings-dialog/qualification-settings-dialog.component';
 import { QualificationFiltersComponent } from '../qualification/components/qualification-filters/qualification-filters.component';
@@ -74,25 +71,21 @@ type RulesTab = 'groups' | 'disciplines' | 'scoring' | 'qualification';
     ButtonComponent,
     // Groups
     CompetitionGroupsTableComponent,
-    CompetitionGroupDetailsDialogComponent,
     AddCompetitionGroupDialogComponent,
     CompetitionGroupsSettingsDialogComponent,
     CompetitionGroupsFiltersComponent,
     // Disciplines
     DisciplinesTableComponent,
-    DisciplineDetailsDialogComponent,
     AddDisciplineDialogComponent,
     DisciplinesSettingsDialogComponent,
     DisciplinesFiltersComponent,
     // Scoring
     ScoringTableComponent,
-    ScoringDetailsDialogComponent,
     AddScoringDialogComponent,
     ScoringSettingsDialogComponent,
     ScoringFiltersComponent,
     // Qualification
     QualificationTableComponent,
-    QualificationDetailsDialogComponent,
     AddQualificationDialogComponent,
     QualificationSettingsDialogComponent,
     QualificationFiltersComponent,
@@ -147,10 +140,8 @@ export class RulesComponent implements OnInit, OnDestroy {
     { id: 'status', label: 'Статус', visible: true },
   ];
 
-  isGroupDetailsOpen = false;
   isGroupAddOpen = false;
   isGroupSettingsOpen = false;
-  selectedGroup: CompetitionGroupDefinitionDto | null = null;
 
   // ===== DISCIPLINES =====
   disciplines: DisciplineDefinitionDto[] = [];
@@ -184,10 +175,8 @@ export class RulesComponent implements OnInit, OnDestroy {
     { id: 'status', label: 'Статус', visible: true },
   ];
 
-  isDisciplineDetailsOpen = false;
   isDisciplineAddOpen = false;
   isDisciplineSettingsOpen = false;
-  selectedDiscipline: DisciplineDefinitionDto | null = null;
 
   // ===== SCORING =====
   scoringSchemes: ScoringSchemeDto[] = [];
@@ -214,10 +203,8 @@ export class RulesComponent implements OnInit, OnDestroy {
     { id: 'status', label: 'Статус', visible: true },
   ];
 
-  isScoringDetailsOpen = false;
   isScoringAddOpen = false;
   isScoringSettingsOpen = false;
-  selectedScoringScheme: ScoringSchemeDto | null = null;
 
   // ===== QUALIFICATION =====
   qualificationSchemes: QualificationSchemeDto[] = [];
@@ -243,10 +230,8 @@ export class RulesComponent implements OnInit, OnDestroy {
     { id: 'status', label: 'Статус', visible: true },
   ];
 
-  isQualificationDetailsOpen = false;
   isQualificationAddOpen = false;
   isQualificationSettingsOpen = false;
-  selectedQualificationScheme: QualificationSchemeDto | null = null;
 
   constructor(
     private authService: AuthService,
@@ -269,9 +254,13 @@ export class RulesComponent implements OnInit, OnDestroy {
 
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const tab = params.get('tab') as RulesTab | null;
+
       if (tab && this.isValidTab(tab)) {
-        this.activeTab = tab;
+        if (this.activeTab !== tab) {
+          this.activeTab = tab;
+        }
         this.triggerTabLoad(this.activeTab);
+        this.cdr.markForCheck();
       } else {
         this.router.navigate(['/regulations', this.activeTab], { replaceUrl: true });
       }
@@ -307,7 +296,10 @@ export class RulesComponent implements OnInit, OnDestroy {
   }
 
   private triggerTabLoad(tab: RulesTab): void {
-    if (tab === 'groups' && !this.groupsLoaded) this.loadGroups();
+    if (tab === 'groups' && !this.groupsLoaded) {
+      this.loadGroupLookup();
+      this.loadGroups();
+    }
     if (tab === 'disciplines' && !this.disciplinesLoaded) {
       this.loadGroupLookup();
       this.loadDisciplines();
@@ -388,28 +380,7 @@ export class RulesComponent implements OnInit, OnDestroy {
   }
 
   openGroupDetails(group: CompetitionGroupDefinitionDto): void {
-    this.selectedGroup = group;
-    this.isGroupDetailsOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeGroupDetails(): void {
-    this.isGroupDetailsOpen = false;
-    this.selectedGroup = null;
-    this.cdr.markForCheck();
-  }
-
-  onGroupSaved(): void {
-    if (this.selectedGroup?.uuid) {
-      this.competitionGroupDefinitionsService.getCompetitionGroupDefinitionByUuid(this.selectedGroup.uuid)
-        .pipe(takeUntil(this.destroy$)).subscribe({ next: (g) => { this.selectedGroup = g; this.cdr.markForCheck(); } });
-    }
-    this.loadGroups();
-  }
-
-  onGroupDeleted(): void {
-    this.closeGroupDetails();
-    this.loadGroups();
+    this.router.navigate(['/regulations', 'groups', group.uuid]);
   }
 
   onGroupAdded(): void {
@@ -482,28 +453,7 @@ export class RulesComponent implements OnInit, OnDestroy {
   }
 
   openDisciplineDetails(discipline: DisciplineDefinitionDto): void {
-    this.selectedDiscipline = discipline;
-    this.isDisciplineDetailsOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeDisciplineDetails(): void {
-    this.isDisciplineDetailsOpen = false;
-    this.selectedDiscipline = null;
-    this.cdr.markForCheck();
-  }
-
-  onDisciplineSaved(): void {
-    if (this.selectedDiscipline?.uuid) {
-      this.disciplineDefinitionsService.getDisciplineDefinitionByUuid(this.selectedDiscipline.uuid)
-        .pipe(takeUntil(this.destroy$)).subscribe({ next: (d) => { this.selectedDiscipline = d; this.cdr.markForCheck(); } });
-    }
-    this.loadDisciplines();
-  }
-
-  onDisciplineDeleted(): void {
-    this.closeDisciplineDetails();
-    this.loadDisciplines();
+    this.router.navigate(['/regulations', 'disciplines', discipline.uuid]);
   }
 
   onDisciplineAdded(): void {
@@ -576,23 +526,7 @@ export class RulesComponent implements OnInit, OnDestroy {
   }
 
   openScoringDetails(scheme: ScoringSchemeDto): void {
-    this.selectedScoringScheme = scheme;
-    this.isScoringDetailsOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeScoringDetails(): void {
-    this.isScoringDetailsOpen = false;
-    this.selectedScoringScheme = null;
-    this.cdr.markForCheck();
-  }
-
-  onScoringSaved(): void {
-    if (this.selectedScoringScheme?.uuid) {
-      this.scoringSchemesService.getScoringSchemeByUuid(this.selectedScoringScheme.uuid)
-        .pipe(takeUntil(this.destroy$)).subscribe({ next: (s) => { this.selectedScoringScheme = s; this.cdr.markForCheck(); } });
-    }
-    this.loadScoringSchemes();
+    this.router.navigate(['/regulations', 'scoring', scheme.uuid]);
   }
 
   onScoringAdded(): void {
@@ -660,23 +594,7 @@ export class RulesComponent implements OnInit, OnDestroy {
   }
 
   openQualificationDetails(scheme: QualificationSchemeDto): void {
-    this.selectedQualificationScheme = scheme;
-    this.isQualificationDetailsOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeQualificationDetails(): void {
-    this.isQualificationDetailsOpen = false;
-    this.selectedQualificationScheme = null;
-    this.cdr.markForCheck();
-  }
-
-  onQualificationSaved(): void {
-    if (this.selectedQualificationScheme?.uuid) {
-      this.qualificationSchemesService.getQualificationSchemeByUuid(this.selectedQualificationScheme.uuid)
-        .pipe(takeUntil(this.destroy$)).subscribe({ next: (s) => { this.selectedQualificationScheme = s; this.cdr.markForCheck(); } });
-    }
-    this.loadQualificationSchemes();
+    this.router.navigate(['/regulations', 'qualification', scheme.uuid]);
   }
 
   onQualificationAdded(): void {

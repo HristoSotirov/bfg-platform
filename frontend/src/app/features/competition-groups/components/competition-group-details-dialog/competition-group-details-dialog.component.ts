@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -27,7 +28,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-competition-group-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './competition-group-details-dialog.component.html',
   styleUrl: './competition-group-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -37,6 +38,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   @Input() group: CompetitionGroupDefinitionDto | null = null;
   @Input() canEdit = false;
   @Input() groupMap: Record<string, string> = {};
+  @Input() permalinkRoute: string[] | null = null;
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -199,6 +201,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   // Transfer group preview
   showTransferGroupDialog = false;
   transferGroup: CompetitionGroupDefinitionDto | null = null;
+  transferGroupPermalinkRoute: string[] | null = null;
 
   openTransferGroupDialog(): void {
     if (!this.group?.transferFromGroupId) return;
@@ -208,6 +211,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
       .subscribe({
         next: (group) => {
           this.transferGroup = group;
+          this.transferGroupPermalinkRoute = ['/regulations/groups', group.uuid!];
           this.showTransferGroupDialog = true;
           this.cdr.markForCheck();
         },
@@ -218,6 +222,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   closeTransferGroupDialog(): void {
     this.showTransferGroupDialog = false;
     this.transferGroup = null;
+    this.transferGroupPermalinkRoute = null;
     this.cdr.markForCheck();
   }
 

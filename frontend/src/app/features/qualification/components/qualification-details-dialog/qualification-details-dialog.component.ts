@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -39,6 +40,7 @@ interface TierWithProgressions {
   imports: [
     CommonModule,
     FormsModule,
+    RouterModule,
     DialogComponent,
     ButtonComponent,
     SearchableSelectDropdownComponent,
@@ -51,6 +53,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() scheme: QualificationSchemeDto | null = null;
   @Input() canEdit = false;
+  @Input() permalinkRoute: string[] | null = null;
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();

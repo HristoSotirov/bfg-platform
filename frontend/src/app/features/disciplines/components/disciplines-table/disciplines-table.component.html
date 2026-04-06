@@ -49,14 +49,14 @@
         >
           @for (column of visibleColumns; track column.id) {
             <td
-              class="px-4 py-3 text-sm whitespace-nowrap"
+              class="px-4 py-3 text-sm max-w-[240px]"
               [class]="
                 column.id === 'isActive'
                   ? getStatusClass(discipline)
                   : 'text-gray-900'
               "
             >
-              {{ getCellValue(discipline, column.id) }}
+              <span class="block truncate" [title]="getCellValue(discipline, column.id)">{{ getCellValue(discipline, column.id) }}</span>
             </td>
           }
         </tr>

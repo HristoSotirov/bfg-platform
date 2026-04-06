@@ -215,16 +215,6 @@
 </div>
 
 <!-- Groups dialogs -->
-<app-competition-group-details-dialog
-  [isOpen]="isGroupDetailsOpen"
-  [group]="selectedGroup"
-  [canEdit]="canEdit"
-  [groupMap]="groupLookup"
-  (closed)="closeGroupDetails()"
-  (saved)="onGroupSaved()"
-  (deleted)="onGroupDeleted()"
-></app-competition-group-details-dialog>
-
 <app-add-competition-group-dialog
   [isOpen]="isGroupAddOpen"
   (closed)="isGroupAddOpen = false"
@@ -240,16 +230,6 @@
 ></app-competition-groups-settings-dialog>
 
 <!-- Disciplines dialogs -->
-<app-discipline-details-dialog
-  [isOpen]="isDisciplineDetailsOpen"
-  [discipline]="selectedDiscipline"
-  [canEdit]="canEdit"
-  [groupMap]="groupLookup"
-  (closed)="closeDisciplineDetails()"
-  (saved)="onDisciplineSaved()"
-  (deleted)="onDisciplineDeleted()"
-></app-discipline-details-dialog>
-
 <app-add-discipline-dialog
   [isOpen]="isDisciplineAddOpen"
   (closed)="isDisciplineAddOpen = false"
@@ -265,14 +245,6 @@
 ></app-disciplines-settings-dialog>
 
 <!-- Scoring dialogs -->
-<app-scoring-details-dialog
-  [isOpen]="isScoringDetailsOpen"
-  [scheme]="selectedScoringScheme"
-  [canEdit]="canEdit"
-  (closed)="closeScoringDetails()"
-  (saved)="onScoringSaved()"
-></app-scoring-details-dialog>
-
 <app-add-scoring-dialog
   [isOpen]="isScoringAddOpen"
   (closed)="isScoringAddOpen = false"
@@ -288,14 +260,6 @@
 ></app-scoring-settings-dialog>
 
 <!-- Qualification dialogs -->
-<app-qualification-details-dialog
-  [isOpen]="isQualificationDetailsOpen"
-  [scheme]="selectedQualificationScheme"
-  [canEdit]="canEdit"
-  (closed)="closeQualificationDetails()"
-  (saved)="onQualificationSaved()"
-></app-qualification-details-dialog>
-
 <app-add-qualification-dialog
   [isOpen]="isQualificationAddOpen"
   (closed)="isQualificationAddOpen = false"
