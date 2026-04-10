@@ -45,24 +45,22 @@ export class AddDisciplineDialogComponent implements OnChanges {
     shortName: '',
     competitionGroupId: '',
     boatClass: '' as string,
-    crewSize: null as number | null,
     maxCrewFromTransfer: null as number | null,
-    hasCoxswain: '' as string,
     isLightweight: '' as string,
     distanceMeters: null as number | null,
     isActive: true,
   };
 
   readonly boatClassOptions: SearchableSelectOption[] = [
-    { value: '1X', label: '1X' },
-    { value: '2X', label: '2X' },
-    { value: '2+', label: '2+' },
-    { value: '2-', label: '2-' },
-    { value: '4X', label: '4X' },
-    { value: '4X+', label: '4X+' },
-    { value: '4+', label: '4+' },
-    { value: '4-', label: '4-' },
-    { value: '8+', label: '8+' },
+    { value: 'SINGLE_SCULL', label: '1X' },
+    { value: 'DOUBLE_SCULL', label: '2X' },
+    { value: 'COXED_PAIR', label: '2+' },
+    { value: 'PAIR', label: '2-' },
+    { value: 'QUAD', label: '4X' },
+    { value: 'COXED_QUAD', label: '4X+' },
+    { value: 'COXED_FOUR', label: '4+' },
+    { value: 'FOUR', label: '4-' },
+    { value: 'EIGHT', label: '8+' },
     { value: 'ERGO', label: 'ERGO' },
   ];
 
@@ -114,9 +112,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
       shortName: '',
       competitionGroupId: this.defaultGroupId || '',
       boatClass: '',
-      crewSize: null,
       maxCrewFromTransfer: null,
-      hasCoxswain: '',
       isLightweight: '',
       distanceMeters: null,
       isActive: true,
@@ -132,11 +128,6 @@ export class AddDisciplineDialogComponent implements OnChanges {
 
   onBoatClassChange(value: string | null): void {
     this.formData.boatClass = value || '';
-    this.cdr.markForCheck();
-  }
-
-  onHasCoxswainChange(value: string | null): void {
-    this.formData.hasCoxswain = value || '';
     this.cdr.markForCheck();
   }
 
@@ -156,9 +147,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
       this.formData.shortName &&
       this.formData.competitionGroupId &&
       this.formData.boatClass &&
-      this.formData.crewSize != null && this.formData.crewSize > 0 &&
       this.formData.maxCrewFromTransfer != null &&
-      this.formData.hasCoxswain &&
       this.formData.isLightweight &&
       this.formData.distanceMeters != null && this.formData.distanceMeters > 0
     );
@@ -176,9 +165,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
       shortName: this.formData.shortName,
       competitionGroupId: this.formData.competitionGroupId,
       boatClass: this.formData.boatClass as BoatClass,
-      crewSize: this.formData.crewSize!,
       maxCrewFromTransfer: this.formData.maxCrewFromTransfer!,
-      hasCoxswain: this.formData.hasCoxswain === 'true',
       isLightweight: this.formData.isLightweight === 'true',
       distanceMeters: this.formData.distanceMeters!,
       isActive: this.formData.isActive,

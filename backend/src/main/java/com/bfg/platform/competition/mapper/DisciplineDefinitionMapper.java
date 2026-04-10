@@ -10,6 +10,8 @@ import java.util.Set;
 
 public class DisciplineDefinitionMapper {
 
+    public record BoatClassFields(int crewSize, boolean hasCoxswain) {}
+
     private DisciplineDefinitionMapper() {
         throw new IllegalStateException("Utility class");
     }
@@ -47,14 +49,14 @@ public class DisciplineDefinitionMapper {
         return dto;
     }
 
-    public static DisciplineDefinition fromCreateRequest(DisciplineDefinitionRequest request) {
+    public static DisciplineDefinition fromCreateRequest(DisciplineDefinitionRequest request, BoatClassFields boatClassFields) {
         DisciplineDefinition entity = new DisciplineDefinition();
         entity.setName(request.getName());
         entity.setShortName(request.getShortName());
         entity.setCompetitionGroupId(request.getCompetitionGroupId());
         entity.setBoatClass(request.getBoatClass());
-        entity.setCrewSize(request.getCrewSize());
-        entity.setHasCoxswain(request.getHasCoxswain());
+        entity.setCrewSize(boatClassFields.crewSize());
+        entity.setHasCoxswain(boatClassFields.hasCoxswain());
         entity.setLightweight(request.getIsLightweight());
         entity.setDistanceMeters(request.getDistanceMeters());
         entity.setMaxCrewFromTransfer(request.getMaxCrewFromTransfer());
@@ -62,14 +64,14 @@ public class DisciplineDefinitionMapper {
         return entity;
     }
 
-    public static void updateFromRequest(DisciplineDefinition entity, DisciplineDefinitionRequest request) {
+    public static void updateFromRequest(DisciplineDefinition entity, DisciplineDefinitionRequest request, BoatClassFields boatClassFields) {
         entity.setName(request.getName());
         entity.setShortName(request.getShortName());
         entity.setCompetitionGroupId(request.getCompetitionGroupId());
         entity.setBoatClass(request.getBoatClass());
-        entity.setCrewSize(request.getCrewSize());
+        entity.setCrewSize(boatClassFields.crewSize());
         entity.setMaxCrewFromTransfer(request.getMaxCrewFromTransfer());
-        entity.setHasCoxswain(request.getHasCoxswain());
+        entity.setHasCoxswain(boatClassFields.hasCoxswain());
         entity.setLightweight(request.getIsLightweight());
         entity.setDistanceMeters(request.getDistanceMeters());
         entity.setActive(request.getIsActive());

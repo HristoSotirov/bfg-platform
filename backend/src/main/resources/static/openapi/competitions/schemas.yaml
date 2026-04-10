@@ -88,15 +88,15 @@ BoatClass:
   type: string
   description: Type of rowing boat
   enum:
-    - 1X
-    - 2X
-    - 2+
-    - 2-
-    - 4X
-    - 4X+
-    - 4+
-    - 4-
-    - 8+
+    - SINGLE_SCULL
+    - DOUBLE_SCULL
+    - COXED_PAIR
+    - PAIR
+    - QUAD
+    - COXED_QUAD
+    - COXED_FOUR
+    - FOUR
+    - EIGHT
     - ERGO
 
 ScoringType:
@@ -668,8 +668,6 @@ DisciplineDefinitionRequest:
     - shortName
     - competitionGroupId
     - boatClass
-    - crewSize
-    - hasCoxswain
     - isLightweight
     - distanceMeters
     - maxCrewFromTransfer
@@ -691,21 +689,12 @@ DisciplineDefinitionRequest:
       allOf:
         - $ref: "#/BoatClass"
       x-field-extra-annotation: '@NotNull(message = "Boat class is required")'
-    crewSize:
-      type: integer
-      minimum: 1
-      x-field-extra-annotation: |-
-        @NotNull(message = "Crew size is required")
-        @Min(value = 1, message = "Crew size must be >= 1")
     maxCrewFromTransfer:
       type: integer
       minimum: 0
       x-field-extra-annotation: |-
         @NotNull(message = "Max crew from transfer is required")
         @Min(value = 0, message = "Max crew from transfer must be >= 0")
-    hasCoxswain:
-      type: boolean
-      x-field-extra-annotation: '@NotNull(message = "Has coxswain is required")'
     isLightweight:
       type: boolean
       x-field-extra-annotation: '@NotNull(message = "Is lightweight is required")'

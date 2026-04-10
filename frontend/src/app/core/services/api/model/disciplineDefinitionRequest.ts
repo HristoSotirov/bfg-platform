@@ -18,9 +18,7 @@ export interface DisciplineDefinitionRequest {
     shortName: string;
     competitionGroupId: string;
     boatClass: BoatClass;
-    crewSize: number;
     maxCrewFromTransfer: number;
-    hasCoxswain: boolean;
     isLightweight: boolean;
     distanceMeters: number;
     isActive: boolean;

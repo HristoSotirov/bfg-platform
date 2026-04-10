@@ -63,11 +63,14 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
     fetchAllPages((skip, top) =>
       this.competitionGroupDefinitionsService
         .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
-    ).pipe(map((groups: any[]) => groups.map((g: any) => ({
-      value: g.uuid || '',
-      label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
-      disabled: !g.isActive,
-    }))));
+    ).pipe(map((groups: any[]) => [
+      { value: '', label: 'Няма' },
+      ...groups.map((g: any) => ({
+        value: g.uuid || '',
+        label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
+        disabled: !g.isActive,
+      })),
+    ]));
 
   readonly genderOptions: SearchableSelectOption[] = [
     { value: CompetitionGroupGender.Male, label: 'Мъже' },

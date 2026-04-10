@@ -196,7 +196,7 @@
                           </tr>
                         } @else {
                           <tr>
-                            <td class="px-2 py-1.5">{{ coeff.boatClass || "-" }}</td>
+                            <td class="px-2 py-1.5">{{ getBoatClassLabel(coeff.boatClass) }}</td>
                             <td class="px-2 py-1.5">{{ coeff.coefficient }}</td>
                             @if (canEdit && !isEditing) {
                               <td class="px-2 py-1.5">

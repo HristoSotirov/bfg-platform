@@ -24,6 +24,7 @@ import {
 } from '../../../../core/services/api';
 import { BoatClass } from '../../../../core/services/api/model/boatClass';
 import { AuthService } from '../../../../core/services/auth.service';
+import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
@@ -64,9 +65,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
     shortName: '',
     competitionGroupId: '',
     boatClass: '' as string,
-    crewSize: 1,
     maxCrewFromTransfer: 0,
-    hasCoxswain: false,
     isLightweight: false,
     distanceMeters: 2000,
     isActive: true,
@@ -82,12 +81,13 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
       disabled: !g.isActive,
     }))));
 
+  readonly getBoatClassLabel = getBoatClassLabel;
   readonly boatClassOptions: SearchableSelectOption[] = [
-    { value: '1X', label: '1X' }, { value: '2X', label: '2X' },
-    { value: '2+', label: '2+' }, { value: '2-', label: '2-' },
-    { value: '4X', label: '4X' }, { value: '4X+', label: '4X+' },
-    { value: '4+', label: '4+' }, { value: '4-', label: '4-' },
-    { value: '8+', label: '8+' }, { value: 'ERGO', label: 'ERGO' },
+    { value: 'SINGLE_SCULL', label: '1X' }, { value: 'DOUBLE_SCULL', label: '2X' },
+    { value: 'COXED_PAIR', label: '2+' }, { value: 'PAIR', label: '2-' },
+    { value: 'QUAD', label: '4X' }, { value: 'COXED_QUAD', label: '4X+' },
+    { value: 'COXED_FOUR', label: '4+' }, { value: 'FOUR', label: '4-' },
+    { value: 'EIGHT', label: '8+' }, { value: 'ERGO', label: 'ERGO' },
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
@@ -204,9 +204,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
       shortName: this.discipline.shortName || '',
       competitionGroupId: this.discipline.competitionGroupId || '',
       boatClass: this.discipline.boatClass || '',
-      crewSize: this.discipline.crewSize ?? 1,
       maxCrewFromTransfer: this.discipline.maxCrewFromTransfer ?? 0,
-      hasCoxswain: this.discipline.hasCoxswain ?? false,
       isLightweight: this.discipline.isLightweight ?? false,
       distanceMeters: this.discipline.distanceMeters ?? 2000,
       isActive: this.discipline.isActive ?? true,
@@ -236,11 +234,6 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
   }
 
-  onHasCoxswainChange(value: string | null): void {
-    this.editData.hasCoxswain = value === 'true';
-    this.cdr.markForCheck();
-  }
-
   onIsLightweightChange(value: string | null): void {
     this.editData.isLightweight = value === 'true';
     this.cdr.markForCheck();
@@ -257,9 +250,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
       shortName: this.editData.shortName,
       competitionGroupId: this.editData.competitionGroupId,
       boatClass: this.editData.boatClass as BoatClass,
-      crewSize: this.editData.crewSize,
       maxCrewFromTransfer: this.editData.maxCrewFromTransfer,
-      hasCoxswain: this.editData.hasCoxswain,
       isLightweight: this.editData.isLightweight,
       distanceMeters: this.editData.distanceMeters,
       isActive: this.editData.isActive,

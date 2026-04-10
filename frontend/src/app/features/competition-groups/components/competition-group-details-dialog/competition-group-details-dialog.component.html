@@ -102,7 +102,7 @@
             <!-- Edit mode -->
             <div class="space-y-1.5">
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Име:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Име <span class="text-red-500">*</span>:</label>
                 <input
                   type="text"
                   [(ngModel)]="editData.name"
@@ -110,7 +110,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Кратко име:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Кратко име <span class="text-red-500">*</span>:</label>
                 <input
                   type="text"
                   [(ngModel)]="editData.shortName"
@@ -118,7 +118,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Пол:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Пол <span class="text-red-500">*</span>:</label>
                 <app-searchable-select-dropdown
                   [options]="genderOptions"
                   [placeholder]="'Изберете пол'"
@@ -128,7 +128,7 @@
                 </app-searchable-select-dropdown>
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Мин. възраст:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Мин. възраст <span class="text-red-500">*</span>:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.minAge"
@@ -136,7 +136,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Макс. възраст:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Макс. възраст <span class="text-red-500">*</span>:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.maxAge"
@@ -153,7 +153,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Статус <span class="text-red-500">*</span>:</label>
                 <app-searchable-select-dropdown
                   [options]="statusOptions"
                   [placeholder]="'Изберете статус'"

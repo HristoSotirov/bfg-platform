@@ -52,7 +52,7 @@
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-36 flex-shrink-0">Клас лодка:</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ discipline.boatClass || "-" }}</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ getBoatClassLabel(discipline.boatClass) }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-36 flex-shrink-0">Размер екипаж:</span>
@@ -101,15 +101,6 @@
                   (ngModelChange)="onBoatClassChange($event)"
                   [disabled]="saving">
                 </app-searchable-select-dropdown>
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Размер екипаж <span class="text-red-500">*</span>:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.crewSize"
-                  min="1"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Макс. прехвърлени <span class="text-red-500">*</span>:</label>
@@ -166,16 +157,6 @@
             </div>
           } @else {
             <div class="space-y-1.5">
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Кокс <span class="text-red-500">*</span>:</label>
-                <app-searchable-select-dropdown
-                  [options]="booleanOptions"
-                  [placeholder]="'Изберете'"
-                  [ngModel]="editData.hasCoxswain ? 'true' : 'false'"
-                  (ngModelChange)="onHasCoxswainChange($event)"
-                  [disabled]="saving">
-                </app-searchable-select-dropdown>
-              </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Лековес <span class="text-red-500">*</span>:</label>
                 <app-searchable-select-dropdown

@@ -43,15 +43,15 @@ export class AddBoatCoefficientDialogComponent implements OnChanges {
   };
 
   readonly boatClassOptions: SearchableSelectOption[] = [
-    { value: BoatClass._1X, label: '1X' },
-    { value: BoatClass._2X, label: '2X' },
-    { value: BoatClass._2, label: '2+' },
-    { value: BoatClass._22, label: '2-' },
-    { value: BoatClass._4X, label: '4X' },
-    { value: BoatClass._4X2, label: '4X+' },
-    { value: BoatClass._4, label: '4+' },
-    { value: BoatClass._42, label: '4-' },
-    { value: BoatClass._8, label: '8+' },
+    { value: BoatClass.SingleScull, label: '1X' },
+    { value: BoatClass.DoubleScull, label: '2X' },
+    { value: BoatClass.CoxedPair, label: '2+' },
+    { value: BoatClass.Pair, label: '2-' },
+    { value: BoatClass.Quad, label: '4X' },
+    { value: BoatClass.CoxedQuad, label: '4X+' },
+    { value: BoatClass.CoxedFour, label: '4+' },
+    { value: BoatClass.Four, label: '4-' },
+    { value: BoatClass.Eight, label: '8+' },
     { value: BoatClass.Ergo, label: 'ERGO' },
   ];
 

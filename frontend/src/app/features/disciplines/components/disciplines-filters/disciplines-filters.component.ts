@@ -47,15 +47,15 @@ export class DisciplinesFiltersComponent implements OnInit {
   filtersExpanded = false;
 
   readonly boatClassOptions: DropdownOption[] = [
-    { value: '1X', label: '1X' },
-    { value: '2X', label: '2X' },
-    { value: '2+', label: '2+' },
-    { value: '2-', label: '2-' },
-    { value: '4X', label: '4X' },
-    { value: '4X+', label: '4X+' },
-    { value: '4+', label: '4+' },
-    { value: '4-', label: '4-' },
-    { value: '8+', label: '8+' },
+    { value: 'SINGLE_SCULL', label: '1X' },
+    { value: 'DOUBLE_SCULL', label: '2X' },
+    { value: 'COXED_PAIR', label: '2+' },
+    { value: 'PAIR', label: '2-' },
+    { value: 'QUAD', label: '4X' },
+    { value: 'COXED_QUAD', label: '4X+' },
+    { value: 'COXED_FOUR', label: '4+' },
+    { value: 'FOUR', label: '4-' },
+    { value: 'EIGHT', label: '8+' },
     { value: 'ERGO', label: 'ERGO' },
   ];
 

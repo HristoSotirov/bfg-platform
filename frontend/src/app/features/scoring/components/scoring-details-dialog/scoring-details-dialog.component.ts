@@ -31,6 +31,7 @@ import {
 } from '../../../../core/services/api';
 import { Subject, takeUntil, catchError, of, throwError } from 'rxjs';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
+import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
 
 @Component({
   selector: 'app-scoring-details-dialog',
@@ -112,28 +113,28 @@ export class ScoringDetailsDialogComponent implements OnChanges {
   savingCoefficient = false;
 
   readonly boatClassOptions: SearchableSelectOption[] = [
-    { value: '1X', label: '1X' },
-    { value: '2X', label: '2X' },
-    { value: '2+', label: '2+' },
-    { value: '2-', label: '2-' },
-    { value: '4X', label: '4X' },
-    { value: '4X+', label: '4X+' },
-    { value: '4+', label: '4+' },
-    { value: '4-', label: '4-' },
-    { value: '8+', label: '8+' },
+    { value: 'SINGLE_SCULL', label: '1X' },
+    { value: 'DOUBLE_SCULL', label: '2X' },
+    { value: 'COXED_PAIR', label: '2+' },
+    { value: 'PAIR', label: '2-' },
+    { value: 'QUAD', label: '4X' },
+    { value: 'COXED_QUAD', label: '4X+' },
+    { value: 'COXED_FOUR', label: '4+' },
+    { value: 'FOUR', label: '4-' },
+    { value: 'EIGHT', label: '8+' },
     { value: 'ERGO', label: 'ERGO' },
   ];
 
   private readonly boatClassOrder: Record<string, number> = {
-    '1X': 1,
-    '2X': 2,
-    '2-': 3,
-    '2+': 4,
-    '4X': 5,
-    '4X+': 6,
-    '4-': 7,
-    '4+': 8,
-    '8+': 9,
+    'SINGLE_SCULL': 1,
+    'DOUBLE_SCULL': 2,
+    'PAIR': 3,
+    'COXED_PAIR': 4,
+    'QUAD': 5,
+    'COXED_QUAD': 6,
+    'FOUR': 7,
+    'COXED_FOUR': 8,
+    'EIGHT': 9,
     'ERGO': 10,
   };
 
@@ -184,9 +185,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
     }
   }
 
-  getBoatClassLabel(boatClass: string | undefined): string {
-    return boatClass || '-';
-  }
+  readonly getBoatClassLabel = getBoatClassLabel;
 
   // --- Rules ---
 

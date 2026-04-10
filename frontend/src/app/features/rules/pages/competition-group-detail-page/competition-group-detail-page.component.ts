@@ -30,6 +30,7 @@ import {
 } from '../../../../core/services/api';
 import { BoatClass } from '../../../../core/services/api/model/boatClass';
 import { AuthService } from '../../../../core/services/auth.service';
+import { getBoatClassLabel, getBoatClassCrewSize, getBoatClassHasCoxswain } from '../../../../shared/utils/boat-class.util';
 import { SystemRole } from '../../../../core/models/navigation.model';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
@@ -65,6 +66,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   disciplinesLoading = false;
   disciplinesLoaded = false;
   disciplinesError: string | null = null;
+  disciplineDeleteError: string | null = null;
 
   isEditing = false;
   saving = false;
@@ -131,11 +133,14 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     fetchAllPages((skip, top) =>
       this.competitionGroupDefinitionsService
         .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
-    ).pipe(map((groups: any[]) => groups.map((g: any) => ({
-      value: g.uuid || '',
-      label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
-      disabled: !g.isActive,
-    }))));
+    ).pipe(map((groups: any[]) => [
+      { value: '', label: 'Няма' },
+      ...groups.map((g: any) => ({
+        value: g.uuid || '',
+        label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
+        disabled: !g.isActive,
+      })),
+    ]));
 
   // Transfer group preview dialog
   showTransferGroupDialog = false;
@@ -158,24 +163,25 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     name: string;
     shortName: string;
     boatClass: string;
-    crewSize: number | null;
     maxCrewFromTransfer: number | null;
-    hasCoxswain: string;
     isLightweight: string;
     distanceMeters: number | null;
     isActive: string;
   } = {
-    name: '', shortName: '', boatClass: '', crewSize: null,
-    maxCrewFromTransfer: null, hasCoxswain: 'false', isLightweight: 'false',
+    name: '', shortName: '', boatClass: '',
+    maxCrewFromTransfer: null, isLightweight: 'false',
     distanceMeters: null, isActive: 'true',
   };
 
+  readonly getBoatClassLabel = getBoatClassLabel;
+  readonly getBoatClassCrewSize = getBoatClassCrewSize;
+  readonly getBoatClassHasCoxswain = getBoatClassHasCoxswain;
   readonly boatClassOptions: SearchableSelectOption[] = [
-    { value: '1X', label: '1X' }, { value: '2X', label: '2X' },
-    { value: '2+', label: '2+' }, { value: '2-', label: '2-' },
-    { value: '4X', label: '4X' }, { value: '4X+', label: '4X+' },
-    { value: '4+', label: '4+' }, { value: '4-', label: '4-' },
-    { value: '8+', label: '8+' }, { value: 'ERGO', label: 'ERGO' },
+    { value: 'SINGLE_SCULL', label: '1X' }, { value: 'DOUBLE_SCULL', label: '2X' },
+    { value: 'COXED_PAIR', label: '2+' }, { value: 'PAIR', label: '2-' },
+    { value: 'QUAD', label: '4X' }, { value: 'COXED_QUAD', label: '4X+' },
+    { value: 'COXED_FOUR', label: '4+' }, { value: 'FOUR', label: '4-' },
+    { value: 'EIGHT', label: '8+' }, { value: 'ERGO', label: 'ERGO' },
   ];
 
   readonly booleanOptions: SearchableSelectOption[] = [
@@ -344,9 +350,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       name: d.name || '',
       shortName: d.shortName || '',
       boatClass: d.boatClass || '',
-      crewSize: d.crewSize ?? null,
       maxCrewFromTransfer: d.maxCrewFromTransfer ?? null,
-      hasCoxswain: d.hasCoxswain ? 'true' : 'false',
       isLightweight: d.isLightweight ? 'true' : 'false',
       distanceMeters: d.distanceMeters ?? null,
       isActive: d.isActive ? 'true' : 'false',
@@ -368,9 +372,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       shortName: this.disciplineEditData.shortName,
       competitionGroupId: this.group!.uuid!,
       boatClass: this.disciplineEditData.boatClass as BoatClass,
-      crewSize: this.disciplineEditData.crewSize ?? 1,
       maxCrewFromTransfer: this.disciplineEditData.maxCrewFromTransfer ?? 0,
-      hasCoxswain: this.disciplineEditData.hasCoxswain === 'true',
       isLightweight: this.disciplineEditData.isLightweight === 'true',
       distanceMeters: this.disciplineEditData.distanceMeters ?? 0,
       isActive: this.disciplineEditData.isActive === 'true',
@@ -404,15 +406,23 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   executeDeleteDiscipline(): void {
     if (!this.disciplineToDelete?.uuid) return;
     const uuid = this.disciplineToDelete.uuid;
-    this.showDeleteDisciplineConfirm = false;
-    this.cdr.markForCheck();
     this.disciplineDefinitionsService
       .deleteDisciplineDefinitionByUuid(uuid)
-      .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.disciplines = this.disciplines.filter(d => d.uuid !== uuid);
-        this.disciplineToDelete = null;
-        this.cdr.markForCheck();
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.disciplines = this.disciplines.filter(d => d.uuid !== uuid);
+          this.disciplineToDelete = null;
+          this.showDeleteDisciplineConfirm = false;
+          this.disciplineDeleteError = null;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.disciplineDeleteError = err?.error?.message || 'Грешка при изтриване на дисциплина';
+          this.disciplineToDelete = null;
+          this.showDeleteDisciplineConfirm = false;
+          this.cdr.markForCheck();
+        },
       });
   }
 

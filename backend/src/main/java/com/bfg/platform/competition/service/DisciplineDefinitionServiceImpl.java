@@ -13,6 +13,7 @@ import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.gen.model.BoatClass;
 import com.bfg.platform.gen.model.DisciplineDefinitionDto;
 import com.bfg.platform.gen.model.DisciplineDefinitionRequest;
 import jakarta.persistence.EntityManager;
@@ -62,9 +63,10 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
     @Override
     @Transactional
     public Optional<DisciplineDefinitionDto> create(DisciplineDefinitionRequest request) {
-        validateCrewSize(request);
-        validateAgainstGroup(request);
-        DisciplineDefinition entity = DisciplineDefinitionMapper.fromCreateRequest(request);
+        DisciplineDefinitionMapper.BoatClassFields fields = resolveBoatClassFields(request.getBoatClass());
+        validateCrewSize(fields.crewSize(), request.getMaxCrewFromTransfer());
+        validateAgainstGroup(request, fields);
+        DisciplineDefinition entity = DisciplineDefinitionMapper.fromCreateRequest(request, fields);
         DisciplineDefinition saved = repository.save(entity);
         entityManager.flush();
         return Optional.of(DisciplineDefinitionMapper.toDto(saved));
@@ -73,11 +75,12 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
     @Override
     @Transactional
     public Optional<DisciplineDefinitionDto> update(UUID uuid, DisciplineDefinitionRequest request) {
-        validateCrewSize(request);
-        validateAgainstGroup(request);
+        DisciplineDefinitionMapper.BoatClassFields fields = resolveBoatClassFields(request.getBoatClass());
+        validateCrewSize(fields.crewSize(), request.getMaxCrewFromTransfer());
+        validateAgainstGroup(request, fields);
         return repository.findById(uuid)
                 .map(entity -> {
-                    DisciplineDefinitionMapper.updateFromRequest(entity, request);
+                    DisciplineDefinitionMapper.updateFromRequest(entity, request, fields);
                     DisciplineDefinition saved = repository.save(entity);
                     return DisciplineDefinitionMapper.toDto(saved);
                 });
@@ -95,7 +98,7 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
         }
     }
 
-    private void validateAgainstGroup(DisciplineDefinitionRequest request) {
+    private void validateAgainstGroup(DisciplineDefinitionRequest request, DisciplineDefinitionMapper.BoatClassFields fields) {
         CompetitionGroupDefinition group = groupRepository.findById(request.getCompetitionGroupId())
                 .orElseThrow(() -> new ValidationException("Competition group not found: " + request.getCompetitionGroupId()));
 
@@ -103,7 +106,7 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
             throw new ValidationException("Competition group is not active: " + request.getCompetitionGroupId());
         }
 
-        if (request.getHasCoxswain()) {
+        if (fields.hasCoxswain()) {
             if (group.getCoxRequiredWeightKg() == null || group.getCoxMinWeightKg() == null) {
                 throw new ValidationException("Cannot set hasCoxswain=true: competition group has no cox weight data configured");
             }
@@ -122,9 +125,24 @@ public class DisciplineDefinitionServiceImpl implements DisciplineDefinitionServ
         }
     }
 
-    private void validateCrewSize(DisciplineDefinitionRequest request) {
-        if (request.getMaxCrewFromTransfer() > request.getCrewSize()) {
+    private void validateCrewSize(int crewSize, int maxCrewFromTransfer) {
+        if (maxCrewFromTransfer > crewSize) {
             throw new ValidationException("Max crew from transfer cannot exceed crew size");
         }
+    }
+
+    private static DisciplineDefinitionMapper.BoatClassFields resolveBoatClassFields(BoatClass boatClass) {
+        return switch (boatClass) {
+            case SINGLE_SCULL -> new DisciplineDefinitionMapper.BoatClassFields(1, false);
+            case DOUBLE_SCULL -> new DisciplineDefinitionMapper.BoatClassFields(2, false);
+            case COXED_PAIR   -> new DisciplineDefinitionMapper.BoatClassFields(2, true);
+            case PAIR         -> new DisciplineDefinitionMapper.BoatClassFields(2, false);
+            case QUAD         -> new DisciplineDefinitionMapper.BoatClassFields(4, false);
+            case COXED_QUAD   -> new DisciplineDefinitionMapper.BoatClassFields(4, true);
+            case COXED_FOUR   -> new DisciplineDefinitionMapper.BoatClassFields(4, true);
+            case FOUR         -> new DisciplineDefinitionMapper.BoatClassFields(4, false);
+            case EIGHT        -> new DisciplineDefinitionMapper.BoatClassFields(8, true);
+            case ERGO         -> new DisciplineDefinitionMapper.BoatClassFields(1, false);
+        };
     }
 }

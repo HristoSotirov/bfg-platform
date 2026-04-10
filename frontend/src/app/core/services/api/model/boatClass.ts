@@ -13,15 +13,15 @@
  * Type of rowing boat
  */
 export const BoatClass = {
-    _1X: '1X',
-    _2X: '2X',
-    _2: '2+',
-    _22: '2-',
-    _4X: '4X',
-    _4X2: '4X+',
-    _4: '4+',
-    _42: '4-',
-    _8: '8+',
+    SingleScull: 'SINGLE_SCULL',
+    DoubleScull: 'DOUBLE_SCULL',
+    CoxedPair: 'COXED_PAIR',
+    Pair: 'PAIR',
+    Quad: 'QUAD',
+    CoxedQuad: 'COXED_QUAD',
+    CoxedFour: 'COXED_FOUR',
+    Four: 'FOUR',
+    Eight: 'EIGHT',
     Ergo: 'ERGO'
 } as const;
 export type BoatClass = typeof BoatClass[keyof typeof BoatClass];
