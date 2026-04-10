@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "npm run generate:api && ng serve",
+    "build": "npm run generate:api && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "generate:api": "openapi-generator-cli generate -i ../backend/src/main/resources/static/openapi/openapi.yaml -g typescript-angular -o src/app/core/services/api --skip-validate-spec --additional-properties=ngVersion=17.3.0,providedInRoot=true,serviceSuffix=Service"

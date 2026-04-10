@@ -6,8 +6,9 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../core/services/scope-visibility.service';
@@ -19,7 +20,6 @@ import {
 } from '../../core/services/api';
 import { UsersTableComponent } from './components/users-table/users-table.component';
 import { UsersFiltersComponent } from './components/users-filters/users-filters.component';
-import { UserDetailsDialogComponent } from './components/user-details-dialog/user-details-dialog.component';
 import { AddUserDialogComponent } from './components/add-user-dialog/add-user-dialog.component';
 import { UserSettingsDialogComponent } from './components/user-settings-dialog/user-settings-dialog.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -57,7 +57,6 @@ export interface UserFilters {
     HeaderComponent,
     UsersTableComponent,
     UsersFiltersComponent,
-    UserDetailsDialogComponent,
     AddUserDialogComponent,
     UserSettingsDialogComponent,
     ButtonComponent,
@@ -108,11 +107,8 @@ export class UsersComponent implements OnInit, OnDestroy {
     // Note: 'scopeType' filter is added dynamically based on user permissions
   ];
 
-  isDetailsDialogOpen = false;
   isAddDialogOpen = false;
   isSettingsDialogOpen = false;
-
-  selectedUser: UserDto | null = null;
 
   exporting = false;
   mobileMenuOpen = false;
@@ -140,6 +136,7 @@ export class UsersComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private usersService: UsersService,
     private scopeVisibility: ScopeVisibilityService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -333,15 +330,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   openDetailsDialog(user: UserDto): void {
-    this.selectedUser = user;
-    this.isDetailsDialogOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeDetailsDialog(): void {
-    this.isDetailsDialogOpen = false;
-    this.selectedUser = null;
-    this.cdr.markForCheck();
+    this.router.navigate(['/users', user.uuid]);
   }
 
   openAddDialog(): void {
@@ -493,11 +482,6 @@ export class UsersComponent implements OnInit, OnDestroy {
     }
   }
 
-  onUserSaved(): void {
-    this.loadUsers();
-    this.closeDetailsDialog();
-  }
-
   onUserAdded(): void {
     this.loadUsers();
     this.closeAddDialog();
@@ -591,21 +575,22 @@ export class UsersComponent implements OnInit, OnDestroy {
     const filterString =
       filterParts.length > 0 ? filterParts.join(' and ') : undefined;
 
-    this.usersService
-      .getAllUsers(
+    fetchAllPages((skip, top) =>
+      this.usersService.getAllUsers(
         filterString,
         this.filters.search || undefined,
         this.orderBy as any,
-        1000, // Maximum allowed by backend
-        0,
+        top,
+        skip,
         undefined,
-      )
+      ) as any
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: (users: any[]) => {
           const visibleColumns = this.columns.filter((col) => col.visible);
 
-          const data = (response.content || []).map((u) => {
+          const data = users.map((u) => {
             const row: any = {};
 
             visibleColumns.forEach((col) => {
@@ -631,7 +616,7 @@ export class UsersComponent implements OnInit, OnDestroy {
                         INTERNAL: 'Вътрешен',
                         EXTERNAL: 'Външен',
                         NATIONAL: 'Национален',
-                      }[u.scopeType] ?? u.scopeType)
+                      } as Record<string, string>)[u.scopeType] ?? u.scopeType
                     : '';
                   break;
                 case 'isActive':

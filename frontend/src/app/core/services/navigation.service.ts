@@ -26,16 +26,16 @@ export class NavigationService {
       requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN'],
     },
     {
+      id: 'rules',
+      label: 'Правилник',
+      route: '/regulations',
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'],
+    },
+    {
       id: 'competitions',
       label: 'Състезания',
       route: '/competitions',
       requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN'],
-    },
-    {
-      id: 'regulations',
-      label: 'Правилник',
-      route: '/regulations',
-      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'],
     },
     {
       id: 'results',

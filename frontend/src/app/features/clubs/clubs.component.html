@@ -144,22 +144,6 @@
   </div>
 </div>
 
-<app-club-details-dialog
-  [isOpen]="isDetailsDialogOpen"
-  [club]="selectedClub"
-  [canEdit]="canEditClub"
-  [canManageCoaches]="
-    selectedClub ? canManageCoachesForClub(selectedClub.uuid) : false
-  "
-  [userClubId]="userClubId"
-  [userRole]="userRole"
-  [showScopeInDetails]="showScopeFeatures"
-  (closed)="closeDetailsDialog()"
-  (saved)="onClubSaved()"
-  (logoUploaded)="onLogoUploaded($event)"
->
-</app-club-details-dialog>
-
 <app-add-club-dialog
   [isOpen]="isAddDialogOpen"
   (closed)="closeAddDialog()"

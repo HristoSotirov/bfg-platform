@@ -1,0 +1,72 @@
+databaseChangeLog:
+  - changeSet:
+      id: 019-entries
+      author: bfg
+      changes:
+        - createTable:
+            tableName: entries
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: competition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: club_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discipline_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: team_number
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: entries
+            columnNames: competition_id, club_id, discipline_id, team_number
+            constraintName: uq_entry_comp_club_disc_team
+        - addForeignKeyConstraint:
+            baseTableName: entries
+            baseColumnNames: competition_id
+            referencedTableName: competitions
+            referencedColumnNames: id
+            constraintName: fk_entry_competition
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: entries
+            baseColumnNames: club_id
+            referencedTableName: clubs
+            referencedColumnNames: id
+            constraintName: fk_entry_club
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: entries
+            baseColumnNames: discipline_id
+            referencedTableName: discipline_definitions
+            referencedColumnNames: id
+            constraintName: fk_entry_discipline
+            onDelete: RESTRICT

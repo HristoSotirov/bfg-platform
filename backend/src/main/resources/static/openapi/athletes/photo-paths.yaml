@@ -1,20 +1,18 @@
 /athletes/{athleteUuid}/photos:
-  parameters:
-    - name: athleteUuid
-      in: path
-      required: true
-      description: UUID of the athlete
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
-
   get:
     tags:
       - Athlete Photos
     summary: Get photo history for an athlete
     operationId: getAthletePhotos
     parameters:
+      - name: athleteUuid
+        in: path
+        required: true
+        description: UUID of the athlete
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{athlete.uuid.required}")'
       - name: filter
         in: query
         description: Filter expression (e.g., athleteId eq '...') - optional when using athleteUuid path

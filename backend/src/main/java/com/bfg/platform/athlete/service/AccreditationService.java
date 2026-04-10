@@ -30,5 +30,7 @@ public interface AccreditationService {
     AthleteBatchMigrationResponse batchMigrateAthletes(AthleteBatchMigrationRequest request);
     
     Optional<AccreditationDto> updateAccreditationStatus(UUID uuid, AccreditationStatus status);
+
+    void deleteAccreditation(UUID uuid);
 }
 

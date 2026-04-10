@@ -25,25 +25,28 @@ type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
           <h2 class="text-xl font-semibold text-gray-900 truncate mr-4">
             {{ title }}
           </h2>
-          <button
-            type="button"
-            class="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-            (click)="close()"
-          >
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div class="flex items-center gap-1 flex-shrink-0">
+            <ng-content select="[slot=header-extra]"></ng-content>
+            <button
+              type="button"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+              (click)="close()"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Body -->
@@ -85,11 +88,13 @@ export class DialogComponent {
   @Input() size: DialogSize = 'md';
   /** When true, body has no scroll (overflow hidden). Use when content is fixed height. */
   @Input() noScroll = false;
+  @Input() tall = false;
   @Output() closed = new EventEmitter<void>();
 
   get dialogClasses(): string {
     const baseClasses =
-      'relative bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-hidden flex flex-col';
+      'relative bg-white rounded-lg shadow-xl w-full overflow-hidden flex flex-col';
+    const heightClasses = this.tall ? 'h-[90vh]' : 'max-h-[90vh]';
 
     const sizeClasses: Record<DialogSize, string> = {
       sm: 'max-w-sm',
@@ -99,7 +104,7 @@ export class DialogComponent {
       '2xl': 'max-w-6xl',
     };
 
-    return `${baseClasses} ${sizeClasses[this.size]}`;
+    return `${baseClasses} ${heightClasses} ${sizeClasses[this.size]}`;
   }
 
   close(): void {

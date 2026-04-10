@@ -359,6 +359,16 @@ public class AccreditationServiceImpl implements AccreditationService {
                 });
     }
 
+    @Override
+    @Transactional
+    public void deleteAccreditation(UUID uuid) {
+        validateUuid(uuid);
+        if (!accreditationRepository.existsById(uuid)) {
+            throw new ResourceNotFoundException("Accreditation", uuid);
+        }
+        accreditationRepository.deleteById(uuid);
+    }
+
     private void validateUuid(UUID uuid) {
         if (uuid == null) {
             throw new ValidationException("Accreditation UUID cannot be null");

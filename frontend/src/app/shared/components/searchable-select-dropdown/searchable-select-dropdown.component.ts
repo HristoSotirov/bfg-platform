@@ -9,6 +9,7 @@ import {
   HostListener,
   forwardRef,
   OnDestroy,
+  OnInit,
   ViewChild,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -17,6 +18,17 @@ import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
+import {
+  Observable,
+  Subject,
+  debounceTime,
+  distinctUntilChanged,
+  switchMap,
+  catchError,
+  of,
+  take,
+} from 'rxjs';
+import { fetchAllPages } from '../../../core/utils/fetch-all-pages';
 
 export interface SearchableSelectOption {
   value: string;
@@ -88,7 +100,9 @@ class SearchableDropdownRegistry {
             [class.max-h-[96px]]="!noScroll"
             [class.overflow-y-auto]="!noScroll"
             [class.overflow-y-visible]="noScroll">
-            @if (filteredOptions.length === 0) {
+            @if (searchLoading) {
+              <div class="px-3 py-2 text-sm text-gray-400 italic">Търсене...</div>
+            } @else if (filteredOptions.length === 0) {
               <div class="px-3 py-2 text-sm text-gray-500">Няма опции</div>
             } @else {
               @for (option of filteredOptions; track option.value) {
@@ -148,13 +162,16 @@ class SearchableDropdownRegistry {
   ],
 })
 export class SearchableSelectDropdownComponent
-  implements ControlValueAccessor, OnDestroy
+  implements ControlValueAccessor, OnInit, OnDestroy
 {
   @Input() options: SearchableSelectOption[] = [];
   @Input() placeholder = 'Изберете...';
   @Input() disabled = false;
-  @Input() dropdownWidth?: string; // Optional custom width for dropdown menu
-  @Input() noScroll = false; // If true, remove max-height and show all options without scroll
+  @Input() dropdownWidth?: string;
+  @Input() noScroll = false;
+  @Input() serverSearch?: (query: string) => Observable<SearchableSelectOption[]>;
+  /** Load all options once on open via fetchAllPages, then filter in-memory. */
+  @Input() staticSearch?: () => Observable<SearchableSelectOption[]>;
 
   @Output() selectionChange = new EventEmitter<string>();
 
@@ -164,8 +181,10 @@ export class SearchableSelectDropdownComponent
   selectedValue: string | null = null;
   searchQuery = '';
   isTyping = false;
+  searchLoading = false;
   private optionClicked = false;
   private arrowClicked = false;
+  private searchSubject = new Subject<string>();
 
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
@@ -177,8 +196,26 @@ export class SearchableSelectDropdownComponent
     SearchableDropdownRegistry.register(this);
   }
 
+  ngOnInit(): void {
+    if (!this.serverSearch) return;
+    this.searchSubject.pipe(
+      debounceTime(500),
+      distinctUntilChanged(),
+      switchMap((query) => {
+        this.searchLoading = true;
+        this.cdr.markForCheck();
+        return this.serverSearch!(query).pipe(catchError(() => of([])));
+      }),
+    ).subscribe((results) => {
+      this.options = results;
+      this.searchLoading = false;
+      this.cdr.markForCheck();
+    });
+  }
+
   ngOnDestroy(): void {
     SearchableDropdownRegistry.unregister(this);
+    this.searchSubject.complete();
   }
 
   @HostListener('document:click', ['$event'])
@@ -189,12 +226,10 @@ export class SearchableSelectDropdownComponent
     }
   }
 
-
   get filteredOptions(): SearchableSelectOption[] {
     if (!this.searchQuery.trim()) {
       return this.options;
     }
-
     const query = this.searchQuery.toLowerCase().trim();
     return this.options.filter((option) =>
       option.label.toLowerCase().includes(query),
@@ -205,7 +240,7 @@ export class SearchableSelectDropdownComponent
     if (this.disabled) return;
     event.preventDefault();
     event.stopPropagation();
-    
+
     this.arrowClicked = true;
 
     if (this.isOpen) {
@@ -213,7 +248,7 @@ export class SearchableSelectDropdownComponent
     } else {
       this.open();
     }
-    
+
     setTimeout(() => {
       this.arrowClicked = false;
     }, 100);
@@ -229,6 +264,20 @@ export class SearchableSelectDropdownComponent
     this.searchQuery = '';
     this.isTyping = false;
     this.cdr.markForCheck();
+
+    if (this.serverSearch) {
+      this.searchSubject.next('');
+    }
+
+    if (this.staticSearch) {
+      this.searchLoading = true;
+      this.cdr.markForCheck();
+      this.staticSearch().pipe(take(1)).subscribe((results) => {
+        this.options = results;
+        this.searchLoading = false;
+        this.cdr.markForCheck();
+      });
+    }
 
     setTimeout(() => {
       if (this.inputField?.nativeElement) {
@@ -284,6 +333,9 @@ export class SearchableSelectDropdownComponent
     if (!this.isOpen) {
       this.open();
     }
+    if (this.serverSearch) {
+      this.searchSubject.next(this.searchQuery.trim());
+    }
     this.cdr.markForCheck();
   }
 
@@ -305,14 +357,14 @@ export class SearchableSelectDropdownComponent
     this.isTyping = false;
     this.onChange(this.selectedValue);
     this.selectionChange.emit(this.selectedValue);
-    
+
     setTimeout(() => {
       this.close();
       if (this.inputField?.nativeElement) {
         this.inputField.nativeElement.blur();
       }
     }, 0);
-    
+
     this.cdr.markForCheck();
   }
 
@@ -323,7 +375,20 @@ export class SearchableSelectDropdownComponent
     } else {
       this.selectedValue = String(value);
       const option = this.options.find((o) => o.value === this.selectedValue);
-      this.searchQuery = option?.label || '';
+      if (option) {
+        this.searchQuery = option.label;
+      } else if (this.serverSearch || this.staticSearch) {
+        // Options not yet loaded — trigger initial load to resolve the label
+        const loader = this.serverSearch ? this.serverSearch('') : this.staticSearch!();
+        loader.pipe(take(1)).subscribe((results) => {
+          this.options = results;
+          const found = this.options.find((o) => o.value === this.selectedValue);
+          this.searchQuery = found?.label || '';
+          this.cdr.markForCheck();
+        });
+      } else {
+        this.searchQuery = '';
+      }
     }
     this.isTyping = false;
     this.cdr.markForCheck();
@@ -341,4 +406,3 @@ export class SearchableSelectDropdownComponent
     this.disabled = isDisabled;
   }
 }
-

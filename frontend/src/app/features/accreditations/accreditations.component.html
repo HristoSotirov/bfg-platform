@@ -24,134 +24,242 @@
       <h1 class="text-2xl font-bold text-gray-900">Картотеки</h1>
     </div>
 
-    <app-accreditations-filters
-      [filters]="filters"
-      [filterConfigs]="filterConfigs"
-      [allClubs]="allClubs"
-      [availableYears]="availableYears"
-      (filtersChange)="onFiltersChange($event)"
-      (searchChange)="onSearchChange($event)"
-    >
-    </app-accreditations-filters>
+    <!-- Tab bar -->
+    <div class="border-b border-gray-200 mb-4">
+      <nav class="-mb-px flex gap-1">
+        <button type="button"
+          class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+          [class]="activeTab === 'accreditations' ? 'border-bfg-blue text-bfg-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          (click)="setTab('accreditations')">
+          Картотеки
+        </button>
+        <button type="button"
+          class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+          [class]="activeTab === 'athletes' ? 'border-bfg-blue text-bfg-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+          (click)="setTab('athletes')">
+          Атлети
+        </button>
+      </nav>
+    </div>
 
-    @if (selectionMessage && selectedAccreditations.size > 0) {
-      <div
-        class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800"
+    <!-- ACCREDITATIONS TAB -->
+    @if (activeTab === 'accreditations') {
+      <app-accreditations-filters
+        [filters]="filters"
+        [filterConfigs]="filterConfigs"
+        [allClubs]="allClubs"
+        [availableYears]="availableYears"
+        [availableBirthYears]="availableAccreditationBirthYears"
+        (filtersChange)="onFiltersChange($event)"
+        (searchChange)="onSearchChange($event)"
       >
-        {{ selectionMessage }}
-      </div>
-    }
-    <div class="flex items-center justify-between gap-2 sm:gap-4 mb-4">
-      <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
-        <div class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
-          Брой:
-          <span class="font-semibold text-gray-900">{{ totalElements }}</span>
+      </app-accreditations-filters>
+
+      @if (selectionMessage && selectedAccreditations.size > 0) {
+        <div
+          class="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800"
+        >
+          {{ selectionMessage }}
         </div>
-        @if (selectedAccreditations.size > 0) {
+      }
+      <div class="flex items-center justify-between gap-2 sm:gap-4 mb-4">
+        <div class="flex items-center gap-2 sm:gap-4 min-w-0 flex-1">
           <div class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
-            Избрани:
-            <span class="font-semibold text-gray-900">{{
-              selectedAccreditations.size
-            }}</span>
+            Брой картотеки:
+            <span class="font-semibold text-gray-900">{{ totalElements }}</span>
           </div>
-          @if (canRenewAccreditation || canEdit) {
+          @if (selectedAccreditations.size > 0) {
+            <div class="text-xs sm:text-sm text-gray-600 whitespace-nowrap">
+              Избрани:
+              <span class="font-semibold text-gray-900">{{
+                selectedAccreditations.size
+              }}</span>
+            </div>
+            @if (canRenewAccreditation || canEdit) {
+              <button
+                type="button"
+                class="text-xs sm:text-sm text-bfg-blue hover:underline whitespace-nowrap"
+                (click)="deselectAll()"
+              >
+                Премахни избора
+              </button>
+            }
+          }
+        </div>
+        <div class="flex items-center gap-2 ml-auto">
+          <div class="hidden sm:flex items-center gap-2">
+            @if (canRenewAccreditation) {
+              <div class="relative group">
+                <app-button
+                  variant="white"
+                  size="md"
+                  [disabled]="selectedAccreditations.size === 0"
+                  text="Подновяване"
+                  (click)="openRenewDialog()"
+                ></app-button>
+                @if (selectedAccreditations.size === 0) {
+                  <div
+                    class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block"
+                  >
+                    Изисква се избор на състезатели
+                    <div
+                      class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
+                    >
+                      <div
+                        class="border-4 border-transparent border-t-white"
+                      ></div>
+                    </div>
+                  </div>
+                }
+              </div>
+              <app-button
+                variant="white"
+                size="md"
+                text="Добавяне"
+                (click)="openAddDialog()"
+              ></app-button>
+            }
+            @if (canEdit) {
+              <div class="relative group">
+                <app-button
+                  variant="white"
+                  size="md"
+                  text="Мед. данни"
+                  [disabled]="selectedAccreditations.size === 0"
+                  (click)="openBatchMedicalDialog()"
+                ></app-button>
+                @if (selectedAccreditations.size === 0) {
+                  <div
+                    class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block"
+                  >
+                    Изисква се избор на състезатели
+                    <div
+                      class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
+                    >
+                      <div
+                        class="border-4 border-transparent border-t-white"
+                      ></div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+            @if (canMigrate) {
+              <app-button
+                variant="white"
+                size="md"
+                text="Миграция"
+                (click)="openMigrationDialog()"
+              ></app-button>
+            }
+            <app-button
+              variant="white"
+              size="md"
+              [disabled]="exporting || totalElements === 0"
+              text="Експорт"
+              (click)="exportToExcel()"
+            ></app-button>
+          </div>
+
+          <app-mobile-action-menu
+            [items]="mobileMenuItems"
+            [isOpen]="mobileMenuOpen"
+            (isOpenChange)="mobileMenuOpen = $event"
+            (menuToggle)="onMobileMenuToggle($event)"
+          ></app-mobile-action-menu>
+
+          <div class="relative group flex-shrink-0">
             <button
               type="button"
-              class="text-xs sm:text-sm text-bfg-blue hover:underline whitespace-nowrap"
-              (click)="deselectAll()"
+              class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              (click)="openSettingsDialog()"
             >
-              Премахни избора
+              <svg
+                class="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                ></path>
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                ></path>
+              </svg>
             </button>
-          }
+            <div
+              class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200"
+            >
+              Настройки
+              <div
+                class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
+              >
+                <div class="border-4 border-transparent border-t-white"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div
+        class="flex-1 overflow-hidden bg-white rounded-lg border border-gray-200"
+      >
+        @if (loading && accreditations.length === 0) {
+          <div class="flex items-center justify-center h-full">
+            <div class="text-gray-500">Зареждане...</div>
+          </div>
+        } @else if (error) {
+          <div class="flex items-center justify-center h-full">
+            <div class="text-red-500">{{ error }}</div>
+          </div>
+        } @else {
+          <app-accreditations-table
+            [accreditations]="accreditations"
+            [columns]="columns"
+            [selectedIds]="selectedAccreditations"
+            [loading]="loading"
+            [hasMore]="hasMore"
+            [canSelect]="canRenewAccreditation || canEdit"
+            [selectingAll]="selectingAll"
+            [maxSelection]="maxSelection"
+            [orderBy]="orderBy"
+            (rowClick)="openDetailsDialog($event)"
+            (selectionChange)="onSelectionChange($event)"
+            (selectAllRequested)="onSelectAllRequested()"
+            (sortChange)="onSortChange($event)"
+            (loadMore)="loadMore()"
+          >
+          </app-accreditations-table>
         }
       </div>
-      <div class="flex items-center gap-2 ml-auto">
-        <div class="hidden sm:flex items-center gap-2">
-          @if (canRenewAccreditation) {
-            <div class="relative group">
-              <app-button
-                variant="white"
-                size="md"
-                [disabled]="selectedAccreditations.size === 0"
-                text="Подновяване"
-                (click)="openRenewDialog()"
-              ></app-button>
-              @if (selectedAccreditations.size === 0) {
-                <div
-                  class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block"
-                >
-                  Изисква се избор на състезатели
-                  <div
-                    class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
-                  >
-                    <div
-                      class="border-4 border-transparent border-t-white"
-                    ></div>
-                  </div>
-                </div>
-              }
-            </div>
-            <app-button
-              variant="white"
-              size="md"
-              text="Добавяне"
-              (click)="openAddDialog()"
-            ></app-button>
-          }
-          @if (canEdit) {
-            <div class="relative group">
-              <app-button
-                variant="white"
-                size="md"
-                text="Мед. данни"
-                [disabled]="selectedAccreditations.size === 0"
-                (click)="openBatchMedicalDialog()"
-              ></app-button>
-              @if (selectedAccreditations.size === 0) {
-                <div
-                  class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200 hidden lg:block"
-                >
-                  Изисква се избор на състезатели
-                  <div
-                    class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
-                  >
-                    <div
-                      class="border-4 border-transparent border-t-white"
-                    ></div>
-                  </div>
-                </div>
-              }
-            </div>
-          }
-          @if (canMigrate) {
-            <app-button
-              variant="white"
-              size="md"
-              text="Миграция"
-              (click)="openMigrationDialog()"
-            ></app-button>
-          }
-          <app-button
-            variant="white"
-            size="md"
-            [disabled]="exporting || totalElements === 0"
-            text="Експорт"
-            (click)="exportToExcel()"
-          ></app-button>
+    }
+
+    <!-- ATHLETES TAB -->
+    @if (activeTab === 'athletes') {
+      <app-athletes-filters
+        [filters]="athleteFilters"
+        [filterConfigs]="athleteFilterConfigs"
+        [availableBirthYears]="availableBirthYears"
+        (filtersChange)="onAthleteFiltersChange($event)"
+        (searchChange)="onAthleteSearchChange($event)"
+      ></app-athletes-filters>
+
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <div class="text-sm text-gray-600">
+          Брой атлети: <span class="font-semibold">{{ athletesTotalElements }}</span>
         </div>
-
-        <app-mobile-action-menu
-          [items]="mobileMenuItems"
-          [isOpen]="mobileMenuOpen"
-          (isOpenChange)="mobileMenuOpen = $event"
-          (menuToggle)="onMobileMenuToggle($event)"
-        ></app-mobile-action-menu>
-
         <div class="relative group flex-shrink-0">
           <button
             type="button"
             class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            (click)="openSettingsDialog()"
+            (click)="openAthletesSettingsDialog()"
           >
             <svg
               class="w-5 h-5"
@@ -174,63 +282,32 @@
             </svg>
           </button>
           <div
-            class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200"
+            class="absolute bottom-full right-0 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200"
           >
             Настройки
-            <div
-              class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
-            >
+            <div class="absolute top-full right-3 transform -mt-1">
               <div class="border-4 border-transparent border-t-white"></div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+      <div class="flex-1 overflow-hidden bg-white rounded-lg border border-gray-200">
+        <app-athletes-table
+          [athletes]="athletes"
+          [columns]="athleteColumns"
+          [loading]="athletesLoading"
+          [hasMore]="athletesHasMore"
+          [orderBy]="athleteOrderBy"
+          (rowClick)="onAthleteRowClick($event)"
+          (sortChange)="onAthleteSortChange($event)"
+          (loadMore)="loadMoreAthletes()"
+        ></app-athletes-table>
+      </div>
+    }
 
-    <div
-      class="flex-1 overflow-hidden bg-white rounded-lg border border-gray-200"
-    >
-      @if (loading && accreditations.length === 0) {
-        <div class="flex items-center justify-center h-full">
-          <div class="text-gray-500">Зареждане...</div>
-        </div>
-      } @else if (error) {
-        <div class="flex items-center justify-center h-full">
-          <div class="text-red-500">{{ error }}</div>
-        </div>
-      } @else {
-        <app-accreditations-table
-          [accreditations]="accreditations"
-          [columns]="columns"
-          [selectedIds]="selectedAccreditations"
-          [loading]="loading"
-          [hasMore]="hasMore"
-          [canSelect]="canRenewAccreditation || canEdit"
-          [selectingAll]="selectingAll"
-          [maxSelection]="maxSelection"
-          [orderBy]="orderBy"
-          (rowClick)="openDetailsDialog($event)"
-          (selectionChange)="onSelectionChange($event)"
-          (selectAllRequested)="onSelectAllRequested()"
-          (sortChange)="onSortChange($event)"
-          (loadMore)="loadMore()"
-        >
-        </app-accreditations-table>
-      }
-    </div>
   </div>
 </div>
 
-<app-athlete-details-dialog
-  [isOpen]="isDetailsDialogOpen"
-  [accreditation]="selectedAccreditation"
-  [canEdit]="canEdit"
-  [userRole]="userRole"
-  [userClub]="userClub"
-  [showScopeInDetails]="showScopeFeatures"
-  (closed)="closeDetailsDialog()"
-  (saved)="onAthleteUpdated()"
-></app-athlete-details-dialog>
 <app-add-athlete-dialog
   [isOpen]="isAddDialogOpen"
   [userClub]="userClub"
@@ -263,3 +340,10 @@
   (closed)="closeMigrationDialog()"
   (migrated)="onMigrationComplete()"
 ></app-migration-dialog>
+<app-athletes-settings-dialog
+  [isOpen]="isAthletesSettingsDialogOpen"
+  [columns]="athleteColumns"
+  [filterConfigs]="athleteFilterConfigs"
+  (closed)="closeAthletesSettingsDialog()"
+  (settingsChange)="onAthleteSettingsChange($event)"
+></app-athletes-settings-dialog>

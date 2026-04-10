@@ -8,12 +8,27 @@ import com.bfg.platform.club.entity.ClubCoach;
 import com.bfg.platform.club.repository.ClubCoachRepository;
 import com.bfg.platform.club.service.ClubCoachService;
 import com.bfg.platform.club.service.ClubService;
+import com.bfg.platform.competition.entity.Competition;
+import com.bfg.platform.competition.entity.CompetitionGroupDefinition;
+import com.bfg.platform.competition.entity.CompetitionTimetableEvent;
+import com.bfg.platform.competition.entity.DisciplineDefinition;
+import com.bfg.platform.competition.entity.QualificationScheme;
+import com.bfg.platform.competition.entity.ScoringScheme;
+import com.bfg.platform.competition.repository.CompetitionGroupDefinitionRepository;
+import com.bfg.platform.competition.repository.CompetitionRepository;
+import com.bfg.platform.competition.repository.CompetitionTimetableEventRepository;
+import com.bfg.platform.competition.repository.DisciplineDefinitionRepository;
+import com.bfg.platform.competition.repository.QualificationSchemeRepository;
+import com.bfg.platform.competition.repository.ScoringSchemeRepository;
 import com.bfg.platform.gen.model.AccreditationStatus;
+import com.bfg.platform.gen.model.BoatClass;
 import com.bfg.platform.gen.model.ClubCoachCreateRequest;
 import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubDto;
+import com.bfg.platform.gen.model.CompetitionGroupGender;
 import com.bfg.platform.gen.model.Gender;
 import com.bfg.platform.gen.model.ScopeType;
+import com.bfg.platform.gen.model.ScoringType;
 import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserDto;
@@ -32,6 +47,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +70,12 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
     private final AthleteRepository athleteRepository;
     private final AccreditationRepository accreditationRepository;
     private final Environment environment;
+    private final ScoringSchemeRepository scoringSchemeRepository;
+    private final QualificationSchemeRepository qualificationSchemeRepository;
+    private final CompetitionGroupDefinitionRepository competitionGroupDefinitionRepository;
+    private final DisciplineDefinitionRepository disciplineDefinitionRepository;
+    private final CompetitionRepository competitionRepository;
+    private final CompetitionTimetableEventRepository competitionTimetableEventRepository;
 
     @Override
     public void run(String... args) {
@@ -228,6 +250,8 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         createAccreditation(externalAthlete3.getId(), externalClub2.getUuid(), externalClub2.getCardPrefix(), previousYear, AccreditationStatus.EXPIRED, ScopeType.EXTERNAL);
         createAccreditation(externalAthlete3.getId(), externalClub2.getUuid(), externalClub2.getCardPrefix(), currentYear, AccreditationStatus.ACTIVE, ScopeType.EXTERNAL);
         createAccreditation(externalAthlete4.getId(), externalClub2.getUuid(), externalClub2.getCardPrefix(), currentYear, AccreditationStatus.NEW_PHOTO_REQUIRED, ScopeType.EXTERNAL);
+
+        bootstrapCompetitionData();
     }
 
     private UserDto createUser(String username, String password, String firstName, String lastName, SystemRole role, LocalDate dateOfBirth, ScopeType scopeType) {
@@ -237,38 +261,18 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
 
         ScopeType effectiveScope = scopeType != null ? scopeType : ScopeType.INTERNAL;
 
-        // ScopeAccessPolicy allows only CLUB_ADMIN to have non-INTERNAL scope via UserService.
-        // APP_ADMIN and FEDERATION_ADMIN with NATIONAL/EXTERNAL must use repository directly.
-        boolean useRepository = (role == SystemRole.APP_ADMIN || role == SystemRole.FEDERATION_ADMIN)
-                && effectiveScope != ScopeType.INTERNAL;
-
-        if (useRepository) {
-            User user = User.builder()
-                    .username(username)
-                    .email(username)
-                    .password(passwordEncoder.encode(password))
-                    .firstName(firstName)
-                    .lastName(lastName)
-                    .dateOfBirth(dateOfBirth)
-                    .role(role)
-                    .scopeType(effectiveScope)
-                    .isActive(true)
-                    .build();
-            return UserMapper.toDto(userRepository.save(user));
-        }
-
-        UserCreateRequest request = new UserCreateRequest();
-        request.setUsername(username);
-        request.setEmail(username);
-        request.setFirstName(firstName);
-        request.setLastName(lastName);
-        request.setDateOfBirth(dateOfBirth);
-        request.setRole(role);
-        if (role == SystemRole.CLUB_ADMIN || role == SystemRole.APP_ADMIN || role == SystemRole.FEDERATION_ADMIN) {
-            request.setScopeType(effectiveScope);
-        }
-
-        return userService.createUser(request).orElseThrow();
+        User user = User.builder()
+                .username(username)
+                .email(username)
+                .password(passwordEncoder.encode(password))
+                .firstName(firstName)
+                .lastName(lastName)
+                .dateOfBirth(dateOfBirth)
+                .role(role)
+                .scopeType(effectiveScope)
+                .isActive(true)
+                .build();
+        return UserMapper.toDto(userRepository.save(user));
     }
 
     private ClubDto createClub(String name, String shortName, UUID clubAdmin, String clubEmail, ScopeType scopeType) {
@@ -348,6 +352,272 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .clubId(clubId)
                 .build();
         clubCoachRepository.save(clubCoach);
+    }
+
+    private void bootstrapCompetitionData() {
+        if (!competitionRepository.findAll().isEmpty()) {
+            return;
+        }
+
+        // ── Scoring schemes ──────────────────────────────────────────────────
+        ScoringScheme scoringScheme = scoringSchemeRepository.save(
+                ScoringScheme.builder()
+                        .name("Стандартна схема")
+                        .scoringType(ScoringType.FIXED)
+                        .isActive(true)
+                        .build());
+
+        ScoringScheme scoringScheme2 = scoringSchemeRepository.save(
+                ScoringScheme.builder()
+                        .name("Точкова схема")
+                        .scoringType(ScoringType.OFFSET_FROM_END)
+                        .isActive(true)
+                        .build());
+
+        // ── Qualification schemes ────────────────────────────────────────────
+        QualificationScheme qualScheme = qualificationSchemeRepository.save(
+                QualificationScheme.builder()
+                        .name("Стандартна квалификация")
+                        .laneCount(6)
+                        .isActive(true)
+                        .build());
+
+        QualificationScheme qualScheme2 = qualificationSchemeRepository.save(
+                QualificationScheme.builder()
+                        .name("Разширена квалификация")
+                        .laneCount(8)
+                        .isActive(true)
+                        .build());
+
+        // ── Competition groups ────────────────────────────────────────────────
+        CompetitionGroupDefinition groupMenSenior = competitionGroupDefinitionRepository.save(
+                CompetitionGroupDefinition.builder()
+                        .name("Мъже Сениори")
+                        .shortName("МС")
+                        .gender(CompetitionGroupGender.MALE)
+                        .minAge(19)
+                        .maxAge(null)
+                        .maxDisciplinesPerAthlete(3)
+                        .isActive(true)
+                        .build());
+
+        CompetitionGroupDefinition groupWomenSenior = competitionGroupDefinitionRepository.save(
+                CompetitionGroupDefinition.builder()
+                        .name("Жени Сениори")
+                        .shortName("ЖС")
+                        .gender(CompetitionGroupGender.FEMALE)
+                        .minAge(19)
+                        .maxAge(null)
+                        .maxDisciplinesPerAthlete(3)
+                        .isActive(true)
+                        .build());
+
+        CompetitionGroupDefinition groupMenJunior = competitionGroupDefinitionRepository.save(
+                CompetitionGroupDefinition.builder()
+                        .name("Мъже Юниори")
+                        .shortName("МЮ")
+                        .gender(CompetitionGroupGender.MALE)
+                        .minAge(16)
+                        .maxAge(18)
+                        .maxDisciplinesPerAthlete(2)
+                        .isActive(true)
+                        .build());
+
+        // ── Discipline definitions ────────────────────────────────────────────
+        DisciplineDefinition disc1x = disciplineDefinitionRepository.save(
+                DisciplineDefinition.builder()
+                        .name("Единична скул мъже")
+                        .shortName("1x М")
+                        .competitionGroupId(groupMenSenior.getId())
+                        .boatClass(BoatClass.SINGLE_SCULL)
+                        .crewSize(1)
+                        .maxCrewFromTransfer(0)
+                        .hasCoxswain(false)
+                        .isLightweight(false)
+                        .distanceMeters(2000)
+                        .isActive(true)
+                        .build());
+
+        DisciplineDefinition disc2x = disciplineDefinitionRepository.save(
+                DisciplineDefinition.builder()
+                        .name("Двойна скул мъже")
+                        .shortName("2x М")
+                        .competitionGroupId(groupMenSenior.getId())
+                        .boatClass(BoatClass.DOUBLE_SCULL)
+                        .crewSize(2)
+                        .maxCrewFromTransfer(0)
+                        .hasCoxswain(false)
+                        .isLightweight(false)
+                        .distanceMeters(2000)
+                        .isActive(true)
+                        .build());
+
+        DisciplineDefinition disc1xW = disciplineDefinitionRepository.save(
+                DisciplineDefinition.builder()
+                        .name("Единична скул жени")
+                        .shortName("1x Ж")
+                        .competitionGroupId(groupWomenSenior.getId())
+                        .boatClass(BoatClass.SINGLE_SCULL)
+                        .crewSize(1)
+                        .maxCrewFromTransfer(0)
+                        .hasCoxswain(false)
+                        .isLightweight(false)
+                        .distanceMeters(2000)
+                        .isActive(true)
+                        .build());
+
+        DisciplineDefinition disc4xJunior = disciplineDefinitionRepository.save(
+                DisciplineDefinition.builder()
+                        .name("Четворна скул юниори мъже")
+                        .shortName("4x МЮ")
+                        .competitionGroupId(groupMenJunior.getId())
+                        .boatClass(BoatClass.QUAD)
+                        .crewSize(4)
+                        .maxCrewFromTransfer(0)
+                        .hasCoxswain(false)
+                        .isLightweight(false)
+                        .distanceMeters(2000)
+                        .isActive(true)
+                        .build());
+
+        // ── Real competition: Национален шампионат 2026 ──────────────────────
+        Competition nationalChampionship = competitionRepository.save(
+                Competition.builder()
+                        .shortName("НШ2026")
+                        .name("Национален шампионат по гребане 2026")
+                        .location("Пловдив, Гребна база")
+                        .startDate(LocalDate.of(2026, 5, 15))
+                        .endDate(LocalDate.of(2026, 5, 17))
+                        .status("PLANNED")
+                        .scoringSchemeId(scoringScheme.getId())
+                        .qualificationSchemeId(qualScheme.getId())
+                        .competitionType("STANDARD")
+                        .isTemplate(false)
+                        .build());
+
+        // Timetable events for national championship (3 disciplines, 3 days)
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(nationalChampionship.getId())
+                        .disciplineId(disc1x.getId())
+                        .qualificationEventType("H")
+                        .scheduledAt(Instant.parse("2026-05-15T09:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(nationalChampionship.getId())
+                        .disciplineId(disc2x.getId())
+                        .qualificationEventType("H")
+                        .scheduledAt(Instant.parse("2026-05-15T10:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(nationalChampionship.getId())
+                        .disciplineId(disc1xW.getId())
+                        .qualificationEventType("H")
+                        .scheduledAt(Instant.parse("2026-05-15T11:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(nationalChampionship.getId())
+                        .disciplineId(disc1x.getId())
+                        .qualificationEventType("FA")
+                        .scheduledAt(Instant.parse("2026-05-17T14:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(nationalChampionship.getId())
+                        .disciplineId(disc2x.getId())
+                        .qualificationEventType("FA")
+                        .scheduledAt(Instant.parse("2026-05-17T15:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(nationalChampionship.getId())
+                        .disciplineId(disc1xW.getId())
+                        .qualificationEventType("FA")
+                        .scheduledAt(Instant.parse("2026-05-17T16:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        // ── Real competition: Купа София 2026 ──────────────────────────────────
+        Competition cupSofia = competitionRepository.save(
+                Competition.builder()
+                        .shortName("КС2026")
+                        .name("Купа София 2026")
+                        .location("София, Панчарево")
+                        .startDate(LocalDate.of(2026, 6, 6))
+                        .endDate(LocalDate.of(2026, 6, 7))
+                        .status("PLANNED")
+                        .scoringSchemeId(scoringScheme2.getId())
+                        .qualificationSchemeId(qualScheme2.getId())
+                        .competitionType("STANDARD")
+                        .isTemplate(false)
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(cupSofia.getId())
+                        .disciplineId(disc1x.getId())
+                        .qualificationEventType("H")
+                        .scheduledAt(Instant.parse("2026-06-06T09:30:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(cupSofia.getId())
+                        .disciplineId(disc4xJunior.getId())
+                        .qualificationEventType("H")
+                        .scheduledAt(Instant.parse("2026-06-06T10:30:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        // ── Template competition ──────────────────────────────────────────────
+        Competition templateComp = competitionRepository.save(
+                Competition.builder()
+                        .shortName("ШАБ")
+                        .name("Шаблон за национален шампионат")
+                        .location("Пловдив, Гребна база")
+                        .startDate(LocalDate.of(2026, 6, 28))
+                        .endDate(LocalDate.of(2026, 6, 29))
+                        .status("PLANNED")
+                        .scoringSchemeId(scoringScheme.getId())
+                        .qualificationSchemeId(qualScheme.getId())
+                        .competitionType("STANDARD")
+                        .isTemplate(true)
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(templateComp.getId())
+                        .disciplineId(disc1x.getId())
+                        .qualificationEventType("H")
+                        .scheduledAt(Instant.parse("2026-06-28T09:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        competitionTimetableEventRepository.save(
+                CompetitionTimetableEvent.builder()
+                        .competitionId(templateComp.getId())
+                        .disciplineId(disc1xW.getId())
+                        .qualificationEventType("H")
+                        .scheduledAt(Instant.parse("2026-06-28T10:00:00Z"))
+                        .eventStatus("SCHEDULED")
+                        .build());
+
+        log.info("Competition test data bootstrapped: 2 real competitions + 1 template, {} disciplines",
+                disciplineDefinitionRepository.count());
     }
 }
 

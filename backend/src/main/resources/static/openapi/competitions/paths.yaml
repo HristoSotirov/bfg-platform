@@ -1,0 +1,2260 @@
+# ── Competition Group Definitions ─────────────────────────────────────────────
+
+/competition-group-definitions:
+  get:
+    tags:
+      - Competition Group Definitions
+    summary: Get all competition group definitions
+    operationId: getAllCompetitionGroupDefinitions
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., isActive eq 'true')
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across competition group definition name and short name (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `name`, `shortName`
+
+          **Examples:**
+          - `Men U23`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - name_asc
+              - name_desc
+              - shortName_asc
+              - shortName_desc
+              - isActive_asc
+              - isActive_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["name_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of competition group definitions successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/CompetitionGroupDefinitionDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Competition Group Definitions
+    summary: Create a new competition group definition
+    operationId: createCompetitionGroupDefinition
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/CompetitionGroupDefinitionRequest"
+    responses:
+      "201":
+        description: Competition group definition created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionGroupDefinitionDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/competition-group-definitions/{uuid}:
+  get:
+    tags:
+      - Competition Group Definitions
+    summary: Get competition group definition by UUID
+    operationId: getCompetitionGroupDefinitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition group definition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Competition group definition details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionGroupDefinitionDto"
+      "404":
+        description: Competition group definition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition group definition not found."
+
+  put:
+    tags:
+      - Competition Group Definitions
+    summary: Update competition group definition by UUID
+    operationId: updateCompetitionGroupDefinitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition group definition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/CompetitionGroupDefinitionRequest"
+    responses:
+      "200":
+        description: Competition group definition updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionGroupDefinitionDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Competition group definition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition group definition not found."
+      "409":
+        description: Conflict - name/shortName already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another competition group definition with the same name or short name already exists."
+
+  delete:
+    tags:
+      - Competition Group Definitions
+    summary: Delete competition group definition by UUID
+    operationId: deleteCompetitionGroupDefinitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition group definition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Competition group definition deleted successfully (no content)
+      "404":
+        description: Competition group definition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition group definition not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete competition group definition: it is referenced by other records."
+
+# ── Discipline Definitions ───────────────────────────────────────────────────
+
+/discipline-definitions:
+  get:
+    tags:
+      - Discipline Definitions
+    summary: Get all discipline definitions
+    operationId: getAllDisciplineDefinitions
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., isActive eq 'true')
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across discipline definition name, short name, and boat class (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `name`, `shortName`, `boatClass`
+
+          **Examples:**
+          - `Single Sculls`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - name_asc
+              - name_desc
+              - shortName_asc
+              - shortName_desc
+              - isActive_asc
+              - isActive_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["name_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of discipline definitions successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/DisciplineDefinitionDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Discipline Definitions
+    summary: Create a new discipline definition
+    operationId: createDisciplineDefinition
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/DisciplineDefinitionRequest"
+    responses:
+      "201":
+        description: Discipline definition created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/DisciplineDefinitionDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/discipline-definitions/{uuid}:
+  get:
+    tags:
+      - Discipline Definitions
+    summary: Get discipline definition by UUID
+    operationId: getDisciplineDefinitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the discipline definition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Discipline definition details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/DisciplineDefinitionDto"
+      "404":
+        description: Discipline definition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Discipline definition not found."
+
+  put:
+    tags:
+      - Discipline Definitions
+    summary: Update discipline definition by UUID
+    operationId: updateDisciplineDefinitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the discipline definition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/DisciplineDefinitionRequest"
+    responses:
+      "200":
+        description: Discipline definition updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/DisciplineDefinitionDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Discipline definition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Discipline definition not found."
+      "409":
+        description: Conflict - name/shortName already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another discipline definition with the same name or short name already exists."
+
+  delete:
+    tags:
+      - Discipline Definitions
+    summary: Delete discipline definition by UUID
+    operationId: deleteDisciplineDefinitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the discipline definition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Discipline definition deleted successfully (no content)
+      "404":
+        description: Discipline definition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Discipline definition not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete discipline definition: it is referenced by other records."
+
+# ── Scoring Schemes ──────────────────────────────────────────────────────────
+
+/scoring-schemes:
+  get:
+    tags:
+      - Scoring Schemes
+    summary: Get all scoring schemes
+    operationId: getAllScoringSchemes
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., isActive eq 'true')
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across scoring scheme name (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `name`
+
+          **Examples:**
+          - `National Scoring`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - name_asc
+              - name_desc
+              - isActive_asc
+              - isActive_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["name_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of scoring schemes successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/ScoringSchemeDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Scoring Schemes
+    summary: Create a new scoring scheme
+    operationId: createScoringScheme
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ScoringSchemeRequest"
+    responses:
+      "201":
+        description: Scoring scheme created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringSchemeDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/scoring-schemes/{uuid}:
+  get:
+    tags:
+      - Scoring Schemes
+    summary: Get scoring scheme by UUID
+    operationId: getScoringSchemeByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the scoring scheme
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Scoring scheme details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringSchemeDto"
+      "404":
+        description: Scoring scheme not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Scoring scheme not found."
+
+  put:
+    tags:
+      - Scoring Schemes
+    summary: Update scoring scheme by UUID
+    operationId: updateScoringSchemeByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the scoring scheme
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ScoringSchemeRequest"
+    responses:
+      "200":
+        description: Scoring scheme updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringSchemeDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Scoring scheme not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Scoring scheme not found."
+      "409":
+        description: Conflict - name already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another scoring scheme with the same name already exists."
+
+  delete:
+    tags:
+      - Scoring Schemes
+    summary: Delete scoring scheme by UUID
+    operationId: deleteScoringSchemeByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the scoring scheme
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Scoring scheme deleted successfully (no content)
+      "404":
+        description: Scoring scheme not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Scoring scheme not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete scoring scheme: it is referenced by other records."
+
+# ── Scoring Rules ────────────────────────────────────────────────────────────
+
+/scoring-rules:
+  get:
+    tags:
+      - Scoring Rules
+    summary: Get all scoring rules
+    operationId: getAllScoringRules
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., scoringSchemeId eq 'uuid-value' and placement eq '1')
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - placement_asc
+              - placement_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["placement_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of scoring rules successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/ScoringRuleDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Scoring Rules
+    summary: Create a new scoring rule
+    operationId: createScoringRule
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ScoringRuleRequest"
+    responses:
+      "201":
+        description: Scoring rule created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringRuleDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/scoring-rules/{uuid}:
+  get:
+    tags:
+      - Scoring Rules
+    summary: Get scoring rule by UUID
+    operationId: getScoringRuleByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the scoring rule
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Scoring rule details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringRuleDto"
+      "404":
+        description: Scoring rule not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Scoring rule not found."
+
+  put:
+    tags:
+      - Scoring Rules
+    summary: Update scoring rule by UUID
+    operationId: updateScoringRuleByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the scoring rule
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ScoringRuleRequest"
+    responses:
+      "200":
+        description: Scoring rule updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringRuleDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Scoring rule not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Scoring rule not found."
+      "409":
+        description: Conflict - duplicate entry
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another scoring rule with the same values already exists."
+
+  delete:
+    tags:
+      - Scoring Rules
+    summary: Delete scoring rule by UUID
+    operationId: deleteScoringRuleByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the scoring rule
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Scoring rule deleted successfully (no content)
+      "404":
+        description: Scoring rule not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Scoring rule not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete scoring rule: it is referenced by other records."
+
+# ── Competitions (unified — templates + real) ────────────────────────────────
+
+/competitions:
+  get:
+    tags:
+      - Competitions
+    summary: Get all competitions (templates and real)
+    operationId: getAllCompetitions
+    parameters:
+      - name: filter
+        in: query
+        description: |
+          Filter expression (e.g., isTemplate eq 'true', isActive eq 'true', status eq 'DRAFT').
+          Use isTemplate eq 'true' to list only templates; isTemplate eq 'false' for real competitions.
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across competition name and short name (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `name`, `shortName`
+
+          **Examples:**
+          - `National Water`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - name_asc
+              - name_desc
+              - shortName_asc
+              - shortName_desc
+              - startDate_asc
+              - startDate_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["name_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of competitions successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/CompetitionDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Competitions
+    summary: Create a new competition (template or real)
+    operationId: createCompetition
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/CompetitionCreateRequest"
+    responses:
+      "201":
+        description: Competition created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/competitions/{uuid}:
+  get:
+    tags:
+      - Competitions
+    summary: Get competition by UUID
+    operationId: getCompetitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Competition details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionDto"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition not found."
+
+  put:
+    tags:
+      - Competitions
+    summary: Update competition by UUID (full replace)
+    operationId: updateCompetitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/CompetitionUpdateRequest"
+    responses:
+      "200":
+        description: Competition updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition not found."
+      "409":
+        description: Conflict - name/shortName already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another competition with the same name or short name already exists."
+
+  delete:
+    tags:
+      - Competitions
+    summary: Delete competition by UUID
+    operationId: deleteCompetitionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Competition deleted successfully (no content)
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete competition: it is referenced by other records."
+
+# ── Competition Timetable Events ──────────────────────────────────────────────
+
+/competition-timetable-events:
+  get:
+    tags:
+      - Competition Timetable Events
+    summary: Get all competition timetable events
+    operationId: getAllCompetitionTimetableEvents
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., competitionId eq 'uuid-value')
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - scheduledAt_asc
+              - scheduledAt_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["scheduledAt_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+      - name: expand
+        in: query
+        description: Related entities to expand (e.g., discipline, discipline.competitionGroup)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - discipline
+              - discipline.competitionGroup
+    responses:
+      "200":
+        description: List of competition timetable events successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Competition Timetable Events
+    summary: Create a competition timetable event
+    operationId: createCompetitionTimetableEvent
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventRequest"
+    responses:
+      "200":
+        description: Competition timetable event created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition not found."
+
+/competition-timetable-events/{uuid}:
+  get:
+    tags:
+      - Competition Timetable Events
+    summary: Get competition timetable event by UUID
+    operationId: getCompetitionTimetableEventByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition timetable event
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Competition timetable event details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
+      "404":
+        description: Competition timetable event not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition timetable event not found."
+
+  put:
+    tags:
+      - Competition Timetable Events
+    summary: Update competition timetable event by UUID (full replace)
+    operationId: updateCompetitionTimetableEventByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition timetable event
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventRequest"
+    responses:
+      "200":
+        description: Competition timetable event updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Competition timetable event not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition timetable event not found."
+      "409":
+        description: Conflict - duplicate entry
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another competition timetable event with the same values already exists."
+
+  delete:
+    tags:
+      - Competition Timetable Events
+    summary: Delete competition timetable event by UUID
+    operationId: deleteCompetitionTimetableEventByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the competition timetable event
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Competition timetable event deleted successfully (no content)
+      "404":
+        description: Competition timetable event not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition timetable event not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete competition timetable event: it is referenced by other records."
+
+# ── Qualification Schemes ────────────────────────────────────────────────────
+
+/qualification-schemes:
+  get:
+    tags:
+      - Qualification Schemes
+    summary: Get all qualification schemes
+    operationId: getAllQualificationSchemes
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., isActive eq 'true')
+        schema:
+          type: string
+      - name: search
+        in: query
+        required: false
+        description: |
+          Free-text search across qualification scheme name (case-insensitive).
+
+          **Behavior:**
+          - Tokenized by whitespace.
+          - All tokens must match at least one field (AND across tokens).
+
+          **Matches:**
+          - `name`
+
+          **Examples:**
+          - `National Water`
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - name_asc
+              - name_desc
+              - isActive_asc
+              - isActive_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["name_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of qualification schemes successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/QualificationSchemeDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Qualification Schemes
+    summary: Create a new qualification scheme
+    operationId: createQualificationScheme
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationSchemeRequest"
+    responses:
+      "201":
+        description: Qualification scheme created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationSchemeDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/qualification-schemes/{uuid}:
+  get:
+    tags:
+      - Qualification Schemes
+    summary: Get qualification scheme by UUID
+    operationId: getQualificationSchemeByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification scheme
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Qualification scheme details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationSchemeDto"
+      "404":
+        description: Qualification scheme not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification scheme not found."
+
+  put:
+    tags:
+      - Qualification Schemes
+    summary: Update qualification scheme by UUID
+    operationId: updateQualificationSchemeByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification scheme
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationSchemeRequest"
+    responses:
+      "200":
+        description: Qualification scheme updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationSchemeDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Qualification scheme not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification scheme not found."
+      "409":
+        description: Conflict - name already exists
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another qualification scheme with the same name already exists."
+
+  delete:
+    tags:
+      - Qualification Schemes
+    summary: Delete qualification scheme by UUID
+    operationId: deleteQualificationSchemeByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification scheme
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Qualification scheme deleted successfully (no content)
+      "404":
+        description: Qualification scheme not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification scheme not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete qualification scheme: it is referenced by other records."
+
+# ── Qualification Tiers ──────────────────────────────────────────────────────
+
+/qualification-tiers:
+  get:
+    tags:
+      - Qualification Tiers
+    summary: Get all qualification tiers
+    operationId: getAllQualificationTiers
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., qualificationSchemeId eq 'uuid-value')
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - boatCountMin_asc
+              - boatCountMin_desc
+              - createdAt_asc
+              - createdAt_desc
+          default: ["boatCountMin_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of qualification tiers successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/QualificationTierDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Qualification Tiers
+    summary: Create a new qualification tier
+    operationId: createQualificationTier
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationTierRequest"
+    responses:
+      "201":
+        description: Qualification tier created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationTierDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/qualification-tiers/{uuid}:
+  get:
+    tags:
+      - Qualification Tiers
+    summary: Get qualification tier by UUID
+    operationId: getQualificationTierByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification tier
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Qualification tier details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationTierDto"
+      "404":
+        description: Qualification tier not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification tier not found."
+
+  put:
+    tags:
+      - Qualification Tiers
+    summary: Update qualification tier by UUID
+    operationId: updateQualificationTierByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification tier
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationTierRequest"
+    responses:
+      "200":
+        description: Qualification tier updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationTierDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Qualification tier not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification tier not found."
+      "409":
+        description: Conflict - duplicate entry
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another qualification tier with the same values already exists."
+
+  delete:
+    tags:
+      - Qualification Tiers
+    summary: Delete qualification tier by UUID
+    operationId: deleteQualificationTierByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification tier
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Qualification tier deleted successfully (no content)
+      "404":
+        description: Qualification tier not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification tier not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete qualification tier: it is referenced by other records."
+
+# ── Qualification Progressions ───────────────────────────────────────────────
+
+/qualification-progressions:
+  get:
+    tags:
+      - Qualification Progressions
+    summary: Get all qualification progressions
+    operationId: getAllQualificationProgressions
+    parameters:
+      - name: filter
+        in: query
+        description: Filter expression (e.g., qualificationTierId eq 'uuid-value')
+        schema:
+          type: string
+      - name: orderBy
+        in: query
+        description: Predefined ordering (multiselect)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - createdAt_asc
+              - createdAt_desc
+          default: ["createdAt_asc"]
+      - name: top
+        in: query
+        description: Maximum number of items to return
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        description: Number of items to skip
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of qualification progressions successfully retrieved
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 500
+              message: "Internal server error. Please try again later."
+
+  post:
+    tags:
+      - Qualification Progressions
+    summary: Create a new qualification progression
+    operationId: createQualificationProgression
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationProgressionRequest"
+    responses:
+      "201":
+        description: Qualification progression created successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "400":
+        description: Bad request, validation failed
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Validation failed."
+
+/qualification-progressions/{uuid}:
+  get:
+    tags:
+      - Qualification Progressions
+    summary: Get qualification progression by UUID
+    operationId: getQualificationProgressionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification progression
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Qualification progression details found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "404":
+        description: Qualification progression not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification progression not found."
+
+  put:
+    tags:
+      - Qualification Progressions
+    summary: Update qualification progression by UUID
+    operationId: updateQualificationProgressionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification progression
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/QualificationProgressionRequest"
+    responses:
+      "200":
+        description: Qualification progression updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/QualificationProgressionDto"
+      "400":
+        description: Bad request - validation error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 400
+              message: "Invalid data format."
+      "404":
+        description: Qualification progression not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification progression not found."
+      "409":
+        description: Conflict - duplicate entry
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Another qualification progression with the same values already exists."
+
+  delete:
+    tags:
+      - Qualification Progressions
+    summary: Delete qualification progression by UUID
+    operationId: deleteQualificationProgressionByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        description: UUID of the qualification progression
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Qualification progression deleted successfully (no content)
+      "404":
+        description: Qualification progression not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Qualification progression not found."
+      "409":
+        description: Conflict - referenced by other records
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 409
+              message: "Cannot delete qualification progression: it is referenced by other records."
+
+# ── Scoring Scheme Boat Coefficients ─────────────────────────────────────────
+
+/scoring-scheme-boat-coefficients:
+  get:
+    tags:
+      - Scoring Scheme Boat Coefficients
+    summary: Get all scoring scheme boat coefficients
+    operationId: getAllScoringSchemeBoatCoefficients
+    parameters:
+      - name: filter
+        in: query
+        schema:
+          type: string
+      - name: top
+        in: query
+        schema:
+          type: integer
+          minimum: 1
+          maximum: 1000
+          default: 100
+      - name: skip
+        in: query
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+    responses:
+      "200":
+        description: List of scoring scheme boat coefficients
+        content:
+          application/json:
+            schema:
+              allOf:
+                - $ref: "../common/schemas.yaml#/Page"
+                - type: object
+                  properties:
+                    content:
+                      type: array
+                      items:
+                        $ref: "../competitions/schemas.yaml#/ScoringSchemeBoatCoefficientDto"
+      "500":
+        description: Server error
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  post:
+    tags:
+      - Scoring Scheme Boat Coefficients
+    summary: Create a scoring scheme boat coefficient
+    operationId: createScoringSchemeBoatCoefficient
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ScoringSchemeBoatCoefficientRequest"
+    responses:
+      "201":
+        description: Created
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringSchemeBoatCoefficientDto"
+      "400":
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/scoring-scheme-boat-coefficients/{uuid}:
+  get:
+    tags:
+      - Scoring Scheme Boat Coefficients
+    summary: Get scoring scheme boat coefficient by UUID
+    operationId: getScoringSchemeBoatCoefficientByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "200":
+        description: Found
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringSchemeBoatCoefficientDto"
+      "404":
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  put:
+    tags:
+      - Scoring Scheme Boat Coefficients
+    summary: Update scoring scheme boat coefficient by UUID
+    operationId: updateScoringSchemeBoatCoefficientByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ScoringSchemeBoatCoefficientRequest"
+    responses:
+      "200":
+        description: Updated
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ScoringSchemeBoatCoefficientDto"
+      "400":
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  delete:
+    tags:
+      - Scoring Scheme Boat Coefficients
+    summary: Delete scoring scheme boat coefficient by UUID
+    operationId: deleteScoringSchemeBoatCoefficientByUuid
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull'
+    responses:
+      "204":
+        description: Deleted
+      "404":
+        description: Not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "409":
+        description: Conflict
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"

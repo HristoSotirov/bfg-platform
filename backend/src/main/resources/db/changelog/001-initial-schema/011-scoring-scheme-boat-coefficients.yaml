@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: 011-scoring-scheme-boat-coefficients
+      author: bfg
+      changes:
+        - createTable:
+            tableName: scoring_scheme_boat_coefficients
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: scoring_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: boat_class
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: coefficient
+                  type: DECIMAL(5,3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: scoring_scheme_boat_coefficients
+            columnNames: scoring_scheme_id, boat_class
+            constraintName: uq_scoring_boat_coeff_scheme_boat
+        - addForeignKeyConstraint:
+            baseTableName: scoring_scheme_boat_coefficients
+            baseColumnNames: scoring_scheme_id
+            referencedTableName: scoring_schemes
+            referencedColumnNames: id
+            constraintName: fk_scoring_boat_coeff_scheme
+            onDelete: RESTRICT

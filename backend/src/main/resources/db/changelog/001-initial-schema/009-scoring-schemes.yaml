@@ -1,0 +1,44 @@
+databaseChangeLog:
+  - changeSet:
+      id: 009-scoring-schemes
+      author: bfg
+      changes:
+        - createTable:
+            tableName: scoring_schemes
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: scoring_type
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                  remarks: "FIXED, OFFSET_FROM_END"
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP

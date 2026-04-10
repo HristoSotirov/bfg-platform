@@ -1,0 +1,436 @@
+<div class="h-screen flex flex-col overflow-hidden bg-white">
+  <app-header></app-header>
+
+  <div class="flex-1 flex flex-col overflow-hidden px-4 lg:px-8 py-4">
+
+    <div class="flex items-center gap-3 mb-4">
+      <a [routerLink]="['/regulations', 'qualification']" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900 break-words min-w-0">{{ scheme?.name || 'Квалификационна схема' }}</h1>
+    </div>
+
+    @if (loading) {
+      <div class="flex items-center justify-center flex-1 text-gray-500">Зареждане...</div>
+    } @else if (error) {
+      <div class="flex items-center justify-center flex-1 text-red-500">{{ error }}</div>
+    } @else if (scheme) {
+
+      <div class="border-b border-gray-200 mb-4">
+        <nav class="-mb-px flex gap-1">
+          <button type="button"
+            class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors border-bfg-blue text-bfg-blue">
+            Детайли
+          </button>
+        </nav>
+      </div>
+
+      <div class="flex-1 overflow-y-auto">
+        <div class="max-w-4xl space-y-4">
+
+          <!-- Scheme Info -->
+          <div>
+            @if (!isEditing) {
+              <div class="space-y-1">
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Ime:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ scheme.name || "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Брой коридори:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ scheme.laneCount ?? "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Статус:</span>
+                  <span class="text-sm font-medium break-all min-w-0" [class]="scheme.isActive ? 'text-green-600' : 'text-red-600'">
+                    {{ scheme.isActive ? "Активен" : "Неактивен" }}
+                  </span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Създадена на:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(scheme.createdAt) }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Променена на:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(scheme.modifiedAt) }}</span>
+                </div>
+              </div>
+            } @else {
+              <div class="space-y-1.5 max-w-sm">
+                <div>
+                  <label class="block text-xs text-gray-500 mb-0.5">Ime:</label>
+                  <input type="text" [(ngModel)]="editData.name"
+                    class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-0.5">Брой коридори:</label>
+                  <input type="number" [(ngModel)]="editData.laneCount" min="1"
+                    class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
+                  <app-searchable-select-dropdown
+                    [options]="statusOptions"
+                    [ngModel]="editData.isActive ? 'true' : 'false'"
+                    (ngModelChange)="editData.isActive = $event === 'true'"
+                    placeholder="Изберете статус...">
+                  </app-searchable-select-dropdown>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Tiers Section -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-medium text-gray-700">Диапазони</h4>
+              @if (canEdit && !isEditing) {
+                <app-button variant="outline" size="sm" text="Добави диапазон" (click)="openAddTierDialog()"></app-button>
+              }
+            </div>
+
+            <div class="border rounded-lg overflow-x-auto">
+              <table class="w-full min-w-[700px] divide-y divide-gray-200 text-sm">
+                <thead class="bg-gray-50">
+                  <tr>
+                    <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">Лодки</th>
+                    <th class="px-2 py-1.5 text-center text-xs font-medium text-gray-500 w-12">С</th>
+                    <th class="px-2 py-1.5 text-center text-xs font-medium text-gray-500 w-12">ПФ</th>
+                    <th class="px-2 py-1.5 text-center text-xs font-medium text-gray-500 w-12">ФБ</th>
+                    <th class="px-2 py-1.5 text-center text-xs font-medium text-gray-500 w-12">ФА</th>
+                    <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">Описание</th>
+                    @if (canEdit && !isEditing) {
+                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500"></th>
+                    }
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                  @if (loadingTiers) {
+                    <tr>
+                      <td colspan="7" class="px-2 py-3 text-center text-gray-500">Зареждане...</td>
+                    </tr>
+                  } @else {
+                    @for (group of tierGroups; track group.tier.uuid; let i = $index) {
+                      @if (editingTierId === group.tier.uuid) {
+                        <!-- Tier edit row -->
+                        <tr class="bg-blue-50">
+                          <td class="px-2 py-1.5 w-20">
+                            <span class="text-xs text-gray-500">{{ tierEditData.boatCountMin }}-{{ tierEditData.boatCountMax }}</span>
+                          </td>
+                          <td class="px-2 py-1.5 text-center w-12">
+                            <input type="number" [(ngModel)]="tierEditData.heatCount" min="0"
+                              class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                          </td>
+                          <td class="px-2 py-1.5 text-center w-12">
+                            <input type="number" [(ngModel)]="tierEditData.semiFinalCount" min="0"
+                              class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                          </td>
+                          <td class="px-2 py-1.5 text-center w-12">
+                            <input type="number" [(ngModel)]="tierEditData.finalBCount" min="0"
+                              class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                          </td>
+                          <td class="px-2 py-1.5 text-center w-12">
+                            <input type="number" [(ngModel)]="tierEditData.finalACount" min="1"
+                              class="w-12 px-1 py-0.5 border border-gray-300 rounded text-sm text-center" />
+                          </td>
+                          <td class="px-2 py-1.5"></td>
+                          <td class="px-2 py-1.5">
+                            <div class="flex gap-3">
+                              <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                [disabled]="!isTierEditValid || savingTierEdit" (click)="saveTierEdit()" title="Запази">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                              </button>
+                              <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                [disabled]="savingTierEdit" (click)="cancelEditingTier()" title="Отказ">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      } @else {
+                        <!-- Tier view row -->
+                        <tr class="cursor-pointer hover:bg-gray-50" (click)="toggleTierExpand(i)">
+                          <td class="px-2 py-1.5 font-medium w-20">{{ group.tier.boatCountMin }}-{{ group.tier.boatCountMax }}</td>
+                          <td class="px-2 py-1.5 text-center w-12">{{ group.tier.heatCount }}</td>
+                          <td class="px-2 py-1.5 text-center w-12">{{ group.tier.semiFinalCount }}</td>
+                          <td class="px-2 py-1.5 text-center w-12">{{ group.tier.finalBCount }}</td>
+                          <td class="px-2 py-1.5 text-center w-12">{{ group.tier.finalACount }}</td>
+                          <td class="px-2 py-1.5 text-xs text-bfg-blue">{{ getTierDescription(group) }}</td>
+                          @if (canEdit && !isEditing) {
+                            <td class="px-2 py-1.5" (click)="$event.stopPropagation()">
+                              <div class="flex gap-3">
+                                <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditingTier(group.tier)" title="Редактирай">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                </button>
+                                <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteTier(group.tier)" title="Изтрий">
+                                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                              </div>
+                            </td>
+                          }
+                        </tr>
+                      }
+
+                      <!-- Expanded progressions -->
+                      @if (group.expanded) {
+                        <tr>
+                          <td [attr.colspan]="canEdit && !isEditing ? 7 : 6" class="px-0 py-0 bg-blue-50">
+                            <div class="px-4 py-2">
+                              <div class="flex items-center justify-between mb-1">
+                                <span class="text-xs font-medium text-gray-600">Правила за класиране</span>
+                                @if (canEdit && !isEditing) {
+                                  <button type="button" class="text-bfg-blue hover:underline text-xs"
+                                    (click)="startAddingProgression(group.tier.uuid!)">
+                                    + Добави правило
+                                  </button>
+                                }
+                              </div>
+                              <table class="w-full text-xs">
+                                <thead>
+                                  <tr class="border-b border-blue-200">
+                                    <th class="px-2 py-1 text-left text-gray-500">От</th>
+                                    <th class="px-2 py-1 text-left text-gray-500">Към</th>
+                                    <th class="px-2 py-1 text-left text-gray-500">По позиция</th>
+                                    <th class="px-2 py-1 text-left text-gray-500">По време</th>
+                                    @if (canEdit && !isEditing) {
+                                      <th class="px-2 py-1 text-left text-gray-500"></th>
+                                    }
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  @for (prog of group.progressions; track prog.uuid) {
+                                    @if (editingProgressionId === prog.uuid) {
+                                      <tr class="bg-blue-100">
+                                        <td class="px-2 py-1">
+                                          <app-searchable-select-dropdown
+                                            [options]="getSourceOptions(group.tier)"
+                                            [(ngModel)]="progressionEditData.sourceEvent"
+                                            placeholder="От..." class="w-28">
+                                          </app-searchable-select-dropdown>
+                                        </td>
+                                        <td class="px-2 py-1">
+                                          <app-searchable-select-dropdown
+                                            [options]="getDestOptions(group.tier)"
+                                            [(ngModel)]="progressionEditData.destEvent"
+                                            placeholder="Към..." class="w-28">
+                                          </app-searchable-select-dropdown>
+                                        </td>
+                                        <td class="px-2 py-1">
+                                          <input type="number" [(ngModel)]="progressionEditData.qualifyByPosition" min="0"
+                                            class="w-14 px-1 py-0.5 border border-gray-300 rounded text-xs" />
+                                        </td>
+                                        <td class="px-2 py-1">
+                                          <input type="number" [(ngModel)]="progressionEditData.qualifyByTime" min="0"
+                                            class="w-14 px-1 py-0.5 border border-gray-300 rounded text-xs" />
+                                        </td>
+                                        <td class="px-2 py-1">
+                                          <div class="flex gap-3">
+                                            <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                              [disabled]="!isProgressionEditValid || savingProgression"
+                                              (click)="saveProgression(group.tier.uuid!)" title="Запази">
+                                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                            </button>
+                                            <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                              [disabled]="savingProgression"
+                                              (click)="cancelEditingProgression()" title="Отказ">
+                                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                            </button>
+                                          </div>
+                                        </td>
+                                      </tr>
+                                    } @else {
+                                      <tr class="border-b border-blue-100">
+                                        <td class="px-2 py-1">{{ getEventLabel(prog.sourceEvent) }}</td>
+                                        <td class="px-2 py-1">{{ getEventLabel(prog.destEvent) }}</td>
+                                        <td class="px-2 py-1">{{ prog.qualifyByPosition }}</td>
+                                        <td class="px-2 py-1">{{ prog.qualifyByTime }}</td>
+                                        @if (canEdit && !isEditing) {
+                                          <td class="px-2 py-1">
+                                            <div class="flex gap-3">
+                                              <button type="button" class="text-bfg-blue hover:text-bfg-blue/70"
+                                                (click)="startEditingProgression(prog)" title="Редактирай">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                              </button>
+                                              <button type="button" class="text-red-400 hover:text-red-600"
+                                                (click)="confirmDeleteProgression(prog)" title="Изтрий">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                              </button>
+                                            </div>
+                                          </td>
+                                        }
+                                      </tr>
+                                    }
+                                  } @empty {
+                                    <tr>
+                                      <td colspan="5" class="px-2 py-2 text-center text-gray-400">Няма правила</td>
+                                    </tr>
+                                  }
+
+                                  <!-- Add progression inline row -->
+                                  @if (addingProgressionForTierId === group.tier.uuid) {
+                                    <tr class="bg-green-50">
+                                      <td class="px-2 py-1">
+                                        <app-searchable-select-dropdown
+                                          [options]="getSourceOptions(group.tier)"
+                                          [(ngModel)]="addProgressionData.sourceEvent"
+                                          placeholder="От..." class="w-28">
+                                        </app-searchable-select-dropdown>
+                                      </td>
+                                      <td class="px-2 py-1">
+                                        <app-searchable-select-dropdown
+                                          [options]="getDestOptions(group.tier)"
+                                          [(ngModel)]="addProgressionData.destEvent"
+                                          placeholder="Към..." class="w-28">
+                                        </app-searchable-select-dropdown>
+                                      </td>
+                                      <td class="px-2 py-1">
+                                        <input type="number" [(ngModel)]="addProgressionData.qualifyByPosition" min="0"
+                                          placeholder="0" class="w-14 px-1 py-0.5 border border-gray-300 rounded text-xs" />
+                                      </td>
+                                      <td class="px-2 py-1">
+                                        <input type="number" [(ngModel)]="addProgressionData.qualifyByTime" min="0"
+                                          placeholder="0" class="w-14 px-1 py-0.5 border border-gray-300 rounded text-xs" />
+                                      </td>
+                                      <td class="px-2 py-1">
+                                        <div class="flex gap-3">
+                                          <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50"
+                                            [disabled]="!isAddProgressionValid || savingNewProgression"
+                                            (click)="saveNewProgression()" title="Запази">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                          </button>
+                                          <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50"
+                                            [disabled]="savingNewProgression"
+                                            (click)="cancelAddingProgression()" title="Отказ">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                                          </button>
+                                        </div>
+                                      </td>
+                                    </tr>
+                                  }
+                                </tbody>
+                              </table>
+                            </div>
+                          </td>
+                        </tr>
+                      }
+                    } @empty {
+                      <tr>
+                        <td colspan="7" class="px-2 py-3 text-center text-gray-500">Няма диапазони</td>
+                      </tr>
+                    }
+                  }
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="flex flex-col gap-2">
+            @if (saveError) {
+              <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                <p class="text-sm text-red-700">{{ saveError }}</p>
+                <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="saveError = null">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            }
+            <div class="flex items-center gap-2">
+              @if (!isEditing) {
+                @if (canEdit) {
+                  <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
+                }
+              } @else {
+                <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
+                <app-button variant="primary" size="md" text="Запази" [disabled]="saving" (click)="saveScheme()"></app-button>
+              }
+            </div>
+          </div>
+
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Add Tier Dialog -->
+<app-dialog
+  [isOpen]="isAddTierDialogOpen"
+  title="Добавяне на диапазон"
+  (closed)="closeAddTierDialog()"
+>
+  <div class="space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Мин. лодки <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.boatCountMin" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Макс. лодки <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.boatCountMax" min="1"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Серии <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.heatCount" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Полуфинали <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.semiFinalCount" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Финал Б <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.finalBCount" min="0"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Финал А <span class="text-red-500">*</span>:</label>
+      <input type="number" [(ngModel)]="addTierData.finalACount" min="1"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+    </div>
+
+    <div class="flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200">
+      @if (addTierError) {
+        <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+          <p class="text-sm text-red-700">{{ addTierError }}</p>
+          <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="addTierError = null">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      }
+      <div class="flex justify-center gap-3">
+        <app-button variant="outline" size="md" text="Затвори" [disabled]="savingTier" (click)="closeAddTierDialog()"></app-button>
+        <app-button variant="primary" size="md" text="Запази" [disabled]="!isAddTierValid || savingTier" (click)="saveTier()"></app-button>
+      </div>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Delete Tier Confirm -->
+<app-dialog [isOpen]="showDeleteTierConfirm" title="Потвърждение за изтриване" (closed)="closeDeleteTierConfirm()" size="md">
+  <div class="py-4">
+    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете този диапазон и всички негови правила?</p>
+    <div class="flex gap-3 justify-center">
+      <app-button variant="outline" size="md" text="Отказ" (click)="closeDeleteTierConfirm()"></app-button>
+      <app-button variant="danger" size="md" text="Изтрий" (click)="deleteTier()"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Delete Progression Confirm -->
+<app-dialog [isOpen]="showDeleteProgressionConfirm" title="Потвърждение за изтриване" (closed)="closeDeleteProgressionConfirm()" size="md">
+  <div class="py-4">
+    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете това правило за класиране?</p>
+    <div class="flex gap-3 justify-center">
+      <app-button variant="outline" size="md" text="Отказ" (click)="closeDeleteProgressionConfirm()"></app-button>
+      <app-button variant="danger" size="md" text="Изтрий" (click)="deleteProgression()"></app-button>
+    </div>
+  </div>
+</app-dialog>

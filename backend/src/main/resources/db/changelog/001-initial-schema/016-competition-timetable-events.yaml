@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: 018-competition-timetable-events
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_timetable_events
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: competition_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: discipline_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: qualification_event_type
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "H, SF, FB, FA"
+              - column:
+                  name: scheduled_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  remarks: "Full datetime of the event"
+              - column:
+                  name: event_status
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED"
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: competition_timetable_events
+            columnNames: competition_id, discipline_id, qualification_event_type, scheduled_at
+            constraintName: uq_timetable_event_comp_disc_type_time
+        - addForeignKeyConstraint:
+            baseTableName: competition_timetable_events
+            baseColumnNames: competition_id
+            referencedTableName: competitions
+            referencedColumnNames: id
+            constraintName: fk_timetable_event_competition
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competition_timetable_events
+            baseColumnNames: discipline_id
+            referencedTableName: discipline_definitions
+            referencedColumnNames: id
+            constraintName: fk_timetable_event_discipline
+            onDelete: RESTRICT
