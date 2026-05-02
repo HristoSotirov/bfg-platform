@@ -304,34 +304,14 @@
   </div>
 </app-dialog>
 
-<app-dialog
+<app-delete-confirm-dialog
   [isOpen]="showDeleteConfirmDialog"
-  title="Потвърждение за изтриване"
+  [itemName]="discipline?.name || ''"
+  [error]="deleteError"
   (closed)="closeDeleteConfirm()"
-  size="md"
->
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">
-      Сигурни ли сте, че искате да изтриете тази дисциплина?
-    </p>
-    <div class="flex gap-3 justify-center">
-      <app-button
-        variant="outline"
-        size="md"
-        text="Отказ"
-        (click)="closeDeleteConfirm()"
-      >
-      </app-button>
-      <app-button
-        variant="primary"
-        size="md"
-        text="Изтрий"
-        (click)="deleteDiscipline()"
-      >
-      </app-button>
-    </div>
-  </div>
-</app-dialog>
+  (confirmed)="deleteDiscipline()"
+  (errorDismissed)="deleteError = null"
+/>
 
 <!-- Competition Group Preview Dialog (read-only) -->
 <app-competition-group-details-dialog

@@ -39,18 +39,21 @@
     @if (step === 'mapping') {
       <div class="space-y-4">
         <h4 class="font-medium text-gray-900">Съпоставка на колони</h4>
-        <p class="text-sm text-gray-500">Изберете какво представлява всяка колона от файла.</p>
+        <p class="text-sm text-gray-500">Изберете от коя колона на файла да се вземе всяко поле.</p>
 
         <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
-          @for (mapping of columnMappings; track mapping.excelColumn) {
+          @for (field of fieldMappings; track field.dataField) {
             <div class="flex items-center gap-3">
-              <span class="w-1/2 text-sm font-medium text-gray-700 truncate">{{ mapping.excelColumn }}</span>
+              <span class="w-1/2 text-sm font-medium text-gray-700 truncate">
+                {{ field.label }}
+                @if (field.required) { <span class="text-red-500">*</span> }
+              </span>
               <div class="w-1/2">
                 <app-searchable-select-dropdown
-                  [options]="getFieldOptionsForMapping(mapping)"
+                  [options]="getExcelOptionsForField(field)"
                   [placeholder]="'Не импортирай'"
-                  [ngModel]="mapping.dataField || null"
-                  (ngModelChange)="onMappingFieldChange(mapping, $event)">
+                  [ngModel]="field.excelColumn || null"
+                  (ngModelChange)="onFieldExcelColumnChange(field, $event)">
                 </app-searchable-select-dropdown>
               </div>
             </div>

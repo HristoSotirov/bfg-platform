@@ -14,20 +14,21 @@ import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   CompetitionGroupDefinitionDto,
   CompetitionGroupDefinitionRequest,
   CompetitionGroupDefinitionsService,
   TransferRounding,
 } from '../../../../core/services/api';
-import { takeUntil, Subject, catchError, throwError, Observable, map } from 'rxjs';
+import { takeUntil, Subject, catchError, throwError, Observable, map, of } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-competition-group-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DeleteConfirmDialogComponent],
   templateUrl: './competition-group-details-dialog.component.html',
   styleUrl: './competition-group-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,6 +53,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   error: string | null = null;
   showEditingWarningDialog = false;
   showDeleteConfirmDialog = false;
+  deleteError: string | null = null;
   showTransferSchemaDialog = false;
 
   get transferSchemaRows(): { crewSize: number; transferCount: number }[] {
@@ -357,15 +359,14 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
 
   closeDeleteConfirm(): void {
     this.showDeleteConfirmDialog = false;
+    this.deleteError = null;
     this.cdr.markForCheck();
   }
 
   deleteGroup(): void {
     if (!this.group?.uuid) return;
 
-    this.deleting = true;
-    this.error = null;
-    this.showDeleteConfirmDialog = false;
+    this.deleteError = null;
     this.cdr.markForCheck();
 
     this.competitionGroupDefinitionsService
@@ -382,20 +383,19 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
           } else if (err?.error?.message) {
             errorMessage = err.error.message;
           }
-          return throwError(() => ({ message: errorMessage }));
+          this.deleteError = errorMessage;
+          this.cdr.markForCheck();
+          return of(null);
         }),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: () => {
-          this.deleting = false;
-          this.deleted.emit();
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          this.deleting = false;
-          this.error = err?.message || 'Грешка при изтриване';
-          this.cdr.markForCheck();
+        next: (result) => {
+          if (result !== null) {
+            this.closeDeleteConfirm();
+            this.deleted.emit();
+            this.cdr.markForCheck();
+          }
         },
       });
   }

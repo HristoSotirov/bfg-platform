@@ -42,7 +42,6 @@ export * from './competitionFinalStandingDto';
 export * from './competitionGroupDefinitionDto';
 export * from './competitionGroupDefinitionRequest';
 export * from './competitionParticipationDto';
-export * from './competitionStatus';
 export * from './competitionTimetableEventDto';
 export * from './competitionTimetableEventRequest';
 export * from './competitionType';

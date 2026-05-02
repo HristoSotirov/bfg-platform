@@ -18,6 +18,7 @@ import { CompetitionGroupDetailsDialogComponent } from '../../../competition-gro
 import { DisciplinesTableComponent } from '../../../disciplines/components/disciplines-table/disciplines-table.component';
 import { DisciplineDetailsDialogComponent } from '../../../disciplines/components/discipline-details-dialog/discipline-details-dialog.component';
 import { AddDisciplineDialogComponent } from '../../../disciplines/components/add-discipline-dialog/add-discipline-dialog.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   CompetitionGroupDefinitionsService,
   CompetitionGroupDefinitionDto,
@@ -49,6 +50,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
     DisciplinesTableComponent,
     DisciplineDetailsDialogComponent,
     AddDisciplineDialogComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './competition-group-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -73,6 +75,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   deleting = false;
   saveError: string | null = null;
   showDeleteConfirmDialog = false;
+  deleteError: string | null = null;
   showEditingWarningDialog = false;
 
   groupLookup: Record<string, string> = {};
@@ -356,6 +359,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
 
   startEditingDiscipline(d: DisciplineDefinitionDto): void {
     this.editingDisciplineId = d.uuid!;
+    this.disciplineSaveError = null;
     this.disciplineEditData = {
       name: d.name || '',
       shortName: d.shortName || '',
@@ -372,12 +376,16 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
 
   cancelEditingDiscipline(): void {
     this.editingDisciplineId = null;
+    this.disciplineSaveError = null;
     this.cdr.markForCheck();
   }
+
+  disciplineSaveError: string | null = null;
 
   saveDiscipline(): void {
     if (!this.editingDisciplineId) return;
     this.savingDiscipline = true;
+    this.disciplineSaveError = null;
     this.cdr.markForCheck();
     const request: DisciplineDefinitionRequest = {
       name: this.disciplineEditData.name,
@@ -393,11 +401,20 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     };
     this.disciplineDefinitionsService
       .updateDisciplineDefinitionByUuid(this.editingDisciplineId, request)
-      .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
+      .pipe(
+        catchError((err) => {
+          this.disciplineSaveError = err?.error?.message || 'Грешка при запазване';
+          this.savingDiscipline = false;
+          this.cdr.markForCheck();
+          return of(null);
+        }),
+        takeUntil(this.destroy$),
+      )
       .subscribe((updated) => {
         this.savingDiscipline = false;
-        this.editingDisciplineId = null;
         if (updated) {
+          this.editingDisciplineId = null;
+          this.disciplineSaveError = null;
           const idx = this.disciplines.findIndex(d => d.uuid === (updated as any).uuid);
           if (idx !== -1) this.disciplines = [...this.disciplines.slice(0, idx), updated as DisciplineDefinitionDto, ...this.disciplines.slice(idx + 1)];
         }
@@ -414,12 +431,14 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   cancelDeleteDiscipline(): void {
     this.disciplineToDelete = null;
     this.showDeleteDisciplineConfirm = false;
+    this.disciplineDeleteError = null;
     this.cdr.markForCheck();
   }
 
   executeDeleteDiscipline(): void {
     if (!this.disciplineToDelete?.uuid) return;
     const uuid = this.disciplineToDelete.uuid;
+    this.disciplineDeleteError = null;
     this.disciplineDefinitionsService
       .deleteDisciplineDefinitionByUuid(uuid)
       .pipe(takeUntil(this.destroy$))
@@ -433,8 +452,6 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.disciplineDeleteError = err?.error?.message || 'Грешка при изтриване на дисциплина';
-          this.disciplineToDelete = null;
-          this.showDeleteDisciplineConfirm = false;
           this.cdr.markForCheck();
         },
       });
@@ -624,13 +641,19 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
 
   confirmDelete(): void {
     this.showDeleteConfirmDialog = true;
+    this.deleteError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirmDialog = false;
+    this.deleteError = null;
     this.cdr.markForCheck();
   }
 
   deleteGroup(): void {
     if (!this.group?.uuid) return;
     this.deleting = true;
-    this.showDeleteConfirmDialog = false;
     this.cdr.markForCheck();
 
     this.competitionGroupDefinitionsService
@@ -649,7 +672,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.deleting = false;
-          this.saveError = err?.message || 'Грешка при изтриване';
+          this.deleteError = err?.message || 'Грешка при изтриване';
           this.cdr.markForCheck();
         },
       });

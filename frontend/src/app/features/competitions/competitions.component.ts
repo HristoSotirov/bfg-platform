@@ -78,8 +78,6 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
   columns: CompetitionColumnConfig[] = [
     { id: 'shortName', label: 'Кратко име', visible: true },
     { id: 'name', label: 'Име', visible: true },
-    { id: 'type', label: 'Тип', visible: true },
-    { id: 'competitionType', label: 'Вид', visible: true },
     { id: 'status', label: 'Статус', visible: true },
     { id: 'startDate', label: 'Начална дата', visible: true },
     { id: 'endDate', label: 'Крайна дата', visible: false },
@@ -88,9 +86,7 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
     { id: 'modifiedAt', label: 'Променен на', visible: false },
   ];
 
-  filterConfigs: CompetitionFilterConfig[] = [
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  filterConfigs: CompetitionFilterConfig[] = [];
 
   isAddDialogOpen = false;
   isSettingsDialogOpen = false;
@@ -140,17 +136,6 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [];
-
-    if (this.filters.statuses.length > 0 && this.isFilterVisible('status')) {
-      if (this.filters.statuses.length === 1) {
-        filterParts.push(`status eq '${this.filters.statuses[0]}'`);
-      } else {
-        const statusConditions = this.filters.statuses
-          .map((s) => `status eq '${s}'`)
-          .join(' or ');
-        filterParts.push(`(${statusConditions})`);
-      }
-    }
 
     const filterString =
       filterParts.length > 0 ? filterParts.join(' and ') : undefined;

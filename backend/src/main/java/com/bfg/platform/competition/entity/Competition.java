@@ -1,6 +1,5 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionStatus;
 import com.bfg.platform.gen.model.CompetitionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -62,10 +61,8 @@ public class Competition {
     @Column(name = "technical_meeting_at")
     private Instant technicalMeetingAt;
 
-    @Column(name = "status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    @Builder.Default
-    private CompetitionStatus status = CompetitionStatus.PLANNED;
+    @Column(name = "awarding_ceremony_at")
+    private Instant awardingCeremonyAt;
 
     @Column(name = "scoring_scheme_id", nullable = false)
     private UUID scoringSchemeId;

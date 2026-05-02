@@ -7,13 +7,14 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
 import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   UserDto,
   UsersService,
@@ -39,6 +40,7 @@ import { ScopeVisibilityService } from '../../../../core/services/scope-visibili
     DialogComponent,
     SearchableSelectDropdownComponent,
     DatePickerComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './user-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -77,6 +79,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private usersService: UsersService,
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
@@ -284,5 +287,40 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
       [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
+  }
+
+  // ===== DELETE USER =====
+  showDeleteConfirm = false;
+  deleteError: string | null = null;
+  deletingUser = false;
+
+  confirmDelete(): void {
+    this.showDeleteConfirm = true;
+    this.deleteError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm = false;
+    this.deleteError = null;
+    this.cdr.markForCheck();
+  }
+
+  deleteUser(): void {
+    if (!this.userData?.uuid) return;
+    this.deletingUser = true;
+    this.cdr.markForCheck();
+    this.usersService.deleteUserByUuid(this.userData.uuid)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/users']);
+        },
+        error: (err) => {
+          this.deletingUser = false;
+          this.deleteError = err?.error?.message || 'Грешка при изтриване на потребител';
+          this.cdr.markForCheck();
+        },
+      });
   }
 }

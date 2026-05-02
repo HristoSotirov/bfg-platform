@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, forkJoin } from 'rxjs';
 import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -22,6 +22,7 @@ import {
   AthletePhotoViewDialogComponent,
   AthletePhotoViewInfo,
 } from '../../components/athlete-photo-view-dialog/athlete-photo-view-dialog.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   AccreditationDto,
   AthletePhotoDto,
@@ -68,6 +69,7 @@ interface AccreditationHistoryItem {
     DatePickerComponent,
     PhotoCropDialogComponent,
     AthletePhotoViewDialogComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './accreditation-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -153,6 +155,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private athletesService: AthletesService,
     private accreditationsService: AccreditationsService,
     private athletePhotosService: AthletePhotosService,
@@ -727,5 +730,40 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   formatDateForInput(dateStr: string | undefined): string {
     if (!dateStr) return '';
     try { return new Date(dateStr).toISOString().split('T')[0]; } catch { return ''; }
+  }
+
+  // ===== DELETE MAIN ACCREDITATION =====
+  showDeleteMainConfirm = false;
+  deleteMainError: string | null = null;
+  deletingMain = false;
+
+  confirmDeleteMain(): void {
+    this.showDeleteMainConfirm = true;
+    this.deleteMainError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDeleteMain(): void {
+    this.showDeleteMainConfirm = false;
+    this.deleteMainError = null;
+    this.cdr.markForCheck();
+  }
+
+  deleteMain(): void {
+    if (!this.accreditation?.uuid) return;
+    this.deletingMain = true;
+    this.cdr.markForCheck();
+    this.accreditationsService.deleteAccreditation(this.accreditation.uuid)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/accreditations']);
+        },
+        error: (err) => {
+          this.deletingMain = false;
+          this.deleteMainError = err?.error?.message || 'Грешка при изтриване на картотека';
+          this.cdr.markForCheck();
+        },
+      });
   }
 }

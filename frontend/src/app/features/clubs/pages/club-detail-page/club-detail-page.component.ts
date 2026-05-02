@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import {
   Subject,
   takeUntil,
@@ -28,6 +28,7 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { PhotoCropDialogComponent } from '../../../accreditations/components/photo-crop-dialog/photo-crop-dialog.component';
 import { ClubLogoViewDialogComponent, ClubLogoViewInfo } from '../../components/club-logo-view-dialog/club-logo-view-dialog.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   ClubDto,
   ClubCoachDto,
@@ -57,6 +58,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
     SearchableSelectDropdownComponent,
     PhotoCropDialogComponent,
     ClubLogoViewDialogComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './club-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -154,6 +156,7 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
     private usersService: UsersService,
@@ -650,5 +653,40 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
     } catch {
       return dateStr;
     }
+  }
+
+  // ===== DELETE CLUB =====
+  showDeleteConfirm = false;
+  deleteError: string | null = null;
+  deletingClub = false;
+
+  confirmDelete(): void {
+    this.showDeleteConfirm = true;
+    this.deleteError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirm = false;
+    this.deleteError = null;
+    this.cdr.markForCheck();
+  }
+
+  deleteClub(): void {
+    if (!this.club?.uuid) return;
+    this.deletingClub = true;
+    this.cdr.markForCheck();
+    this.clubsService.deleteClubByUuid(this.club.uuid)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/clubs']);
+        },
+        error: (err) => {
+          this.deletingClub = false;
+          this.deleteError = err?.error?.message || 'Грешка при изтриване на клуб';
+          this.cdr.markForCheck();
+        },
+      });
   }
 }

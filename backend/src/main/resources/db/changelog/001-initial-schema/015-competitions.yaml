@@ -53,11 +53,9 @@ databaseChangeLog:
                   type: TIMESTAMPTZ
                   remarks: "Only for real competitions (is_template=false). Technical meeting datetime."
               - column:
-                  name: status
-                  type: VARCHAR(20)
-                  constraints:
-                    nullable: false
-                  remarks: "PLANNED, DRAFT, REGISTRATION_OPEN, REGISTRATION_CLOSED, IN_PROGRESS, COMPLETED, CANCELLED. Only for real competitions."
+                  name: awarding_ceremony_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Must be on the endDate."
               - column:
                   name: scoring_scheme_id
                   type: UUID

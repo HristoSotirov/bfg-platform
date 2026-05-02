@@ -25,17 +25,6 @@ QualificationEventType:
     - FB
     - FA
 
-CompetitionStatus:
-  type: string
-  description: Status of a competition
-  enum:
-    - PLANNED
-    - REGISTRATION_OPEN
-    - REGISTRATION_CLOSED
-    - IN_PROGRESS
-    - COMPLETED
-    - CANCELLED
-
 CompetitionEventStatus:
   type: string
   description: Status of a competition event
@@ -408,8 +397,10 @@ CompetitionDto:
       type: string
       format: date-time
       description: "Required when isTemplate is false."
-    status:
-      $ref: "#/CompetitionStatus"
+    awardingCeremonyAt:
+      type: string
+      format: date-time
+      description: "Required when isTemplate is false. Must be on the endDate."
     isTemplate:
       type: boolean
     scoringSchemeId:
@@ -1036,6 +1027,10 @@ CompetitionCreateRequest:
       type: string
       format: date-time
       description: "Required when isTemplate is false."
+    awardingCeremonyAt:
+      type: string
+      format: date-time
+      description: "Required when isTemplate is false. Must be on the endDate."
     scoringSchemeId:
       type: string
       format: uuid
@@ -1064,7 +1059,6 @@ CompetitionUpdateRequest:
     - startDate
     - endDate
     - competitionType
-    - status
   properties:
     shortName:
       type: string
@@ -1102,6 +1096,10 @@ CompetitionUpdateRequest:
       type: string
       format: date-time
       description: "Required when isTemplate is false."
+    awardingCeremonyAt:
+      type: string
+      format: date-time
+      description: "Required when isTemplate is false. Must be on the endDate."
     scoringSchemeId:
       type: string
       format: uuid
@@ -1114,10 +1112,6 @@ CompetitionUpdateRequest:
       allOf:
         - $ref: "#/CompetitionType"
       x-field-extra-annotation: '@NotNull(message = "Competition type is required")'
-    status:
-      allOf:
-        - $ref: "#/CompetitionStatus"
-      x-field-extra-annotation: '@NotNull(message = "Status is required")'
 
 CompetitionTimetableEventRequest:
   type: object

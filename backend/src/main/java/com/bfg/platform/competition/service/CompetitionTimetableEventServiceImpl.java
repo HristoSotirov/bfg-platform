@@ -201,6 +201,10 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
                 throw new ValidationException("scheduledAt must be within the competition period ("
                         + startDate + " to " + endDate + ")");
             }
+            Instant awardingCeremony = competition.getAwardingCeremonyAt();
+            if (awardingCeremony != null && !at.isBefore(awardingCeremony)) {
+                throw new ValidationException("scheduledAt must be before the awarding ceremony");
+            }
         }
     }
 

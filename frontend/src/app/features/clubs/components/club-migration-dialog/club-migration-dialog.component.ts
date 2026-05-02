@@ -13,18 +13,17 @@ const VALID_PREFIX_REGEX = /^\d{2}$/;
 const BATCH_SIZE = 100;
 const MAX_RETRIES = 3;
 
-interface ColumnMapping {
-  excelColumn: string;
+interface FieldMapping {
   dataField: string;
+  label: string;
+  excelColumn: string;
+  required: boolean;
 }
 
 interface MigrationResult {
   totalCreated: number;
   totalSkipped: number;
-  failedChunkCount: number;
-  totalChunkCount: number;
   skippedItems: Array<{ club: ClubBatchCreateRequestItem; reason: string }>;
-  failedChunkErrors: Array<{ chunkIndex: number; message: string }>;
 }
 
 @Component({
@@ -48,12 +47,11 @@ export class ClubMigrationDialogComponent implements OnChanges {
   excelColumns: string[] = [];
   previewData: any[] = [];
 
-  columnMappings: ColumnMapping[] = [];
+  fieldMappings: FieldMapping[] = [];
 
   parsedClubs: ClubBatchCreateRequestItem[] = [];
 
   readonly dataFields = [
-    { value: '', label: 'Не импортирай' },
     { value: 'name', label: 'Пълно име' },
     { value: 'shortName', label: 'Кратко име' },
     { value: 'cardPrefix', label: 'Номер (2 цифри)' },
@@ -61,12 +59,17 @@ export class ClubMigrationDialogComponent implements OnChanges {
     { value: 'adminEmail', label: 'Имейл на администратор' }
   ];
 
-  getFieldOptionsForMapping(mapping: ColumnMapping): SearchableSelectOption[] {
-    return this.dataFields.map(f => ({
-      value: f.value,
-      label: f.label,
-      disabled: f.value !== '' && this.columnMappings.some(m => m !== mapping && m.dataField === f.value)
-    }));
+  private readonly requiredFields = ['name', 'shortName', 'cardPrefix', 'clubEmail', 'adminEmail'];
+
+  getExcelOptionsForField(field: FieldMapping): SearchableSelectOption[] {
+    return [
+      { value: '', label: 'Не импортирай' },
+      ...this.excelColumns.map(col => ({
+        value: col,
+        label: col,
+        disabled: this.fieldMappings.some(f => f !== field && f.excelColumn === col),
+      })),
+    ];
   }
 
   step: 'upload' | 'mapping' | 'preview' | 'results' = 'upload';
@@ -98,7 +101,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
     this.fileName = '';
     this.excelColumns = [];
     this.previewData = [];
-    this.columnMappings = [];
+    this.fieldMappings = [];
     this.parsedClubs = [];
     this.step = 'upload';
     this.migrating = false;
@@ -137,9 +140,11 @@ export class ClubMigrationDialogComponent implements OnChanges {
             return obj;
           });
 
-          this.columnMappings = this.excelColumns.map(col => ({
-            excelColumn: col,
-            dataField: ''
+          this.fieldMappings = this.dataFields.map(f => ({
+            dataField: f.value,
+            label: f.label,
+            excelColumn: '',
+            required: this.requiredFields.includes(f.value),
           }));
 
           this.step = 'mapping';
@@ -155,11 +160,13 @@ export class ClubMigrationDialogComponent implements OnChanges {
 
   private rowToClub(row: any[]): ClubBatchCreateRequestItem | null {
     const club: Partial<ClubBatchCreateRequestItem> = {};
-    this.columnMappings.forEach((mapping, idx) => {
-      if (mapping.dataField) {
-        (club as Record<string, string>)[mapping.dataField] = String(row[idx] ?? '').trim();
+    for (const field of this.fieldMappings) {
+      if (!field.excelColumn) continue;
+      const colIdx = this.excelColumns.indexOf(field.excelColumn);
+      if (colIdx >= 0) {
+        (club as Record<string, string>)[field.dataField] = String(row[colIdx] ?? '').trim();
       }
-    });
+    }
     const prefix = club.cardPrefix ?? '';
     if (!VALID_PREFIX_REGEX.test(prefix)) {
       return null;
@@ -208,18 +215,15 @@ export class ClubMigrationDialogComponent implements OnChanges {
     this.cdr.markForCheck();
   }
 
-  onMappingFieldChange(mapping: ColumnMapping, value: string | null): void {
-    mapping.dataField = value ?? '';
+  onFieldExcelColumnChange(field: FieldMapping, value: string | null): void {
+    field.excelColumn = value ?? '';
     this.cdr.markForCheck();
   }
 
   get hasRequiredMappings(): boolean {
-    const hasShortName = this.columnMappings.some(m => m.dataField === 'shortName');
-    const hasName = this.columnMappings.some(m => m.dataField === 'name');
-    const hasCardPrefix = this.columnMappings.some(m => m.dataField === 'cardPrefix');
-    const hasClubEmail = this.columnMappings.some(m => m.dataField === 'clubEmail');
-    const hasAdminEmail = this.columnMappings.some(m => m.dataField === 'adminEmail');
-    return hasShortName && hasName && hasCardPrefix && hasClubEmail && hasAdminEmail;
+    return this.fieldMappings
+      .filter(f => f.required)
+      .every(f => f.excelColumn !== '');
   }
 
   private migrateChunkWithRetry(chunk: ClubBatchCreateRequestItem[]) {
@@ -277,7 +281,6 @@ export class ClubMigrationDialogComponent implements OnChanges {
           let totalCreated = 0;
           let totalSkipped = 0;
           const skippedItems: Array<{ club: ClubBatchCreateRequestItem; reason: string }> = [];
-          const failedChunkErrors: Array<{ chunkIndex: number; message: string }> = [];
 
           results.forEach((r, index) => {
             if (r.success) {
@@ -291,17 +294,17 @@ export class ClubMigrationDialogComponent implements OnChanges {
               }
             } else {
               const message = this.getErrorMessage(r.error);
-              failedChunkErrors.push({ chunkIndex: index + 1, message });
+              for (const club of chunks[index]) {
+                skippedItems.push({ club, reason: message });
+              }
+              totalSkipped += chunks[index].length;
             }
           });
 
           this.migrationResult = {
             totalCreated,
             totalSkipped,
-            failedChunkCount: failedChunkErrors.length,
-            totalChunkCount: totalChunks,
             skippedItems,
-            failedChunkErrors
           };
           this.step = 'results';
           this.cdr.markForCheck();
@@ -345,4 +348,3 @@ export class ClubMigrationDialogComponent implements OnChanges {
     this.closed.emit();
   }
 }
-

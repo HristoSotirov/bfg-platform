@@ -22,6 +22,7 @@ import {
   AthletePhotoViewDialogComponent,
   AthletePhotoViewInfo,
 } from '../../components/athlete-photo-view-dialog/athlete-photo-view-dialog.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   AccreditationDto,
   AthleteDto,
@@ -71,6 +72,7 @@ interface AccreditationHistoryItem {
     DatePickerComponent,
     PhotoCropDialogComponent,
     AthletePhotoViewDialogComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './athlete-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -125,6 +127,8 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
   showDeleteAccreditationConfirm = false;
   showDeleteAthleteConfirm = false;
   deleting = false;
+  deleteAthleteError: string | null = null;
+  deleteAccreditationError: string | null = null;
 
   private statusLabels: Record<string, string> = {
     [AccreditationStatus.Active]: 'Активна',
@@ -636,15 +640,23 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
     });
   }
 
+  getDeletingAccreditationName(): string {
+    if (!this.deletingAccreditationUuid) return '';
+    const acc = this.fullHistory.find((a) => a.uuid === this.deletingAccreditationUuid);
+    return acc?.accreditationNumber ? 'картотека ' + acc.accreditationNumber : '';
+  }
+
   confirmDeleteAccreditation(uuid: string): void {
     this.deletingAccreditationUuid = uuid;
     this.showDeleteAccreditationConfirm = true;
+    this.deleteAccreditationError = null;
     this.cdr.markForCheck();
   }
 
   cancelDeleteAccreditation(): void {
     this.deletingAccreditationUuid = null;
     this.showDeleteAccreditationConfirm = false;
+    this.deleteAccreditationError = null;
     this.cdr.markForCheck();
   }
 
@@ -657,14 +669,13 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
         this.deleting = false;
         this.showDeleteAccreditationConfirm = false;
         this.deletingAccreditationUuid = null;
+        this.deleteAccreditationError = null;
         this.loadAccreditationHistory();
         this.cdr.markForCheck();
       },
       error: (err: any) => {
         this.deleting = false;
-        this.error = err?.error?.message || 'Грешка при изтриване на картотека';
-        this.showDeleteAccreditationConfirm = false;
-        this.deletingAccreditationUuid = null;
+        this.deleteAccreditationError = err?.error?.message || 'Грешка при изтриване на картотека';
         this.cdr.markForCheck();
       },
     });
@@ -672,11 +683,13 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
 
   confirmDeleteAthlete(): void {
     this.showDeleteAthleteConfirm = true;
+    this.deleteAthleteError = null;
     this.cdr.markForCheck();
   }
 
   cancelDeleteAthlete(): void {
     this.showDeleteAthleteConfirm = false;
+    this.deleteAthleteError = null;
     this.cdr.markForCheck();
   }
 
@@ -691,8 +704,7 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         this.deleting = false;
-        this.error = err?.error?.message || 'Грешка при изтриване на атлет';
-        this.showDeleteAthleteConfirm = false;
+        this.deleteAthleteError = err?.error?.message || 'Грешка при изтриване на атлет';
         this.cdr.markForCheck();
       },
     });

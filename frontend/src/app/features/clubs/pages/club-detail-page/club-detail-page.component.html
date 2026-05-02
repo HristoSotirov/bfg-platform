@@ -135,8 +135,9 @@
                   }
 
                   @if (canEdit) {
-                    <div class="pt-2">
+                    <div class="flex items-center gap-2 pt-2">
                       <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
+                      <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDelete()"></app-button>
                     </div>
                   }
 
@@ -324,3 +325,14 @@
     </div>
   </div>
 </app-dialog>
+
+<!-- Delete club confirmation -->
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteConfirm"
+  [itemName]="club?.name || ''"
+  [deleting]="deletingClub"
+  [error]="deleteError"
+  (closed)="cancelDelete()"
+  (confirmed)="deleteClub()"
+  (errorDismissed)="deleteError = null"
+/>

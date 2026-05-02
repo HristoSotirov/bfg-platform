@@ -424,31 +424,23 @@
 </app-dialog>
 
 <!-- Delete accreditation confirm -->
-<app-dialog
+<app-delete-confirm-dialog
   [isOpen]="showDeleteAccreditationConfirm"
-  title="Изтриване на картотека"
+  [itemName]="getDeletingAccreditationName()"
+  [deleting]="deleting"
+  [error]="deleteAccreditationError"
   (closed)="cancelDeleteAccreditation()"
->
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете тази картотека? Действието е необратимо.</p>
-    <div class="flex justify-center gap-3">
-      <app-button variant="outline" size="md" text="Отказ" [disabled]="deleting" (click)="cancelDeleteAccreditation()"></app-button>
-      <app-button variant="danger" size="md" text="Изтрий" [disabled]="deleting" (click)="executeDeleteAccreditation()"></app-button>
-    </div>
-  </div>
-</app-dialog>
+  (confirmed)="executeDeleteAccreditation()"
+  (errorDismissed)="deleteAccreditationError = null"
+/>
 
 <!-- Delete athlete confirm -->
-<app-dialog
+<app-delete-confirm-dialog
   [isOpen]="showDeleteAthleteConfirm"
-  title="Изтриване на атлет"
+  [itemName]="fullName"
+  [deleting]="deleting"
+  [error]="deleteAthleteError"
   (closed)="cancelDeleteAthlete()"
->
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете атлет <span class="font-medium">{{ fullName }}</span>? Действието е необратимо.</p>
-    <div class="flex justify-center gap-3">
-      <app-button variant="outline" size="md" text="Отказ" [disabled]="deleting" (click)="cancelDeleteAthlete()"></app-button>
-      <app-button variant="danger" size="md" text="Изтрий" [disabled]="deleting" (click)="executeDeleteAthlete()"></app-button>
-    </div>
-  </div>
-</app-dialog>
+  (confirmed)="executeDeleteAthlete()"
+  (errorDismissed)="deleteAthleteError = null"
+/>

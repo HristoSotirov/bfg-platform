@@ -43,15 +43,7 @@ export class CompetitionsFiltersComponent implements OnInit {
   searchValue = '';
   filtersExpanded = false;
 
-  readonly statusOptions: DropdownOption[] = [
-    { value: 'DRAFT', label: 'Чернова' },
-    { value: 'PLANNED', label: 'Планирано' },
-    { value: 'REGISTRATION_OPEN', label: 'Регистрация' },
-    { value: 'REGISTRATION_CLOSED', label: 'Затворена регистрация' },
-    { value: 'IN_PROGRESS', label: 'В ход' },
-    { value: 'COMPLETED', label: 'Приключило' },
-    { value: 'CANCELLED', label: 'Отменено' },
-  ];
+  readonly statusOptions: DropdownOption[] = [];
 
   ngOnInit(): void {
     this.searchValue = this.filters.search || '';
@@ -63,7 +55,7 @@ export class CompetitionsFiltersComponent implements OnInit {
   }
 
   hasVisibleFilters(): boolean {
-    return this.isFilterVisible('status');
+    return false;
   }
 
   onSearchChange(value: string): void {

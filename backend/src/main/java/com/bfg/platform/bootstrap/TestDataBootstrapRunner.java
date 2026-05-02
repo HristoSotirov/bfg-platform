@@ -40,7 +40,7 @@ import com.bfg.platform.gen.model.ClubCoachCreateRequest;
 import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubDto;
 import com.bfg.platform.gen.model.CompetitionEventStatus;
-import com.bfg.platform.gen.model.CompetitionStatus;
+
 import com.bfg.platform.gen.model.CompetitionType;
 import com.bfg.platform.gen.model.DisciplineGender;
 import com.bfg.platform.gen.model.Gender;
@@ -547,7 +547,8 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .entrySubmissionsClosedAt(submissionClosedAt)
                 .lastChangesBeforeTmAt(lastChangesAt)
                 .technicalMeetingAt(technicalMeetingAt)
-                .status(CompetitionStatus.REGISTRATION_OPEN).scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualSenior.getId())
+                .awardingCeremonyAt(Instant.parse("2026-05-17T17:00:00Z"))
+                .scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualSenior.getId())
                 .competitionType(CompetitionType.NATIONAL_WATER).isTemplate(false).build());
 
         // Day 1 — Heats: senior groups morning, junior groups afternoon
@@ -1471,7 +1472,8 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         Competition cupSofia = competitionRepository.save(Competition.builder()
                 .shortName("КС2026").name("Купа София 2026")
                 .location("София, Панчарево").startDate(LocalDate.of(2026, 6, 6)).endDate(LocalDate.of(2026, 6, 7))
-                .status(CompetitionStatus.PLANNED).scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualJunior.getId())
+                .awardingCeremonyAt(Instant.parse("2026-06-07T16:00:00Z"))
+                .scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualJunior.getId())
                 .competitionType(CompetitionType.NATIONAL_WATER).isTemplate(false).build());
 
         // Day 1 — Heats
@@ -1501,7 +1503,8 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         Competition dpge = competitionRepository.save(Competition.builder()
                 .shortName("ДПГЕ2026").name("Държавно първенство на гребен ергометър 2026")
                 .location("София, НСА").startDate(LocalDate.of(2026, 3, 15)).endDate(LocalDate.of(2026, 3, 15))
-                .status(CompetitionStatus.PLANNED).scoringSchemeId(scoringErg.getId()).qualificationSchemeId(qualJunior.getId())
+                .awardingCeremonyAt(Instant.parse("2026-03-15T17:00:00Z"))
+                .scoringSchemeId(scoringErg.getId()).qualificationSchemeId(qualJunior.getId())
                 .competitionType(CompetitionType.ERG).isTemplate(false).build());
 
         DisciplineDefinition dErgM = disc("Ергометър мъже", "ERG М", gSenior, BoatClass.ERGO, 1, false, false, 2000, 2, 0, DisciplineGender.MALE);
@@ -1531,7 +1534,7 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         Competition template = competitionRepository.save(Competition.builder()
                 .shortName("ШАБ-ДИШ").name("Шаблон за ДИШ")
                 .location("Пловдив, Гребна база").startDate(LocalDate.of(2026, 6, 28)).endDate(LocalDate.of(2026, 6, 29))
-                .status(CompetitionStatus.PLANNED).scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualSenior.getId())
+                .scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualSenior.getId())
                 .competitionType(CompetitionType.NATIONAL_WATER).isTemplate(true).build());
 
         ttEvent(template, dM_1x, H, "2026-06-28T09:00:00Z"); ttEvent(template, dF_1x, H, "2026-06-28T10:00:00Z");
@@ -1551,7 +1554,8 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .entrySubmissionsClosedAt(Instant.now().minus(java.time.Duration.ofDays(1)))
                 .lastChangesBeforeTmAt(Instant.now().minus(java.time.Duration.ofDays(1)))
                 .technicalMeetingAt(Instant.now().minus(java.time.Duration.ofHours(2)))
-                .status(CompetitionStatus.IN_PROGRESS).scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualSenior.getId())
+                .awardingCeremonyAt(today.atTime(17, 0).toInstant(java.time.ZoneOffset.UTC))
+                .scoringSchemeId(scoringDish.getId()).qualificationSchemeId(qualSenior.getId())
                 .competitionType(CompetitionType.NATIONAL_WATER).isTemplate(false).build());
 
         // Events today: lightweight 1x, lightweight 2x, coxed four (4+), lightweight 4- with coxed crew
@@ -1686,7 +1690,7 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .entrySubmissionsClosedAt(Instant.parse("2026-04-23T00:00:00Z"))
                 .lastChangesBeforeTmAt(Instant.parse("2026-04-24T00:00:00Z"))
                 .technicalMeetingAt(Instant.parse("2026-04-24T18:00:00Z"))
-                .status(CompetitionStatus.IN_PROGRESS)
+                .awardingCeremonyAt(Instant.parse("2026-04-27T17:00:00Z"))
                 .scoringSchemeId(testScheme.getId())
                 .qualificationSchemeId(qualScheme.getId())
                 .competitionType(CompetitionType.NATIONAL_WATER).isTemplate(false).build());
@@ -1916,7 +1920,7 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .entrySubmissionsClosedAt(Instant.parse("2026-05-08T00:00:00Z"))
                 .lastChangesBeforeTmAt(Instant.parse("2026-05-09T00:00:00Z"))
                 .technicalMeetingAt(Instant.parse("2026-05-09T18:00:00Z"))
-                .status(CompetitionStatus.IN_PROGRESS)
+                .awardingCeremonyAt(Instant.parse("2026-05-12T17:00:00Z"))
                 .scoringSchemeId(scoringScheme.getId())
                 .qualificationSchemeId(qualScheme.getId())
                 .competitionType(CompetitionType.NATIONAL_WATER).isTemplate(false).build());
@@ -2198,12 +2202,16 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         DisciplineDefinition dTMix18_2x = disc("Тест 2x смесена юн.ст.", "2x ТMix18", gTest18,
                 BoatClass.DOUBLE_SCULL, 2, false, false, 2000, 2, 0, DisciplineGender.MIXED);
 
-        // Competition with REGISTRATION_OPEN status
+        // Competition for entries test
         Competition entriesComp = competitionRepository.save(Competition.builder()
                 .shortName("ТЕСТ-ЗАЯВКИ").name("Тест подаване на заявки")
                 .location("Пловдив, Гребна база")
                 .startDate(LocalDate.of(2026, 7, 10)).endDate(LocalDate.of(2026, 7, 12))
-                .status(CompetitionStatus.REGISTRATION_OPEN)
+                .entrySubmissionsOpenAt(Instant.parse("2026-06-01T00:00:00Z"))
+                .entrySubmissionsClosedAt(Instant.parse("2026-07-08T00:00:00Z"))
+                .lastChangesBeforeTmAt(Instant.parse("2026-07-09T00:00:00Z"))
+                .technicalMeetingAt(Instant.parse("2026-07-09T18:00:00Z"))
+                .awardingCeremonyAt(Instant.parse("2026-07-12T17:00:00Z"))
                 .scoringSchemeId(scoringScheme.getId())
                 .qualificationSchemeId(qualScheme.getId())
                 .competitionType(CompetitionType.NATIONAL_WATER)

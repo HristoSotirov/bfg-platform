@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { CompetitionDto } from '../../../../core/services/api';
 import { CompetitionColumnConfig } from '../../competitions.component';
+import { computeCompetitionStatus, STATUS_LABELS, STATUS_CLASSES, ComputedCompetitionStatus } from '../../utils/competition-status.util';
 
 @Component({
   selector: 'app-competitions-table',
@@ -73,9 +74,7 @@ export class CompetitionsTableComponent implements OnInit {
     switch (columnId) {
       case 'shortName': return c.shortName || '-';
       case 'name': return c.name || '-';
-      case 'type': return c.isTemplate ? 'Шаблон' : 'Реално';
-      case 'competitionType': return this.getCompetitionTypeLabel(c.competitionType as string);
-      case 'status': return this.getStatusLabel(c.status as string);
+      case 'status': return this.getStatusLabel(computeCompetitionStatus(c));
       case 'startDate': return c.startDate ? this.formatDate(c.startDate) : '-';
       case 'endDate': return c.endDate ? this.formatDate(c.endDate) : '-';
       case 'location': return c.location || '-';
@@ -85,39 +84,13 @@ export class CompetitionsTableComponent implements OnInit {
     }
   }
 
-  getCompetitionTypeLabel(type: string | undefined): string {
-    const labels: Record<string, string> = {
-      ERG: 'Ергометър',
-      NATIONAL_WATER: 'Национално (вода)',
-      BALKAN: 'Балкански',
-    };
-    return type ? (labels[type] ?? type) : '-';
-  }
-
-  getStatusLabel(status: string | undefined): string {
-    const labels: Record<string, string> = {
-      DRAFT: 'Чернова',
-      PLANNED: 'Планирано',
-      REGISTRATION_OPEN: 'Регистрация',
-      REGISTRATION_CLOSED: 'Затворена регистрация',
-      IN_PROGRESS: 'В ход',
-      COMPLETED: 'Приключило',
-      CANCELLED: 'Отменено',
-    };
-    return status ? (labels[status] ?? status) : '-';
+  getStatusLabel(status: string | null | undefined): string {
+    return status ? (STATUS_LABELS[status as ComputedCompetitionStatus] ?? status) : '-';
   }
 
   getStatusClass(c: CompetitionDto): string {
-    const classes: Record<string, string> = {
-      DRAFT: 'text-gray-500',
-      PLANNED: 'text-blue-600',
-      REGISTRATION_OPEN: 'text-green-600',
-      REGISTRATION_CLOSED: 'text-orange-500',
-      IN_PROGRESS: 'text-bfg-blue',
-      COMPLETED: 'text-gray-700',
-      CANCELLED: 'text-red-600',
-    };
-    return c.status ? (classes[c.status as string] ?? 'text-gray-900') : 'text-gray-900';
+    const s = computeCompetitionStatus(c);
+    return s ? (STATUS_CLASSES[s] || 'text-gray-900') : 'text-gray-900';
   }
 
   formatDate(dateStr: string | undefined): string {

@@ -187,11 +187,6 @@ databaseChangeLog:
         # =============================================
         - createIndex:
             tableName: competitions
-            indexName: idx_competitions_status
-            columns:
-              - column: { name: status }
-        - createIndex:
-            tableName: competitions
             indexName: idx_competitions_scoring_scheme_id
             columns:
               - column: { name: scoring_scheme_id }

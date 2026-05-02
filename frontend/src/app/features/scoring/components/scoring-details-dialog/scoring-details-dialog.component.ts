@@ -16,6 +16,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { AddScoringRuleDialogComponent } from '../add-scoring-rule-dialog/add-scoring-rule-dialog.component';
 import { AddBoatCoefficientDialogComponent } from '../add-boat-coefficient-dialog/add-boat-coefficient-dialog.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   ScoringSchemeDto,
   ScoringRuleDto,
@@ -45,6 +46,7 @@ import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
     SearchableSelectDropdownComponent,
     AddScoringRuleDialogComponent,
     AddBoatCoefficientDialogComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './scoring-details-dialog.component.html',
   styleUrl: './scoring-details-dialog.component.scss',
@@ -92,9 +94,11 @@ export class ScoringDetailsDialogComponent implements OnChanges {
 
   showDeleteRuleConfirm = false;
   ruleToDelete: ScoringRuleDto | null = null;
+  deleteRuleError: string | null = null;
 
   showDeleteCoefficientConfirm = false;
   coefficientToDelete: ScoringSchemeBoatCoefficientDto | null = null;
+  deleteCoefficientError: string | null = null;
 
   // Inline editing for rules
   editingRuleId: string | null = null;
@@ -246,6 +250,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
   closeDeleteRuleConfirm(): void {
     this.showDeleteRuleConfirm = false;
     this.ruleToDelete = null;
+    this.deleteRuleError = null;
     this.cdr.markForCheck();
   }
 
@@ -253,23 +258,24 @@ export class ScoringDetailsDialogComponent implements OnChanges {
     if (!this.ruleToDelete?.uuid) return;
 
     const ruleUuid = this.ruleToDelete.uuid;
-    this.showDeleteRuleConfirm = false;
-    this.error = null;
+    this.deleteRuleError = null;
 
     this.scoringRulesService
       .deleteScoringRuleByUuid(ruleUuid)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при изтриване на правило';
+          this.deleteRuleError = err?.error?.message || 'Грешка при изтриване на правило';
           this.cdr.markForCheck();
           return of(null);
         }),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: () => {
-          this.ruleToDelete = null;
-          this.loadRules();
+        next: (result) => {
+          if (result !== null) {
+            this.closeDeleteRuleConfirm();
+            this.loadRules();
+          }
         },
       });
   }
@@ -390,6 +396,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
   closeDeleteCoefficientConfirm(): void {
     this.showDeleteCoefficientConfirm = false;
     this.coefficientToDelete = null;
+    this.deleteCoefficientError = null;
     this.cdr.markForCheck();
   }
 
@@ -397,14 +404,13 @@ export class ScoringDetailsDialogComponent implements OnChanges {
     if (!this.coefficientToDelete?.uuid) return;
 
     const coeffUuid = this.coefficientToDelete.uuid;
-    this.showDeleteCoefficientConfirm = false;
-    this.error = null;
+    this.deleteCoefficientError = null;
 
     this.scoringSchemeBoatCoefficientsService
       .deleteScoringSchemeBoatCoefficientByUuid(coeffUuid)
       .pipe(
         catchError((err) => {
-          this.error =
+          this.deleteCoefficientError =
             err?.error?.message || 'Грешка при изтриване на коефициент';
           this.cdr.markForCheck();
           return of(null);
@@ -412,9 +418,11 @@ export class ScoringDetailsDialogComponent implements OnChanges {
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: () => {
-          this.coefficientToDelete = null;
-          this.loadCoefficients();
+        next: (result) => {
+          if (result !== null) {
+            this.closeDeleteCoefficientConfirm();
+            this.loadCoefficients();
+          }
         },
       });
   }

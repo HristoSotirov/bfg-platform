@@ -422,23 +422,21 @@
 </app-dialog>
 
 <!-- Delete Tier Confirm -->
-<app-dialog [isOpen]="showDeleteTierConfirm" title="Потвърждение за изтриване" (closed)="closeDeleteTierConfirm()" size="md">
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете този диапазон и всички негови правила?</p>
-    <div class="flex gap-3 justify-center">
-      <app-button variant="outline" size="md" text="Отказ" (click)="closeDeleteTierConfirm()"></app-button>
-      <app-button variant="primary" size="md" text="Изтрий" (click)="deleteTier()"></app-button>
-    </div>
-  </div>
-</app-dialog>
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteTierConfirm"
+  [itemName]="tierToDelete?.boatCountMin + '–' + tierToDelete?.boatCountMax + ' лодки'"
+  [error]="deleteTierError"
+  (closed)="closeDeleteTierConfirm()"
+  (confirmed)="deleteTier()"
+  (errorDismissed)="deleteTierError = null"
+/>
 
 <!-- Delete Progression Confirm -->
-<app-dialog [isOpen]="showDeleteProgressionConfirm" title="Потвърждение за изтриване" (closed)="closeDeleteProgressionConfirm()" size="md">
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете това правило за класиране?</p>
-    <div class="flex gap-3 justify-center">
-      <app-button variant="outline" size="md" text="Отказ" (click)="closeDeleteProgressionConfirm()"></app-button>
-      <app-button variant="primary" size="md" text="Изтрий" (click)="deleteProgression()"></app-button>
-    </div>
-  </div>
-</app-dialog>
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteProgressionConfirm"
+  [itemName]="progressionToDelete?.sourceEvent + ' → ' + progressionToDelete?.destEvent"
+  [error]="deleteProgressionError"
+  (closed)="closeDeleteProgressionConfirm()"
+  (confirmed)="deleteProgression()"
+  (errorDismissed)="deleteProgressionError = null"
+/>

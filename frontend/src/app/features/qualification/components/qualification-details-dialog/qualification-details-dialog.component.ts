@@ -14,6 +14,7 @@ import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   QualificationSchemeDto,
   QualificationSchemeRequest,
@@ -44,6 +45,7 @@ interface TierWithProgressions {
     DialogComponent,
     ButtonComponent,
     SearchableSelectDropdownComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './qualification-details-dialog.component.html',
   styleUrl: './qualification-details-dialog.component.scss',
@@ -90,6 +92,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   // Delete tier
   showDeleteTierConfirm = false;
   tierToDelete: QualificationTierDto | null = null;
+  deleteTierError: string | null = null;
 
   // Inline editing for tiers
   editingTierId: string | null = null;
@@ -116,6 +119,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   // Delete progression
   showDeleteProgressionConfirm = false;
   progressionToDelete: QualificationProgressionDto | null = null;
+  deleteProgressionError: string | null = null;
 
   // Add progression
   addingProgressionForTierId: string | null = null;
@@ -447,26 +451,30 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   closeDeleteTierConfirm(): void {
     this.showDeleteTierConfirm = false;
     this.tierToDelete = null;
+    this.deleteTierError = null;
     this.cdr.markForCheck();
   }
 
   deleteTier(): void {
     if (!this.tierToDelete?.uuid) return;
+    this.deleteTierError = null;
     this.tiersService
       .deleteQualificationTierByUuid(this.tierToDelete.uuid)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при изтриване на диапазон';
+          this.deleteTierError = err?.error?.message || 'Грешка при изтриване на диапазон';
           this.cdr.markForCheck();
           return of(null);
         }),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: () => {
-          this.closeDeleteTierConfirm();
-          this.loadTiers();
-          this.cdr.markForCheck();
+        next: (result) => {
+          if (result !== null) {
+            this.closeDeleteTierConfirm();
+            this.loadTiers();
+            this.cdr.markForCheck();
+          }
         },
       });
   }
@@ -618,26 +626,30 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   closeDeleteProgressionConfirm(): void {
     this.showDeleteProgressionConfirm = false;
     this.progressionToDelete = null;
+    this.deleteProgressionError = null;
     this.cdr.markForCheck();
   }
 
   deleteProgression(): void {
     if (!this.progressionToDelete?.uuid) return;
+    this.deleteProgressionError = null;
     this.progressionsService
       .deleteQualificationProgressionByUuid(this.progressionToDelete.uuid)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при изтриване на правило';
+          this.deleteProgressionError = err?.error?.message || 'Грешка при изтриване на правило';
           this.cdr.markForCheck();
           return of(null);
         }),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: () => {
-          this.closeDeleteProgressionConfirm();
-          this.loadTiers();
-          this.cdr.markForCheck();
+        next: (result) => {
+          if (result !== null) {
+            this.closeDeleteProgressionConfirm();
+            this.loadTiers();
+            this.cdr.markForCheck();
+          }
         },
       });
   }

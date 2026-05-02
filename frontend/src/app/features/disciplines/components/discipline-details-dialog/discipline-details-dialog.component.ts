@@ -14,6 +14,7 @@ import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import { CompetitionGroupDetailsDialogComponent } from '../../../competition-groups/components/competition-group-details-dialog/competition-group-details-dialog.component';
 import {
   DisciplineDefinitionDto,
@@ -33,6 +34,7 @@ import {
   map,
   tap,
   take,
+  of,
 } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
@@ -41,7 +43,7 @@ import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
 @Component({
   selector: 'app-discipline-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, CompetitionGroupDetailsDialogComponent],
+  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DeleteConfirmDialogComponent, CompetitionGroupDetailsDialogComponent],
   templateUrl: './discipline-details-dialog.component.html',
   styleUrl: './discipline-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,6 +68,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   error: string | null = null;
   showEditingWarningDialog = false;
   showDeleteConfirmDialog = false;
+  deleteError: string | null = null;
 
   editData = {
     name: '',
@@ -311,15 +314,14 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
 
   closeDeleteConfirm(): void {
     this.showDeleteConfirmDialog = false;
+    this.deleteError = null;
     this.cdr.markForCheck();
   }
 
   deleteDiscipline(): void {
     if (!this.discipline?.uuid) return;
 
-    this.deleting = true;
-    this.error = null;
-    this.showDeleteConfirmDialog = false;
+    this.deleteError = null;
     this.cdr.markForCheck();
 
     this.disciplineDefinitionsService
@@ -336,20 +338,19 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
           } else if (err?.error?.message) {
             errorMessage = err.error.message;
           }
-          return throwError(() => ({ message: errorMessage }));
+          this.deleteError = errorMessage;
+          this.cdr.markForCheck();
+          return of(null);
         }),
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: () => {
-          this.deleting = false;
-          this.deleted.emit();
-          this.cdr.markForCheck();
-        },
-        error: (err) => {
-          this.deleting = false;
-          this.error = err?.message || 'Грешка при изтриване';
-          this.cdr.markForCheck();
+        next: (result) => {
+          if (result !== null) {
+            this.closeDeleteConfirm();
+            this.deleted.emit();
+            this.cdr.markForCheck();
+          }
         },
       });
   }

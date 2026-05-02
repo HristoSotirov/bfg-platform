@@ -7,14 +7,14 @@ import {
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, throwError } from 'rxjs';
 import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
-import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { AddScoringRuleDialogComponent } from '../../../scoring/components/add-scoring-rule-dialog/add-scoring-rule-dialog.component';
 import { AddBoatCoefficientDialogComponent } from '../../../scoring/components/add-boat-coefficient-dialog/add-boat-coefficient-dialog.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   ScoringSchemeDto,
   ScoringRuleDto,
@@ -42,10 +42,10 @@ import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
     RouterModule,
     HeaderComponent,
     ButtonComponent,
-    DialogComponent,
     SearchableSelectDropdownComponent,
     AddScoringRuleDialogComponent,
     AddBoatCoefficientDialogComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './scoring-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -87,9 +87,11 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
 
   showDeleteRuleConfirm = false;
   ruleToDelete: ScoringRuleDto | null = null;
+  deleteRuleError: string | null = null;
 
   showDeleteCoefficientConfirm = false;
   coefficientToDelete: ScoringSchemeBoatCoefficientDto | null = null;
+  deleteCoefficientError: string | null = null;
 
   editingRuleId: string | null = null;
   ruleEditData = { placement: null as number | null, basePoints: null as number | null };
@@ -114,6 +116,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private location: Location,
     private scoringSchemesService: ScoringSchemesService,
     private scoringRulesService: ScoringRulesService,
@@ -272,16 +275,17 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
   closeDeleteRuleConfirm(): void {
     this.showDeleteRuleConfirm = false;
     this.ruleToDelete = null;
+    this.deleteRuleError = null;
     this.cdr.markForCheck();
   }
 
   deleteRule(): void {
     if (!this.ruleToDelete?.uuid) return;
     const uuid = this.ruleToDelete.uuid;
-    this.showDeleteRuleConfirm = false;
+    this.deleteRuleError = null;
     this.scoringRulesService.deleteScoringRuleByUuid(uuid)
-      .pipe(catchError((err) => { this.saveError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
-      .subscribe(() => { this.ruleToDelete = null; this.loadRules(); });
+      .pipe(catchError((err) => { this.deleteRuleError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .subscribe((result) => { if (result !== null) { this.closeDeleteRuleConfirm(); this.loadRules(); } });
   }
 
   startEditingRule(rule: ScoringRuleDto): void {
@@ -316,16 +320,17 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
   closeDeleteCoefficientConfirm(): void {
     this.showDeleteCoefficientConfirm = false;
     this.coefficientToDelete = null;
+    this.deleteCoefficientError = null;
     this.cdr.markForCheck();
   }
 
   deleteCoefficient(): void {
     if (!this.coefficientToDelete?.uuid) return;
     const uuid = this.coefficientToDelete.uuid;
-    this.showDeleteCoefficientConfirm = false;
+    this.deleteCoefficientError = null;
     this.scoringSchemeBoatCoefficientsService.deleteScoringSchemeBoatCoefficientByUuid(uuid)
-      .pipe(catchError((err) => { this.saveError = err?.error?.message || 'Грешка'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
-      .subscribe(() => { this.coefficientToDelete = null; this.loadCoefficients(); });
+      .pipe(catchError((err) => { this.deleteCoefficientError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .subscribe((result) => { if (result !== null) { this.closeDeleteCoefficientConfirm(); this.loadCoefficients(); } });
   }
 
   startEditingCoefficient(coeff: ScoringSchemeBoatCoefficientDto): void {
@@ -344,5 +349,40 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
     this.scoringSchemeBoatCoefficientsService.updateScoringSchemeBoatCoefficientByUuid(this.editingCoefficientId, request)
       .pipe(catchError((err) => { this.saveError = err?.error?.message || 'Грешка'; this.savingCoefficient = false; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
       .subscribe((result) => { this.savingCoefficient = false; if (result) { this.editingCoefficientId = null; this.loadCoefficients(); } this.cdr.markForCheck(); });
+  }
+
+  // ===== DELETE SCHEME =====
+  showDeleteSchemeConfirm = false;
+  deleteSchemeError: string | null = null;
+  deletingScheme = false;
+
+  confirmDeleteScheme(): void {
+    this.showDeleteSchemeConfirm = true;
+    this.deleteSchemeError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDeleteScheme(): void {
+    this.showDeleteSchemeConfirm = false;
+    this.deleteSchemeError = null;
+    this.cdr.markForCheck();
+  }
+
+  deleteScheme(): void {
+    if (!this.scheme?.uuid) return;
+    this.deletingScheme = true;
+    this.cdr.markForCheck();
+    this.scoringSchemesService.deleteScoringSchemeByUuid(this.scheme.uuid)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/regulations/scoring']);
+        },
+        error: (err) => {
+          this.deletingScheme = false;
+          this.deleteSchemeError = err?.error?.message || 'Грешка при изтриване на схема за точкуване';
+          this.cdr.markForCheck();
+        },
+      });
   }
 }

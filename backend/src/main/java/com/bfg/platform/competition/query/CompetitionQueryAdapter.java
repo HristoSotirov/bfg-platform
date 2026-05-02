@@ -101,7 +101,7 @@ public final class CompetitionQueryAdapter {
         @Override
         public Predicate build(Root<Competition> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
             return switch (field) {
-                case "name", "shortName", "location", "status" ->
+                case "name", "shortName", "location" ->
                     QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
                 case "isTemplate" ->
                     QueryAdapterHelpers.booleanPredicate(root, cb, field, op, valueRaw);
@@ -125,7 +125,7 @@ public final class CompetitionQueryAdapter {
         @Override
         public Predicate buildIn(Root<Competition> root, CriteriaBuilder cb, String field, List<String> values) {
             return switch (field) {
-                case "name", "shortName", "status" ->
+                case "name", "shortName" ->
                     QueryAdapterHelpers.stringInPredicate(root, cb, field, values);
                 case "scoringSchemeId", "qualificationSchemeId" ->
                     QueryAdapterHelpers.uuidInPredicate(root, cb, field, values);

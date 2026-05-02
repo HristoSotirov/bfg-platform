@@ -32,7 +32,8 @@ public class CompetitionMapper {
             ? OffsetDateTime.ofInstant(entity.getLastChangesBeforeTmAt(), ZoneOffset.UTC) : null);
         dto.setTechnicalMeetingAt(entity.getTechnicalMeetingAt() != null
             ? OffsetDateTime.ofInstant(entity.getTechnicalMeetingAt(), ZoneOffset.UTC) : null);
-        dto.setStatus(entity.getStatus());
+        dto.setAwardingCeremonyAt(entity.getAwardingCeremonyAt() != null
+            ? OffsetDateTime.ofInstant(entity.getAwardingCeremonyAt(), ZoneOffset.UTC) : null);
         dto.setScoringSchemeId(entity.getScoringSchemeId());
         dto.setQualificationSchemeId(entity.getQualificationSchemeId());
         dto.setCompetitionType(entity.getCompetitionType());
@@ -62,6 +63,8 @@ public class CompetitionMapper {
             ? request.getLastChangesBeforeTmAt().toInstant() : null);
         entity.setTechnicalMeetingAt(request.getTechnicalMeetingAt() != null
             ? request.getTechnicalMeetingAt().toInstant() : null);
+        entity.setAwardingCeremonyAt(request.getAwardingCeremonyAt() != null
+            ? request.getAwardingCeremonyAt().toInstant() : null);
         entity.setScoringSchemeId(request.getScoringSchemeId());
         entity.setQualificationSchemeId(request.getQualificationSchemeId());
         entity.setCompetitionType(request.getCompetitionType());
@@ -83,7 +86,8 @@ public class CompetitionMapper {
             ? request.getLastChangesBeforeTmAt().toInstant() : null);
         entity.setTechnicalMeetingAt(request.getTechnicalMeetingAt() != null
             ? request.getTechnicalMeetingAt().toInstant() : null);
-        entity.setStatus(request.getStatus());
+        entity.setAwardingCeremonyAt(request.getAwardingCeremonyAt() != null
+            ? request.getAwardingCeremonyAt().toInstant() : null);
         entity.setScoringSchemeId(request.getScoringSchemeId());
         entity.setQualificationSchemeId(request.getQualificationSchemeId());
         entity.setCompetitionType(request.getCompetitionType());

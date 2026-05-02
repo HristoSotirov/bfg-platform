@@ -16,7 +16,6 @@ import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.gen.model.CompetitionCreateRequest;
 import com.bfg.platform.gen.model.CompetitionDto;
-import com.bfg.platform.gen.model.CompetitionStatus;
 import com.bfg.platform.gen.model.CompetitionType;
 import com.bfg.platform.gen.model.CompetitionUpdateRequest;
 import jakarta.persistence.EntityManager;
@@ -32,6 +31,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -73,7 +73,6 @@ public class CompetitionServiceImpl implements CompetitionService {
     public Optional<CompetitionDto> create(CompetitionCreateRequest request) {
         validateCreate(request);
         Competition entity = CompetitionMapper.fromRequest(request);
-        entity.setStatus(CompetitionStatus.PLANNED);
         Competition saved = repository.save(entity);
         entityManager.flush();
         return Optional.of(CompetitionMapper.toDto(saved));
@@ -98,6 +97,7 @@ public class CompetitionServiceImpl implements CompetitionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Competition", uuid));
         try {
             repository.delete(entity);
+            entityManager.flush();
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ConstraintViolationMessageExtractor.extractMessage(e));
         }
@@ -114,13 +114,15 @@ public class CompetitionServiceImpl implements CompetitionService {
         boolean isTemplate = Boolean.TRUE.equals(request.getIsTemplate());
         if (!isTemplate) {
             requireDateTimes(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
-                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt());
+                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt(),
+                    request.getAwardingCeremonyAt());
         }
 
         validateDates(request.getStartDate(), request.getEndDate());
         if (!isTemplate) {
             validateChronology(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
                     request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt(), request.getStartDate());
+            validateAwardingCeremony(request.getAwardingCeremonyAt(), request.getEndDate());
         }
     }
 
@@ -134,13 +136,15 @@ public class CompetitionServiceImpl implements CompetitionService {
 
         if (!isTemplate) {
             requireDateTimes(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
-                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt());
+                    request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt(),
+                    request.getAwardingCeremonyAt());
         }
 
         validateDates(request.getStartDate(), request.getEndDate());
         if (!isTemplate) {
             validateChronology(request.getEntrySubmissionsOpenAt(), request.getEntrySubmissionsClosedAt(),
                     request.getLastChangesBeforeTmAt(), request.getTechnicalMeetingAt(), request.getStartDate());
+            validateAwardingCeremony(request.getAwardingCeremonyAt(), request.getEndDate());
         }
     }
 
@@ -159,11 +163,13 @@ public class CompetitionServiceImpl implements CompetitionService {
     }
 
     private void requireDateTimes(OffsetDateTime openAt, OffsetDateTime closedAt,
-                                   OffsetDateTime lastChangesTm, OffsetDateTime technicalMeeting) {
+                                   OffsetDateTime lastChangesTm, OffsetDateTime technicalMeeting,
+                                   OffsetDateTime awardingCeremony) {
         if (openAt == null) throw new ValidationException("Entry submissions open date/time is required");
         if (closedAt == null) throw new ValidationException("Entry submissions closed date/time is required");
         if (lastChangesTm == null) throw new ValidationException("Last changes before TM date/time is required");
         if (technicalMeeting == null) throw new ValidationException("Technical meeting date/time is required");
+        if (awardingCeremony == null) throw new ValidationException("Awarding ceremony date/time is required");
     }
 
     private void validateDates(LocalDate startDate, LocalDate endDate) {
@@ -183,7 +189,7 @@ public class CompetitionServiceImpl implements CompetitionService {
         Instant submissionsClosed = closedAt.toInstant();
         Instant lastChangesTmInst = lastChangesTm.toInstant();
         Instant technicalMeetingInst = technicalMeeting.toInstant();
-        Instant startInstant = startDate.atStartOfDay(java.time.ZoneOffset.UTC).toInstant();
+        Instant startInstant = startDate.atStartOfDay(ZoneOffset.UTC).toInstant();
 
         if (!submissionsOpen.isBefore(submissionsClosed)) {
             throw new ValidationException("Entry submissions open date/time must be before entry submissions closed date/time");
@@ -196,6 +202,14 @@ public class CompetitionServiceImpl implements CompetitionService {
         }
         if (!technicalMeetingInst.isBefore(startInstant)) {
             throw new ValidationException("Technical meeting date/time must be before competition start date");
+        }
+    }
+
+    private void validateAwardingCeremony(OffsetDateTime awardingCeremonyAt, LocalDate endDate) {
+        if (awardingCeremonyAt == null || endDate == null) return;
+        LocalDate ceremonyDate = awardingCeremonyAt.atZoneSameInstant(ZoneOffset.UTC).toLocalDate();
+        if (!ceremonyDate.isEqual(endDate)) {
+            throw new ValidationException("Awarding ceremony must be on the competition end date (" + endDate + ")");
         }
     }
 

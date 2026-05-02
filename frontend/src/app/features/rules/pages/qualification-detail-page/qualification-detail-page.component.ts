@@ -7,12 +7,13 @@ import {
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule, ActivatedRoute } from '@angular/router';
+import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, throwError } from 'rxjs';
 import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   QualificationSchemeDto,
   QualificationSchemeRequest,
@@ -45,6 +46,7 @@ interface TierWithProgressions {
     ButtonComponent,
     DialogComponent,
     SearchableSelectDropdownComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './qualification-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -79,6 +81,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
 
   showDeleteTierConfirm = false;
   tierToDelete: QualificationTierDto | null = null;
+  deleteTierError: string | null = null;
 
   editingTierId: string | null = null;
   tierEditData = {
@@ -97,6 +100,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
 
   showDeleteProgressionConfirm = false;
   progressionToDelete: QualificationProgressionDto | null = null;
+  deleteProgressionError: string | null = null;
 
   addingProgressionForTierId: string | null = null;
   addProgressionData = { sourceEvent: '', destEvent: '', qualifyByPosition: null as number | null, qualifyByTime: null as number | null };
@@ -112,6 +116,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
+    private router: Router,
     private location: Location,
     private schemesService: QualificationSchemesService,
     private tiersService: QualificationTiersService,
@@ -335,12 +340,13 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   confirmDeleteTier(tier: QualificationTierDto): void { this.tierToDelete = tier; this.showDeleteTierConfirm = true; this.cdr.markForCheck(); }
-  closeDeleteTierConfirm(): void { this.showDeleteTierConfirm = false; this.tierToDelete = null; this.cdr.markForCheck(); }
+  closeDeleteTierConfirm(): void { this.showDeleteTierConfirm = false; this.tierToDelete = null; this.deleteTierError = null; this.cdr.markForCheck(); }
   deleteTier(): void {
     if (!this.tierToDelete?.uuid) return;
+    this.deleteTierError = null;
     this.tiersService.deleteQualificationTierByUuid(this.tierToDelete.uuid)
-      .pipe(catchError((err) => { this.saveError = err?.error?.message || 'Грешка'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
-      .subscribe(() => { this.closeDeleteTierConfirm(); this.loadTiers(); this.cdr.markForCheck(); });
+      .pipe(catchError((err) => { this.deleteTierError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .subscribe((result) => { if (result !== null) { this.closeDeleteTierConfirm(); this.loadTiers(); this.cdr.markForCheck(); } });
   }
 
   startEditingTier(tier: QualificationTierDto): void {
@@ -387,12 +393,13 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   confirmDeleteProgression(prog: QualificationProgressionDto): void { this.progressionToDelete = prog; this.showDeleteProgressionConfirm = true; this.cdr.markForCheck(); }
-  closeDeleteProgressionConfirm(): void { this.showDeleteProgressionConfirm = false; this.progressionToDelete = null; this.cdr.markForCheck(); }
+  closeDeleteProgressionConfirm(): void { this.showDeleteProgressionConfirm = false; this.progressionToDelete = null; this.deleteProgressionError = null; this.cdr.markForCheck(); }
   deleteProgression(): void {
     if (!this.progressionToDelete?.uuid) return;
+    this.deleteProgressionError = null;
     this.progressionsService.deleteQualificationProgressionByUuid(this.progressionToDelete.uuid)
-      .pipe(catchError((err) => { this.saveError = err?.error?.message || 'Грешка'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
-      .subscribe(() => { this.closeDeleteProgressionConfirm(); this.loadTiers(); this.cdr.markForCheck(); });
+      .pipe(catchError((err) => { this.deleteProgressionError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .subscribe((result) => { if (result !== null) { this.closeDeleteProgressionConfirm(); this.loadTiers(); this.cdr.markForCheck(); } });
   }
 
   startAddingProgression(tierId: string): void {
@@ -414,5 +421,40 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
     this.progressionsService.createQualificationProgression(request)
       .pipe(catchError((err) => { this.saveError = err?.error?.message || 'Грешка'; this.savingNewProgression = false; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
       .subscribe((result) => { this.savingNewProgression = false; if (result) { this.addingProgressionForTierId = null; this.loadTiers(); } this.cdr.markForCheck(); });
+  }
+
+  // ===== DELETE SCHEME =====
+  showDeleteSchemeConfirm = false;
+  deleteSchemeError: string | null = null;
+  deletingScheme = false;
+
+  confirmDeleteScheme(): void {
+    this.showDeleteSchemeConfirm = true;
+    this.deleteSchemeError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDeleteScheme(): void {
+    this.showDeleteSchemeConfirm = false;
+    this.deleteSchemeError = null;
+    this.cdr.markForCheck();
+  }
+
+  deleteScheme(): void {
+    if (!this.scheme?.uuid) return;
+    this.deletingScheme = true;
+    this.cdr.markForCheck();
+    this.schemesService.deleteQualificationSchemeByUuid(this.scheme.uuid)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/regulations/qualification']);
+        },
+        error: (err) => {
+          this.deletingScheme = false;
+          this.deleteSchemeError = err?.error?.message || 'Грешка при изтриване на квалификационна схема';
+          this.cdr.markForCheck();
+        },
+      });
   }
 }

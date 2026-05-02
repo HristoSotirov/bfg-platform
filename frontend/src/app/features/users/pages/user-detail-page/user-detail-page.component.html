@@ -117,8 +117,9 @@
               }
 
               @if (canEdit) {
-                <div class="pt-4">
+                <div class="flex items-center gap-2 pt-4">
                   <app-button variant="outline" size="md" text="Редактиране" (click)="startEditing()"></app-button>
+                  <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDelete()"></app-button>
                 </div>
               }
 
@@ -227,3 +228,14 @@
     </div>
   </div>
 </app-dialog>
+
+<!-- Delete user confirmation -->
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteConfirm"
+  [itemName]="userData?.email || ''"
+  [deleting]="deletingUser"
+  [error]="deleteError"
+  (closed)="cancelDelete()"
+  (confirmed)="deleteUser()"
+  (errorDismissed)="deleteError = null"
+/>

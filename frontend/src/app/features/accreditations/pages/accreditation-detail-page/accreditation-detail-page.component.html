@@ -164,8 +164,9 @@
                     }
 
                     @if (canEdit) {
-                      <div class="pt-2">
+                      <div class="flex items-center gap-2 pt-2">
                         <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
+                        <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDeleteMain()"></app-button>
                       </div>
                     }
                   </div>
@@ -398,3 +399,14 @@
     </div>
   </div>
 </app-dialog>
+
+<!-- Delete main accreditation confirmation -->
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteMainConfirm"
+  [itemName]="accreditation?.accreditationNumber || ''"
+  [deleting]="deletingMain"
+  [error]="deleteMainError"
+  (closed)="cancelDeleteMain()"
+  (confirmed)="deleteMain()"
+  (errorDismissed)="deleteMainError = null"
+/>

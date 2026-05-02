@@ -993,7 +993,7 @@
       - name: filter
         in: query
         description: |
-          Filter expression (e.g., isTemplate eq 'true', isActive eq 'true', status eq 'DRAFT').
+          Filter expression (e.g., isTemplate eq 'true', isActive eq 'true').
           Use isTemplate eq 'true' to list only templates; isTemplate eq 'false' for real competitions.
         schema:
           type: string

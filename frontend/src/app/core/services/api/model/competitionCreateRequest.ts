@@ -35,6 +35,10 @@ export interface CompetitionCreateRequest {
      * Required when isTemplate is false.
      */
     technicalMeetingAt?: string;
+    /**
+     * Required when isTemplate is false. Must be on the endDate.
+     */
+    awardingCeremonyAt?: string;
     scoringSchemeId: string;
     qualificationSchemeId: string;
     competitionType: CompetitionType;

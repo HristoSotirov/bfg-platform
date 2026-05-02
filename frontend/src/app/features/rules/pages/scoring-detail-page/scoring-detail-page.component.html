@@ -238,6 +238,7 @@
               @if (!isEditing) {
                 @if (canEdit) {
                   <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
+                  <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDeleteScheme()"></app-button>
                 }
               } @else {
                 <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
@@ -251,27 +252,23 @@
   </div>
 </div>
 
-<!-- Delete rule confirm -->
-<app-dialog [isOpen]="showDeleteRuleConfirm" title="Потвърждение за изтриване" (closed)="closeDeleteRuleConfirm()" size="md">
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете това правило?</p>
-    <div class="flex gap-3 justify-center">
-      <app-button variant="outline" size="md" text="Отказ" (click)="closeDeleteRuleConfirm()"></app-button>
-      <app-button variant="danger" size="md" text="Изтрий" (click)="deleteRule()"></app-button>
-    </div>
-  </div>
-</app-dialog>
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteRuleConfirm"
+  [itemName]="'Място ' + ruleToDelete?.placement"
+  [error]="deleteRuleError"
+  (closed)="closeDeleteRuleConfirm()"
+  (confirmed)="deleteRule()"
+  (errorDismissed)="deleteRuleError = null"
+/>
 
-<!-- Delete coefficient confirm -->
-<app-dialog [isOpen]="showDeleteCoefficientConfirm" title="Потвърждение за изтриване" (closed)="closeDeleteCoefficientConfirm()" size="md">
-  <div class="py-4">
-    <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да изтриете този коефициент?</p>
-    <div class="flex gap-3 justify-center">
-      <app-button variant="outline" size="md" text="Отказ" (click)="closeDeleteCoefficientConfirm()"></app-button>
-      <app-button variant="danger" size="md" text="Изтрий" (click)="deleteCoefficient()"></app-button>
-    </div>
-  </div>
-</app-dialog>
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteCoefficientConfirm"
+  [itemName]="getBoatClassLabel(coefficientToDelete?.boatClass)"
+  [error]="deleteCoefficientError"
+  (closed)="closeDeleteCoefficientConfirm()"
+  (confirmed)="deleteCoefficient()"
+  (errorDismissed)="deleteCoefficientError = null"
+/>
 
 <!-- Add Rule -->
 <app-add-scoring-rule-dialog
@@ -289,3 +286,13 @@
   (closed)="closeAddCoefficientDialog()"
   (added)="onCoefficientAdded()">
 </app-add-boat-coefficient-dialog>
+
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteSchemeConfirm"
+  [itemName]="scheme?.name || ''"
+  [deleting]="deletingScheme"
+  [error]="deleteSchemeError"
+  (closed)="cancelDeleteScheme()"
+  (confirmed)="deleteScheme()"
+  (errorDismissed)="deleteSchemeError = null"
+/>

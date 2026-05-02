@@ -258,8 +258,6 @@ components:
       $ref: "./competitions/schemas.yaml#/ScoringType"
     QualificationEventType:
       $ref: "./competitions/schemas.yaml#/QualificationEventType"
-    CompetitionStatus:
-      $ref: "./competitions/schemas.yaml#/CompetitionStatus"
     CompetitionEventStatus:
       $ref: "./competitions/schemas.yaml#/CompetitionEventStatus"
     CompetitionType:

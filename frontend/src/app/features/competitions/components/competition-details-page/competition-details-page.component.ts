@@ -35,12 +35,12 @@ import {
   ChronoState,
   ChronoResult,
 } from '../race-chronometer/race-chronometer.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
   CompetitionsService,
   CompetitionDto,
   CompetitionUpdateRequest,
-  CompetitionStatus,
   CompetitionType,
   CompetitionTimetableEventDto,
   CompetitionTimetableEventRequest,
@@ -88,6 +88,7 @@ import {
   ComputeStandingsResponse,
 } from '../../../../core/services/api';
 import { SystemRole } from '../../../../core/models/navigation.model';
+import { computeCompetitionStatus, STATUS_LABELS, STATUS_CLASSES, ComputedCompetitionStatus } from '../../utils/competition-status.util';
 import { NgChartsModule } from 'ng2-charts';
 import { Chart, ChartData, ChartOptions, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title, Plugin } from 'chart.js';
 
@@ -223,6 +224,7 @@ interface ResultEditRow {
     QualificationDetailsDialogComponent,
     SubmitEntriesDialogComponent,
     RaceChronometerComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './competition-details-page.component.html',
   styleUrl: './competition-details-page.component.scss',
@@ -382,6 +384,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   newEvent: Partial<CompetitionTimetableEventRequest> = {};
   showDeleteTimetableConfirm = false;
   timetableEventToDelete: CompetitionTimetableEventDto | null = null;
+  deleteTimetableError: string | null = null;
 
   // Edit timetable event
   editingTimetableUuid: string | null = null;
@@ -437,15 +440,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     }))));
 
   userRole: SystemRole | null = null;
-
-  readonly statusOptions: SearchableSelectOption[] = [
-    { value: CompetitionStatus.Planned, label: 'Планирано' },
-    { value: CompetitionStatus.RegistrationOpen, label: 'Регистрация' },
-    { value: CompetitionStatus.RegistrationClosed, label: 'Затворена регистрация' },
-    { value: CompetitionStatus.InProgress, label: 'В ход' },
-    { value: CompetitionStatus.Completed, label: 'Приключило' },
-    { value: CompetitionStatus.Cancelled, label: 'Отменено' },
-  ];
 
   readonly competitionTypeOptions: SearchableSelectOption[] = [
     { value: CompetitionType.Erg, label: 'Ергометър' },
@@ -1797,6 +1791,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   loadingWeights = false;
   selectedWeighInDay: string | null = null;
   weighInRecording = false;
+  weighInError: string | null = null;
   weighInEditAthleteId: string | null = null;
   weighInEditWeight = '';
   weighInEditRole: WeightMeasurementRole = WeightMeasurementRole.Rower;
@@ -1967,6 +1962,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.weighInEditCardNumber = cardNumber;
     this.weighInEditScheduledAt = scheduledAt ?? null;
     this.weighInEditDisciplineLabel = disciplineLabel;
+    this.weighInError = null;
     const existing = this.weightMeasurements.find(m => m.athleteId === athleteId);
     this.weighInEditWeight = existing?.weightKg != null ? String(existing.weightKg) : '';
     this.loadWeighInPhoto(athleteId);
@@ -2033,6 +2029,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     if (isNaN(weight) || weight <= 0) return;
 
     this.weighInRecording = true;
+    this.weighInError = null;
     this.cdr.markForCheck();
 
     const request: RecordWeightRequest = {
@@ -2053,11 +2050,13 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
             this.weightMeasurements = [...this.weightMeasurements, result];
           }
           this.weighInRecording = false;
+          this.weighInError = null;
           this.closeWeighInEdit();
           this.cdr.markForCheck();
         },
-        error: () => {
+        error: (err) => {
           this.weighInRecording = false;
+          this.weighInError = err?.error?.message || 'Грешка при записване на теглото';
           this.cdr.markForCheck();
         },
       });
@@ -2665,9 +2664,16 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     if (!this.competition?.uuid) return;
     this.finalStandingsService.deleteFinalStandings(this.competition.uuid, { disciplineIds: [disciplineId] })
       .pipe(takeUntil(this.destroy$))
-      .subscribe(() => {
-        this.finalStandings = this.finalStandings.filter(s => s.disciplineId !== disciplineId);
-        this.cdr.markForCheck();
+      .subscribe({
+        next: () => {
+          this.finalStandings = this.finalStandings.filter(s => s.disciplineId !== disciplineId);
+          delete this.standingsDisciplineErrors[disciplineId];
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          this.standingsDisciplineErrors[disciplineId] = err?.error?.message || 'Грешка при изтриване на класирането';
+          this.cdr.markForCheck();
+        },
       });
   }
 
@@ -3225,7 +3231,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       entrySubmissionsClosedAt: this.competition.entrySubmissionsClosedAt as any,
       lastChangesBeforeTmAt: this.competition.lastChangesBeforeTmAt as any,
       technicalMeetingAt: this.competition.technicalMeetingAt as any,
-      status: this.competition.status as CompetitionStatus,
+      awardingCeremonyAt: this.competition.awardingCeremonyAt as any,
       scoringSchemeId: this.competition.scoringSchemeId,
       qualificationSchemeId: this.competition.qualificationSchemeId,
       competitionType: this.competition.competitionType as CompetitionType,
@@ -3239,6 +3245,41 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.isEditing = false;
     this.editError = null;
     this.cdr.markForCheck();
+  }
+
+  // ===== DELETE COMPETITION =====
+  showDeleteCompetitionConfirm = false;
+  deleteCompetitionError: string | null = null;
+  deletingCompetition = false;
+
+  confirmDeleteCompetition(): void {
+    this.showDeleteCompetitionConfirm = true;
+    this.deleteCompetitionError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDeleteCompetition(): void {
+    this.showDeleteCompetitionConfirm = false;
+    this.deleteCompetitionError = null;
+    this.cdr.markForCheck();
+  }
+
+  deleteCompetition(): void {
+    if (!this.competition?.uuid) return;
+    this.deletingCompetition = true;
+    this.cdr.markForCheck();
+    this.competitionsService.deleteCompetitionByUuid(this.competition.uuid)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/competitions']);
+        },
+        error: (err) => {
+          this.deletingCompetition = false;
+          this.deleteCompetitionError = err?.error?.message || 'Грешка при изтриване на състезание';
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   private appendZ(val: any): any {
@@ -3267,6 +3308,8 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       technicalMeetingAt: this.editData.technicalMeetingAt
         ? this.appendZ(this.editData.technicalMeetingAt) as any
         : undefined,
+      awardingCeremonyAt: this.competition.isTemplate ? undefined
+        : (this.editData.awardingCeremonyAt ? this.appendZ(this.editData.awardingCeremonyAt) as any : undefined),
     };
 
     this.competitionsService
@@ -3364,6 +3407,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   confirmDeleteTimetableEvent(event: CompetitionTimetableEventDto): void {
     this.timetableEventToDelete = event;
     this.showDeleteTimetableConfirm = true;
+    this.deleteTimetableError = null;
     this.cdr.markForCheck();
   }
 
@@ -3422,6 +3466,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   cancelDeleteTimetableEvent(): void {
     this.timetableEventToDelete = null;
     this.showDeleteTimetableConfirm = false;
+    this.deleteTimetableError = null;
     this.cdr.markForCheck();
   }
 
@@ -3434,12 +3479,11 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         next: () => {
           this.timetableEventToDelete = null;
           this.showDeleteTimetableConfirm = false;
+          this.deleteTimetableError = null;
           this.loadTimetable();
         },
         error: (err) => {
-          this.timetableError = err?.error?.message || 'Грешка при изтриване';
-          this.timetableEventToDelete = null;
-          this.showDeleteTimetableConfirm = false;
+          this.deleteTimetableError = err?.error?.message || 'Грешка при изтриване';
           this.cdr.markForCheck();
         },
       });
@@ -3529,29 +3573,15 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     return type ? (labels[type] ?? type) : '-';
   }
 
-  getStatusLabel(status: string | undefined): string {
-    const labels: Record<string, string> = {
-      DRAFT: 'Чернова',
-      PLANNED: 'Планирано',
-      REGISTRATION_OPEN: 'Регистрация',
-      REGISTRATION_CLOSED: 'Затворена регистрация',
-      IN_PROGRESS: 'В ход',
-      COMPLETED: 'Приключило',
-      CANCELLED: 'Отменено',
-    };
-    return status ? (labels[status] ?? status) : '-';
+  getStatusLabel(status: string | null | undefined): string {
+    return status ? (STATUS_LABELS[status as ComputedCompetitionStatus] ?? status) : '-';
   }
 
-  getStatusClass(status: string | undefined): string {
-    const classes: Record<string, string> = {
-      DRAFT: 'text-gray-500',
-      PLANNED: 'text-blue-600',
-      REGISTRATION_OPEN: 'text-green-600',
-      REGISTRATION_CLOSED: 'text-orange-500',
-      IN_PROGRESS: 'text-bfg-blue font-semibold',
-      COMPLETED: 'text-gray-700',
-      CANCELLED: 'text-red-600',
-    };
-    return status ? (classes[status] ?? 'text-gray-900') : 'text-gray-900';
+  getStatusClass(status: string | null | undefined): string {
+    return status ? (STATUS_CLASSES[status as ComputedCompetitionStatus] ?? 'text-gray-900') : 'text-gray-900';
+  }
+
+  getComputedStatus(): string | null {
+    return this.competition ? computeCompetitionStatus(this.competition) : null;
   }
 }

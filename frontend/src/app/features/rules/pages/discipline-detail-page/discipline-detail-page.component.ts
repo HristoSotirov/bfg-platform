@@ -15,6 +15,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { CompetitionGroupDetailsDialogComponent } from '../../../competition-groups/components/competition-group-details-dialog/competition-group-details-dialog.component';
+import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   DisciplineDefinitionsService,
   DisciplineDefinitionDto,
@@ -41,6 +42,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
     DialogComponent,
     SearchableSelectDropdownComponent,
     CompetitionGroupDetailsDialogComponent,
+    DeleteConfirmDialogComponent,
   ],
   templateUrl: './discipline-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -59,6 +61,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
   deleting = false;
   saveError: string | null = null;
   showDeleteConfirmDialog = false;
+  deleteError: string | null = null;
 
   groupLookup: Record<string, string> = {};
 
@@ -304,13 +307,19 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
 
   confirmDelete(): void {
     this.showDeleteConfirmDialog = true;
+    this.deleteError = null;
+    this.cdr.markForCheck();
+  }
+
+  cancelDelete(): void {
+    this.showDeleteConfirmDialog = false;
+    this.deleteError = null;
     this.cdr.markForCheck();
   }
 
   deleteDiscipline(): void {
     if (!this.discipline?.uuid) return;
     this.deleting = true;
-    this.showDeleteConfirmDialog = false;
     this.cdr.markForCheck();
 
     this.disciplineDefinitionsService
@@ -327,7 +336,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
         next: () => { this.location.back(); },
         error: (err) => {
           this.deleting = false;
-          this.saveError = err?.message || 'Грешка при изтриване';
+          this.deleteError = err?.message || 'Грешка при изтриване';
           this.cdr.markForCheck();
         },
       });
