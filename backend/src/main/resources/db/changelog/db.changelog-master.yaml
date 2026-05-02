@@ -52,6 +52,8 @@ databaseChangeLog:
       file: db/changelog/001-initial-schema/020-competition-final-standings.yaml
   - include:
       file: db/changelog/001-initial-schema/021-athlete-weight-measurements.yaml
+  - include:
+      file: db/changelog/001-initial-schema/022-alter-final-standings.yaml
 
   # Functions and triggers
   - include:

@@ -9,7 +9,6 @@ import com.bfg.platform.gen.model.GetAllUsers200Response;
 import com.bfg.platform.gen.model.UserDto;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserUpdateRequest;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +51,7 @@ public class UserController implements UsersApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN')")
-    public ResponseEntity<UserDto> createUser(@Valid UserCreateRequest userCreateRequest) {
+    public ResponseEntity<UserDto> createUser(UserCreateRequest userCreateRequest) {
         return userService.createUser(userCreateRequest)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create user"));
@@ -60,7 +59,7 @@ public class UserController implements UsersApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<UserDto> patchUserByUuid(UUID userUuid, @Valid UserUpdateRequest userUpdateRequest) {
+    public ResponseEntity<UserDto> patchUserByUuid(UUID userUuid, UserUpdateRequest userUpdateRequest) {
         return userService.updateUser(userUuid, userUpdateRequest)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userUuid));

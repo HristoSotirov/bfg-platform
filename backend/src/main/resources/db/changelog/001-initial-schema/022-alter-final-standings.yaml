@@ -1,0 +1,17 @@
+databaseChangeLog:
+  - changeSet:
+      id: 023-alter-final-standings
+      author: bfg
+      changes:
+        - dropUniqueConstraint:
+            tableName: competition_final_standings
+            constraintName: uq_comp_standing_comp_disc_rank
+        - renameColumn:
+            tableName: competition_final_standings
+            oldColumnName: best_time_ms
+            newColumnName: time_ms
+            columnDataType: INTEGER
+        - dropNotNullConstraint:
+            tableName: competition_final_standings
+            columnName: time_ms
+            columnDataType: INTEGER

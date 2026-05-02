@@ -86,6 +86,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   columns: DisciplineColumnConfig[] = [
     { id: 'name', label: 'Име', visible: true },
     { id: 'shortName', label: 'Кратко име', visible: true },
+    { id: 'gender', label: 'Пол', visible: true },
     { id: 'competitionGroup', label: 'Състезателна група', visible: true },
     { id: 'boatClass', label: 'Клас лодка', visible: true },
     { id: 'crewSize', label: 'Размер екипаж', visible: true },
@@ -156,13 +157,13 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
 
   get canAddDiscipline(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
   get canEditDiscipline(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 

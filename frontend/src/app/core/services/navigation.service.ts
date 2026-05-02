@@ -35,7 +35,7 @@ export class NavigationService {
       id: 'competitions',
       label: 'Състезания',
       route: '/competitions',
-      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN'],
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'],
     },
     {
       id: 'results',

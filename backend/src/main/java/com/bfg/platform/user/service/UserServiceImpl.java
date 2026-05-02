@@ -4,6 +4,7 @@ import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.security.ResourceType;
 import com.bfg.platform.common.security.ScopeAccessPolicy;
@@ -47,6 +48,7 @@ public class UserServiceImpl implements UserService {
     public Page<UserDto> getAllUsers(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
         // Validate scope filter - throws 403 if invalid
         scopeAccessValidator.validateFilterScope(filter);
+        ExpandQueryParser.parse(expand, User.class);
 
         // No implicit filter override - use only user-provided filter
         Specification<User> filterSpec = UserQueryAdapter.parseFilter(filter);
@@ -58,6 +60,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public Optional<UserDto> getUserById(UUID uuid, List<String> expand) {
+        ExpandQueryParser.parse(expand, User.class);
         Optional<User> opt = userRepository.findById(uuid);
         if (opt.isEmpty()) {
             return Optional.empty();

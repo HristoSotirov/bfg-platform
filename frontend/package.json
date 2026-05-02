@@ -12,6 +12,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "17.3.0",
+    "@angular/cdk": "17.3.10",
     "@angular/common": "17.3.0",
     "@angular/compiler": "17.3.0",
     "@angular/core": "17.3.0",
@@ -21,6 +22,8 @@
     "@angular/router": "17.3.0",
     "@ngx-translate/core": "17.0.0",
     "@ngx-translate/http-loader": "17.0.0",
+    "chart.js": "4.5.1",
+    "ng2-charts": "5.0.4",
     "ngx-image-cropper": "9.1.6",
     "rxjs": "7.8.1",
     "tslib": "2.3.0",

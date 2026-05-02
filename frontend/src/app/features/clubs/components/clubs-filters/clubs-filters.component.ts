@@ -9,6 +9,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ClubFilters, ClubFilterConfig } from '../../clubs.component';
+import { ScopeType } from '../../../../core/services/api';
 import {
   MultiSelectDropdownComponent,
   DropdownOption,
@@ -50,9 +51,9 @@ export class ClubsFiltersComponent implements OnInit {
   ];
 
   readonly scopeTypeOptions: DropdownOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Външен' },
-    { value: 'NATIONAL', label: 'Национален' },
+    { value: ScopeType.Internal, label: 'Вътрешен' },
+    { value: ScopeType.External, label: 'Външен' },
+    { value: ScopeType.National, label: 'Национален' },
   ];
 
   ngOnInit(): void {

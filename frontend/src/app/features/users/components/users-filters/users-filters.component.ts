@@ -15,7 +15,7 @@ import {
 } from '../../../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 import { SearchBarComponent } from '../../../../shared/components/search-bar/search-bar.component';
 import { FilterToggleButtonComponent } from '../../../../shared/components/filter-toggle-button/filter-toggle-button.component';
-import { SystemRole } from '../../../../core/services/api';
+import { SystemRole, ScopeType } from '../../../../core/services/api';
 
 @Component({
   selector: 'app-users-filters',
@@ -47,10 +47,10 @@ export class UsersFiltersComponent implements OnInit {
   filtersExpanded = false; // Start collapsed on mobile
 
   readonly roleOptions: DropdownOption[] = [
-    { value: 'APP_ADMIN', label: 'Администратор' },
-    { value: 'FEDERATION_ADMIN', label: 'Администратор на федерацията' },
-    { value: 'CLUB_ADMIN', label: 'Администратор на клуб' },
-    { value: 'COACH', label: 'Треньор' },
+    { value: SystemRole.AppAdmin, label: 'Администратор' },
+    { value: SystemRole.FederationAdmin, label: 'Администратор на федерацията' },
+    { value: SystemRole.ClubAdmin, label: 'Администратор на клуб' },
+    { value: SystemRole.Coach, label: 'Треньор' },
   ];
 
   readonly statusOptions: DropdownOption[] = [
@@ -59,9 +59,9 @@ export class UsersFiltersComponent implements OnInit {
   ];
 
   readonly scopeTypeOptions: DropdownOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Външен' },
-    { value: 'NATIONAL', label: 'Национален' },
+    { value: ScopeType.Internal, label: 'Вътрешен' },
+    { value: ScopeType.External, label: 'Външен' },
+    { value: ScopeType.National, label: 'Национален' },
   ];
 
   ngOnInit(): void {

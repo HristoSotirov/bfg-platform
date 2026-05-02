@@ -13,12 +13,10 @@ import com.bfg.platform.gen.model.AthleteCreateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.common.util.PageConverter;
 import com.bfg.platform.gen.model.GetAllAccreditations200Response;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -58,7 +56,7 @@ public class AccreditationController implements AccreditationsApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('CLUB_ADMIN', 'COACH')")
-    public ResponseEntity<AthleteDto> createAthleteWithAccreditation(@Valid @RequestBody AthleteCreateRequest request) {
+    public ResponseEntity<AthleteDto> createAthleteWithAccreditation(AthleteCreateRequest request) {
         return accreditationService.createAthleteWithAccreditation(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new RuntimeException("Failed to create athlete with accreditation"));
@@ -67,7 +65,7 @@ public class AccreditationController implements AccreditationsApi {
     @Override
     @PreAuthorize("hasAnyAuthority('CLUB_ADMIN', 'COACH')")
     public ResponseEntity<AccreditationBatchRenewalResponse> batchRenewAccreditations(
-            @Valid AccreditationBatchRenewalRequest request) {
+            AccreditationBatchRenewalRequest request) {
         AccreditationBatchRenewalResponse response = 
                 accreditationService.batchRenewAccreditations(request);
         return ResponseEntity.ok(response);
@@ -75,7 +73,7 @@ public class AccreditationController implements AccreditationsApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<AthleteBatchMigrationResponse> batchMigrateAthletes(@Valid AthleteBatchMigrationRequest request) {
+    public ResponseEntity<AthleteBatchMigrationResponse> batchMigrateAthletes(AthleteBatchMigrationRequest request) {
         AthleteBatchMigrationResponse response = accreditationService.batchMigrateAthletes(request);
         return ResponseEntity.ok(response);
     }
@@ -84,7 +82,7 @@ public class AccreditationController implements AccreditationsApi {
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<AccreditationDto> patchAccreditationStatus(
             UUID accreditationUuid,
-            @Valid @RequestBody AccreditationStatusPatchRequest body) {
+            AccreditationStatusPatchRequest body) {
         return accreditationService.updateAccreditationStatus(accreditationUuid, body.getStatus())
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Accreditation", accreditationUuid));

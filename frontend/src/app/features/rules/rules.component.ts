@@ -113,31 +113,34 @@ export class RulesComponent implements OnInit, OnDestroy {
   groupsLoaded = false;
   groupLookup: Record<string, string> = {};
 
-  groupFilters: CompetitionGroupFilters = { search: '', genders: [], statuses: [] };
+  groupFilters: CompetitionGroupFilters = { search: '', statuses: [] };
   groupOrderBy: string[] = ['name_asc'];
 
   groupColumns: ColumnConfig[] = [
-    { id: 'name', label: 'Ime', visible: true },
-    { id: 'shortName', label: 'Кратко ime', visible: true },
-    { id: 'gender', label: 'Пол', visible: true },
+    { id: 'name', label: 'Име', visible: true },
+    { id: 'shortName', label: 'Кратко име', visible: true },
     { id: 'minAge', label: 'Мин. възраст', visible: true },
     { id: 'maxAge', label: 'Макс. възраст', visible: true },
+    { id: 'coxMinAge', label: 'Рулеви мин. възраст', visible: false },
+    { id: 'coxMaxAge', label: 'Рулеви макс. възраст', visible: false },
     { id: 'maxDisciplinesPerAthlete', label: 'Макс. дисциплини', visible: true },
     { id: 'transferFromGroupId', label: 'Трансфер от група', visible: true },
     { id: 'minCrewForTransfer', label: 'Мин. екипаж', visible: true },
     { id: 'transferRatio', label: 'Съотношение', visible: true },
     { id: 'transferRounding', label: 'Закръгляне', visible: true },
-    { id: 'transferredMaxDisciplinesPerPerson', label: 'Макс. дисц. (трансф.)', visible: true },
-    { id: 'coxRequiredWeightKg', label: 'Тегло кокс (изисквано)', visible: true },
-    { id: 'coxMinWeightKg', label: 'Тегло кокс (мин.)', visible: true },
-    { id: 'lightMaxWeightKg', label: 'Тегло лековес (макс.)', visible: true },
+    { id: 'transferredMaxDisciplinesPerAthlete', label: 'Макс. дисц. (трансф.)', visible: true },
+    { id: 'maleTeamCoxRequiredWeightKg', label: 'М. рулеви изискв. тегло', visible: true },
+    { id: 'maleTeamCoxMinWeightKg', label: 'М. рулеви мин. тегло', visible: true },
+    { id: 'maleTeamLightMaxWeightKg', label: 'М. лек макс. тегло', visible: true },
+    { id: 'femaleTeamCoxRequiredWeightKg', label: 'Ж. рулеви изискв. тегло', visible: true },
+    { id: 'femaleTeamCoxMinWeightKg', label: 'Ж. рулеви мин. тегло', visible: true },
+    { id: 'femaleTeamLightMaxWeightKg', label: 'Ж. лек макс. тегло', visible: true },
     { id: 'isActive', label: 'Статус', visible: true },
     { id: 'createdAt', label: 'Създаден на', visible: true },
     { id: 'modifiedAt', label: 'Променен на', visible: true },
   ];
 
   groupFilterConfigs: FilterConfig[] = [
-    { id: 'gender', label: 'Пол', visible: true },
     { id: 'status', label: 'Статус', visible: true },
   ];
 
@@ -277,7 +280,7 @@ export class RulesComponent implements OnInit, OnDestroy {
   }
 
   get canEdit(): boolean {
-    return this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN';
+    return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
   }
 
   readonly tabs: { id: RulesTab; label: string }[] = [
@@ -340,11 +343,6 @@ export class RulesComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [];
-    if (this.groupFilters.genders.length > 0) {
-      filterParts.push(this.groupFilters.genders.length === 1
-        ? `gender eq '${this.groupFilters.genders[0]}'`
-        : `(${this.groupFilters.genders.map(g => `gender eq '${g}'`).join(' or ')})`);
-    }
     if (this.groupFilters.statuses.length > 0) {
       filterParts.push(this.groupFilters.statuses.length === 1
         ? `isActive eq ${this.groupFilters.statuses[0]}`

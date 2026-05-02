@@ -15,9 +15,9 @@
 export const CompetitionEventStatus = {
     Scheduled: 'SCHEDULED',
     InProgress: 'IN_PROGRESS',
-    Finished: 'FINISHED',
-    Cancelled: 'CANCELLED',
-    Postponed: 'POSTPONED'
+    UnofficialResults: 'UNOFFICIAL_RESULTS',
+    OfficialResults: 'OFFICIAL_RESULTS',
+    Cancelled: 'CANCELLED'
 } as const;
 export type CompetitionEventStatus = typeof CompetitionEventStatus[keyof typeof CompetitionEventStatus];
 

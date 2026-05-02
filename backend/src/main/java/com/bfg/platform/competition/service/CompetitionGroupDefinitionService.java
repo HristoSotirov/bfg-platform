@@ -9,8 +9,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface CompetitionGroupDefinitionService {
-    Page<CompetitionGroupDefinitionDto> getAll(String filter, String search, List<String> orderBy, Integer top, Integer skip);
-    Optional<CompetitionGroupDefinitionDto> getByUuid(UUID uuid);
+    Page<CompetitionGroupDefinitionDto> getAll(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand);
+    Optional<CompetitionGroupDefinitionDto> getByUuid(UUID uuid, List<String> expand);
     Optional<CompetitionGroupDefinitionDto> create(CompetitionGroupDefinitionRequest request);
     Optional<CompetitionGroupDefinitionDto> update(UUID uuid, CompetitionGroupDefinitionRequest request);
     void delete(UUID uuid);

@@ -14,7 +14,7 @@
       title="Отвори страницата"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
       </svg>
     </a>
   }
@@ -40,16 +40,20 @@
                   <span class="text-sm font-medium break-all min-w-0">{{ group.shortName || "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Пол:</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ getGenderLabel(group.gender) }}</span>
-                </div>
-                <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.minAge != null ? group.minAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви мин. възраст:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinAge != null ? group.coxMinAge : "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви макс. възраст:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.coxMaxAge != null ? group.coxMaxAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисциплини:</span>
@@ -70,16 +74,28 @@
               <div class="pt-2 border-t border-gray-200">
                 <div class="space-y-1">
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Лек макс. тегло (кг):</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.lightMaxWeightKg != null ? group.lightMaxWeightKg : "-" }}</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. лек макс. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamLightMaxWeightKg != null ? group.maleTeamLightMaxWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви мин. тегло (кг):</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinWeightKg != null ? group.coxMinWeightKg : "-" }}</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. рулеви мин. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxMinWeightKg != null ? group.maleTeamCoxMinWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви изискв. тегло (кг):</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.coxRequiredWeightKg != null ? group.coxRequiredWeightKg : "-" }}</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. рулеви изискв. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxRequiredWeightKg != null ? group.maleTeamCoxRequiredWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. лек макс. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamLightMaxWeightKg != null ? group.femaleTeamLightMaxWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. рулеви мин. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxMinWeightKg != null ? group.femaleTeamCoxMinWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. рулеви изискв. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxRequiredWeightKg != null ? group.femaleTeamCoxRequiredWeightKg : "-" }}</span>
                   </div>
                 </div>
               </div>
@@ -118,16 +134,6 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Пол <span class="text-red-500">*</span>:</label>
-                <app-searchable-select-dropdown
-                  [options]="genderOptions"
-                  [placeholder]="'Изберете пол'"
-                  [ngModel]="editData.gender"
-                  (ngModelChange)="onGenderChange($event)"
-                  [disabled]="saving">
-                </app-searchable-select-dropdown>
-              </div>
-              <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Мин. възраст <span class="text-red-500">*</span>:</label>
                 <input
                   type="number"
@@ -140,6 +146,22 @@
                 <input
                   type="number"
                   [(ngModel)]="editData.maxAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Рулеви мин. възраст:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.coxMinAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Рулеви макс. възраст:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.coxMaxAge"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
               </div>
@@ -201,7 +223,7 @@
                   </div>
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисц. (трансф.):</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerPerson != null ? group.transferredMaxDisciplinesPerPerson : "-" }}</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerAthlete != null ? group.transferredMaxDisciplinesPerAthlete : "-" }}</span>
                   </div>
                 </div>
               </div>
@@ -257,36 +279,63 @@
                 <label class="block text-xs text-gray-500 mb-0.5">Макс. дисц. (трансф.):</label>
                 <input
                   type="number"
-                  [(ngModel)]="editData.transferredMaxDisciplinesPerPerson"
+                  [(ngModel)]="editData.transferredMaxDisciplinesPerAthlete"
                   min="1"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
               </div>
 
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Лек макс. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Лек макс. тегло (кг):</label>
                 <input
                   type="number"
                   step="0.1"
-                  [(ngModel)]="editData.lightMaxWeightKg"
+                  [(ngModel)]="editData.maleTeamLightMaxWeightKg"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Рулеви мин. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви мин. тегло (кг):</label>
                 <input
                   type="number"
                   step="0.1"
-                  [(ngModel)]="editData.coxMinWeightKg"
+                  [(ngModel)]="editData.maleTeamCoxMinWeightKg"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Рулеви изискв. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви изискв. тегло (кг):</label>
                 <input
                   type="number"
                   step="0.1"
-                  [(ngModel)]="editData.coxRequiredWeightKg"
+                  [(ngModel)]="editData.maleTeamCoxRequiredWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Лек макс. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.femaleTeamLightMaxWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви мин. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.femaleTeamCoxMinWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви изискв. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.femaleTeamCoxRequiredWeightKg"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
               </div>
@@ -460,7 +509,7 @@
       title="Отвори страницата"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
       </svg>
     </a>
   }
@@ -474,10 +523,6 @@
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
           <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.shortName || "-" }}</span>
-        </div>
-        <div class="flex items-baseline">
-          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Пол:</span>
-          <span class="text-sm font-medium break-all min-w-0">{{ getGenderLabel(transferGroup.gender) }}</span>
         </div>
         <div class="flex items-baseline">
           <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>

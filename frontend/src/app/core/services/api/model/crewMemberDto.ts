@@ -7,6 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { AccreditationDto } from './accreditationDto';
 import { SeatPosition } from './seatPosition';
 
 
@@ -17,8 +18,8 @@ export interface CrewMemberDto {
     uuid?: string;
     entryId?: string;
     seatPosition?: SeatPosition;
-    athleteId?: string;
-    cardNumber?: string;
+    accreditationId?: string;
+    accreditation?: AccreditationDto;
     createdAt?: string;
     modifiedAt?: string;
 }

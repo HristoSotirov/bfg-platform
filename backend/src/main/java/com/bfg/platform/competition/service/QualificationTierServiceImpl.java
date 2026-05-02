@@ -15,6 +15,7 @@ import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.gen.model.QualificationEventType;
 import com.bfg.platform.gen.model.QualificationTierDto;
 import com.bfg.platform.gen.model.QualificationTierRequest;
 import jakarta.persistence.EntityManager;
@@ -193,29 +194,24 @@ public class QualificationTierServiceImpl implements QualificationTierService {
     }
 
     private void generateProgressions(QualificationTier tier) {
-        // H -> SF
         if (tier.getHeatCount() > 0 && tier.getSemiFinalCount() > 0) {
-            createProgression(tier.getId(), "H", "SF");
+            createProgression(tier.getId(), QualificationEventType.H, QualificationEventType.SF);
         }
-        // H -> FA (only if no semi-finals)
         if (tier.getHeatCount() > 0 && tier.getSemiFinalCount() == 0 && tier.getFinalACount() > 0) {
-            createProgression(tier.getId(), "H", "FA");
+            createProgression(tier.getId(), QualificationEventType.H, QualificationEventType.FA);
         }
-        // H -> FB (only if no semi-finals)
         if (tier.getHeatCount() > 0 && tier.getSemiFinalCount() == 0 && tier.getFinalBCount() > 0) {
-            createProgression(tier.getId(), "H", "FB");
+            createProgression(tier.getId(), QualificationEventType.H, QualificationEventType.FB);
         }
-        // SF -> FA
         if (tier.getSemiFinalCount() > 0 && tier.getFinalACount() > 0) {
-            createProgression(tier.getId(), "SF", "FA");
+            createProgression(tier.getId(), QualificationEventType.SF, QualificationEventType.FA);
         }
-        // SF -> FB
         if (tier.getSemiFinalCount() > 0 && tier.getFinalBCount() > 0) {
-            createProgression(tier.getId(), "SF", "FB");
+            createProgression(tier.getId(), QualificationEventType.SF, QualificationEventType.FB);
         }
     }
 
-    private void createProgression(UUID tierId, String sourceEvent, String destEvent) {
+    private void createProgression(UUID tierId, QualificationEventType sourceEvent, QualificationEventType destEvent) {
         QualificationProgression progression = new QualificationProgression();
         progression.setQualificationTierId(tierId);
         progression.setSourceEvent(sourceEvent);

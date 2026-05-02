@@ -17,7 +17,6 @@ export interface AthleteWeightMeasurementDto {
     uuid?: string;
     athleteId?: string;
     weightKg?: number;
-    measurementDate?: string;
     role?: WeightMeasurementRole;
     createdAt?: string;
     modifiedAt?: string;

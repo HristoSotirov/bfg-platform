@@ -7,11 +7,10 @@ import com.bfg.platform.gen.api.CompetitionTimetableEventsApi;
 import com.bfg.platform.gen.model.CompetitionTimetableEventDto;
 import com.bfg.platform.gen.model.CompetitionTimetableEventRequest;
 import com.bfg.platform.gen.model.GetAllCompetitionTimetableEvents200Response;
-import jakarta.validation.Valid;
+import com.bfg.platform.gen.model.UpdateEventStatusRequest;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -34,7 +33,7 @@ public class CompetitionTimetableEventController implements CompetitionTimetable
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<CompetitionTimetableEventDto> createCompetitionTimetableEvent(
-            @Valid @RequestBody CompetitionTimetableEventRequest request) {
+            CompetitionTimetableEventRequest request) {
         return service.create(request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Competition timetable event", (UUID) null));
@@ -51,7 +50,7 @@ public class CompetitionTimetableEventController implements CompetitionTimetable
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<CompetitionTimetableEventDto> updateCompetitionTimetableEventByUuid(
-            UUID uuid, @Valid @RequestBody CompetitionTimetableEventRequest request) {
+            UUID uuid, CompetitionTimetableEventRequest request) {
         return service.update(uuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Competition timetable event", uuid));
@@ -62,5 +61,13 @@ public class CompetitionTimetableEventController implements CompetitionTimetable
     public ResponseEntity<Void> deleteCompetitionTimetableEventByUuid(UUID uuid) {
         service.delete(uuid);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
+    public ResponseEntity<CompetitionTimetableEventDto> updateCompetitionEventStatus(
+            UUID uuid, UpdateEventStatusRequest request) {
+        CompetitionTimetableEventDto result = service.updateEventStatus(uuid, request.getEventStatus());
+        return ResponseEntity.ok(result);
     }
 }

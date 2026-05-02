@@ -8,12 +8,10 @@ import com.bfg.platform.gen.api.ScoringSchemesApi;
 import com.bfg.platform.gen.model.GetAllScoringSchemes200Response;
 import com.bfg.platform.gen.model.ScoringSchemeDto;
 import com.bfg.platform.gen.model.ScoringSchemeRequest;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,7 +35,7 @@ public class ScoringSchemeController implements ScoringSchemesApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<ScoringSchemeDto> createScoringScheme(
-            @Valid @RequestBody ScoringSchemeRequest request) {
+            ScoringSchemeRequest request) {
         return service.create(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create scoring scheme"));
@@ -54,7 +52,7 @@ public class ScoringSchemeController implements ScoringSchemesApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<ScoringSchemeDto> updateScoringSchemeByUuid(
-            UUID uuid, @Valid @RequestBody ScoringSchemeRequest request) {
+            UUID uuid, ScoringSchemeRequest request) {
         return service.update(uuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Scoring scheme", uuid));

@@ -18,7 +18,6 @@ import {
   CompetitionGroupDefinitionDto,
   CompetitionGroupDefinitionRequest,
   CompetitionGroupDefinitionsService,
-  CompetitionGroupGender,
   TransferRounding,
 } from '../../../../core/services/api';
 import { takeUntil, Subject, catchError, throwError, Observable, map } from 'rxjs';
@@ -103,42 +102,44 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   editData: {
     name: string;
     shortName: string;
-    gender: CompetitionGroupGender;
     minAge: number | null;
     maxAge: number | null;
+    coxMinAge: number | null;
+    coxMaxAge: number | null;
     maxDisciplinesPerAthlete: number | null;
     transferFromGroupId: string;
     minCrewForTransfer: number | null;
     transferRatio: number | null;
     transferRounding: TransferRounding | '';
-    transferredMaxDisciplinesPerPerson: number | null;
-    coxRequiredWeightKg: number | null;
-    coxMinWeightKg: number | null;
-    lightMaxWeightKg: number | null;
+    transferredMaxDisciplinesPerAthlete: number | null;
+    maleTeamCoxRequiredWeightKg: number | null;
+    maleTeamCoxMinWeightKg: number | null;
+    maleTeamLightMaxWeightKg: number | null;
+    femaleTeamCoxRequiredWeightKg: number | null;
+    femaleTeamCoxMinWeightKg: number | null;
+    femaleTeamLightMaxWeightKg: number | null;
     isActive: boolean;
   } = {
     name: '',
     shortName: '',
-    gender: CompetitionGroupGender.Male,
     minAge: null,
     maxAge: null,
+    coxMinAge: null,
+    coxMaxAge: null,
     maxDisciplinesPerAthlete: null,
     transferFromGroupId: '',
     minCrewForTransfer: null,
     transferRatio: null,
     transferRounding: '',
-    transferredMaxDisciplinesPerPerson: null,
-    coxRequiredWeightKg: null,
-    coxMinWeightKg: null,
-    lightMaxWeightKg: null,
+    transferredMaxDisciplinesPerAthlete: null,
+    maleTeamCoxRequiredWeightKg: null,
+    maleTeamCoxMinWeightKg: null,
+    maleTeamLightMaxWeightKg: null,
+    femaleTeamCoxRequiredWeightKg: null,
+    femaleTeamCoxMinWeightKg: null,
+    femaleTeamLightMaxWeightKg: null,
     isActive: true,
   };
-
-  readonly genderOptions: SearchableSelectOption[] = [
-    { value: CompetitionGroupGender.Male, label: 'Мъже' },
-    { value: CompetitionGroupGender.Female, label: 'Жени' },
-    { value: CompetitionGroupGender.Mixed, label: 'Смесени' },
-  ];
 
   readonly statusOptions: SearchableSelectOption[] = [
     { value: 'true', label: 'Активен' },
@@ -164,16 +165,6 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     if (changes['isOpen'] && !this.isOpen) {
       this.destroy$.next();
     }
-  }
-
-  getGenderLabel(gender: CompetitionGroupGender | undefined): string {
-    if (!gender) return '-';
-    const labels: Record<string, string> = {
-      MALE: 'Мъже',
-      FEMALE: 'Жени',
-      MIXED: 'Смесени',
-    };
-    return labels[gender] ?? gender;
   }
 
   getRoundingLabel(rounding: TransferRounding | undefined): string {
@@ -222,7 +213,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
       .subscribe({
         next: (group) => {
           this.transferGroup = group;
-          this.transferGroupPermalinkRoute = ['/regulations/groups', group.uuid!];
+          this.transferGroupPermalinkRoute = this.permalinkRoute ? ['/regulations/groups', group.uuid!] : null;
           this.showTransferGroupDialog = true;
           this.cdr.markForCheck();
         },
@@ -251,18 +242,22 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     this.editData = {
       name: this.group.name || '',
       shortName: this.group.shortName || '',
-      gender: this.group.gender || CompetitionGroupGender.Male,
       minAge: this.group.minAge ?? null,
       maxAge: this.group.maxAge ?? null,
+      coxMinAge: this.group.coxMinAge ?? null,
+      coxMaxAge: this.group.coxMaxAge ?? null,
       maxDisciplinesPerAthlete: this.group.maxDisciplinesPerAthlete ?? null,
       transferFromGroupId: this.group.transferFromGroupId || '',
       minCrewForTransfer: this.group.minCrewForTransfer ?? null,
       transferRatio: this.group.transferRatio ?? null,
       transferRounding: this.group.transferRounding || '',
-      transferredMaxDisciplinesPerPerson: this.group.transferredMaxDisciplinesPerPerson ?? null,
-      coxRequiredWeightKg: this.group.coxRequiredWeightKg ?? null,
-      coxMinWeightKg: this.group.coxMinWeightKg ?? null,
-      lightMaxWeightKg: this.group.lightMaxWeightKg ?? null,
+      transferredMaxDisciplinesPerAthlete: this.group.transferredMaxDisciplinesPerAthlete ?? null,
+      maleTeamCoxRequiredWeightKg: this.group.maleTeamCoxRequiredWeightKg ?? null,
+      maleTeamCoxMinWeightKg: this.group.maleTeamCoxMinWeightKg ?? null,
+      maleTeamLightMaxWeightKg: this.group.maleTeamLightMaxWeightKg ?? null,
+      femaleTeamCoxRequiredWeightKg: this.group.femaleTeamCoxRequiredWeightKg ?? null,
+      femaleTeamCoxMinWeightKg: this.group.femaleTeamCoxMinWeightKg ?? null,
+      femaleTeamLightMaxWeightKg: this.group.femaleTeamLightMaxWeightKg ?? null,
       isActive: this.group.isActive ?? true,
     };
     this.isEditing = true;
@@ -272,11 +267,6 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   cancelEditing(): void {
     this.isEditing = false;
     this.error = null;
-    this.cdr.markForCheck();
-  }
-
-  onGenderChange(value: string | null): void {
-    this.editData.gender = (value as CompetitionGroupGender) || CompetitionGroupGender.Male;
     this.cdr.markForCheck();
   }
 
@@ -300,18 +290,22 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     const request: CompetitionGroupDefinitionRequest = {
       name: this.editData.name,
       shortName: this.editData.shortName,
-      gender: this.editData.gender,
       minAge: this.editData.minAge ?? 0,
       maxAge: this.editData.maxAge ?? 0,
+      coxMinAge: this.editData.coxMinAge ?? undefined,
+      coxMaxAge: this.editData.coxMaxAge ?? undefined,
       maxDisciplinesPerAthlete: this.editData.maxDisciplinesPerAthlete ?? 1,
       transferFromGroupId: this.editData.transferFromGroupId || undefined,
       minCrewForTransfer: this.editData.minCrewForTransfer ?? undefined,
       transferRatio: this.editData.transferRatio ?? undefined,
       transferRounding: (this.editData.transferRounding as TransferRounding) || undefined,
-      transferredMaxDisciplinesPerPerson: this.editData.transferredMaxDisciplinesPerPerson ?? undefined,
-      coxRequiredWeightKg: this.editData.coxRequiredWeightKg ?? undefined,
-      coxMinWeightKg: this.editData.coxMinWeightKg ?? undefined,
-      lightMaxWeightKg: this.editData.lightMaxWeightKg ?? undefined,
+      transferredMaxDisciplinesPerAthlete: this.editData.transferredMaxDisciplinesPerAthlete ?? undefined,
+      maleTeamCoxRequiredWeightKg: this.editData.maleTeamCoxRequiredWeightKg ?? undefined,
+      maleTeamCoxMinWeightKg: this.editData.maleTeamCoxMinWeightKg ?? undefined,
+      maleTeamLightMaxWeightKg: this.editData.maleTeamLightMaxWeightKg ?? undefined,
+      femaleTeamCoxRequiredWeightKg: this.editData.femaleTeamCoxRequiredWeightKg ?? undefined,
+      femaleTeamCoxMinWeightKg: this.editData.femaleTeamCoxMinWeightKg ?? undefined,
+      femaleTeamLightMaxWeightKg: this.editData.femaleTeamLightMaxWeightKg ?? undefined,
       isActive: this.editData.isActive,
     };
 

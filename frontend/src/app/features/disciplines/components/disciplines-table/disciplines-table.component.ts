@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { DisciplineDefinitionDto } from '../../../../core/services/api';
+import { DisciplineDefinitionDto, DisciplineGender } from '../../../../core/services/api';
 import { DisciplineColumnConfig } from '../../disciplines.component';
 
 @Component({
@@ -96,6 +96,10 @@ export class DisciplinesTableComponent implements OnInit {
         return discipline.name || '-';
       case 'shortName':
         return discipline.shortName || '-';
+      case 'gender': {
+        const g = discipline.gender;
+        return g === DisciplineGender.Male ? 'Мъже' : g === DisciplineGender.Female ? 'Жени' : g === DisciplineGender.Mixed ? 'Смесени' : '-';
+      }
       case 'boatClass':
         return discipline.boatClass || '-';
       case 'crewSize':

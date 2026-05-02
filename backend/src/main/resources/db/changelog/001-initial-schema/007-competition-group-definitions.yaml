@@ -25,12 +25,6 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: gender
-                  type: VARCHAR(10)
-                  constraints:
-                    nullable: false
-                  remarks: "MALE, FEMALE, or MIXED"
-              - column:
                   name: min_age
                   type: INTEGER
                   constraints:
@@ -38,6 +32,14 @@ databaseChangeLog:
               - column:
                   name: max_age
                   type: INTEGER
+              - column:
+                  name: cox_min_age
+                  type: INTEGER
+                  remarks: "Minimum age for coxswain - nullable, falls back to min_age"
+              - column:
+                  name: cox_max_age
+                  type: INTEGER
+                  remarks: "Maximum age for coxswain - nullable, falls back to max_age"
               - column:
                   name: max_disciplines_per_athlete
                   type: INTEGER
@@ -56,20 +58,32 @@ databaseChangeLog:
                   name: transfer_rounding
                   type: VARCHAR(20)
               - column:
-                  name: transferred_max_disciplines_per_person
+                  name: transferred_max_disciplines_per_athlete
                   type: INTEGER
               - column:
-                  name: cox_required_weight_kg
+                  name: male_team_cox_required_weight_kg
                   type: NUMERIC(5,2)
-                  remarks: "Recommended weight for coxswain"
+                  remarks: "Recommended cox weight for male team"
               - column:
-                  name: cox_min_weight_kg
+                  name: male_team_cox_min_weight_kg
                   type: NUMERIC(5,2)
-                  remarks: "Minimal allowed weight for coxswain"
+                  remarks: "Minimal allowed cox weight for male team"
               - column:
-                  name: light_max_weight_kg
+                  name: male_team_light_max_weight_kg
                   type: NUMERIC(5,2)
-                  remarks: "Maximum allowed weight for lightweight rowers"
+                  remarks: "Maximum allowed weight for male team lightweight rowers"
+              - column:
+                  name: female_team_cox_required_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Recommended cox weight for female team"
+              - column:
+                  name: female_team_cox_min_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Minimal allowed cox weight for female team"
+              - column:
+                  name: female_team_light_max_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Maximum allowed weight for female team lightweight rowers"
               - column:
                   name: is_active
                   type: BOOLEAN

@@ -22,11 +22,11 @@ import {
   CompetitionGroupDefinitionsService,
   CompetitionGroupDefinitionDto,
   CompetitionGroupDefinitionRequest,
-  CompetitionGroupGender,
   TransferRounding,
   DisciplineDefinitionsService,
   DisciplineDefinitionDto,
   DisciplineDefinitionRequest,
+  DisciplineGender,
 } from '../../../../core/services/api';
 import { BoatClass } from '../../../../core/services/api/model/boatClass';
 import { AuthService } from '../../../../core/services/auth.service';
@@ -80,42 +80,44 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   editData: {
     name: string;
     shortName: string;
-    gender: CompetitionGroupGender;
     minAge: number | null;
     maxAge: number | null;
+    coxMinAge: number | null;
+    coxMaxAge: number | null;
     maxDisciplinesPerAthlete: number | null;
     transferFromGroupId: string;
     minCrewForTransfer: number | null;
     transferRatio: number | null;
     transferRounding: TransferRounding | '';
-    transferredMaxDisciplinesPerPerson: number | null;
-    coxRequiredWeightKg: number | null;
-    coxMinWeightKg: number | null;
-    lightMaxWeightKg: number | null;
+    transferredMaxDisciplinesPerAthlete: number | null;
+    maleTeamCoxRequiredWeightKg: number | null;
+    maleTeamCoxMinWeightKg: number | null;
+    maleTeamLightMaxWeightKg: number | null;
+    femaleTeamCoxRequiredWeightKg: number | null;
+    femaleTeamCoxMinWeightKg: number | null;
+    femaleTeamLightMaxWeightKg: number | null;
     isActive: boolean;
   } = {
     name: '',
     shortName: '',
-    gender: CompetitionGroupGender.Male,
     minAge: null,
     maxAge: null,
+    coxMinAge: null,
+    coxMaxAge: null,
     maxDisciplinesPerAthlete: null,
     transferFromGroupId: '',
     minCrewForTransfer: null,
     transferRatio: null,
     transferRounding: '',
-    transferredMaxDisciplinesPerPerson: null,
-    coxRequiredWeightKg: null,
-    coxMinWeightKg: null,
-    lightMaxWeightKg: null,
+    transferredMaxDisciplinesPerAthlete: null,
+    maleTeamCoxRequiredWeightKg: null,
+    maleTeamCoxMinWeightKg: null,
+    maleTeamLightMaxWeightKg: null,
+    femaleTeamCoxRequiredWeightKg: null,
+    femaleTeamCoxMinWeightKg: null,
+    femaleTeamLightMaxWeightKg: null,
     isActive: true,
   };
-
-  readonly genderOptions: SearchableSelectOption[] = [
-    { value: CompetitionGroupGender.Male, label: 'Мъже' },
-    { value: CompetitionGroupGender.Female, label: 'Жени' },
-    { value: CompetitionGroupGender.Mixed, label: 'Смесени' },
-  ];
 
   readonly statusOptions: SearchableSelectOption[] = [
     { value: 'true', label: 'Активен' },
@@ -162,15 +164,17 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   disciplineEditData: {
     name: string;
     shortName: string;
+    gender: string;
     boatClass: string;
     maxCrewFromTransfer: number | null;
     isLightweight: string;
     distanceMeters: number | null;
+    maxBoatsPerClub: number | null;
     isActive: string;
   } = {
-    name: '', shortName: '', boatClass: '',
+    name: '', shortName: '', gender: '', boatClass: '',
     maxCrewFromTransfer: null, isLightweight: 'false',
-    distanceMeters: null, isActive: 'true',
+    distanceMeters: null, maxBoatsPerClub: null, isActive: 'true',
   };
 
   readonly getBoatClassLabel = getBoatClassLabel;
@@ -182,6 +186,12 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     { value: 'QUAD', label: '4X' }, { value: 'COXED_QUAD', label: '4X+' },
     { value: 'COXED_FOUR', label: '4+' }, { value: 'FOUR', label: '4-' },
     { value: 'EIGHT', label: '8+' }, { value: 'ERGO', label: 'ERGO' },
+  ];
+
+  readonly disciplineGenderOptions: SearchableSelectOption[] = [
+    { value: DisciplineGender.Male, label: 'Мъже' },
+    { value: DisciplineGender.Female, label: 'Жени' },
+    { value: DisciplineGender.Mixed, label: 'Смесени' },
   ];
 
   readonly booleanOptions: SearchableSelectOption[] = [
@@ -261,7 +271,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   get canEdit(): boolean {
     const user = this.authService.currentUser;
     if (!user) return false;
-    return user.roles.some(r => r === 'APP_ADMIN' || r === 'FEDERATION_ADMIN');
+    return user.roles.some(r => r === SystemRole.AppAdmin || r === SystemRole.FederationAdmin);
   }
 
   private loadGroup(uuid: string): void {
@@ -349,10 +359,12 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     this.disciplineEditData = {
       name: d.name || '',
       shortName: d.shortName || '',
+      gender: d.gender || '',
       boatClass: d.boatClass || '',
       maxCrewFromTransfer: d.maxCrewFromTransfer ?? null,
       isLightweight: d.isLightweight ? 'true' : 'false',
       distanceMeters: d.distanceMeters ?? null,
+      maxBoatsPerClub: d.maxBoatsPerClub ?? null,
       isActive: d.isActive ? 'true' : 'false',
     };
     this.cdr.markForCheck();
@@ -371,10 +383,12 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       name: this.disciplineEditData.name,
       shortName: this.disciplineEditData.shortName,
       competitionGroupId: this.group!.uuid!,
+      gender: this.disciplineEditData.gender as DisciplineGender,
       boatClass: this.disciplineEditData.boatClass as BoatClass,
       maxCrewFromTransfer: this.disciplineEditData.maxCrewFromTransfer ?? 0,
       isLightweight: this.disciplineEditData.isLightweight === 'true',
       distanceMeters: this.disciplineEditData.distanceMeters ?? 0,
+      maxBoatsPerClub: this.disciplineEditData.maxBoatsPerClub ?? 1,
       isActive: this.disciplineEditData.isActive === 'true',
     };
     this.disciplineDefinitionsService
@@ -449,12 +463,6 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     this.loadDisciplines();
   }
 
-  getGenderLabel(gender: CompetitionGroupGender | undefined): string {
-    if (!gender) return '-';
-    const labels: Record<string, string> = { MALE: 'Мъже', FEMALE: 'Жени', MIXED: 'Смесени' };
-    return labels[gender] ?? gender;
-  }
-
   getRoundingLabel(rounding: TransferRounding | undefined): string {
     if (!rounding) return '-';
     const labels: Record<string, string> = {
@@ -518,18 +526,22 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     this.editData = {
       name: this.group.name || '',
       shortName: this.group.shortName || '',
-      gender: this.group.gender || CompetitionGroupGender.Male,
       minAge: this.group.minAge ?? null,
       maxAge: this.group.maxAge ?? null,
+      coxMinAge: this.group.coxMinAge ?? null,
+      coxMaxAge: this.group.coxMaxAge ?? null,
       maxDisciplinesPerAthlete: this.group.maxDisciplinesPerAthlete ?? null,
       transferFromGroupId: this.group.transferFromGroupId || '',
       minCrewForTransfer: this.group.minCrewForTransfer ?? null,
       transferRatio: this.group.transferRatio ?? null,
       transferRounding: this.group.transferRounding || '',
-      transferredMaxDisciplinesPerPerson: this.group.transferredMaxDisciplinesPerPerson ?? null,
-      coxRequiredWeightKg: this.group.coxRequiredWeightKg ?? null,
-      coxMinWeightKg: this.group.coxMinWeightKg ?? null,
-      lightMaxWeightKg: this.group.lightMaxWeightKg ?? null,
+      transferredMaxDisciplinesPerAthlete: this.group.transferredMaxDisciplinesPerAthlete ?? null,
+      maleTeamCoxRequiredWeightKg: this.group.maleTeamCoxRequiredWeightKg ?? null,
+      maleTeamCoxMinWeightKg: this.group.maleTeamCoxMinWeightKg ?? null,
+      maleTeamLightMaxWeightKg: this.group.maleTeamLightMaxWeightKg ?? null,
+      femaleTeamCoxRequiredWeightKg: this.group.femaleTeamCoxRequiredWeightKg ?? null,
+      femaleTeamCoxMinWeightKg: this.group.femaleTeamCoxMinWeightKg ?? null,
+      femaleTeamLightMaxWeightKg: this.group.femaleTeamLightMaxWeightKg ?? null,
       isActive: this.group.isActive ?? true,
     };
     this.isEditing = true;
@@ -539,11 +551,6 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   cancelEditing(): void {
     this.isEditing = false;
     this.saveError = null;
-    this.cdr.markForCheck();
-  }
-
-  onGenderChange(value: string | null): void {
-    this.editData.gender = (value as CompetitionGroupGender) || CompetitionGroupGender.Male;
     this.cdr.markForCheck();
   }
 
@@ -566,18 +573,22 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     const request: CompetitionGroupDefinitionRequest = {
       name: this.editData.name,
       shortName: this.editData.shortName,
-      gender: this.editData.gender,
       minAge: this.editData.minAge ?? 0,
       maxAge: this.editData.maxAge ?? 0,
+      coxMinAge: this.editData.coxMinAge ?? undefined,
+      coxMaxAge: this.editData.coxMaxAge ?? undefined,
       maxDisciplinesPerAthlete: this.editData.maxDisciplinesPerAthlete ?? 1,
       transferFromGroupId: this.editData.transferFromGroupId || undefined,
       minCrewForTransfer: this.editData.minCrewForTransfer ?? undefined,
       transferRatio: this.editData.transferRatio ?? undefined,
       transferRounding: (this.editData.transferRounding as TransferRounding) || undefined,
-      transferredMaxDisciplinesPerPerson: this.editData.transferredMaxDisciplinesPerPerson ?? undefined,
-      coxRequiredWeightKg: this.editData.coxRequiredWeightKg ?? undefined,
-      coxMinWeightKg: this.editData.coxMinWeightKg ?? undefined,
-      lightMaxWeightKg: this.editData.lightMaxWeightKg ?? undefined,
+      transferredMaxDisciplinesPerAthlete: this.editData.transferredMaxDisciplinesPerAthlete ?? undefined,
+      maleTeamCoxRequiredWeightKg: this.editData.maleTeamCoxRequiredWeightKg ?? undefined,
+      maleTeamCoxMinWeightKg: this.editData.maleTeamCoxMinWeightKg ?? undefined,
+      maleTeamLightMaxWeightKg: this.editData.maleTeamLightMaxWeightKg ?? undefined,
+      femaleTeamCoxRequiredWeightKg: this.editData.femaleTeamCoxRequiredWeightKg ?? undefined,
+      femaleTeamCoxMinWeightKg: this.editData.femaleTeamCoxMinWeightKg ?? undefined,
+      femaleTeamLightMaxWeightKg: this.editData.femaleTeamLightMaxWeightKg ?? undefined,
       isActive: this.editData.isActive,
     };
 

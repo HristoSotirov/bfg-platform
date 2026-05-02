@@ -29,9 +29,10 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
-                  name: finish_status
+                  name: participation_status
                   type: VARCHAR(20)
-                  remarks: "OK, DNS, DNF, DSQ"
+                  remarks: "REGISTERED, CHECKED_IN, DNS, DNF, DSQ, FINISHED"
+                  defaultValue: REGISTERED
               - column:
                   name: finish_time_ms
                   type: INTEGER
@@ -54,10 +55,14 @@ databaseChangeLog:
             tableName: competition_participations
             columnNames: competition_event_id, lane
             constraintName: uq_participation_event_lane
+            deferrable: true
+            initiallyDeferred: true
         - addUniqueConstraint:
             tableName: competition_participations
             columnNames: competition_event_id, entry_id
             constraintName: uq_participation_event_entry
+            deferrable: true
+            initiallyDeferred: true
         - addForeignKeyConstraint:
             baseTableName: competition_participations
             baseColumnNames: competition_event_id
@@ -71,4 +76,4 @@ databaseChangeLog:
             referencedTableName: entries
             referencedColumnNames: id
             constraintName: fk_participation_entry
-            onDelete: RESTRICT
+            onDelete: CASCADE

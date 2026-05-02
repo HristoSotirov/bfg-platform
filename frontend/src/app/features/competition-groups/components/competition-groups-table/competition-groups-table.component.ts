@@ -9,7 +9,6 @@ import {
 import { CommonModule } from '@angular/common';
 import {
   CompetitionGroupDefinitionDto,
-  CompetitionGroupGender,
 } from '../../../../core/services/api';
 import { ColumnConfig } from '../../competition-groups.component';
 
@@ -87,12 +86,14 @@ export class CompetitionGroupsTableComponent implements OnInit {
         return group.name || '-';
       case 'shortName':
         return group.shortName || '-';
-      case 'gender':
-        return this.getGenderLabel(group.gender);
       case 'minAge':
         return group.minAge != null ? String(group.minAge) : '-';
       case 'maxAge':
         return group.maxAge != null ? String(group.maxAge) : '-';
+      case 'coxMinAge':
+        return group.coxMinAge != null ? String(group.coxMinAge) : '-';
+      case 'coxMaxAge':
+        return group.coxMaxAge != null ? String(group.coxMaxAge) : '-';
       case 'maxDisciplinesPerAthlete':
         return group.maxDisciplinesPerAthlete != null ? String(group.maxDisciplinesPerAthlete) : '-';
       case 'transferFromGroupId':
@@ -103,14 +104,20 @@ export class CompetitionGroupsTableComponent implements OnInit {
         return group.transferRatio != null ? String(group.transferRatio) : '-';
       case 'transferRounding':
         return this.getRoundingLabel(group.transferRounding);
-      case 'transferredMaxDisciplinesPerPerson':
-        return group.transferredMaxDisciplinesPerPerson != null ? String(group.transferredMaxDisciplinesPerPerson) : '-';
-      case 'coxRequiredWeightKg':
-        return group.coxRequiredWeightKg != null ? String(group.coxRequiredWeightKg) : '-';
-      case 'coxMinWeightKg':
-        return group.coxMinWeightKg != null ? String(group.coxMinWeightKg) : '-';
-      case 'lightMaxWeightKg':
-        return group.lightMaxWeightKg != null ? String(group.lightMaxWeightKg) : '-';
+      case 'transferredMaxDisciplinesPerAthlete':
+        return group.transferredMaxDisciplinesPerAthlete != null ? String(group.transferredMaxDisciplinesPerAthlete) : '-';
+      case 'maleTeamCoxRequiredWeightKg':
+        return group.maleTeamCoxRequiredWeightKg != null ? String(group.maleTeamCoxRequiredWeightKg) : '-';
+      case 'maleTeamCoxMinWeightKg':
+        return group.maleTeamCoxMinWeightKg != null ? String(group.maleTeamCoxMinWeightKg) : '-';
+      case 'maleTeamLightMaxWeightKg':
+        return group.maleTeamLightMaxWeightKg != null ? String(group.maleTeamLightMaxWeightKg) : '-';
+      case 'femaleTeamCoxRequiredWeightKg':
+        return group.femaleTeamCoxRequiredWeightKg != null ? String(group.femaleTeamCoxRequiredWeightKg) : '-';
+      case 'femaleTeamCoxMinWeightKg':
+        return group.femaleTeamCoxMinWeightKg != null ? String(group.femaleTeamCoxMinWeightKg) : '-';
+      case 'femaleTeamLightMaxWeightKg':
+        return group.femaleTeamLightMaxWeightKg != null ? String(group.femaleTeamLightMaxWeightKg) : '-';
       case 'isActive':
         return group.isActive ? 'Активен' : 'Неактивен';
       case 'createdAt':
@@ -130,16 +137,6 @@ export class CompetitionGroupsTableComponent implements OnInit {
     } catch {
       return dateStr;
     }
-  }
-
-  getGenderLabel(gender: CompetitionGroupGender | undefined): string {
-    if (!gender) return '-';
-    const labels: Record<string, string> = {
-      MALE: 'Мъже',
-      FEMALE: 'Жени',
-      MIXED: 'Смесени',
-    };
-    return labels[gender] ?? gender;
   }
 
   getRoundingLabel(rounding: string | undefined): string {

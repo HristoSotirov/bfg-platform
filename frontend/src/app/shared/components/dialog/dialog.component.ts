@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'fullscreen';
 
 @Component({
   selector: 'app-dialog',
@@ -28,6 +28,7 @@ type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
           <div class="flex items-center gap-1 flex-shrink-0">
             <ng-content select="[slot=header-extra]"></ng-content>
             <button
+              *ngIf="!preventBackdropClose"
               type="button"
               class="text-gray-400 hover:text-gray-600 transition-colors"
               (click)="close()"
@@ -79,6 +80,17 @@ type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
         min-height: 0;
         overflow-y: auto;
       }
+      .dialog-fullscreen {
+        width: 95vw;
+        max-height: 90vh;
+      }
+      @media (min-width: 1024px) {
+        .dialog-fullscreen {
+          width: min(85vw, 85vh);
+          height: min(85vh, 85vw);
+          max-height: none;
+        }
+      }
     `,
   ],
 })
@@ -89,12 +101,13 @@ export class DialogComponent {
   /** When true, body has no scroll (overflow hidden). Use when content is fixed height. */
   @Input() noScroll = false;
   @Input() tall = false;
+  @Input() preventBackdropClose = false;
   @Output() closed = new EventEmitter<void>();
 
   get dialogClasses(): string {
     const baseClasses =
       'relative bg-white rounded-lg shadow-xl w-full overflow-hidden flex flex-col';
-    const heightClasses = this.tall ? 'h-[90vh]' : 'max-h-[90vh]';
+    const heightClasses = this.size === 'fullscreen' ? '' : this.tall ? 'h-[90vh]' : 'max-h-[90vh]';
 
     const sizeClasses: Record<DialogSize, string> = {
       sm: 'max-w-sm',
@@ -102,6 +115,7 @@ export class DialogComponent {
       lg: 'max-w-2xl',
       xl: 'max-w-4xl',
       '2xl': 'max-w-6xl',
+      fullscreen: 'dialog-fullscreen',
     };
 
     return `${baseClasses} ${heightClasses} ${sizeClasses[this.size]}`;
@@ -112,7 +126,7 @@ export class DialogComponent {
   }
 
   onBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
+    if (event.target === event.currentTarget && !this.preventBackdropClose) {
       this.close();
     }
   }

@@ -7,7 +7,6 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { CompetitionGroupGender } from './competitionGroupGender';
 import { TransferRounding } from './transferRounding';
 
 
@@ -17,9 +16,16 @@ import { TransferRounding } from './transferRounding';
 export interface CompetitionGroupDefinitionRequest { 
     name: string;
     shortName: string;
-    gender: CompetitionGroupGender;
     minAge: number;
     maxAge: number;
+    /**
+     * Nullable - minimum age for coxswain, falls back to minAge if null
+     */
+    coxMinAge?: number;
+    /**
+     * Nullable - maximum age for coxswain, falls back to maxAge if null
+     */
+    coxMaxAge?: number;
     maxDisciplinesPerAthlete: number;
     /**
      * Nullable - all transfer fields must be set together or all null
@@ -37,16 +43,25 @@ export interface CompetitionGroupDefinitionRequest {
     /**
      * Nullable - all transfer fields must be set together or all null
      */
-    transferredMaxDisciplinesPerPerson?: number;
+    transferredMaxDisciplinesPerAthlete?: number;
     /**
-     * Nullable - both cox weight fields must be set together or both null
+     * Nullable - both male team cox weight fields must be set together or both null
      */
-    coxRequiredWeightKg?: number;
+    maleTeamCoxRequiredWeightKg?: number;
     /**
-     * Nullable - both cox weight fields must be set together or both null
+     * Nullable - both male team cox weight fields must be set together or both null
      */
-    coxMinWeightKg?: number;
-    lightMaxWeightKg?: number;
+    maleTeamCoxMinWeightKg?: number;
+    maleTeamLightMaxWeightKg?: number;
+    /**
+     * Nullable - both female team cox weight fields must be set together or both null
+     */
+    femaleTeamCoxRequiredWeightKg?: number;
+    /**
+     * Nullable - both female team cox weight fields must be set together or both null
+     */
+    femaleTeamCoxMinWeightKg?: number;
+    femaleTeamLightMaxWeightKg?: number;
     isActive: boolean;
 }
 export namespace CompetitionGroupDefinitionRequest {

@@ -8,7 +8,6 @@ import com.bfg.platform.gen.model.ClubCoachDto;
 import com.bfg.platform.gen.model.ClubDto;
 import com.bfg.platform.common.util.PageConverter;
 import com.bfg.platform.gen.model.GetClubCoaches200Response;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -41,7 +40,7 @@ public class ClubCoachController implements ClubCoachesApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN')")
-    public ResponseEntity<ClubCoachDto> assignCoachToClub(@Valid ClubCoachCreateRequest clubCoachCreateRequest) {
+    public ResponseEntity<ClubCoachDto> assignCoachToClub(ClubCoachCreateRequest clubCoachCreateRequest) {
         return clubCoachService.assignCoachToClub(clubCoachCreateRequest)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to assign coach to club"));

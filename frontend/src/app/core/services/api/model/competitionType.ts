@@ -13,9 +13,9 @@
  * Type/format of the competition
  */
 export const CompetitionType = {
-    Standard: 'STANDARD',
     Erg: 'ERG',
-    NationalTeamTest: 'NATIONAL_TEAM_TEST'
+    NationalWater: 'NATIONAL_WATER',
+    Balkan: 'BALKAN'
 } as const;
 export type CompetitionType = typeof CompetitionType[keyof typeof CompetitionType];
 

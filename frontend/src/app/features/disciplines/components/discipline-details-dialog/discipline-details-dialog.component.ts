@@ -23,6 +23,7 @@ import {
   CompetitionGroupDefinitionDto,
 } from '../../../../core/services/api';
 import { BoatClass } from '../../../../core/services/api/model/boatClass';
+import { DisciplineGender } from '../../../../core/services/api/model/disciplineGender';
 import {
   takeUntil,
   Subject,
@@ -69,11 +70,13 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   editData = {
     name: '',
     shortName: '',
+    gender: '' as string,
     competitionGroupId: '',
     boatClass: '' as string,
     maxCrewFromTransfer: 0,
     isLightweight: false,
     distanceMeters: 2000,
+    maxBoatsPerClub: 1,
     isActive: true,
   };
 
@@ -99,6 +102,12 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     { value: 'FOUR', label: '4-' },
     { value: 'EIGHT', label: '8+' },
     { value: 'ERGO', label: 'ERGO' },
+  ];
+
+  readonly genderOptions: SearchableSelectOption[] = [
+    { value: DisciplineGender.Male, label: 'Мъже' },
+    { value: DisciplineGender.Female, label: 'Жени' },
+    { value: DisciplineGender.Mixed, label: 'Смесени' },
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
@@ -144,7 +153,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
       .subscribe({
         next: (group) => {
           this.selectedGroup = group;
-          this.groupPermalinkRoute = ['/regulations/groups', group.uuid!];
+          this.groupPermalinkRoute = this.permalinkRoute ? ['/regulations/groups', group.uuid!] : null;
           this.showGroupDialog = true;
           this.cdr.markForCheck();
         },
@@ -190,11 +199,13 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     this.editData = {
       name: this.discipline.name || '',
       shortName: this.discipline.shortName || '',
+      gender: this.discipline.gender || '',
       competitionGroupId: this.discipline.competitionGroupId || '',
       boatClass: this.discipline.boatClass || '',
       maxCrewFromTransfer: this.discipline.maxCrewFromTransfer ?? 0,
       isLightweight: this.discipline.isLightweight ?? false,
       distanceMeters: this.discipline.distanceMeters ?? 2000,
+      maxBoatsPerClub: this.discipline.maxBoatsPerClub ?? 1,
       isActive: this.discipline.isActive ?? true,
     };
     this.isEditing = true;
@@ -214,6 +225,11 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
 
   onBoatClassChange(value: string | null): void {
     this.editData.boatClass = value || '';
+    this.cdr.markForCheck();
+  }
+
+  onGenderChange(value: string | null): void {
+    this.editData.gender = value || '';
     this.cdr.markForCheck();
   }
 
@@ -237,11 +253,13 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     const request: DisciplineDefinitionRequest = {
       name: this.editData.name,
       shortName: this.editData.shortName,
+      gender: this.editData.gender as DisciplineGender,
       competitionGroupId: this.editData.competitionGroupId,
       boatClass: this.editData.boatClass as BoatClass,
       maxCrewFromTransfer: this.editData.maxCrewFromTransfer,
       isLightweight: this.editData.isLightweight,
       distanceMeters: this.editData.distanceMeters,
+      maxBoatsPerClub: this.editData.maxBoatsPerClub,
       isActive: this.editData.isActive,
     };
 

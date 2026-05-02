@@ -24,6 +24,7 @@ import {
   UsersService,
   UserDto,
   ClubCoachCreateRequest,
+  ScopeType,
 } from '../../../../core/services/api';
 import {
   takeUntil,
@@ -170,7 +171,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
 
   get canUploadLogo(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
@@ -195,9 +196,9 @@ export class ClubDetailsDialogComponent implements OnChanges {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }

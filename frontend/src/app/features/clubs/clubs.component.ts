@@ -159,19 +159,19 @@ export class ClubsComponent implements OnInit, OnDestroy {
 
   get canAddClub(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
   get canEditClub(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
   get canMigrate(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
@@ -208,14 +208,14 @@ export class ClubsComponent implements OnInit, OnDestroy {
 
     // Find the club to check if it's internal
     const club = this.clubs.find((c) => c.uuid === clubId);
-    if (!club || club.scopeType !== 'INTERNAL') {
+    if (!club || club.scopeType !== ScopeType.Internal) {
       return false;
     }
 
-    if (this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN') {
+    if (this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin) {
       return true;
     }
-    if (this.userRole === 'CLUB_ADMIN' && this.userClubId === clubId) {
+    if (this.userRole === SystemRole.ClubAdmin && this.userClubId === clubId) {
       return true;
     }
     return false;
@@ -232,7 +232,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
     this.userRole = user.roles[0] as SystemRole;
     this.applyRoleBasedVisibility();
 
-    if (this.userRole === 'CLUB_ADMIN') {
+    if (this.userRole === SystemRole.ClubAdmin) {
       this.clubsService
         .getClubByAdminId(user.uuid)
         .pipe(
@@ -246,7 +246,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
           },
           error: () => this.loadClubs(),
         });
-    } else if (this.userRole === 'COACH') {
+    } else if (this.userRole === SystemRole.Coach) {
       this.clubCoachesService
         .getClubByCoachId(user.uuid)
         .pipe(
@@ -650,9 +650,9 @@ export class ClubsComponent implements OnInit, OnDestroy {
                 case 'scopeType':
                   row[col.label] = c.scopeType
                     ? ({
-                        INTERNAL: 'Вътрешен',
-                        EXTERNAL: 'Външен',
-                        NATIONAL: 'Национален',
+                        [ScopeType.Internal]: 'Вътрешен',
+                        [ScopeType.External]: 'Външен',
+                        [ScopeType.National]: 'Национален',
                       } as Record<string, string>)[c.scopeType] ?? c.scopeType
                     : '';
                   break;

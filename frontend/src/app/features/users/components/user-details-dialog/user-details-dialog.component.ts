@@ -22,6 +22,7 @@ import {
   ClubsService,
   ClubCoachesService,
   ClubDto,
+  ScopeType,
 } from '../../../../core/services/api';
 import { takeUntil, Subject, catchError, of } from 'rxjs';
 
@@ -69,10 +70,10 @@ export class UserDetailsDialogComponent implements OnChanges {
   ];
 
   private roleLabels: Record<SystemRole, string> = {
-    APP_ADMIN: 'Администратор',
-    FEDERATION_ADMIN: 'Администратор на федерацията',
-    CLUB_ADMIN: 'Администратор на клуб',
-    COACH: 'Треньор',
+    [SystemRole.AppAdmin]: 'Администратор',
+    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
+    [SystemRole.ClubAdmin]: 'Администратор на клуб',
+    [SystemRole.Coach]: 'Треньор',
   };
 
   constructor(
@@ -156,7 +157,7 @@ export class UserDetailsDialogComponent implements OnChanges {
   private loadClub(user: UserDto): void {
     const role = user.role;
     
-    if (role === 'COACH') {
+    if (role === SystemRole.Coach) {
       this.clubCoachesService
         .getClubByCoachId(user.uuid!)
         .pipe(
@@ -170,7 +171,7 @@ export class UserDetailsDialogComponent implements OnChanges {
             this.cdr.markForCheck();
           },
         });
-    } else if (role === 'CLUB_ADMIN') {
+    } else if (role === SystemRole.ClubAdmin) {
       this.clubsService
         .getClubByAdminId(user.uuid!)
         .pipe(
@@ -192,7 +193,7 @@ export class UserDetailsDialogComponent implements OnChanges {
 
   shouldShowClubSection(): boolean {
     const role = this.userData?.role;
-    return role === 'COACH' || role === 'CLUB_ADMIN';
+    return role === SystemRole.Coach || role === SystemRole.ClubAdmin;
   }
 
   startEditing(): void {
@@ -295,9 +296,9 @@ export class UserDetailsDialogComponent implements OnChanges {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }

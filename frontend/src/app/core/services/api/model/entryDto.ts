@@ -7,6 +7,8 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
+import { ClubDto } from './clubDto';
+import { CrewMemberDto } from './crewMemberDto';
 
 
 /**
@@ -16,8 +18,10 @@ export interface EntryDto {
     uuid?: string;
     competitionId?: string;
     clubId?: string;
+    club?: ClubDto;
     disciplineId?: string;
     teamNumber?: number;
+    crewMembers?: Array<CrewMemberDto>;
     createdAt?: string;
     modifiedAt?: string;
 }

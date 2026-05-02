@@ -11,6 +11,8 @@ import { CommonModule } from '@angular/common';
 import {
   AccreditationDto,
   AccreditationStatus,
+  Gender,
+  ScopeType,
 } from '../../../../core/services/api';
 import { ColumnConfig } from '../../accreditations.component';
 import { calculateRaceGroup } from '../../../../shared/utils/race-group.util';
@@ -44,12 +46,12 @@ export class AccreditationsTableComponent implements OnInit {
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
 
   private statusLabels: Record<string, string> = {
-    ACTIVE: 'Активна',
-    PENDING_VALIDATION: 'Чакаща валидация',
-    PENDING_PHOTO_VALIDATION: 'Чакаща снимка',
-    NEW_PHOTO_REQUIRED: 'Нова снимка',
-    EXPIRED: 'Изтекла',
-    SUSPENDED: 'Спряна',
+    [AccreditationStatus.Active]: 'Активна',
+    [AccreditationStatus.PendingValidation]: 'Чакаща валидация',
+    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
+    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
+    [AccreditationStatus.Expired]: 'Изтекла',
+    [AccreditationStatus.Suspended]: 'Спряна',
   };
 
   constructor(private elementRef: ElementRef) {}
@@ -227,9 +229,9 @@ export class AccreditationsTableComponent implements OnInit {
   private getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }

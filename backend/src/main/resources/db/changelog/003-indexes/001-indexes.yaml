@@ -122,15 +122,15 @@ databaseChangeLog:
         # =============================================
         # competition_group_definitions
         # =============================================
-        - createIndex:
-            tableName: competition_group_definitions
-            indexName: idx_comp_group_def_gender
-            columns:
-              - column: { name: gender }
-
         # =============================================
         # discipline_definitions
         # =============================================
+        - createIndex:
+            tableName: discipline_definitions
+            indexName: idx_discipline_def_gender
+            columns:
+              - column: { name: gender }
+
         - createIndex:
             tableName: discipline_definitions
             indexName: idx_discipline_def_competition_group_id
@@ -249,9 +249,9 @@ databaseChangeLog:
               - column: { name: entry_id }
         - createIndex:
             tableName: crew_members
-            indexName: idx_crew_members_athlete_id
+            indexName: idx_crew_members_accreditation_id
             columns:
-              - column: { name: athlete_id }
+              - column: { name: accreditation_id }
 
         # =============================================
         # competition_participations

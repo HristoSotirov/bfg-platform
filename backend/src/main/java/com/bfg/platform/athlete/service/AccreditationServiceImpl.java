@@ -39,6 +39,7 @@ import com.bfg.platform.gen.model.AthleteBatchMigrationResponse;
 import com.bfg.platform.gen.model.AthleteBatchMigrationResponseSkippedInner;
 import com.bfg.platform.gen.model.AthleteCreateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
+import com.bfg.platform.gen.model.ScopeType;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -414,7 +415,7 @@ public class AccreditationServiceImpl implements AccreditationService {
                 club.getId(),
                 newCardNumber,
                 year,
-                com.bfg.platform.gen.model.ScopeType.INTERNAL,
+                ScopeType.INTERNAL,
                 status
         );
         

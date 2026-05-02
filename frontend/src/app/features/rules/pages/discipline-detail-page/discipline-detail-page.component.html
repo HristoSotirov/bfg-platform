@@ -49,6 +49,10 @@
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.shortName || "-" }}</span>
                     </div>
                     <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Пол:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.gender === 'MALE' ? 'Мъже' : discipline.gender === 'FEMALE' ? 'Жени' : discipline.gender === 'MIXED' ? 'Смесени' : '-' }}</span>
+                    </div>
+                    <div class="flex items-baseline">
                       <span class="text-xs text-gray-500 w-40 flex-shrink-0">Состезателна група:</span>
                       @if (discipline.competitionGroupId) {
                         <button type="button" class="text-sm font-medium text-bfg-blue hover:underline cursor-pointer"
@@ -84,6 +88,16 @@
                     <label class="block text-xs text-gray-500 mb-0.5">Кратко ime <span class="text-red-500">*</span>:</label>
                     <input type="text" [(ngModel)]="editData.shortName"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Пол <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown
+                      [options]="genderOptions"
+                      [placeholder]="'Изберете пол'"
+                      [ngModel]="editData.gender"
+                      (ngModelChange)="onGenderChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
                   </div>
                   <div>
                     <label class="block text-xs text-gray-500 mb-0.5">Состезателна група <span class="text-red-500">*</span>:</label>
@@ -128,6 +142,10 @@
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.distanceMeters != null ? discipline.distanceMeters : "-" }}</span>
                     </div>
                     <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Макс. отбори на клуб:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.maxBoatsPerClub != null ? discipline.maxBoatsPerClub : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
                       <span class="text-xs text-gray-500 w-40 flex-shrink-0">Статус:</span>
                       <span class="text-sm font-medium break-all min-w-0" [class]="discipline.isActive ? 'text-green-600' : 'text-red-600'">
                         {{ discipline.isActive ? "Активен" : "Неактивен" }}
@@ -159,6 +177,11 @@
                   <div>
                     <label class="block text-xs text-gray-500 mb-0.5">Дистанция (м) <span class="text-red-500">*</span>:</label>
                     <input type="number" [(ngModel)]="editData.distanceMeters" min="0"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Макс. отбори на клуб <span class="text-red-500">*</span>:</label>
+                    <input type="number" [(ngModel)]="editData.maxBoatsPerClub" min="1"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
                   <div>

@@ -24,6 +24,10 @@ import { CompetitionTimetableEventRequest } from '../model/competitionTimetableE
 import { ErrorResponse } from '../model/errorResponse';
 // @ts-ignore
 import { GetAllCompetitionTimetableEvents200Response } from '../model/getAllCompetitionTimetableEvents200Response';
+// @ts-ignore
+import { UpdateCompetitionEventStatus422Response } from '../model/updateCompetitionEventStatus422Response';
+// @ts-ignore
+import { UpdateEventStatusRequest } from '../model/updateEventStatusRequest';
 
 // @ts-ignore
 import { BASE_PATH, COLLECTION_FORMATS }                     from '../variables';
@@ -175,10 +179,10 @@ export class CompetitionTimetableEventsService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup'>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionTimetableEvents200Response>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup'>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionTimetableEvents200Response>>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup'>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionTimetableEvents200Response>>;
-    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup'>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup' | 'discipline.competitionGroup.transferFromGroup'>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllCompetitionTimetableEvents200Response>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup' | 'discipline.competitionGroup.transferFromGroup'>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllCompetitionTimetableEvents200Response>>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup' | 'discipline.competitionGroup.transferFromGroup'>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllCompetitionTimetableEvents200Response>>;
+    public getAllCompetitionTimetableEvents(filter?: string, orderBy?: Array<'scheduledAt_asc' | 'scheduledAt_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'discipline' | 'discipline.competitionGroup' | 'discipline.competitionGroup.transferFromGroup'>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
@@ -287,6 +291,78 @@ export class CompetitionTimetableEventsService extends BaseService {
         return this.httpClient.request<CompetitionTimetableEventDto>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                transferCache: localVarTransferCache,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
+     * Update competition timetable event status
+     * Updates the status of a competition timetable event with transition validation. Allowed transitions: - SCHEDULED → IN_PROGRESS, CANCELLED, POSTPONED - IN_PROGRESS → SCHEDULED (if no results), UNOFFICIAL_RESULTS, OFFICIAL_RESULTS, CANCELLED, POSTPONED - UNOFFICIAL_RESULTS → OFFICIAL_RESULTS - OFFICIAL_RESULTS → UNOFFICIAL_RESULTS - CANCELLED → SCHEDULED - POSTPONED → SCHEDULED 
+     * @param uuid UUID of the competition timetable event
+     * @param updateEventStatusRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public updateCompetitionEventStatus(uuid: string, updateEventStatusRequest: UpdateEventStatusRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<CompetitionTimetableEventDto>;
+    public updateCompetitionEventStatus(uuid: string, updateEventStatusRequest: UpdateEventStatusRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<CompetitionTimetableEventDto>>;
+    public updateCompetitionEventStatus(uuid: string, updateEventStatusRequest: UpdateEventStatusRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<CompetitionTimetableEventDto>>;
+    public updateCompetitionEventStatus(uuid: string, updateEventStatusRequest: UpdateEventStatusRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (uuid === null || uuid === undefined) {
+            throw new Error('Required parameter uuid was null or undefined when calling updateCompetitionEventStatus.');
+        }
+        if (updateEventStatusRequest === null || updateEventStatusRequest === undefined) {
+            throw new Error('Required parameter updateEventStatusRequest was null or undefined when calling updateCompetitionEventStatus.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearerAuth) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/competition-timetable-events/${this.configuration.encodeParam({name: "uuid", value: uuid, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: "uuid"})}/status`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<CompetitionTimetableEventDto>('put', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: updateEventStatusRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

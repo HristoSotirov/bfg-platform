@@ -37,8 +37,21 @@ public final class ExpandConfig {
                 .addExpandableField("competitionGroup", com.bfg.platform.competition.entity.CompetitionGroupDefinition.class, JoinType.LEFT)
                 .build());
 
+        register(com.bfg.platform.competition.entity.CompetitionGroupDefinition.class, EntityExpandConfig.builder()
+                .addExpandableField("transferFromGroup", com.bfg.platform.competition.entity.CompetitionGroupDefinition.class, JoinType.LEFT)
+                .build());
+
         register(com.bfg.platform.competition.entity.CompetitionTimetableEvent.class, EntityExpandConfig.builder()
                 .addExpandableField("discipline", com.bfg.platform.competition.entity.DisciplineDefinition.class, JoinType.LEFT)
+                .build());
+
+        register(com.bfg.platform.competition.entity.Entry.class, EntityExpandConfig.builder()
+                .addExpandableField("club", com.bfg.platform.club.entity.Club.class, JoinType.LEFT)
+                .addExpandableField("crewMembers", com.bfg.platform.competition.entity.CrewMember.class, JoinType.LEFT)
+                .build());
+
+        register(com.bfg.platform.competition.entity.CrewMember.class, EntityExpandConfig.builder()
+                .addExpandableField("accreditation", com.bfg.platform.athlete.entity.Accreditation.class, JoinType.LEFT)
                 .build());
     }
     

@@ -291,7 +291,9 @@
                   <div class="space-y-1 mb-3">
                     <div class="flex items-baseline">
                       <span class="text-xs text-gray-500 w-28 flex-shrink-0">Наименование:</span>
-                      <span class="text-sm font-medium">{{ scoringScheme.name }}</span>
+                      <button type="button" class="text-sm font-medium text-bfg-blue hover:underline text-left" (click)="openScoringDialog()">
+                        {{ scoringScheme.name }}
+                      </button>
                     </div>
                     <div class="flex items-baseline">
                       <span class="text-xs text-gray-500 w-28 flex-shrink-0">Статус:</span>
@@ -334,7 +336,9 @@
                   <div class="space-y-1 mb-3">
                     <div class="flex items-baseline">
                       <span class="text-xs text-gray-500 w-28 flex-shrink-0">Наименование:</span>
-                      <span class="text-sm font-medium">{{ qualificationScheme.name }}</span>
+                      <button type="button" class="text-sm font-medium text-bfg-blue hover:underline text-left" (click)="openQualificationDialog()">
+                        {{ qualificationScheme.name }}
+                      </button>
                     </div>
                     <div class="flex items-baseline">
                       <span class="text-xs text-gray-500 w-28 flex-shrink-0">Брой коридори:</span>
@@ -396,7 +400,7 @@
               <div class="text-sm text-gray-400">Няма дисциплини (добавете събития в разписанието)</div>
             } @else {
               @for (group of disciplinesByGroup; track group.groupId) {
-                <div class="border border-gray-200 rounded-lg overflow-hidden">
+                <div class="border border-gray-200 rounded-lg overflow-x-auto">
                   <div class="px-4 py-2.5 bg-gray-50 border-b border-gray-200 flex items-center gap-2">
                     <button
                       type="button"
@@ -451,9 +455,9 @@
                     <div>
                       <label class="block text-xs text-gray-500 mb-0.5">Дисциплина <span class="text-red-500">*</span>:</label>
                       <app-searchable-select-dropdown
-                        [options]="disciplineOptionsForTimetable"
+                        [staticSearch]="disciplineSearch"
                         [(ngModel)]="newEvent.disciplineId"
-                        placeholder="Изберете..."
+                        placeholder="Изберете дисциплина..."
                       ></app-searchable-select-dropdown>
                     </div>
                     <div>
@@ -492,7 +496,7 @@
               }
             }
 
-            <div class="border border-gray-200 rounded-lg overflow-hidden">
+            <div class="border border-gray-200 rounded-lg overflow-x-auto">
               <table class="min-w-full divide-y divide-gray-200 text-sm">
                 <thead class="bg-gray-50">
                   <tr>
@@ -519,7 +523,7 @@
                           <td class="px-4 py-2">{{ i + 1 }}</td>
                           <td class="px-4 py-2">
                             <app-searchable-select-dropdown
-                              [options]="disciplineOptionsForTimetable"
+                              [staticSearch]="disciplineSearch"
                               [(ngModel)]="editTimetableData.disciplineId"
                               placeholder="Дисциплина..."
                             ></app-searchable-select-dropdown>
@@ -597,15 +601,824 @@
           </div>
         }
 
-        <!-- ===== ENTRIES / PROGRESSION / RESULTS (coming soon for real competitions) ===== -->
-        @if (activeTab === 'entries' || activeTab === 'progression' || activeTab === 'results') {
-          <div class="flex flex-col items-center justify-center h-64 text-gray-400">
-            <svg class="w-12 h-12 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-            <p class="text-lg font-medium">Предстои</p>
-            <p class="text-sm mt-1">Функционалността ще бъде добавена скоро</p>
+        <!-- ===== ENTRIES ===== -->
+        @if (activeTab === 'entries') {
+          <div class="flex flex-col gap-4">
+
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between">
+              <div class="text-sm text-gray-500">
+                @if (loadingEntries) { Зареждане... }
+                @else if (clubEntries.length > 0) {
+                  {{ submittedClubs.length }} {{ submittedClubs.length === 1 ? 'клуб' : 'клуба' }}
+                  · {{ clubEntries.length }} {{ clubEntries.length === 1 ? 'заявка' : 'заявки' }}
+                }
+              </div>
+              @if (canSubmitEntries) {
+                <app-button
+                  variant="primary"
+                  size="sm"
+                  text="Подай / редактирай заявки"
+                  (click)="onSubmitEntriesClick()"
+                ></app-button>
+              }
+            </div>
+
+            @if (!isSubmissionOpen && !canEdit) {
+              <div class="px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
+                @if (competition.entrySubmissionsOpenAt) {
+                  Периодът за подаване на заявки е приключил. Всички заявки са видими.
+                } @else {
+                  Периодът за подаване на заявки все още не е отворен.
+                }
+              </div>
+            }
+
+            @if (loadingEntries) {
+              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+            } @else if (clubEntries.length === 0) {
+              <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                <p class="text-sm">Няма подадени заявки</p>
+              </div>
+            } @else {
+
+              <!-- Club submissions list -->
+              <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
+                  <span class="text-xs font-medium text-gray-600 uppercase tracking-wide">Подадени заявки по клубове</span>
+                </div>
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-gray-100 text-xs text-gray-500">
+                      <th class="text-left py-2 px-4 font-medium">Клуб</th>
+                      <th class="text-right py-2 px-4 font-medium w-24">Заявки</th>
+                      <th class="text-right py-2 px-4 font-medium w-20"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (club of submittedClubs; track club.clubId) {
+                      <tr class="border-b border-gray-50 hover:bg-gray-50 cursor-pointer" (click)="openClubDetail(club.clubId)">
+                        <td class="py-2 px-4 text-gray-700 font-medium">{{ club.clubName }}</td>
+                        <td class="py-2 px-4 text-right text-gray-500">{{ club.entryCount }}</td>
+                        <td class="py-2 px-4 text-right">
+                          <span class="text-xs text-bfg-blue">Виж</span>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+
+              <!-- Overview: group → discipline → table -->
+              @for (group of entriesByGroupDiscipline; track group.groupId) {
+                <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                  <div class="bg-blue-50 px-4 py-2 border-b border-gray-200">
+                    <span class="text-sm font-semibold text-gray-800">{{ group.groupName }}</span>
+                  </div>
+
+                  @for (disc of group.disciplines; track disc.disciplineId) {
+                    <div class="px-4 py-1.5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                      <div>
+                        <span class="text-xs font-medium text-gray-600">{{ disc.label }}</span>
+                        <span class="text-xs text-gray-400 ml-1">({{ disc.rows.length }})</span>
+                      </div>
+                      <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="openDisciplineEntryDetail(disc.disciplineId, disc.label)">Виж</button>
+                    </div>
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-gray-100 text-xs text-gray-400">
+                          <th class="text-left py-1 px-4 font-medium">Клуб</th>
+                          <th class="text-left py-1 px-4 font-medium w-16">Отбор</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of disc.rows; track row.entry.uuid) {
+                          <tr class="border-b border-gray-50">
+                            <td class="py-1 px-4 text-gray-700">{{ row.clubName }}</td>
+                            <td class="py-1 px-4 text-gray-500">{{ row.teamNumber }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  }
+                </div>
+              }
+            }
+
+          </div>
+        }
+
+        <!-- ===== PROGRESSION TAB ===== -->
+        @if (activeTab === 'progression') {
+          <div class="flex flex-col gap-4">
+
+            <!-- Toolbar -->
+            <div class="flex items-center justify-end">
+              @if (canEdit) {
+                <app-button
+                  variant="primary"
+                  size="sm"
+                  [text]="generatingProgression ? 'Изпълнение...' : 'Генерирай следващ етап'"
+                  [disabled]="generatingProgression"
+                  (click)="onAdvanceClick()"
+                ></app-button>
+              }
+            </div>
+
+            @if (progressionError) {
+              <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                <p class="text-sm text-red-700">{{ progressionError }}</p>
+                <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="progressionError = null">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            }
+
+            @if (loadingProgression) {
+              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+            } @else if (startListEvents.length === 0) {
+              <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p class="text-sm">Няма генерирани стартови листи</p>
+              </div>
+            } @else {
+              <!-- Day pill buttons -->
+              @if (startListDays.length > 1) {
+                <div class="flex flex-wrap gap-2">
+                  @for (day of startListDays; track day.key) {
+                    <button
+                      type="button"
+                      class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap"
+                      [class]="activeStartListDay === day.key
+                        ? 'border-bfg-blue bg-bfg-blue text-white'
+                        : 'border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white'"
+                      (click)="selectStartListDay(day.key)"
+                    >
+                      {{ day.label }}
+                    </button>
+                  }
+                </div>
+              }
+
+              <!-- Events count for active day -->
+              <div class="text-sm text-gray-500">
+                {{ filteredStartListEvents.length }} {{ filteredStartListEvents.length === 1 ? 'събитие' : 'събития' }}
+              </div>
+
+              <div class="space-y-6 max-w-2xl">
+                @for (ev of filteredStartListEvents; track ev.eventUuid) {
+                  <div class="transition-all">
+                    <!-- Title outside table -->
+                    <div class="flex items-center gap-5 mb-1 px-1">
+                      @if (ev.scheduledAt) {
+                        <span class="text-sm font-semibold text-gray-800">{{ formatTimeOnly(ev.scheduledAt) }}</span>
+                      }
+                      <span class="text-sm text-gray-600">{{ ev.disciplineLabel }}</span>
+                      <span class="text-sm text-gray-400">{{ ev.eventTypeLabel }}@if (ev.showNumber) { {{ ev.eventNumber }}}</span>
+                      <span class="text-xs px-2 py-0.5 rounded-full"
+                        [class]="ev.eventStatus === 'OFFICIAL_RESULTS' ? 'bg-green-100 text-green-700'
+                          : ev.eventStatus === 'UNOFFICIAL_RESULTS' ? 'bg-yellow-100 text-yellow-700'
+                          : ev.eventStatus === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700'
+                          : ev.eventStatus === 'CANCELLED' ? 'bg-red-100 text-red-700'
+                          : 'bg-gray-100 text-gray-600'">
+                        {{ ev.eventStatusLabel }}
+                      </span>
+                      @if (canEdit && ev.eventStatus !== 'OFFICIAL_RESULTS' && ev.eventStatus !== 'UNOFFICIAL_RESULTS' && ev.eventStatus !== 'CANCELLED') {
+                        <button type="button"
+                          class="ml-auto text-xs text-bfg-blue hover:underline transition-colors"
+                          (click)="openLaneRearrange(ev); $event.stopPropagation()">
+                          Коридори
+                        </button>
+                      }
+                      @if (canEdit && ev.eventStatus !== 'CANCELLED' && ev.participations.length > 0) {
+                        <button type="button"
+                          class="text-xs text-bfg-blue hover:underline transition-colors"
+                          [class.ml-auto]="ev.eventStatus === 'OFFICIAL_RESULTS' || ev.eventStatus === 'UNOFFICIAL_RESULTS' || ev.eventStatus === 'CANCELLED'"
+                          (click)="openResultsEntry(ev.eventUuid); $event.stopPropagation()">
+                          Резултати
+                        </button>
+                      }
+                      <button type="button"
+                        class="text-gray-400 hover:text-gray-600 transition-colors"
+                        [class.ml-auto]="!canEdit || ev.eventStatus === 'CANCELLED' || ev.participations.length === 0"
+                        title="Обнови"
+                        (click)="loadTimetable(); loadProgression(true); $event.stopPropagation()">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                      </button>
+                    </div>
+                    <!-- Table -->
+                    <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                      <table class="w-full text-sm">
+                        <thead>
+                          <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                            @if (ev.hasResults) {
+                              <th class="text-center py-1.5 px-3 font-medium w-12">Място</th>
+                            }
+                            <th class="text-center py-1.5 px-3 font-medium w-12">Кор.</th>
+                            <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                            <th class="text-left py-1.5 px-3 font-medium">Екипаж</th>
+                            @if (ev.hasResults) {
+                              <th class="text-center py-1.5 px-3 font-medium w-24">Време</th>
+                            }
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (p of ev.participations; track p.lane) {
+                            <tr class="border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors"
+                              (click)="openCrewVerify(ev, p.entryId)">
+                              @if (ev.hasResults) {
+                                <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ p.place ?? '-' }}</td>
+                              }
+                              <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ p.lane }}</td>
+                              <td class="py-1.5 px-3 text-gray-700">
+                                {{ p.clubName }}@if (p.teamNumber > 1) { <span class="ml-2 text-gray-400">{{ p.teamNumber }}</span>}
+                                @if (p.participationStatus === 'CHECKED_IN') {
+                                  <span class="ml-2 inline-flex items-center gap-1 text-xs text-green-600">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    {{ formatTimeOnly(p.modifiedAt!) }}
+                                  </span>
+                                }
+                              </td>
+                              <td class="py-1.5 px-3 text-gray-600 text-xs">
+                                @for (c of p.crew; track c.seatPosition) {
+                                  <div class="flex items-center gap-3">
+                                    <span class="text-gray-400 font-medium w-4">{{ c.seat }}</span>
+                                    <span class="text-gray-400 w-14 hidden sm:inline">{{ c.cardNumber }}</span>
+                                    <span class="text-gray-900">{{ c.name }}</span>
+                                  </div>
+                                }
+                              </td>
+                              @if (ev.hasResults) {
+                                <td class="py-1.5 px-3 text-center text-gray-600 font-mono text-xs">
+                                  @if (p.finishTimeMs) { {{ formatTimeMs(p.finishTimeMs) }} } @else if (p.participationStatus && p.participationStatus !== 'FINISHED' && p.participationStatus !== 'REGISTERED') { <span class="text-red-500">{{ p.participationStatus }}</span> } @else { - }
+                                </td>
+                              }
+                            </tr>
+                          }
+                          @if (ev.participations.length === 0) {
+                            <tr>
+                              <td [attr.colspan]="ev.hasResults ? 5 : 3" class="py-3 px-3 text-center text-gray-400 text-xs">Няма участници</td>
+                            </tr>
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        <!-- ===== RESULTS TAB ===== -->
+        @if (activeTab === 'results') {
+          <div class="flex flex-col gap-4">
+            @if (standingsError) {
+              <div class="flex items-start justify-between gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                <p class="text-sm text-red-700">{{ standingsError }}</p>
+                <button type="button" class="text-red-400 hover:text-red-600 shrink-0" (click)="standingsError = null">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            }
+
+            @if (loadingStandings || loadingProgression) {
+              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+            } @else if (resultsDisciplines.length === 0) {
+              <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+                </svg>
+                <p class="text-sm">Няма дисциплини</p>
+              </div>
+            } @else {
+              <!-- Bulk action -->
+              <div class="flex items-center justify-end px-1">
+                <app-button
+                  variant="primary"
+                  size="sm"
+                  [text]="computingStandings ? 'Генериране...' : 'Генерирай класиране'"
+                  [disabled]="computingStandings"
+                  (click)="onGenerateStandingsClick()">
+                </app-button>
+              </div>
+
+              <div class="space-y-6 max-w-2xl">
+                @for (disc of resultsDisciplines; track disc.disciplineId) {
+                  <div class="transition-all">
+                    <!-- Title outside table — same style as start list -->
+                    <div class="flex items-center gap-5 mb-1 px-1">
+                      <span class="text-sm font-semibold text-gray-800">{{ disc.label }}</span>
+                      <span class="ml-auto flex items-center gap-3">
+                        @if (standingsForDiscipline(disc.disciplineId).length > 0) {
+                          <button type="button" class="text-xs text-red-500 hover:text-red-700" (click)="deleteStandings(disc.disciplineId)">Изтрий</button>
+                        }
+                        <button type="button"
+                          class="text-xs text-bfg-blue hover:underline transition-colors"
+                          [disabled]="computingStandings"
+                          (click)="computeStandings([disc.disciplineId])">
+                          {{ standingsForDiscipline(disc.disciplineId).length > 0 ? 'Преизчисли' : 'Генерирай' }}
+                        </button>
+                      </span>
+                    </div>
+
+                    @if (standingsDisciplineErrors[disc.disciplineId]) {
+                      <div class="flex items-start justify-between gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-1.5 mb-1 mx-1">
+                        <p class="text-xs text-red-700">{{ standingsDisciplineErrors[disc.disciplineId] }}</p>
+                        <button type="button" class="text-red-400 hover:text-red-600 shrink-0" (click)="standingsDisciplineErrors[disc.disciplineId] = ''">
+                          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
+                      </div>
+                    }
+
+                    @if (standingsForDiscipline(disc.disciplineId).length > 0) {
+                      <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                        <table class="w-full text-sm">
+                          <thead>
+                            <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                              <th class="text-center py-1.5 px-3 font-medium w-12">Място</th>
+                              <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                              <th class="text-left py-1.5 px-3 font-medium">Екипаж</th>
+                              <th class="text-center py-1.5 px-3 font-medium w-24">Време</th>
+                              <th class="text-center py-1.5 px-3 font-medium w-20">Точки</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            @for (s of standingsForDiscipline(disc.disciplineId); track s.uuid) {
+                              <tr class="border-b border-gray-50">
+                                <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ s.overallRank }}</td>
+                                <td class="py-1.5 px-3 text-gray-700">
+                                  {{ getEntryLabel(s.entryId!) }}
+                                </td>
+                                <td class="py-1.5 px-3 text-gray-600 text-xs">
+                                  @for (c of getEntryCrew(s.entryId!); track c.cardNumber) {
+                                    <div class="flex items-center gap-3">
+                                      <span class="text-gray-400 font-medium w-4">{{ c.seat }}</span>
+                                      <span class="text-gray-400 w-14 hidden sm:inline">{{ c.cardNumber }}</span>
+                                      <span class="text-gray-900">{{ c.name }}</span>
+                                    </div>
+                                  }
+                                </td>
+                                <td class="py-1.5 px-3 text-center text-gray-600 font-mono text-xs">
+                                  @if (s.timeMs != null) { {{ formatTimeMs(s.timeMs!) }} } @else { - }
+                                </td>
+                                <td class="py-1.5 px-3 text-center text-gray-600 font-medium">{{ s.points }}</td>
+                              </tr>
+                            }
+                          </tbody>
+                        </table>
+                      </div>
+                    } @else {
+                      <div class="border border-gray-200 rounded-lg py-6 text-center text-gray-400 text-sm">Няма класиране</div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+
+        @if (activeTab === 'complex-standings') {
+          <div class="flex flex-col gap-6">
+            @if (loadingClubRankings) {
+              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+            } @else if (clubRankingsError) {
+              <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                <p class="text-sm text-red-700">{{ clubRankingsError }}</p>
+                <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="clubRankingsError = null">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                  </svg>
+                </button>
+              </div>
+            } @else if (clubRankings.length === 0) {
+              <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                <span class="text-sm">Няма комплексно класиране. Генерирайте крайно класиране за дисциплините от таб "Резултати".</span>
+              </div>
+            } @else {
+
+              <!-- Chart visualization -->
+              <div class="flex flex-col gap-4 mb-6">
+                <!-- View buttons -->
+                <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500 mr-1">Изглед:</span>
+                    <button type="button"
+                      class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                      [class.bg-bfg-blue]="chartView === 'total'"
+                      [class.text-white]="chartView === 'total'"
+                      [class.border]="chartView !== 'total'"
+                      [class.border-bfg-blue]="chartView !== 'total'"
+                      [class.text-bfg-blue]="chartView !== 'total'"
+                      [class.bg-white]="chartView !== 'total'"
+                      [class.hover:bg-bfg-blue]="chartView !== 'total'"
+                      [class.hover:text-white]="chartView !== 'total'"
+                      (click)="chartView = 'total'">
+                      Общо
+                    </button>
+                    <button type="button"
+                      class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                      [class.bg-bfg-blue]="chartView === 'stacked'"
+                      [class.text-white]="chartView === 'stacked'"
+                      [class.border]="chartView !== 'stacked'"
+                      [class.border-bfg-blue]="chartView !== 'stacked'"
+                      [class.text-bfg-blue]="chartView !== 'stacked'"
+                      [class.bg-white]="chartView !== 'stacked'"
+                      [class.hover:bg-bfg-blue]="chartView !== 'stacked'"
+                      [class.hover:text-white]="chartView !== 'stacked'"
+                      (click)="chartView = 'stacked'">
+                      По дисциплини
+                    </button>
+                    <button type="button"
+                      class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                      [class.bg-bfg-blue]="chartView === 'medals'"
+                      [class.text-white]="chartView === 'medals'"
+                      [class.border]="chartView !== 'medals'"
+                      [class.border-bfg-blue]="chartView !== 'medals'"
+                      [class.text-bfg-blue]="chartView !== 'medals'"
+                      [class.bg-white]="chartView !== 'medals'"
+                      [class.hover:bg-bfg-blue]="chartView !== 'medals'"
+                      [class.hover:text-white]="chartView !== 'medals'"
+                      (click)="chartView = 'medals'">
+                      Медали
+                    </button>
+                  </div>
+
+                  <div class="flex items-center gap-2">
+                    <span class="text-sm text-gray-500 mr-1">Пол:</span>
+                    <button type="button"
+                      class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                      [class.bg-bfg-blue]="chartGender === 'ALL'"
+                      [class.text-white]="chartGender === 'ALL'"
+                      [class.border]="chartGender !== 'ALL'"
+                      [class.border-bfg-blue]="chartGender !== 'ALL'"
+                      [class.text-bfg-blue]="chartGender !== 'ALL'"
+                      [class.bg-white]="chartGender !== 'ALL'"
+                      [class.hover:bg-bfg-blue]="chartGender !== 'ALL'"
+                      [class.hover:text-white]="chartGender !== 'ALL'"
+                      (click)="chartGender = 'ALL'">
+                      Всички
+                    </button>
+                    <button type="button"
+                      class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                      [class.bg-bfg-blue]="chartGender === 'MALE'"
+                      [class.text-white]="chartGender === 'MALE'"
+                      [class.border]="chartGender !== 'MALE'"
+                      [class.border-bfg-blue]="chartGender !== 'MALE'"
+                      [class.text-bfg-blue]="chartGender !== 'MALE'"
+                      [class.bg-white]="chartGender !== 'MALE'"
+                      [class.hover:bg-bfg-blue]="chartGender !== 'MALE'"
+                      [class.hover:text-white]="chartGender !== 'MALE'"
+                      (click)="chartGender = 'MALE'">
+                      Мъже
+                    </button>
+                    <button type="button"
+                      class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                      [class.bg-bfg-blue]="chartGender === 'FEMALE'"
+                      [class.text-white]="chartGender === 'FEMALE'"
+                      [class.border]="chartGender !== 'FEMALE'"
+                      [class.border-bfg-blue]="chartGender !== 'FEMALE'"
+                      [class.text-bfg-blue]="chartGender !== 'FEMALE'"
+                      [class.bg-white]="chartGender !== 'FEMALE'"
+                      [class.hover:bg-bfg-blue]="chartGender !== 'FEMALE'"
+                      [class.hover:text-white]="chartGender !== 'FEMALE'"
+                      (click)="chartGender = 'FEMALE'">
+                      Жени
+                    </button>
+                  </div>
+
+                  @if (teamRankingGroups.length > 0) {
+                    <div class="flex items-center gap-2">
+                      <span class="text-sm text-gray-500 mr-1">Група:</span>
+                      <button type="button"
+                        class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                        [class.bg-bfg-blue]="chartGroup === 'ALL'"
+                        [class.text-white]="chartGroup === 'ALL'"
+                        [class.border]="chartGroup !== 'ALL'"
+                        [class.border-bfg-blue]="chartGroup !== 'ALL'"
+                        [class.text-bfg-blue]="chartGroup !== 'ALL'"
+                        [class.bg-white]="chartGroup !== 'ALL'"
+                        [class.hover:bg-bfg-blue]="chartGroup !== 'ALL'"
+                        [class.hover:text-white]="chartGroup !== 'ALL'"
+                        (click)="chartGroup = 'ALL'">
+                        Всички
+                      </button>
+                      @for (g of teamRankingGroups; track g.id) {
+                        <button type="button"
+                          class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
+                          [class.bg-bfg-blue]="chartGroup === g.id"
+                          [class.text-white]="chartGroup === g.id"
+                          [class.border]="chartGroup !== g.id"
+                          [class.border-bfg-blue]="chartGroup !== g.id"
+                          [class.text-bfg-blue]="chartGroup !== g.id"
+                          [class.bg-white]="chartGroup !== g.id"
+                          [class.hover:bg-bfg-blue]="chartGroup !== g.id"
+                          [class.hover:text-white]="chartGroup !== g.id"
+                          (click)="chartGroup = g.id">
+                          {{ g.shortName }}
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Chart -->
+                <div class="border border-gray-200 rounded-lg p-3" style="height: 300px;">
+                  <canvas baseChart
+                    type="bar"
+                    [data]="cachedChartData"
+                    [options]="cachedChartOptions"
+                    [plugins]="chartPlugins">
+                  </canvas>
+                </div>
+              </div>
+
+              <!-- Section A: Per-Group Side-by-Side Tables -->
+              @for (group of teamRankingGroups; track group.id) {
+                @if (teamRankingByGroup(group.id, 'MALE').length > 0 || teamRankingByGroup(group.id, 'FEMALE').length > 0) {
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    @if (teamRankingByGroup(group.id, 'MALE').length > 0) {
+                      <div>
+                        <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ group.shortName }} — Мъже</div>
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                          <table class="w-full text-sm">
+                            <thead>
+                              <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                                <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
+                                <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                                <th class="text-center py-1.5 px-3 font-medium w-20">Точки</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (row of teamRankingByGroup(group.id, 'MALE'); track row.clubShortName) {
+                                <tr class="border-b border-gray-50">
+                                  <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.rank }}</td>
+                                  <td class="py-1.5 px-3 text-gray-700 font-medium">{{ row.clubShortName }}</td>
+                                  <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.points | number:'1.1-2' }}</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    }
+
+                    @if (teamRankingByGroup(group.id, 'FEMALE').length > 0) {
+                      <div>
+                        <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ group.shortName }} — Жени</div>
+                        <div class="border border-gray-200 rounded-lg overflow-hidden">
+                          <table class="w-full text-sm">
+                            <thead>
+                              <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                                <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
+                                <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                                <th class="text-center py-1.5 px-3 font-medium w-20">Точки</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              @for (row of teamRankingByGroup(group.id, 'FEMALE'); track row.clubShortName) {
+                                <tr class="border-b border-gray-50">
+                                  <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.rank }}</td>
+                                  <td class="py-1.5 px-3 text-gray-700 font-medium">{{ row.clubShortName }}</td>
+                                  <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.points | number:'1.1-2' }}</td>
+                                </tr>
+                              }
+                            </tbody>
+                          </table>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                }
+              }
+
+              <!-- Separator -->
+              <hr class="border-gray-200 my-2">
+
+              <!-- Section B: Gender Summary Tables -->
+
+              <!-- Males Summary -->
+              @if (teamRankingSummary('MALE').length > 0) {
+                <div>
+                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">Мъже — Обобщение</div>
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                          <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
+                          <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                          @for (d of teamRankingDisciplines('MALE'); track d.id) {
+                            <th class="text-center py-1.5 px-3 font-medium">{{ d.shortName }}</th>
+                          }
+                          <th class="text-center py-1.5 px-3 font-medium w-20">Общо</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of teamRankingSummary('MALE'); track row.clubShortName) {
+                          <tr class="border-b border-gray-50">
+                            <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.rank }}</td>
+                            <td class="py-1.5 px-3 text-gray-700 font-medium">{{ row.clubShortName }}</td>
+                            @for (d of teamRankingDisciplines('MALE'); track d.id) {
+                              <td class="py-1.5 px-3 text-center text-gray-700">
+                                {{ row.disciplines.get(d.id) ? (row.disciplines.get(d.id) | number:'1.1-2') : '—' }}
+                              </td>
+                            }
+                            <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.total | number:'1.1-2' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Females Summary -->
+              @if (teamRankingSummary('FEMALE').length > 0) {
+                <div>
+                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">Жени — Обобщение</div>
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                          <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
+                          <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                          @for (d of teamRankingDisciplines('FEMALE'); track d.id) {
+                            <th class="text-center py-1.5 px-3 font-medium">{{ d.shortName }}</th>
+                          }
+                          <th class="text-center py-1.5 px-3 font-medium w-20">Общо</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of teamRankingSummary('FEMALE'); track row.clubShortName) {
+                          <tr class="border-b border-gray-50">
+                            <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.rank }}</td>
+                            <td class="py-1.5 px-3 text-gray-700 font-medium">{{ row.clubShortName }}</td>
+                            @for (d of teamRankingDisciplines('FEMALE'); track d.id) {
+                              <td class="py-1.5 px-3 text-center text-gray-700">
+                                {{ row.disciplines.get(d.id) ? (row.disciplines.get(d.id) | number:'1.1-2') : '—' }}
+                              </td>
+                            }
+                            <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.total | number:'1.1-2' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- All Summary -->
+              @if (teamRankingSummary('ALL').length > 0) {
+                <div>
+                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">Всички — Обобщение</div>
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-sm">
+                      <thead>
+                        <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                          <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
+                          <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                          @for (d of teamRankingDisciplines('ALL'); track d.id) {
+                            <th class="text-center py-1.5 px-3 font-medium">{{ d.shortName }}</th>
+                          }
+                          <th class="text-center py-1.5 px-3 font-medium w-20">Общо</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (row of teamRankingSummary('ALL'); track row.clubShortName) {
+                          <tr class="border-b border-gray-50">
+                            <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.rank }}</td>
+                            <td class="py-1.5 px-3 text-gray-700 font-medium">{{ row.clubShortName }}</td>
+                            @for (d of teamRankingDisciplines('ALL'); track d.id) {
+                              <td class="py-1.5 px-3 text-center text-gray-700">
+                                {{ row.disciplines.get(d.id) ? (row.disciplines.get(d.id) | number:'1.1-2') : '—' }}
+                              </td>
+                            }
+                            <td class="py-1.5 px-3 text-center font-semibold text-gray-700">{{ row.total | number:'1.1-2' }}</td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+            }
+          </div>
+        }
+
+        @if (activeTab === 'weigh-in') {
+          <div class="flex flex-col gap-4">
+            <!-- Day selector -->
+            @if (weighInDays.length > 1) {
+              <div class="flex flex-wrap gap-2">
+                @for (day of weighInDays; track day.key) {
+                  <button
+                    type="button"
+                    class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap"
+                    [class]="day.key === activeWeighInDay
+                      ? 'border-bfg-blue bg-bfg-blue text-white'
+                      : 'border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white'"
+                    (click)="selectWeighInDay(day.key)">
+                    {{ day.label }}
+                  </button>
+                }
+              </div>
+            }
+
+            @if (loadingWeights || loadingProgression) {
+              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+            } @else if (weighInEventGroups.length === 0) {
+              <div class="flex flex-col items-center justify-center py-12 text-gray-400">
+                <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
+                </svg>
+                <p class="text-sm">Няма атлети за измерване за избрания ден</p>
+              </div>
+            } @else {
+              <div class="space-y-6 max-w-2xl">
+                @if (!isWeighInToday) {
+                  <div class="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
+                    <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+                    </svg>
+                    <p class="text-sm text-amber-700">Измервания могат да се записват само за днешния ден.</p>
+                  </div>
+                }
+                @for (group of weighInEventGroups; track group.eventUuid) {
+                  <div class="transition-all">
+                    <div class="flex items-center gap-5 mb-1 px-1">
+                      @if (group.scheduledAt) {
+                        <span class="text-sm font-semibold text-gray-800">{{ formatTimeOnly(group.scheduledAt) }}</span>
+                      }
+                      <span class="text-sm text-gray-600">{{ group.disciplineLabel }}</span>
+                      <span class="text-sm text-gray-400">{{ group.eventTypeLabel }}@if (group.showNumber) { {{ group.eventNumber }}}</span>
+                      <button type="button"
+                        class="ml-auto text-gray-400 hover:text-gray-600 transition-colors"
+                        title="Обнови"
+                        (click)="loadWeightMeasurements(); $event.stopPropagation()">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                      </button>
+                    </div>
+                    <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                      <table class="w-full text-sm">
+                        <thead>
+                          <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
+                            <th class="text-left py-1.5 px-3 font-medium">Атлет</th>
+                            <th class="text-left py-1.5 px-3 font-medium">Карта</th>
+                            <th class="text-left py-1.5 px-3 font-medium">Роля</th>
+                            <th class="text-left py-1.5 px-3 font-medium">Лимит</th>
+                            <th class="text-left py-1.5 px-3 font-medium">Тегло</th>
+                            <th class="text-left py-1.5 px-3 font-medium">Коментар</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          @for (crew of group.crews; track crew.clubName + crew.teamNumber) {
+                            <tr class="bg-gray-50 border-b border-gray-100">
+                              <td colspan="6" class="py-1 px-3 text-xs font-medium text-gray-600">
+                                {{ crew.clubName }}@if (crew.teamNumber > 1) { <span class="ml-1 text-gray-400">{{ crew.teamNumber }}</span>}
+                              </td>
+                            </tr>
+                            @for (athlete of crew.athletes; track athlete.athleteId) {
+                              <tr [class]="isWeighInToday ? 'border-b border-gray-50 cursor-pointer hover:bg-gray-50 transition-colors' : 'border-b border-gray-50'" (click)="openWeighInEdit(athlete.athleteId, athlete.role, athlete.name, athlete.cardNumber, group.scheduledAt, group.disciplineLabel)">
+                                <td class="py-1.5 px-3 text-gray-800">
+                                  <div class="flex items-center gap-2">
+                                    <span class="text-gray-400 font-medium w-4 text-xs">{{ athlete.seat }}</span>
+                                    <span>{{ athlete.name }}</span>
+                                  </div>
+                                </td>
+                                <td class="py-1.5 px-3 text-gray-500 text-xs">{{ athlete.cardNumber }}</td>
+                                <td class="py-1.5 px-3 text-gray-500 text-xs">{{ athlete.roleLabel }}</td>
+                                <td class="py-1.5 px-3 text-gray-600">{{ athlete.weightLimit != null ? (athlete.weightLimit + ' кг') : '–' }}</td>
+                                <td class="py-1.5 px-3 font-semibold" [class]="athlete.weightKg == null ? 'text-gray-400' : (athlete.isInvalid ? 'text-red-600' : (athlete.needsCompensation ? 'text-orange-500' : 'text-green-600'))">
+                                  {{ athlete.weightKg != null ? (athlete.weightKg + ' кг') : '–' }}
+                                </td>
+                                <td class="py-1.5 px-3 text-xs" [class]="athlete.isInvalid ? 'text-red-600' : (athlete.needsCompensation ? 'text-orange-500' : '')">
+                                  {{ athlete.comment || '' }}
+                                </td>
+                              </tr>
+                            }
+                          }
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
           </div>
         }
 
@@ -614,6 +1427,61 @@
 
   </div>
 </div>
+
+<!-- Weigh-in Edit Dialog -->
+<app-dialog [isOpen]="weighInEditAthleteId != null" [title]="weighInEditDisciplineLabel + ' · ' + (weighInEditScheduledAt ? formatTimeOnly(weighInEditScheduledAt) : '')" size="fullscreen" (closed)="closeWeighInEdit()">
+  <div class="flex flex-col h-full overflow-y-auto">
+
+    <div class="flex-1 min-h-0 flex items-center justify-center py-2">
+      <div class="aspect-square max-h-[50vh] rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+        @if (weighInEditPhotoLoading) {
+          <div class="w-full h-full flex items-center justify-center">
+            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-bfg-blue"></div>
+          </div>
+        } @else {
+          <img
+            [src]="weighInEditPhotoUrl || 'assets/images/default-user.png'"
+            [alt]="weighInEditName || 'Снимка'"
+            class="w-full h-full object-cover"
+          />
+        }
+      </div>
+    </div>
+
+    <div class="shrink-0 text-center space-y-1 text-sm border-t border-gray-200 pt-4 mt-4 bg-white">
+      <p class="font-medium text-gray-900">{{ weighInEditName }}</p>
+      <p class="text-gray-500">{{ weighInEditCardNumber }}</p>
+    </div>
+
+    <div class="shrink-0 pt-4 border-t border-gray-200 mt-4">
+      @if (weighInTimeWarning) {
+        <div class="flex items-start gap-2 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mb-3">
+          <svg class="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+          <p class="text-sm text-yellow-700">{{ weighInTimeWarning }}</p>
+        </div>
+      }
+      <div class="flex items-center gap-3">
+        <input type="number" step="0.01" min="0"
+          class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          [(ngModel)]="weighInEditWeight" placeholder="Тегло (кг)" />
+        <button
+          type="button"
+          class="px-6 py-2.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
+          [disabled]="weighInRecording || !weighInEditWeight"
+          (click)="saveWeighIn()"
+        >
+          @if (weighInRecording) {
+            <span class="inline-block animate-spin mr-2">⟳</span>
+          }
+          Запази
+        </button>
+      </div>
+    </div>
+
+  </div>
+</app-dialog>
 
 <!-- Editing Warning Dialog -->
 <app-dialog [isOpen]="showEditingWarningDialog" title="Незапазени промени" (closed)="showEditingWarningDialog = false">
@@ -669,3 +1537,1105 @@
   (closed)="closeGroupDetails()"
   (navigated)="closeGroupDetails()"
 ></app-competition-group-details-dialog>
+
+<!-- Scoring scheme details dialog -->
+<app-scoring-details-dialog
+  [isOpen]="showScoringDialog"
+  [scheme]="scoringScheme"
+  [canEdit]="false"
+  [permalinkRoute]="scoringScheme?.uuid ? ['/regulations/scoring', scoringScheme!.uuid!, 'details'] : null"
+  (closed)="showScoringDialog = false"
+></app-scoring-details-dialog>
+
+<!-- Qualification scheme details dialog -->
+<app-qualification-details-dialog
+  [isOpen]="showQualificationDialog"
+  [scheme]="qualificationScheme"
+  [canEdit]="false"
+  [permalinkRoute]="qualificationScheme?.uuid ? ['/regulations/qualification', qualificationScheme!.uuid!, 'details'] : null"
+  (closed)="showQualificationDialog = false"
+></app-qualification-details-dialog>
+
+<!-- Club selection pre-dialog for admins -->
+<app-dialog
+  [isOpen]="showClubSelectDialog"
+  title="Изберете клуб"
+  size="md"
+  (closed)="showClubSelectDialog = false">
+  <div>
+    <label class="block text-sm font-medium text-gray-700 mb-2">Клуб:</label>
+    <app-searchable-select-dropdown
+      [options]="clubOptions"
+      [placeholder]="'Търсене на клуб...'"
+      [ngModel]="selectedClubForEntries"
+      (ngModelChange)="onClubSelectedForEntries($event)">
+    </app-searchable-select-dropdown>
+  </div>
+  <div class="dialog-footer flex justify-center gap-3 pt-4" style="border-top: 1px solid #e5e7eb; margin-left: 0; margin-right: 0;">
+    <app-button
+      variant="primary"
+      size="md"
+      text="Затвори"
+      (click)="showClubSelectDialog = false">
+    </app-button>
+  </div>
+</app-dialog>
+
+<!-- Submit entries dialog -->
+<app-submit-entries-dialog
+  [isOpen]="showSubmitEntriesDialog"
+  [competitionId]="competition?.uuid || ''"
+  [competitionYear]="competitionYear"
+  [clubId]="selectedClubForEntries ?? userClubId"
+  [timetableEvents]="timetableEvents"
+  [existingEntries]="entriesForSelectedClub"
+  (closed)="showSubmitEntriesDialog = false; selectedClubForEntries = null; entriesForSelectedClub = []"
+  (submitted)="loadEntries(); selectedClubForEntries = null; entriesForSelectedClub = []"
+></app-submit-entries-dialog>
+
+<!-- Club entry detail dialog -->
+<app-dialog
+  [isOpen]="!!selectedClubId"
+  [title]="'Заявка — ' + getSelectedClubName()"
+  size="xl"
+  [noScroll]="true"
+  (closed)="closeClubDetail()"
+>
+  @if (selectedClubId) {
+    <div class="flex flex-col max-h-[calc(90vh-120px)]">
+      <div class="flex-1 overflow-y-auto">
+        @if (loadingClubDetail) {
+          <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+        } @else if (entryGroupViews.length === 0) {
+          <p class="text-sm text-gray-400 py-4 text-center">Няма заявки от този клуб</p>
+        } @else {
+          @for (group of entryGroupViews; track group.groupId) {
+            <!-- Group header -->
+            <div class="mb-6">
+              <h3 class="text-base font-semibold text-gray-800 mb-3 pb-1 border-b border-gray-200">{{ group.groupLabel }}</h3>
+
+              <!-- Male team athletes -->
+              @if (group.maleTeam && group.maleTeam.athletes.length > 0) {
+                <div class="mb-4">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-sm font-medium text-gray-700">Мъжки отбор</span>
+                    <span class="text-xs text-gray-500">{{ group.maleTeam.totalAthletes }} спортисти
+                      ({{ getTeamBreakdown(group.maleTeam.athletes).own }} в групата@if (group.transferRatio && group.transferRatio > 0) {<span class="text-orange-600">, {{ getTeamBreakdown(group.maleTeam.athletes).transfer }} трансфер</span>}@if (getTeamBreakdown(group.maleTeam.athletes).coxOnly > 0) {<span class="text-teal-600">, {{ getTeamBreakdown(group.maleTeam.athletes).coxOnly }} кормчия</span>})
+                    </span>
+                    @if (group.transferRatio && group.transferRatio > 0) {
+                      <button class="text-xs text-blue-600 hover:text-blue-800 underline ml-1"
+                              (click)="openTransferSchemaDialog(group.maleTeam.athletes, group.transferRatio, group.groupLabel)">
+                        Виж трансферна схема
+                      </button>
+                    }
+                  </div>
+                  <!-- Athletes table -->
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-xs">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">&#8470;</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Име</th>
+                          <th class="px-2 py-1.5 text-center text-gray-500 font-medium">Набор</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Дисц.</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Мед.</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Заст.</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (a of group.maleTeam.athletes; track a.accreditationId) {
+                          <tr class="border-t border-gray-100">
+                            <td class="px-3 py-1.5 text-gray-500">{{ a.accreditationNumber || '-' }}</td>
+                            <td class="px-3 py-1.5 text-gray-700">
+                              @if (a.isTransfer && !(a.coxCount > 0 && a.disciplineCount === 0)) { <span class="text-orange-600 font-medium">[Т]</span> }
+                              @if (a.coxCount > 0 && a.disciplineCount === 0) { <span class="text-teal-600 font-medium">[К]</span> }
+                              {{ a.name }}
+                            </td>
+                            <td class="px-2 py-1.5 text-center text-gray-500">{{ a.dateOfBirth ? a.dateOfBirth.substring(2, 4) : '-' }}</td>
+                            <td class="px-3 py-1.5 text-center text-gray-600">
+                              {{ a.disciplineCount }}
+                              @if (a.coxCount > 0) {
+                                <span class="text-gray-400">+{{ a.coxCount }}c</span>
+                              }
+                            </td>
+                            <td class="px-3 py-1.5 text-center">
+                              <span [class]="a.medicalValid ? 'text-green-600' : 'text-red-500'">
+                                {{ a.medicalExamDue ? formatDateShort(a.medicalExamDue) : '-' }}
+                              </span>
+                            </td>
+                            <td class="px-3 py-1.5 text-center">
+                              <span [class]="a.insuranceValid ? 'text-green-600' : 'text-red-500'">
+                                @if (a.insuranceFrom && a.insuranceTo) {
+                                  {{ formatDateShort(a.insuranceFrom) }} - {{ formatDateShort(a.insuranceTo) }}
+                                } @else {
+                                  -
+                                }
+                              </span>
+                            </td>
+                            <td class="px-3 py-1.5 text-center">
+                              <span class="text-xs" [class]="a.accreditationStatus === 'ACTIVE' ? 'text-green-600' : 'text-orange-500'">
+                                {{ a.accreditationStatus === 'ACTIVE' ? 'Активен' : a.accreditationStatus }}
+                              </span>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Female team athletes -->
+              @if (group.femaleTeam && group.femaleTeam.athletes.length > 0) {
+                <div class="mb-4">
+                  <div class="flex items-center gap-2 mb-2">
+                    <span class="text-sm font-medium text-gray-700">Женски отбор</span>
+                    <span class="text-xs text-gray-500">{{ group.femaleTeam.totalAthletes }} спортисти
+                      ({{ getTeamBreakdown(group.femaleTeam.athletes).own }} в групата@if (group.transferRatio && group.transferRatio > 0) {<span class="text-orange-600">, {{ getTeamBreakdown(group.femaleTeam.athletes).transfer }} трансфер</span>}@if (getTeamBreakdown(group.femaleTeam.athletes).coxOnly > 0) {<span class="text-teal-600">, {{ getTeamBreakdown(group.femaleTeam.athletes).coxOnly }} кормчия</span>})
+                    </span>
+                    @if (group.transferRatio && group.transferRatio > 0) {
+                      <button class="text-xs text-blue-600 hover:text-blue-800 underline ml-1"
+                              (click)="openTransferSchemaDialog(group.femaleTeam.athletes, group.transferRatio, group.groupLabel)">
+                        Виж трансферна схема
+                      </button>
+                    }
+                  </div>
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-xs">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">&#8470;</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Име</th>
+                          <th class="px-2 py-1.5 text-center text-gray-500 font-medium">Набор</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Дисц.</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Мед.</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Заст.</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Статус</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (a of group.femaleTeam.athletes; track a.accreditationId) {
+                          <tr class="border-t border-gray-100">
+                            <td class="px-3 py-1.5 text-gray-500">{{ a.accreditationNumber || '-' }}</td>
+                            <td class="px-3 py-1.5 text-gray-700">
+                              @if (a.isTransfer && !(a.coxCount > 0 && a.disciplineCount === 0)) { <span class="text-orange-600 font-medium">[Т]</span> }
+                              @if (a.coxCount > 0 && a.disciplineCount === 0) { <span class="text-teal-600 font-medium">[К]</span> }
+                              {{ a.name }}
+                            </td>
+                            <td class="px-2 py-1.5 text-center text-gray-500">{{ a.dateOfBirth ? a.dateOfBirth.substring(2, 4) : '-' }}</td>
+                            <td class="px-3 py-1.5 text-center text-gray-600">
+                              {{ a.disciplineCount }}
+                              @if (a.coxCount > 0) {
+                                <span class="text-gray-400">+{{ a.coxCount }}c</span>
+                              }
+                            </td>
+                            <td class="px-3 py-1.5 text-center">
+                              <span [class]="a.medicalValid ? 'text-green-600' : 'text-red-500'">
+                                {{ a.medicalExamDue ? formatDateShort(a.medicalExamDue) : '-' }}
+                              </span>
+                            </td>
+                            <td class="px-3 py-1.5 text-center">
+                              <span [class]="a.insuranceValid ? 'text-green-600' : 'text-red-500'">
+                                @if (a.insuranceFrom && a.insuranceTo) {
+                                  {{ formatDateShort(a.insuranceFrom) }} - {{ formatDateShort(a.insuranceTo) }}
+                                } @else {
+                                  -
+                                }
+                              </span>
+                            </td>
+                            <td class="px-3 py-1.5 text-center">
+                              <span class="text-xs" [class]="a.accreditationStatus === 'ACTIVE' ? 'text-green-600' : 'text-orange-500'">
+                                {{ a.accreditationStatus === 'ACTIVE' ? 'Активен' : a.accreditationStatus }}
+                              </span>
+                            </td>
+                          </tr>
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Male disciplines detail -->
+              @if (group.maleDisciplines.length > 0) {
+                <div class="mb-3">
+                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Мъжки дисциплини</p>
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-xs">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Дисциплина</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (disc of group.maleDisciplines; track disc.label) {
+                          @for (team of disc.teams; track team.teamNumber) {
+                            <tr class="border-t border-gray-200">
+                              <td class="px-3 py-1.5 text-gray-700 font-medium align-top">{{ disc.label }}</td>
+                              <td class="px-3 py-1.5 text-gray-500 text-center align-top">{{ team.teamNumber }}</td>
+                              <td class="px-3 py-1.5 text-gray-600">
+                                @for (c of team.crew; track c.seat) {
+                                  <div class="flex items-center gap-3">
+                                    <span class="text-gray-400 font-medium w-4">{{ c.seat }}</span>
+                                    @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
+                                    <span class="text-gray-900">{{ c.name }}</span>
+                                    @if (c.genderSuffix) { <span class="text-gray-400">({{ c.genderSuffix }})</span> }
+                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">[Т]</span> }
+                                    @if (c.isCox) { <span class="text-teal-600 font-medium">[К]</span> }
+                                  </div>
+                                }
+                              </td>
+                            </tr>
+                          }
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Female disciplines detail -->
+              @if (group.femaleDisciplines.length > 0) {
+                <div class="mb-3">
+                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Женски дисциплини</p>
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-xs">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Дисциплина</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (disc of group.femaleDisciplines; track disc.label) {
+                          @for (team of disc.teams; track team.teamNumber) {
+                            <tr class="border-t border-gray-200">
+                              <td class="px-3 py-1.5 text-gray-700 font-medium align-top">{{ disc.label }}</td>
+                              <td class="px-3 py-1.5 text-gray-500 text-center align-top">{{ team.teamNumber }}</td>
+                              <td class="px-3 py-1.5 text-gray-600">
+                                @for (c of team.crew; track c.seat) {
+                                  <div class="flex items-center gap-3">
+                                    <span class="text-gray-400 font-medium w-4">{{ c.seat }}</span>
+                                    @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
+                                    <span class="text-gray-900">{{ c.name }}</span>
+                                    @if (c.genderSuffix) { <span class="text-gray-400">({{ c.genderSuffix }})</span> }
+                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">[Т]</span> }
+                                    @if (c.isCox) { <span class="text-teal-600 font-medium">[К]</span> }
+                                  </div>
+                                }
+                              </td>
+                            </tr>
+                          }
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Mixed disciplines detail -->
+              @if (group.mixedDisciplines.length > 0) {
+                <div class="mb-3">
+                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Смесени дисциплини</p>
+                  <div class="border border-gray-200 rounded-lg overflow-x-auto">
+                    <table class="w-full text-xs">
+                      <thead class="bg-gray-50">
+                        <tr>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Дисциплина</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        @for (disc of group.mixedDisciplines; track disc.label) {
+                          @for (team of disc.teams; track team.teamNumber) {
+                            <tr class="border-t border-gray-200">
+                              <td class="px-3 py-1.5 text-gray-700 font-medium align-top">{{ disc.label }}</td>
+                              <td class="px-3 py-1.5 text-gray-500 text-center align-top">{{ team.teamNumber }}</td>
+                              <td class="px-3 py-1.5 text-gray-600">
+                                @for (c of team.crew; track c.seat) {
+                                  <div class="flex items-center gap-3">
+                                    <span class="text-gray-400 font-medium w-4">{{ c.seat }}</span>
+                                    @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
+                                    <span class="text-gray-900">{{ c.name }}</span>
+                                    @if (c.genderSuffix) { <span class="text-gray-400">({{ c.genderSuffix }})</span> }
+                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">[Т]</span> }
+                                    @if (c.isCox) { <span class="text-teal-600 font-medium">[К]</span> }
+                                  </div>
+                                }
+                              </td>
+                            </tr>
+                          }
+                        }
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        }
+      </div>
+      <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
+        <app-button variant="primary" size="md" text="Затвори" (click)="closeClubDetail()"></app-button>
+      </div>
+    </div>
+  }
+</app-dialog>
+
+<!-- Transfer schema dialog -->
+<app-dialog
+  [isOpen]="!!transferSchemaDialog"
+  [title]="'Схема за трансфер — ' + (transferSchemaDialog?.groupLabel || '')"
+  size="md"
+  [noScroll]="true"
+  (closed)="closeTransferSchemaDialog()"
+>
+  @if (transferSchemaDialog) {
+    <div class="flex flex-col max-h-[calc(90vh-80px)]">
+      <p class="text-sm text-gray-600 mb-3 px-2 pt-2 flex-shrink-0">
+        Допуска се до <strong>{{ transferSchemaDialog.transferRatio }}%</strong> от стартиралите състезатели
+        да бъдат трансферирани.
+      </p>
+
+      <div class="flex-1 overflow-y-auto">
+        <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">Общ брой на отбора</th>
+              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">Макс. трансфер</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of getTransferSchema(transferSchemaDialog.teamSize, transferSchemaDialog.transferRatio); track row.total) {
+              <tr
+                class="border-b border-gray-100"
+                [class.bg-blue-50]="transferSchemaDialog.teamSize === row.total"
+                [class.font-medium]="transferSchemaDialog.teamSize === row.total"
+              >
+                <td class="py-1.5 px-3">{{ row.total }}</td>
+                <td class="py-1.5 px-3">
+                  {{ row.maxTransfer }}
+                  @if (transferSchemaDialog.teamSize === row.total) {
+                    <span class="text-xs text-gray-400 ml-1">(текущо)</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mt-3 px-3 py-2 rounded text-sm flex-shrink-0"
+        [class]="transferSchemaDialog.isOver ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">
+        @if (transferSchemaDialog.isOver) {
+          Избрани {{ transferSchemaDialog.transferCount }} трансфер от {{ transferSchemaDialog.teamSize }} общо — надвишен лимит (макс. {{ transferSchemaDialog.maxAllowed }}).
+        } @else {
+          Избрани {{ transferSchemaDialog.transferCount }} трансфер от {{ transferSchemaDialog.teamSize }} общо — в рамките на лимита (макс. {{ transferSchemaDialog.maxAllowed }}).
+        }
+      </div>
+
+      <div class="mt-4 flex justify-center flex-shrink-0">
+        <app-button variant="primary" size="md" text="Затвори" (click)="closeTransferSchemaDialog()"></app-button>
+      </div>
+    </div>
+  }
+</app-dialog>
+
+<!-- Discipline entry detail dialog -->
+<app-dialog
+  [isOpen]="!!selectedDisciplineEntryId"
+  [title]="selectedDisciplineEntryLabel"
+  size="xl"
+  [noScroll]="true"
+  (closed)="closeDisciplineEntryDetail()"
+>
+  @if (selectedDisciplineEntryId) {
+    <div class="flex flex-col max-h-[calc(90vh-120px)]">
+      <div class="flex-1 overflow-y-auto">
+        @if (disciplineEntryRows.length === 0) {
+          <p class="text-sm text-gray-400 py-4 text-center">Няма заявки за тази дисциплина</p>
+        } @else {
+          <div class="border border-gray-200 rounded-lg overflow-x-auto">
+            <table class="w-full text-xs">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Клуб</th>
+                  <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
+                  <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (row of disciplineEntryRows; track row.entryId) {
+                  <tr class="border-t border-gray-200">
+                    <td class="px-3 py-1.5 text-gray-700 font-medium align-top">{{ row.clubName }}</td>
+                    <td class="px-3 py-1.5 text-gray-500 text-center align-top">{{ row.teamNumber }}</td>
+                    <td class="px-3 py-1.5 text-gray-600">
+                      @for (c of row.crew; track c.seat) {
+                        <div class="flex items-center gap-3">
+                          <span class="text-gray-400 font-medium w-4">{{ c.seat }}</span>
+                          @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
+                          <span [class.text-orange-600]="c.isTransfer" [class.text-teal-600]="c.isCox && !c.isTransfer" [class.text-gray-900]="!c.isTransfer && !c.isCox">
+                            @if (c.isTransfer) { <span class="font-medium">[Т]</span> }
+                            @if (c.isCox && !c.isTransfer) { <span class="font-medium">[К]</span> }
+                            {{ c.name }}
+                          </span>
+                        </div>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+      <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
+        <app-button variant="primary" size="md" text="Затвори" (click)="closeDisciplineEntryDetail()"></app-button>
+      </div>
+    </div>
+  }
+</app-dialog>
+
+<!-- Discipline selection dialog for progression advance -->
+<app-dialog
+  [isOpen]="showDisciplineSelectDialog"
+  title="Изберете дисциплини за следващ етап"
+  size="md"
+  (closed)="showDisciplineSelectDialog = false"
+>
+  <div class="flex flex-col max-h-[calc(90vh-120px)]">
+    <div class="flex-1 overflow-y-auto">
+      <label class="flex items-center gap-2 text-sm font-medium text-gray-700 pb-2 mb-2 border-b border-gray-200 cursor-pointer">
+        <input type="checkbox"
+          class="rounded border-gray-300 text-bfg-blue focus:ring-bfg-blue"
+          [checked]="allDisciplinesSelected"
+          (change)="toggleAllDisciplines()" />
+        Всички дисциплини
+      </label>
+      <div class="space-y-0.5">
+        @for (disc of resultsDisciplines; track disc.disciplineId) {
+          <label class="flex items-center gap-2 text-sm text-gray-600 py-1.5 px-1 hover:bg-gray-50 rounded cursor-pointer">
+            <input type="checkbox"
+              class="rounded border-gray-300 text-bfg-blue focus:ring-bfg-blue"
+              [checked]="disciplineSelectionMap[disc.disciplineId]"
+              (change)="toggleDiscipline(disc.disciplineId)" />
+            <span class="flex-1">{{ disc.label }}</span>
+            <span class="text-xs text-gray-400">{{ disc.currentStage || '-' }}</span>
+            <span class="text-xs text-gray-400">{{ disc.entryCount }} зап.</span>
+          </label>
+        }
+      </div>
+    </div>
+    <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center gap-2">
+      <app-button variant="outline" size="md" text="Отказ" (click)="showDisciplineSelectDialog = false"></app-button>
+      <app-button variant="primary" size="md" text="Генерирай следващ етап" [disabled]="generatingProgression" (click)="confirmAdvanceProgression()"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Generate progression results dialog -->
+<app-dialog
+  [isOpen]="showGenerateResultsDialog"
+  title="Резултати от генериране"
+  size="lg"
+  (closed)="showGenerateResultsDialog = false"
+>
+  <div class="flex flex-col max-h-[calc(90vh-120px)]">
+    <div class="flex-1 overflow-y-auto">
+      @if (generateResults.length === 0) {
+        <p class="text-sm text-gray-400 py-4 text-center">Няма резултати</p>
+      } @else {
+        <div class="border border-gray-200 rounded-lg overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Дисциплина</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Статус</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Причина</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">От етап</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Към етап</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Заявки</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @for (r of generateResults; track r.disciplineId) {
+                <tr>
+                  <td class="px-4 py-2 text-gray-700 font-medium">{{ r.disciplineName || r.disciplineId }}</td>
+                  <td class="px-4 py-2 text-center">
+                    <span class="inline-flex items-center gap-1 text-xs font-medium" [class]="getGenerationStatusIcon(r.status)">
+                      @if (r.status === ProgressionGenerationStatus.Success) {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                      } @else if (r.status === ProgressionGenerationStatus.Skipped) {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                      } @else {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      }
+                      {{ getGenerationStatusLabel(r.status) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-2 text-gray-500 text-xs">{{ r.reason || '-' }}</td>
+                  <td class="px-4 py-2 text-center text-gray-600">{{ r.fromStage ? getEventTypLabel(r.fromStage) : '-' }}</td>
+                  <td class="px-4 py-2 text-center text-gray-600">{{ r.stage ? getEventTypLabel(r.stage) : '-' }}</td>
+                  <td class="px-4 py-2 text-center text-gray-600">{{ r.entryCount ?? '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+    <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
+      <app-button variant="primary" size="md" text="Затвори" (click)="showGenerateResultsDialog = false"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Standings discipline selection dialog -->
+<app-dialog
+  [isOpen]="showStandingsSelectDialog"
+  title="Изберете дисциплини за класиране"
+  size="md"
+  (closed)="showStandingsSelectDialog = false"
+>
+  <div class="flex flex-col max-h-[calc(90vh-120px)]">
+    <div class="flex-1 overflow-y-auto">
+      <label class="flex items-center gap-2 text-sm font-medium text-gray-700 pb-2 mb-2 border-b border-gray-200 cursor-pointer">
+        <input type="checkbox"
+          class="rounded border-gray-300 text-bfg-blue focus:ring-bfg-blue"
+          [checked]="allStandingsSelected"
+          (change)="toggleAllStandingsSelection()" />
+        Всички дисциплини
+      </label>
+      <div class="space-y-0.5">
+        @for (disc of resultsDisciplines; track disc.disciplineId) {
+          <label class="flex items-center gap-2 text-sm text-gray-600 py-1.5 px-1 hover:bg-gray-50 rounded cursor-pointer">
+            <input type="checkbox"
+              class="rounded border-gray-300 text-bfg-blue focus:ring-bfg-blue"
+              [checked]="standingsSelectionMap[disc.disciplineId]"
+              (change)="toggleStandingsSelection(disc.disciplineId)" />
+            <span class="flex-1">{{ disc.label }}</span>
+          </label>
+        }
+      </div>
+    </div>
+    <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center gap-2">
+      <app-button variant="outline" size="md" text="Отказ" (click)="showStandingsSelectDialog = false"></app-button>
+      <app-button variant="primary" size="md" text="Генерирай класиране" [disabled]="computingStandings" (click)="confirmGenerateStandings()"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Standings generation results dialog -->
+<app-dialog
+  [isOpen]="showStandingsResultsDialog"
+  title="Резултати от генериране на класиране"
+  size="lg"
+  (closed)="showStandingsResultsDialog = false"
+>
+  <div class="flex flex-col max-h-[calc(90vh-120px)]">
+    <div class="flex-1 overflow-y-auto">
+      @if (standingsGenerateResults.length === 0) {
+        <p class="text-sm text-gray-400 py-4 text-center">Няма резултати</p>
+      } @else {
+        <div class="border border-gray-200 rounded-lg overflow-x-auto">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Дисциплина</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Статус</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Причина</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @for (r of standingsGenerateResults; track r.disciplineId) {
+                <tr>
+                  <td class="px-4 py-2 text-gray-700 font-medium">{{ r.disciplineName || r.disciplineId }}</td>
+                  <td class="px-4 py-2 text-center">
+                    <span class="inline-flex items-center gap-1 text-xs font-medium" [class]="getGenerationStatusIcon(r.status)">
+                      @if (r.status === ProgressionGenerationStatus.Success) {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                      } @else if (r.status === ProgressionGenerationStatus.Skipped) {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                      } @else {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      }
+                      {{ getGenerationStatusLabel(r.status) }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-2 text-gray-500 text-xs">{{ r.reason || '-' }}</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </div>
+    <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
+      <app-button variant="primary" size="md" text="Затвори" (click)="showStandingsResultsDialog = false"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Discipline progression detail dialog -->
+<app-dialog
+  [isOpen]="!!selectedProgressionDisciplineId"
+  [title]="'Прогресия — ' + selectedProgressionDisciplineLabel"
+  size="xl"
+  [noScroll]="true"
+  (closed)="closeProgressionDiscipline()"
+>
+  @if (selectedProgressionDisciplineId) {
+    <div class="flex flex-col max-h-[calc(90vh-120px)]">
+      <div class="flex-1 overflow-y-auto space-y-4">
+        @if (disciplineEvents.length === 0) {
+          <p class="text-sm text-gray-400 py-4 text-center">Няма генерирани събития за тази дисциплина</p>
+        } @else if (editingLanes) {
+          <!-- Lane editing mode -->
+          <div class="mb-2 flex items-center justify-between">
+            <span class="text-sm font-medium text-gray-700">Редактиране на коридори</span>
+            <div class="flex gap-2">
+              <app-button variant="outline" size="sm" text="Отказ" [disabled]="savingLanes" (click)="cancelEditingLanes()"></app-button>
+              <app-button variant="primary" size="sm" text="Запази" [disabled]="savingLanes" (click)="saveLanes()"></app-button>
+            </div>
+          </div>
+          @if (lanesError) {
+            <div class="px-3 py-2 bg-red-50 text-red-700 text-sm rounded-lg mb-2 flex items-start justify-between gap-2">
+              <span>{{ lanesError }}</span>
+              <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="lanesError = null">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+          }
+          <div class="border border-gray-200 rounded-lg overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-1.5 text-left text-xs text-gray-500 font-medium">Серия</th>
+                  <th class="px-4 py-1.5 text-center text-xs text-gray-500 font-medium w-20">Коридор</th>
+                  <th class="px-4 py-1.5 text-left text-xs text-gray-500 font-medium">Екипаж</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (edit of laneEdits; track edit.entryId + edit.eventIndex) {
+                  <tr class="border-t border-gray-100">
+                    <td class="px-4 py-1.5 text-gray-500">{{ edit.eventIndex + 1 }}</td>
+                    <td class="px-4 py-1.5 text-center">
+                      <input type="number" min="1" [(ngModel)]="edit.lane"
+                        class="w-14 px-2 py-1 border border-gray-300 rounded text-sm text-center focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                        [disabled]="savingLanes">
+                    </td>
+                    <td class="px-4 py-1.5 text-gray-700">{{ edit.entryLabel }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        } @else {
+          <!-- Normal view with edit button -->
+          @if (canEdit && disciplineEvents.length > 0 && disciplineEvents[0].eventStatus !== 'OFFICIAL_RESULTS') {
+            <div class="flex justify-end mb-2">
+              <app-button variant="outline" size="sm" text="Промени коридори" (click)="startEditingLanes()"></app-button>
+            </div>
+          }
+          @for (ev of disciplineEvents; track ev.eventUuid) {
+            <div class="border border-gray-200 rounded-lg overflow-x-auto">
+              <div class="bg-gray-50 px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-semibold text-gray-800">{{ ev.eventTypeLabel }}</span>
+                  @if (ev.scheduledAt) {
+                    <span class="text-xs text-gray-400">{{ formatDateOnly(ev.scheduledAt) }} {{ formatTimeOnly(ev.scheduledAt) }}</span>
+                  }
+                  <span class="text-xs px-2 py-0.5 rounded-full"
+                    [class]="ev.eventStatus === 'OFFICIAL_RESULTS' ? 'bg-green-100 text-green-700' :
+                             ev.eventStatus === 'UNOFFICIAL_RESULTS' ? 'bg-yellow-100 text-yellow-700' :
+                             ev.eventStatus === 'IN_PROGRESS' ? 'bg-blue-100 text-blue-700' :
+                             ev.eventStatus === 'CANCELLED' ? 'bg-red-100 text-red-700' :
+                             'bg-gray-100 text-gray-600'">
+                    {{ ev.eventStatusLabel }}
+                  </span>
+                </div>
+                @if (canEdit && ev.eventStatus !== 'CANCELLED' && ev.participations.length > 0) {
+                  <app-button variant="outline" size="sm" text="Запиши резултати" (click)="openResultsEntry(ev.eventUuid)"></app-button>
+                }
+              </div>
+              @if (ev.participations.length === 0) {
+                <div class="px-4 py-4 text-center text-sm text-gray-400">Няма участници</div>
+              } @else {
+                <table class="w-full text-sm">
+                  <thead>
+                    <tr class="border-b border-gray-100 text-xs text-gray-400">
+                      <th class="text-center py-1.5 px-4 font-medium w-16">Кор.</th>
+                      <th class="text-left py-1.5 px-4 font-medium">Клуб</th>
+                      @if (ev.eventStatus === 'UNOFFICIAL_RESULTS' || ev.eventStatus === 'OFFICIAL_RESULTS') {
+                        <th class="text-center py-1.5 px-4 font-medium w-16">Място</th>
+                        <th class="text-center py-1.5 px-4 font-medium w-24">Време</th>
+                        <th class="text-center py-1.5 px-4 font-medium w-16">Статус</th>
+                      }
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (p of ev.participations; track p.uuid) {
+                      <tr class="border-b border-gray-50">
+                        <td class="py-1.5 px-4 text-center text-gray-500">{{ p.lane ?? '-' }}</td>
+                        <td class="py-1.5 px-4 text-gray-700">{{ p.entryLabel }}</td>
+                        @if (ev.eventStatus === 'UNOFFICIAL_RESULTS' || ev.eventStatus === 'OFFICIAL_RESULTS') {
+                          <td class="py-1.5 px-4 text-center font-semibold text-gray-700">
+                            @if (p.place) { {{ p.place }} } @else { - }
+                          </td>
+                          <td class="py-1.5 px-4 text-center text-gray-600">
+                            @if (p.finishTimeMs) { {{ formatTimeMs(p.finishTimeMs) }} } @else { - }
+                          </td>
+                          <td class="py-1.5 px-4 text-center">
+                            <span class="text-xs" [class]="p.participationStatus === 'FINISHED' ? 'text-green-600' : 'text-red-500'">
+                              {{ p.participationStatus ?? '-' }}
+                            </span>
+                          </td>
+                        }
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              }
+            </div>
+          }
+        }
+      </div>
+      <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
+        <app-button variant="primary" size="md" text="Затвори" (click)="closeProgressionDiscipline()"></app-button>
+      </div>
+    </div>
+  }
+</app-dialog>
+
+<!-- Record results dialog -->
+<app-dialog
+  [isOpen]="!!selectedProgressionEventId"
+  [title]="'Резултати — ' + selectedEventLabel"
+  size="lg"
+  [noScroll]="true"
+  (closed)="closeResultsEntry()"
+>
+  @if (selectedProgressionEventId) {
+    <div class="flex flex-col max-h-[calc(90vh-120px)]">
+      <!-- Chrono running indicator -->
+      @if (isChronoRunning) {
+        <div class="flex items-center gap-2 px-3 py-2 mb-3 bg-green-50 border border-green-200 rounded-lg">
+          <span class="inline-block h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
+          <span class="text-sm text-green-700 font-medium">Хронометърът работи</span>
+        </div>
+      }
+
+      <!-- Warning when event already has results -->
+      @if (selectedEventHasResults) {
+        <div class="flex items-start gap-2 px-3 py-2 mb-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <svg class="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
+          </svg>
+          <p class="text-xs text-yellow-800">Промяната на резултатите ще изтрие стартовите листи и класирането за всички следващи етапи на тази дисциплина.</p>
+        </div>
+      }
+
+      <div class="flex-1 overflow-y-auto">
+        @if (resultsError) {
+          <div class="px-3 py-2 mb-3 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+            <p class="text-sm text-red-700">{{ resultsError }}</p>
+            <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="resultsError = null">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+              </svg>
+            </button>
+          </div>
+        }
+
+        @if (loadingEventParticipations) {
+          <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+        } @else if (resultEdits.length === 0) {
+          <p class="text-sm text-gray-400 py-4 text-center">Няма участници в това събитие</p>
+        } @else {
+          <div class="border border-gray-200 rounded-lg overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-16">Кор.</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Клуб</th>
+                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-28">Статус</th>
+                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-32">Време (мм:сс.дд)</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                @for (row of resultEdits; track row.participationId) {
+                  <tr>
+                    <td class="px-3 py-2 text-center text-gray-500">{{ row.lane || '-' }}</td>
+                    <td class="px-3 py-2 text-gray-700">{{ row.entryLabel }}</td>
+                    <td class="px-3 py-2">
+                      <app-searchable-select-dropdown
+                        [options]="finishStatusOptions"
+                        [(ngModel)]="row.finishStatus"
+                        [disabled]="savingResults"
+                      ></app-searchable-select-dropdown>
+                    </td>
+                    <td class="px-3 py-2">
+                      <input
+                        type="text"
+                        [(ngModel)]="row.timeInput"
+                        [disabled]="row.finishStatus !== 'FINISHED' || savingResults"
+                        placeholder="00:00.00"
+                        class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-center focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue disabled:bg-gray-100 disabled:text-gray-400"
+                      />
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+
+        <!-- Status selector -->
+        <div class="mt-4">
+          <label class="block text-xs text-gray-500 mb-0.5">Статус на събитието при запис:</label>
+          <app-searchable-select-dropdown
+            [options]="saveResultsStatusOptions"
+            [(ngModel)]="saveResultsStatus"
+            placeholder="Изберете статус..."
+          ></app-searchable-select-dropdown>
+        </div>
+      </div>
+      <div class="shrink-0 pt-4 border-t border-gray-200 flex gap-3 justify-center flex-wrap items-center">
+        @if (!isChronoRunning && resultEdits.length > 0) {
+          <app-button variant="outline" size="md" text="Процес старт" [disabled]="savingResults" (click)="openChronoStart()"></app-button>
+        }
+        @if (isChronoRunning) {
+          <app-button variant="outline" size="md" text="Процес финиш" [disabled]="savingResults" (click)="openChronoFinish()"></app-button>
+        }
+        <app-button variant="outline" size="md" text="Отказ" [disabled]="savingResults" (click)="closeResultsEntry()"></app-button>
+        <app-button variant="primary" size="md" [text]="savingResults ? 'Записване...' : 'Запиши резултати'" [disabled]="savingResults || resultEdits.length === 0" (click)="saveResults()"></app-button>
+      </div>
+    </div>
+  }
+</app-dialog>
+
+<!-- Race chronometer dialog -->
+@if (selectedProgressionEventId) {
+  <app-race-chronometer
+    [isOpen]="chronoDialogOpen"
+    [initialMode]="chronoDialogMode"
+    [eventLabel]="selectedEventLabel"
+    [chronoState]="getOrCreateChronoState(selectedProgressionEventId)"
+    [lanes]="chronoEventLanes"
+    (closed)="onChronoClosed()"
+    (chronoStarted)="onChronoStarted()"
+    (resultsApplied)="onChronoResultsApplied($event)"
+  ></app-race-chronometer>
+}
+
+<!-- Chrono stop confirmation dialog -->
+<app-dialog
+  [isOpen]="showChronoStopConfirm"
+  title="Активен хронометър"
+  size="md"
+  (closed)="cancelChronoStop()"
+>
+  <div class="py-4">
+    <p class="text-gray-700 mb-6">
+      Хронометърът работи. Сигурни ли сте, че искате да затворите диалога? Хронометърът ще бъде спрян.
+    </p>
+    <div class="flex gap-3 justify-center">
+      <app-button variant="outline" size="md" text="Не, върни се" (click)="cancelChronoStop()"></app-button>
+      <app-button variant="danger" size="md" text="Да, затвори" (click)="confirmChronoStop()"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Lane Rearrange Dialog -->
+<app-dialog
+  [isOpen]="laneRearrangeOpen"
+  [title]="laneRearrangeTitle"
+  size="2xl"
+  [tall]="true"
+  [noScroll]="true"
+  (closed)="closeLaneRearrange()"
+>
+  <div class="flex flex-col h-full">
+    @if (laneRearrangeError) {
+      <div class="px-3 py-2 mb-4 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+        <p class="text-sm text-red-700">{{ laneRearrangeError }}</p>
+        <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="laneRearrangeError = null">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+    }
+    <div class="flex gap-4 overflow-x-auto flex-1 min-h-0">
+      @for (ev of laneRearrangeEvents; track ev.eventUuid) {
+        <div class="flex-1 min-w-[200px] flex flex-col">
+          <div class="text-xs font-medium text-gray-500 mb-2 text-center">{{ ev.label }}</div>
+          <div class="border border-gray-200 rounded-lg bg-gray-50 p-1 flex-1 overflow-y-auto"
+            cdkDropList
+            [cdkDropListData]="ev.entries"
+            [cdkDropListConnectedTo]="laneDropListIds"
+            [id]="'lane-list-' + ev.eventIndex"
+            (cdkDropListDropped)="onLaneDrop($event)">
+            @for (entry of ev.entries; track entry.entryId) {
+              <div cdkDrag
+                class="bg-white border border-gray-200 rounded px-3 py-2 mb-1 text-sm cursor-grab hover:shadow-sm transition-shadow">
+                <div class="flex items-center gap-2">
+                  <span class="text-gray-400 font-mono w-5 text-center text-xs">{{ $index + 1 }}</span>
+                  <span class="text-gray-700 font-medium">{{ entry.clubName }}</span>
+                  @if (entry.teamNumber > 1) {
+                    <span class="ml-1 text-gray-400">{{ entry.teamNumber }}</span>
+                  }
+                </div>
+                @if (entry.crew.length > 0) {
+                  <div class="ml-7 mt-1 space-y-0.5">
+                    @for (c of entry.crew; track c.seat) {
+                      <div class="text-xs text-gray-500">
+                        <span class="text-gray-400">{{ c.seat }}</span> {{ c.name }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+            @if (ev.entries.length === 0) {
+              <div class="text-center text-xs text-gray-400 py-4">Празно</div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+    <div class="shrink-0 pt-4 mt-4 border-t border-gray-200 flex justify-center gap-2">
+      <app-button variant="outline" size="md" text="Отказ" [disabled]="laneRearrangeSaving" (click)="closeLaneRearrange()"></app-button>
+      <app-button variant="primary" size="md" [text]="laneRearrangeSaving ? 'Записване...' : 'Запази'"
+        [disabled]="laneRearrangeSaving" (click)="saveLaneRearrange()"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Crew Verification Dialog -->
+<app-dialog
+  [isOpen]="!!crewVerifyParticipation"
+  [title]="crewVerifyTitle"
+  size="fullscreen"
+  [noScroll]="true"
+  (closed)="closeCrewVerify()"
+>
+  @if (crewVerifyCurrentMember; as member) {
+    <div class="flex flex-col h-full">
+
+      <div class="flex-1 min-h-0 flex items-center justify-center gap-3">
+        <!-- Side arrows: hidden on mobile/tablet, visible lg+ -->
+        @if (crewVerifyCanPrev || crewVerifyCanNext) {
+          <button
+            type="button"
+            class="hidden lg:flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
+            (click)="crewVerifyGoPrev()"
+            [disabled]="!crewVerifyCanPrev"
+          >
+            ‹
+          </button>
+        }
+        <div class="aspect-square max-h-full rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+          @if (crewVerifyPhotoLoading) {
+            <div class="w-full h-full flex items-center justify-center">
+              <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-bfg-blue"></div>
+            </div>
+          } @else {
+            <img
+              [src]="crewVerifyPhotoUrl || 'assets/images/default-user.png'"
+              [alt]="member.name || 'Снимка'"
+              class="w-full h-full object-cover"
+            />
+          }
+        </div>
+        @if (crewVerifyCanPrev || crewVerifyCanNext) {
+          <button
+            type="button"
+            class="hidden lg:flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
+            (click)="crewVerifyGoNext()"
+            [disabled]="!crewVerifyCanNext"
+          >
+            ›
+          </button>
+        }
+      </div>
+
+      <!-- Bottom arrows: visible on mobile/tablet only -->
+      @if ((crewVerifyCanPrev || crewVerifyCanNext)) {
+        <div class="flex lg:hidden justify-center gap-6 pt-3">
+          <button
+            type="button"
+            class="h-9 w-9 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
+            (click)="crewVerifyGoPrev()"
+            [disabled]="!crewVerifyCanPrev"
+          >
+            ‹
+          </button>
+          <button
+            type="button"
+            class="h-9 w-9 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
+            (click)="crewVerifyGoNext()"
+            [disabled]="!crewVerifyCanNext"
+          >
+            ›
+          </button>
+        </div>
+      }
+
+      <div class="shrink-0 text-center space-y-1 text-sm border-t border-gray-200 pt-4 mt-4">
+        <p class="font-medium text-gray-900">{{ member.name }}</p>
+        <p class="text-gray-500">{{ member.seat }} · {{ member.cardNumber }}</p>
+        @if (member.accreditationYear || member.accreditationStatus) {
+          <p class="text-gray-500">
+            @if (member.accreditationYear) { {{ member.accreditationYear }} }
+            @if (member.accreditationYear && member.accreditationStatus) { · }
+            @if (member.accreditationStatus) { {{ member.accreditationStatus }} }
+          </p>
+        }
+        @if (getAthleteWeight(member.athleteId); as w) {
+          <p [class]="crewVerifyWeightClass(member)">
+            ⚖ {{ w.weightKg }} кг @if (crewVerifyWeightComment(member); as comment) { · {{ comment }}}
+          </p>
+        } @else if (crewVerifyNeedsWeight(member)) {
+          <p class="text-gray-400 text-xs">⚖ Не е измерен</p>
+        }
+        @if (crewVerifyParticipation && crewVerifyParticipation.crew.length > 1) {
+          <p class="text-xs text-gray-400 pt-1">{{ crewVerifyIndex + 1 }} от {{ crewVerifyParticipation.crew.length }}</p>
+        }
+      </div>
+
+      <div class="shrink-0 pt-4 border-t border-gray-200 mt-4">
+        @if (crewVerifyError) {
+          <div class="flex items-start justify-between gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2 mb-2">
+            <p class="text-sm text-red-700">{{ crewVerifyError }}</p>
+            <button type="button" class="text-red-400 hover:text-red-600 shrink-0" (click)="crewVerifyError = null">×</button>
+          </div>
+        }
+        @if (crewVerifyParticipation) {
+          <button
+            type="button"
+            class="w-full py-2.5 px-4 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+            [class]="crewVerifyParticipation.participationStatus === 'CHECKED_IN'
+              ? 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              : 'bg-green-600 text-white hover:bg-green-700'"
+            [disabled]="crewVerifySaving"
+            (click)="toggleCrewVerifyStatus()"
+          >
+            @if (crewVerifySaving) {
+              <span class="inline-block animate-spin mr-2">⟳</span>
+            }
+            {{ crewVerifyParticipation.participationStatus === 'CHECKED_IN' ? 'Маркирай като непроверен' : 'Маркирай като проверен' }}
+          </button>
+        }
+      </div>
+
+    </div>
+  }
+</app-dialog>

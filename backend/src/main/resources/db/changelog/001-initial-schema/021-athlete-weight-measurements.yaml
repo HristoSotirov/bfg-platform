@@ -23,18 +23,20 @@ databaseChangeLog:
                   type: NUMERIC(5,2)
                   constraints:
                     nullable: false
-                  remarks: "Measured weight of the athlete"
-              - column:
-                  name: measurement_date
-                  type: DATE
-                  constraints:
-                    nullable: false
+                  remarks: "Measured weight of the athlete in kg"
               - column:
                   name: role
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
                   remarks: "ROWER or COX"
+              - column:
+                  name: measurement_date
+                  type: DATE
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_DATE
+                  remarks: "Date of the measurement (one per athlete per day)"
               - column:
                   name: created_at
                   type: TIMESTAMPTZ

@@ -1,14 +1,17 @@
 package com.bfg.platform.competition.service;
 
 import com.bfg.platform.competition.entity.Competition;
+import com.bfg.platform.competition.entity.CompetitionParticipation;
 import com.bfg.platform.competition.entity.CompetitionTimetableEvent;
 import com.bfg.platform.competition.mapper.CompetitionTimetableEventMapper;
 import com.bfg.platform.competition.query.CompetitionTimetableEventQueryAdapter;
+import com.bfg.platform.competition.repository.CompetitionParticipationRepository;
 import com.bfg.platform.competition.repository.CompetitionRepository;
 import com.bfg.platform.competition.repository.CompetitionTimetableEventRepository;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
+import com.bfg.platform.common.exception.ValidationErrorsException;
 import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
@@ -18,6 +21,8 @@ import com.bfg.platform.common.repository.DynamicEntityGraph;
 import com.bfg.platform.gen.model.CompetitionEventStatus;
 import com.bfg.platform.gen.model.CompetitionTimetableEventDto;
 import com.bfg.platform.gen.model.CompetitionTimetableEventRequest;
+import com.bfg.platform.gen.model.CompetitionType;
+import com.bfg.platform.gen.model.QualificationEventType;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.TypedQuery;
@@ -40,6 +45,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -50,6 +56,7 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
 
     private final CompetitionTimetableEventRepository repository;
     private final CompetitionRepository competitionRepository;
+    private final CompetitionParticipationRepository participationRepository;
     private final EntityManager entityManager;
 
     @Override
@@ -89,7 +96,7 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
         Competition competition = loadCompetition(request.getCompetitionId());
         validateScheduledAt(request.getScheduledAt(), competition);
         validateForCompetitionType(competition.getCompetitionType(),
-                request.getQualificationEventType() != null ? request.getQualificationEventType().getValue() : null);
+                request.getQualificationEventType());
         if (request.getEventStatus() != CompetitionEventStatus.SCHEDULED) {
             throw new ValidationException("Event status must be SCHEDULED on creation");
         }
@@ -106,7 +113,7 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
         Competition competition = loadCompetition(request.getCompetitionId());
         validateScheduledAt(request.getScheduledAt(), competition);
         validateForCompetitionType(competition.getCompetitionType(),
-                request.getQualificationEventType() != null ? request.getQualificationEventType().getValue() : null);
+                request.getQualificationEventType());
 
         CompetitionTimetableEvent existing = repository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("Competition timetable event", uuid));
@@ -125,6 +132,53 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
             repository.delete(entity);
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException(ConstraintViolationMessageExtractor.extractMessage(e));
+        }
+    }
+
+    @Override
+    @Transactional
+    public CompetitionTimetableEventDto updateEventStatus(UUID uuid, CompetitionEventStatus newStatus) {
+        if (newStatus != CompetitionEventStatus.SCHEDULED
+                && newStatus != CompetitionEventStatus.IN_PROGRESS
+                && newStatus != CompetitionEventStatus.CANCELLED) {
+            throw new ValidationException("Този endpoint поддържа само SCHEDULED, IN_PROGRESS или CANCELLED. " +
+                    "За резултатен статус използвайте записване на резултати.");
+        }
+
+        CompetitionTimetableEvent event = repository.findById(uuid)
+                .orElseThrow(() -> new ResourceNotFoundException("Competition timetable event", uuid));
+
+        CompetitionEventStatus currentStatus = event.getEventStatus();
+        validateEventStatusTransition(currentStatus, newStatus, event);
+
+        event.setEventStatus(newStatus);
+        CompetitionTimetableEvent saved = repository.save(event);
+        return CompetitionTimetableEventMapper.toDto(saved);
+    }
+
+    private static final Map<CompetitionEventStatus, Set<CompetitionEventStatus>> ALLOWED_EVENT_TRANSITIONS = Map.of(
+            CompetitionEventStatus.SCHEDULED, Set.of(CompetitionEventStatus.IN_PROGRESS, CompetitionEventStatus.CANCELLED),
+            CompetitionEventStatus.IN_PROGRESS, Set.of(CompetitionEventStatus.SCHEDULED, CompetitionEventStatus.CANCELLED),
+            CompetitionEventStatus.UNOFFICIAL_RESULTS, Set.of(),
+            CompetitionEventStatus.OFFICIAL_RESULTS, Set.of(),
+            CompetitionEventStatus.CANCELLED, Set.of(CompetitionEventStatus.SCHEDULED)
+    );
+
+    private void validateEventStatusTransition(CompetitionEventStatus current, CompetitionEventStatus target, CompetitionTimetableEvent event) {
+        Set<CompetitionEventStatus> allowed = ALLOWED_EVENT_TRANSITIONS.getOrDefault(current, Set.of());
+        if (!allowed.contains(target)) {
+            throw new ValidationErrorsException(List.of(
+                    "Невалиден преход: " + current.getValue() + " → " + target.getValue()));
+        }
+
+        if (target == CompetitionEventStatus.SCHEDULED && current == CompetitionEventStatus.IN_PROGRESS) {
+            List<CompetitionParticipation> participations = participationRepository
+                    .findByCompetitionEventIdOrderByLaneAsc(event.getId());
+            boolean hasResults = participations.stream().anyMatch(p -> p.getFinishTimeMs() != null);
+            if (hasResults) {
+                throw new ValidationErrorsException(List.of(
+                        "Не може да се върне към SCHEDULED — вече има записани резултати"));
+            }
         }
     }
 
@@ -150,12 +204,13 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
         }
     }
 
-    private void validateForCompetitionType(String competitionType, String eventType) {
-        if (competitionType == null || "STANDARD".equals(competitionType)) {
+    private void validateForCompetitionType(CompetitionType competitionType, QualificationEventType eventType) {
+        if (competitionType == null || CompetitionType.NATIONAL_WATER.equals(competitionType)
+                || CompetitionType.BALKAN.equals(competitionType)) {
             return;
         }
-        if ("ERG".equals(competitionType) || "NATIONAL_TEAM_TEST".equals(competitionType)) {
-            if (!"H".equals(eventType)) {
+        if (CompetitionType.ERG.equals(competitionType)) {
+            if (eventType != QualificationEventType.H) {
                 throw new ValidationException("Only H (heat) events are valid for competition type " + competitionType);
             }
         }

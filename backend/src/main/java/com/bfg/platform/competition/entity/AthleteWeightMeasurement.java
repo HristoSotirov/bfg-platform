@@ -54,12 +54,13 @@ public class AthleteWeightMeasurement {
     @Column(name = "weight_kg")
     private BigDecimal weightKg;
 
-    @Column(name = "measurement_date")
-    private LocalDate measurementDate;
-
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private WeightMeasurementRole role;
+
+    @Column(name = "measurement_date", insertable = false, updatable = false, nullable = false)
+    @Setter(AccessLevel.NONE)
+    private LocalDate measurementDate;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

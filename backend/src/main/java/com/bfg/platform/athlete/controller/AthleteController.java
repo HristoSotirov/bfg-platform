@@ -8,7 +8,6 @@ import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.gen.model.AthleteUpdateRequest;
 import com.bfg.platform.gen.model.GetAllAthletes200Response;
 import com.bfg.platform.common.util.PageConverter;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +51,7 @@ public class AthleteController implements AthletesApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<AthleteDto> patchAthleteByUuid(UUID athleteUuid,
-                                                             @Valid AthleteUpdateRequest request) {
+                                                             AthleteUpdateRequest request) {
         return athleteService.updateAthlete(athleteUuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Athlete", athleteUuid));
@@ -60,7 +59,7 @@ public class AthleteController implements AthletesApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<List<AthleteDto>> batchUpdateMedicalInfo(@Valid AthleteBatchMedicalUpdateRequest request) {
+    public ResponseEntity<List<AthleteDto>> batchUpdateMedicalInfo(AthleteBatchMedicalUpdateRequest request) {
         return ResponseEntity.ok(athleteService.batchUpdateMedicalInfo(request));
     }
 

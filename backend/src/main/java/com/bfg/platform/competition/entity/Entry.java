@@ -9,6 +9,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -20,6 +22,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -65,6 +68,13 @@ public class Entry {
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private DisciplineDefinition discipline;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "entry")
+    @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    @OrderBy("seatPosition ASC")
+    private List<CrewMember> crewMembers;
 
     @Column(name = "team_number")
     private Integer teamNumber;

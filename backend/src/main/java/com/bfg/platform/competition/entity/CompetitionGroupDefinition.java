@@ -1,6 +1,5 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.CompetitionGroupGender;
 import com.bfg.platform.gen.model.TransferRounding;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -46,15 +45,17 @@ public class CompetitionGroupDefinition {
     @Column(name = "short_name")
     private String shortName;
 
-    @Column(name = "gender")
-    @Enumerated(EnumType.STRING)
-    private CompetitionGroupGender gender;
-
     @Column(name = "min_age")
     private Integer minAge;
 
     @Column(name = "max_age")
     private Integer maxAge;
+
+    @Column(name = "cox_min_age")
+    private Integer coxMinAge;
+
+    @Column(name = "cox_max_age")
+    private Integer coxMaxAge;
 
     @Column(name = "max_disciplines_per_athlete")
     private int maxDisciplinesPerAthlete;
@@ -79,17 +80,26 @@ public class CompetitionGroupDefinition {
     @Enumerated(EnumType.STRING)
     private TransferRounding transferRounding;
 
-    @Column(name = "transferred_max_disciplines_per_person")
-    private Integer transferredMaxDisciplinesPerPerson;
+    @Column(name = "transferred_max_disciplines_per_athlete")
+    private Integer transferredMaxDisciplinesPerAthlete;
 
-    @Column(name = "cox_required_weight_kg")
-    private BigDecimal coxRequiredWeightKg;
+    @Column(name = "male_team_cox_required_weight_kg")
+    private BigDecimal maleTeamCoxRequiredWeightKg;
 
-    @Column(name = "cox_min_weight_kg")
-    private BigDecimal coxMinWeightKg;
+    @Column(name = "male_team_cox_min_weight_kg")
+    private BigDecimal maleTeamCoxMinWeightKg;
 
-    @Column(name = "light_max_weight_kg")
-    private BigDecimal lightMaxWeightKg;
+    @Column(name = "male_team_light_max_weight_kg")
+    private BigDecimal maleTeamLightMaxWeightKg;
+
+    @Column(name = "female_team_cox_required_weight_kg")
+    private BigDecimal femaleTeamCoxRequiredWeightKg;
+
+    @Column(name = "female_team_cox_min_weight_kg")
+    private BigDecimal femaleTeamCoxMinWeightKg;
+
+    @Column(name = "female_team_light_max_weight_kg")
+    private BigDecimal femaleTeamLightMaxWeightKg;
 
     @Column(name = "is_active")
     private boolean isActive;

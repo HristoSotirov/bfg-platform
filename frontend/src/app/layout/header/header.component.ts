@@ -27,6 +27,7 @@ import {
   ClubCoachesService,
   UserDto,
   ClubDto,
+  SystemRole,
 } from '../../core/services/api';
 
 interface ProfileData {
@@ -71,10 +72,10 @@ export class HeaderComponent {
   ];
 
   private roleLabels: Record<string, string> = {
-    APP_ADMIN: 'Администратор',
-    FEDERATION_ADMIN: 'Администратор на федерацията',
-    CLUB_ADMIN: 'Администратор на клуб',
-    COACH: 'Треньор',
+    [SystemRole.AppAdmin]: 'Администратор',
+    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
+    [SystemRole.ClubAdmin]: 'Администратор на клуб',
+    [SystemRole.Coach]: 'Треньор',
   };
 
   constructor(
@@ -184,9 +185,9 @@ export class HeaderComponent {
 
         // For COACH or CLUB_ADMIN, also fetch club info
         const role = user.role;
-        if (role === 'COACH') {
+        if (role === SystemRole.Coach) {
           this.loadCoachClub(currentUser.uuid);
-        } else if (role === 'CLUB_ADMIN') {
+        } else if (role === SystemRole.ClubAdmin) {
           this.loadAdminClub(currentUser.uuid);
         } else {
           this.cdr.markForCheck();
@@ -271,6 +272,6 @@ export class HeaderComponent {
 
   shouldShowClubSection(): boolean {
     const role = this.profileData.user?.role;
-    return role === 'COACH' || role === 'CLUB_ADMIN';
+    return role === SystemRole.Coach || role === SystemRole.ClubAdmin;
   }
 }

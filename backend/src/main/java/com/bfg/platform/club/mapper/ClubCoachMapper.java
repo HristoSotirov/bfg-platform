@@ -1,6 +1,7 @@
 package com.bfg.platform.club.mapper;
 
 import com.bfg.platform.club.entity.ClubCoach;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.gen.model.ClubCoachCreateRequest;
 import com.bfg.platform.gen.model.ClubCoachDto;
 import com.bfg.platform.user.service.UserMapper;
@@ -44,7 +45,8 @@ public class ClubCoachMapper {
         }
         
         if (expandClub && clubCoach.getClub() != null) {
-            dto.setClub(ClubMapper.toDto(clubCoach.getClub(), expand));
+            java.util.Set<String> clubExpand = ExpandQueryParser.subExpand(expand, "club");
+            dto.setClub(ClubMapper.toDto(clubCoach.getClub(), clubExpand));
         }
         
         return dto;

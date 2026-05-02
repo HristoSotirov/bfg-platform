@@ -14,7 +14,7 @@
       title="Отвори страницата"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
       </svg>
     </a>
   }
@@ -35,6 +35,10 @@
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-36 flex-shrink-0">Кратко име:</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ discipline.shortName || "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-36 flex-shrink-0">Пол:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ discipline.gender === 'MALE' ? 'Мъже' : discipline.gender === 'FEMALE' ? 'Жени' : discipline.gender === 'MIXED' ? 'Смесени' : '-' }}</span>
                 </div>
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-36 flex-shrink-0">Състезателна група:</span>
@@ -81,6 +85,16 @@
                   [(ngModel)]="editData.shortName"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Пол <span class="text-red-500">*</span>:</label>
+                <app-searchable-select-dropdown
+                  [options]="genderOptions"
+                  [placeholder]="'Изберете пол'"
+                  [ngModel]="editData.gender"
+                  (ngModelChange)="onGenderChange($event)"
+                  [disabled]="saving">
+                </app-searchable-select-dropdown>
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5">Състезателна група <span class="text-red-500">*</span>:</label>
@@ -132,6 +146,10 @@
                   <span class="text-sm font-medium break-all min-w-0">{{ discipline.distanceMeters != null ? discipline.distanceMeters : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-36 flex-shrink-0">Макс. отбори на клуб:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ discipline.maxBoatsPerClub != null ? discipline.maxBoatsPerClub : "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-36 flex-shrink-0">Статус:</span>
                   <span
                     class="text-sm font-medium break-all min-w-0"
@@ -173,6 +191,15 @@
                   type="number"
                   [(ngModel)]="editData.distanceMeters"
                   min="0"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Макс. отбори на клуб <span class="text-red-500">*</span>:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.maxBoatsPerClub"
+                  min="1"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
               </div>

@@ -40,7 +40,7 @@ databaseChangeLog:
                   type: VARCHAR(20)
                   constraints:
                     nullable: false
-                  remarks: "SCHEDULED, IN_PROGRESS, FINISHED, CANCELLED, POSTPONED"
+                  remarks: "SCHEDULED, IN_PROGRESS, UNOFFICIAL_RESULTS, OFFICIAL_RESULTS, CANCELLED"
               - column:
                   name: created_at
                   type: TIMESTAMPTZ

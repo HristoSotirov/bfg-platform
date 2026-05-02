@@ -8,12 +8,10 @@ import com.bfg.platform.gen.api.QualificationTiersApi;
 import com.bfg.platform.gen.model.GetAllQualificationTiers200Response;
 import com.bfg.platform.gen.model.QualificationTierDto;
 import com.bfg.platform.gen.model.QualificationTierRequest;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,7 +35,7 @@ public class QualificationTierController implements QualificationTiersApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<QualificationTierDto> createQualificationTier(
-            @Valid @RequestBody QualificationTierRequest request) {
+            QualificationTierRequest request) {
         return service.create(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create qualification tier"));
@@ -54,7 +52,7 @@ public class QualificationTierController implements QualificationTiersApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<QualificationTierDto> updateQualificationTierByUuid(
-            UUID uuid, @Valid @RequestBody QualificationTierRequest request) {
+            UUID uuid, QualificationTierRequest request) {
         return service.update(uuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Qualification tier", uuid));

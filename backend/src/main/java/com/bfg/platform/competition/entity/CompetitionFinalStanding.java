@@ -69,8 +69,8 @@ public class CompetitionFinalStanding {
     @Column(name = "overall_rank")
     private Integer overallRank;
 
-    @Column(name = "best_time_ms")
-    private Integer bestTimeMs;
+    @Column(name = "time_ms")
+    private Integer timeMs;
 
     @Column(name = "points")
     private BigDecimal points;

@@ -38,6 +38,7 @@ import {
 import { AuthService } from '../../../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 import { SystemRole } from '../../../../core/models/navigation.model';
+import { ScopeType } from '../../../../core/services/api';
 import { calculateRaceGroup } from '../../../../shared/utils/race-group.util';
 
 const DEFAULT_MEDICAL_DURATION_MONTHS = 12;
@@ -117,21 +118,21 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   statusChanges: Map<string, AccreditationStatus> = new Map();
 
   private statusLabels: Record<string, string> = {
-    ACTIVE: 'Активна',
-    PENDING_VALIDATION: 'Заявена',
-    PENDING_PHOTO_VALIDATION: 'Чакаща снимка',
-    NEW_PHOTO_REQUIRED: 'Нова снимка',
-    EXPIRED: 'Изтекла',
-    SUSPENDED: 'Спряна',
+    [AccreditationStatus.Active]: 'Активна',
+    [AccreditationStatus.PendingValidation]: 'Заявена',
+    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
+    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
+    [AccreditationStatus.Expired]: 'Изтекла',
+    [AccreditationStatus.Suspended]: 'Спряна',
   };
 
   readonly statusOptions: { value: AccreditationStatus; label: string }[] = [
-    { value: 'ACTIVE', label: 'Активна' },
-    { value: 'PENDING_VALIDATION', label: 'Заявена' },
-    { value: 'PENDING_PHOTO_VALIDATION', label: 'Чакаща снимка' },
-    { value: 'NEW_PHOTO_REQUIRED', label: 'Нова снимка' },
-    { value: 'EXPIRED', label: 'Изтекла' },
-    { value: 'SUSPENDED', label: 'Спряна' },
+    { value: AccreditationStatus.Active, label: 'Активна' },
+    { value: AccreditationStatus.PendingValidation, label: 'Заявена' },
+    { value: AccreditationStatus.PendingPhotoValidation, label: 'Чакаща снимка' },
+    { value: AccreditationStatus.NewPhotoRequired, label: 'Нова снимка' },
+    { value: AccreditationStatus.Expired, label: 'Изтекла' },
+    { value: AccreditationStatus.Suspended, label: 'Спряна' },
   ];
 
   get statusSelectOptions(): SearchableSelectOption[] {
@@ -139,8 +140,8 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   readonly genderOptions = [
-    { value: 'MALE', label: 'Мъж' },
-    { value: 'FEMALE', label: 'Жена' },
+    { value: Gender.MALE, label: 'Мъж' },
+    { value: Gender.FEMALE, label: 'Жена' },
   ];
 
   get genderSelectOptions(): SearchableSelectOption[] {
@@ -170,11 +171,11 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
 
     // Load userClub for CLUB_ADMIN / COACH (needed for canUploadPhoto)
     if (user) {
-      if (this.userRole === 'CLUB_ADMIN') {
+      if (this.userRole === SystemRole.ClubAdmin) {
         this.clubsService.getClubByAdminId(user.uuid)
           .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
           .subscribe({ next: (club) => { this.userClub = club; this.cdr.markForCheck(); } });
-      } else if (this.userRole === 'COACH') {
+      } else if (this.userRole === SystemRole.Coach) {
         this.clubCoachesService.getClubByCoachId(user.uuid)
           .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
           .subscribe({ next: (club) => { this.userClub = club; this.cdr.markForCheck(); } });
@@ -195,7 +196,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get canEdit(): boolean {
-    return this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN';
+    return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
   }
 
   get showScopeInDetails(): boolean {
@@ -234,16 +235,16 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get canUploadPhoto(): boolean {
-    if ((this.userRole !== 'CLUB_ADMIN' && this.userRole !== 'COACH') || !this.userClub?.uuid || !this.athlete?.uuid) {
+    if ((this.userRole !== SystemRole.ClubAdmin && this.userRole !== SystemRole.Coach) || !this.userClub?.uuid || !this.athlete?.uuid) {
       return false;
     }
     return this.fullHistory.some(
-      (acc) => acc.year === this.currentYear && acc.status === 'NEW_PHOTO_REQUIRED' && acc.clubId === this.userClub?.uuid,
+      (acc) => acc.year === this.currentYear && acc.status === AccreditationStatus.NewPhotoRequired && acc.clubId === this.userClub?.uuid,
     );
   }
 
   get isAdminUser(): boolean {
-    return this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN';
+    return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
   }
 
   get hasHistoryWarning(): boolean {
@@ -688,24 +689,24 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
 
   getStatusClass(status: string | undefined): string {
     switch (status) {
-      case 'ACTIVE': return 'text-green-600';
-      case 'EXPIRED': return 'text-gray-500';
-      case 'PENDING_VALIDATION':
-      case 'PENDING_PHOTO_VALIDATION': return 'text-yellow-600';
-      case 'NEW_PHOTO_REQUIRED': return 'text-orange-500';
-      case 'SUSPENDED': return 'text-red-600';
+      case AccreditationStatus.Active: return 'text-green-600';
+      case AccreditationStatus.Expired: return 'text-gray-500';
+      case AccreditationStatus.PendingValidation:
+      case AccreditationStatus.PendingPhotoValidation: return 'text-yellow-600';
+      case AccreditationStatus.NewPhotoRequired: return 'text-orange-500';
+      case AccreditationStatus.Suspended: return 'text-red-600';
       default: return 'text-gray-600';
     }
   }
 
   getGenderLabel(gender: string | undefined): string {
     if (!gender) return '-';
-    return gender === 'MALE' ? 'Мъж' : gender === 'FEMALE' ? 'Жена' : gender;
+    return gender === Gender.MALE ? 'Мъж' : gender === Gender.FEMALE ? 'Жена' : gender;
   }
 
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
-    const labels: Record<string, string> = { INTERNAL: 'Вътрешен', EXTERNAL: 'Външен', NATIONAL: 'Национален' };
+    const labels: Record<string, string> = { [ScopeType.Internal]: 'Вътрешен', [ScopeType.External]: 'Външен', [ScopeType.National]: 'Национален' };
     return labels[scopeType] ?? scopeType;
   }
 

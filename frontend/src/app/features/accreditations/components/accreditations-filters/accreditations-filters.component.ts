@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AccreditationStatus } from '../../../../core/services/api';
+import { AccreditationStatus, Gender, ScopeType } from '../../../../core/services/api';
 import {
   AccreditationFilters,
   FilterConfig,
@@ -61,25 +61,25 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
   selectedBirthYearsCache: string[] = [];
 
   readonly statusOptions: DropdownOption[] = [
-    { value: 'ACTIVE', label: 'Активна' },
-    { value: 'PENDING_VALIDATION', label: 'Чакаща валидация' },
-    { value: 'PENDING_PHOTO_VALIDATION', label: 'Чакаща снимка' },
-    { value: 'NEW_PHOTO_REQUIRED', label: 'Нова снимка' },
-    { value: 'EXPIRED', label: 'Изтекла' },
-    { value: 'SUSPENDED', label: 'Спряна' },
+    { value: AccreditationStatus.Active, label: 'Активна' },
+    { value: AccreditationStatus.PendingValidation, label: 'Чакаща валидация' },
+    { value: AccreditationStatus.PendingPhotoValidation, label: 'Чакаща снимка' },
+    { value: AccreditationStatus.NewPhotoRequired, label: 'Нова снимка' },
+    { value: AccreditationStatus.Expired, label: 'Изтекла' },
+    { value: AccreditationStatus.Suspended, label: 'Спряна' },
   ];
 
   readonly genderOptions: DropdownOption[] = [
-    { value: 'MALE', label: 'Мъж' },
-    { value: 'FEMALE', label: 'Жена' },
+    { value: Gender.MALE, label: 'Мъж' },
+    { value: Gender.FEMALE, label: 'Жена' },
   ];
 
   yearOptions: DropdownOption[] = [];
   clubOptions: DropdownOption[] = [];
   readonly scopeTypeOptions: DropdownOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Външен' },
-    { value: 'NATIONAL', label: 'Национален' },
+    { value: ScopeType.Internal, label: 'Вътрешен' },
+    { value: ScopeType.External, label: 'Външен' },
+    { value: ScopeType.National, label: 'Национален' },
   ];
 
   get birthYearOptions(): DropdownOption[] {

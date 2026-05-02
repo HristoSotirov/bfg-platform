@@ -1,0 +1,175 @@
+<app-dialog
+  [isOpen]="isOpen"
+  [title]="dialogTitle"
+  size="lg"
+  [tall]="dialogMode === 'finish'"
+  (closed)="goBackToResults()"
+>
+  <!-- START MODE -->
+  <ng-container *ngIf="dialogMode === 'start'">
+    <div class="flex flex-col items-center gap-6 py-8">
+      <div class="text-6xl font-mono tracking-wider text-gray-900 tabular-nums">
+        {{ displayTime }}
+      </div>
+
+      <p *ngIf="chronoState?.phase === 'waiting'" class="text-gray-500">
+        Натиснете <kbd class="rounded border border-gray-300 bg-gray-100 px-2 py-0.5 font-mono text-sm">SPACE</kbd> за старт
+      </p>
+
+      <p *ngIf="chronoState?.phase === 'running'" class="text-green-600 font-medium flex items-center gap-2">
+        <span class="inline-block h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
+        Хронометърът работи
+      </p>
+
+      <div *ngIf="chronoState?.phase === 'running'" class="flex flex-col items-center gap-2">
+        <app-button
+          text="Назад към резултати"
+          variant="outline"
+          (click)="goBackToResults()"
+        ></app-button>
+        <app-button
+          text="Рестарт"
+          variant="outline"
+          size="sm"
+          (click)="promptRestart()"
+        ></app-button>
+      </div>
+
+      <!-- Restart confirmation -->
+      <div *ngIf="showRestartConfirm" class="w-full rounded border border-yellow-300 bg-yellow-50 p-4 text-center">
+        <p class="text-sm text-gray-700 mb-3">Сигурни ли сте? Хронометърът ще бъде нулиран.</p>
+        <div class="flex justify-center gap-3">
+          <app-button text="Не" variant="outline" size="sm" (click)="cancelRestart()"></app-button>
+          <app-button text="Да, рестартирай" variant="danger" size="sm" (click)="confirmRestart()"></app-button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- FINISH MODE -->
+  <ng-container *ngIf="dialogMode === 'finish'">
+    <div class="flex flex-col items-center gap-6 py-8">
+      <div class="text-6xl font-mono tracking-wider text-gray-900 tabular-nums">
+        {{ displayTime }}
+      </div>
+
+      <p *ngIf="chronoState?.phase === 'running'" class="text-gray-500">
+        Натиснете <kbd class="rounded border border-gray-300 bg-gray-100 px-2 py-0.5 font-mono text-sm">SPACE</kbd> за улавяне на време
+      </p>
+
+      <!-- Splits list -->
+      <div
+        *ngIf="chronoState?.splits?.length"
+        class="w-full max-h-48 overflow-y-auto rounded border border-gray-200 bg-gray-50 px-4 py-2"
+      >
+        <div
+          *ngFor="let split of chronoState.splits; let i = index"
+          class="flex justify-between py-1 font-mono text-sm"
+          [class.border-t]="i > 0"
+          [class.border-gray-200]="i > 0"
+        >
+          <span class="text-gray-500">{{ i + 1 }}.</span>
+          <span class="text-gray-900">{{ formatMs(split) }}</span>
+        </div>
+      </div>
+
+      <div *ngIf="chronoState?.phase === 'running'" class="flex flex-col items-center gap-2">
+        <p *ngIf="!canStop" class="text-xs text-gray-400">
+          Минимум {{ minSplitsToStop }} времена за спиране (уловени: {{ chronoState.splits.length }})
+        </p>
+        <div class="flex justify-center gap-3">
+          <app-button
+            text="Рестарт"
+            variant="outline"
+            (click)="promptRestart()"
+          ></app-button>
+          <app-button
+            text="Стоп хронометър"
+            variant="danger"
+            [disabled]="!canStop"
+            (click)="stopChrono()"
+          ></app-button>
+        </div>
+      </div>
+
+      <!-- Restart confirmation -->
+      <div *ngIf="showRestartConfirm" class="w-full rounded border border-yellow-300 bg-yellow-50 p-4 text-center">
+        <p class="text-sm text-gray-700 mb-3">Сигурни ли сте? Всички уловени времена ще бъдат изтрити.</p>
+        <div class="flex justify-center gap-3">
+          <app-button text="Не" variant="outline" size="sm" (click)="cancelRestart()"></app-button>
+          <app-button text="Да, рестартирай" variant="danger" size="sm" (click)="confirmRestart()"></app-button>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+
+  <!-- ASSIGN MODE -->
+  <ng-container *ngIf="dialogMode === 'assign'">
+    <div class="flex flex-col gap-4 py-4">
+      <p class="text-sm text-gray-600">
+        Общо време: <span class="font-mono font-medium">{{ displayTime }}</span>
+        · Уловени времена: <span class="font-medium">{{ chronoState.splits.length }}</span>
+        · Избрани: <span class="font-medium">{{ selectedSplitCount }}</span>
+      </p>
+
+      <!-- Splits with checkboxes -->
+      <div
+        *ngIf="chronoState.splits.length"
+        class="max-h-48 overflow-y-auto rounded border border-gray-200 bg-gray-50 px-2 py-1"
+      >
+        <div
+          *ngFor="let split of chronoState.splits; let i = index"
+          class="flex items-center gap-3 py-1.5 cursor-pointer hover:bg-gray-100 rounded px-2"
+          [class.border-t]="i > 0"
+          [class.border-gray-200]="i > 0"
+          [class.opacity-40]="!splitSelected[i]"
+          (click)="toggleSplit(i)"
+        >
+          <input
+            type="checkbox"
+            class="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            [checked]="splitSelected[i]"
+            (click)="$event.stopPropagation()"
+            (change)="toggleSplit(i)"
+          />
+          <span class="text-gray-500 font-mono text-sm w-6">{{ i + 1 }}.</span>
+          <span class="text-gray-900 font-mono text-sm">{{ formatMs(split) }}</span>
+        </div>
+      </div>
+
+      <!-- Lane order -->
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          Ред на финиширане — {{ selectedSplitCount }} коридора (разделени с интервал)
+        </label>
+        <input
+          type="text"
+          class="block w-full rounded border border-gray-300 px-3 py-2 text-sm font-mono focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+          placeholder="напр. 7 4 3 1"
+          [(ngModel)]="laneOrderInput"
+        />
+        <p class="mt-1 text-xs text-gray-400">
+          Налични коридори: {{ lanes.join(', ') }}
+        </p>
+      </div>
+
+      <!-- Error -->
+      <p *ngIf="assignError" class="text-sm text-red-600">{{ assignError }}</p>
+
+      <!-- Actions -->
+      <div class="flex justify-center gap-3 pt-2">
+        <app-button
+          text="Отказ"
+          variant="outline"
+          (click)="goBackToResults()"
+        ></app-button>
+        <app-button
+          text="Потвърди"
+          variant="primary"
+          [disabled]="selectedSplitCount === 0"
+          (click)="confirmAssign()"
+        ></app-button>
+      </div>
+    </div>
+  </ng-container>
+</app-dialog>

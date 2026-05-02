@@ -1,7 +1,10 @@
 package com.bfg.platform.competition.entity;
 
+import com.bfg.platform.gen.model.QualificationEventType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -46,10 +49,12 @@ public class QualificationProgression {
     private QualificationTier qualificationTier;
 
     @Column(name = "source_event")
-    private String sourceEvent;
+    @Enumerated(EnumType.STRING)
+    private QualificationEventType sourceEvent;
 
     @Column(name = "dest_event")
-    private String destEvent;
+    @Enumerated(EnumType.STRING)
+    private QualificationEventType destEvent;
 
     @Column(name = "qualify_by_position")
     private int qualifyByPosition;

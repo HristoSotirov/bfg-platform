@@ -9,6 +9,7 @@ import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.security.AuthorizationService;
 import com.bfg.platform.common.security.ScopeAccessPolicy;
@@ -18,6 +19,7 @@ import com.bfg.platform.gen.model.AthleteBatchMedicalUpdateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.gen.model.AthleteUpdateRequest;
 import com.bfg.platform.gen.model.ScopeType;
+import com.bfg.platform.gen.model.SystemRole;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -54,7 +56,8 @@ public class AthleteServiceImpl implements AthleteService {
     ) {
         // Validate scope filter - throws 403 if invalid
         scopeAccessValidator.validateFilterScope(filter);
-        
+        ExpandQueryParser.parse(expand, Athlete.class);
+
         // Athletes don't have direct clubId - they are accessed via accreditations
         // Club restriction is enforced at the accreditations endpoint
 
@@ -70,6 +73,7 @@ public class AthleteServiceImpl implements AthleteService {
 
     @Override
     public Optional<AthleteDto> getAthleteDtoByUuid(UUID uuid, List<String> expand) {
+        ExpandQueryParser.parse(expand, Athlete.class);
         return athleteRepository.findById(uuid)
                 .map(athlete -> {
                     validateAthleteAccess(athlete);
@@ -115,9 +119,9 @@ public class AthleteServiceImpl implements AthleteService {
     /**
      * Determines if the user needs club-based access restriction for individual athlete access.
      */
-    private boolean requiresAthleteClubRestriction(com.bfg.platform.gen.model.SystemRole role, ScopeType scope) {
-        if (role == com.bfg.platform.gen.model.SystemRole.APP_ADMIN || 
-            role == com.bfg.platform.gen.model.SystemRole.FEDERATION_ADMIN) {
+    private boolean requiresAthleteClubRestriction(SystemRole role, ScopeType scope) {
+        if (role == SystemRole.APP_ADMIN ||
+            role == SystemRole.FEDERATION_ADMIN) {
             return false;
         }
         return scope != ScopeType.INTERNAL;

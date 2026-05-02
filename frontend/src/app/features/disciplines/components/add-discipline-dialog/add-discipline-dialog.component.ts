@@ -19,6 +19,7 @@ import {
   CompetitionGroupDefinitionsService,
 } from '../../../../core/services/api';
 import { BoatClass } from '../../../../core/services/api/model/boatClass';
+import { DisciplineGender } from '../../../../core/services/api/model/disciplineGender';
 import { Observable, takeUntil, Subject, map } from 'rxjs';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
@@ -43,13 +44,21 @@ export class AddDisciplineDialogComponent implements OnChanges {
   formData = {
     name: '',
     shortName: '',
+    gender: '' as string,
     competitionGroupId: '',
     boatClass: '' as string,
     maxCrewFromTransfer: null as number | null,
     isLightweight: '' as string,
     distanceMeters: null as number | null,
+    maxBoatsPerClub: null as number | null,
     isActive: true,
   };
+
+  readonly genderOptions: SearchableSelectOption[] = [
+    { value: DisciplineGender.Male, label: 'Мъже' },
+    { value: DisciplineGender.Female, label: 'Жени' },
+    { value: DisciplineGender.Mixed, label: 'Смесени' },
+  ];
 
   readonly boatClassOptions: SearchableSelectOption[] = [
     { value: 'SINGLE_SCULL', label: '1X' },
@@ -110,11 +119,13 @@ export class AddDisciplineDialogComponent implements OnChanges {
     this.formData = {
       name: '',
       shortName: '',
+      gender: '',
       competitionGroupId: this.defaultGroupId || '',
       boatClass: '',
       maxCrewFromTransfer: null,
       isLightweight: '',
       distanceMeters: null,
+      maxBoatsPerClub: null,
       isActive: true,
     };
     this.error = null;
@@ -128,6 +139,11 @@ export class AddDisciplineDialogComponent implements OnChanges {
 
   onBoatClassChange(value: string | null): void {
     this.formData.boatClass = value || '';
+    this.cdr.markForCheck();
+  }
+
+  onGenderChange(value: string | null): void {
+    this.formData.gender = value || '';
     this.cdr.markForCheck();
   }
 
@@ -145,11 +161,13 @@ export class AddDisciplineDialogComponent implements OnChanges {
     return !!(
       this.formData.name &&
       this.formData.shortName &&
+      this.formData.gender &&
       this.formData.competitionGroupId &&
       this.formData.boatClass &&
       this.formData.maxCrewFromTransfer != null &&
       this.formData.isLightweight &&
-      this.formData.distanceMeters != null && this.formData.distanceMeters > 0
+      this.formData.distanceMeters != null && this.formData.distanceMeters > 0 &&
+      this.formData.maxBoatsPerClub != null && this.formData.maxBoatsPerClub > 0
     );
   }
 
@@ -163,11 +181,13 @@ export class AddDisciplineDialogComponent implements OnChanges {
     const request: DisciplineDefinitionRequest = {
       name: this.formData.name,
       shortName: this.formData.shortName,
+      gender: this.formData.gender as DisciplineGender,
       competitionGroupId: this.formData.competitionGroupId,
       boatClass: this.formData.boatClass as BoatClass,
       maxCrewFromTransfer: this.formData.maxCrewFromTransfer!,
       isLightweight: this.formData.isLightweight === 'true',
       distanceMeters: this.formData.distanceMeters!,
+      maxBoatsPerClub: this.formData.maxBoatsPerClub!,
       isActive: this.formData.isActive,
     };
 

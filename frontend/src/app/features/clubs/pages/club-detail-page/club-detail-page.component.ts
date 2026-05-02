@@ -41,6 +41,7 @@ import {
 import { AuthService } from '../../../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 import { SystemRole } from '../../../../core/models/navigation.model';
+import { ScopeType } from '../../../../core/services/api';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
@@ -181,20 +182,20 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get canEdit(): boolean {
-    return this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN';
+    return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
   }
 
   get canManageCoaches(): boolean {
     if (!this.club?.uuid) return false;
     if (!this.scopeVisibility.canViewScopeField()) return false;
-    if ((this.club as any).scopeType !== 'INTERNAL') return false;
-    if (this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN') return true;
-    if (this.userRole === 'CLUB_ADMIN' && this.userClubId === this.club.uuid) return true;
+    if ((this.club as any).scopeType !== ScopeType.Internal) return false;
+    if (this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin) return true;
+    if (this.userRole === SystemRole.ClubAdmin && this.userClubId === this.club.uuid) return true;
     return false;
   }
 
   get canUploadLogo(): boolean {
-    return this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN';
+    return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
   }
 
   get showScopeInDetails(): boolean {
@@ -302,9 +303,9 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }

@@ -1,5 +1,6 @@
 package com.bfg.platform.competition.mapper;
 
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.competition.entity.DisciplineDefinition;
 import com.bfg.platform.gen.model.DisciplineDefinitionDto;
 import com.bfg.platform.gen.model.DisciplineDefinitionRequest;
@@ -27,6 +28,7 @@ public class DisciplineDefinitionMapper {
         dto.setUuid(entity.getId());
         dto.setName(entity.getName());
         dto.setShortName(entity.getShortName());
+        dto.setGender(entity.getGender());
         dto.setCompetitionGroupId(entity.getCompetitionGroupId());
         dto.setBoatClass(entity.getBoatClass());
         dto.setCrewSize(entity.getCrewSize());
@@ -35,6 +37,7 @@ public class DisciplineDefinitionMapper {
         dto.setDistanceMeters(entity.getDistanceMeters());
         dto.setMaxCrewFromTransfer(entity.getMaxCrewFromTransfer());
         dto.setIsActive(entity.isActive());
+        dto.setMaxBoatsPerClub(entity.getMaxBoatsPerClub());
         dto.setCreatedAt(entity.getCreatedAt() != null
             ? OffsetDateTime.ofInstant(entity.getCreatedAt(), ZoneOffset.UTC)
             : null);
@@ -43,7 +46,8 @@ public class DisciplineDefinitionMapper {
             : null);
 
         if (expand != null && expand.contains("competitionGroup") && entity.getCompetitionGroup() != null) {
-            dto.setCompetitionGroup(CompetitionGroupDefinitionMapper.toDto(entity.getCompetitionGroup()));
+            Set<String> groupExpand = ExpandQueryParser.subExpand(expand, "competitionGroup");
+            dto.setCompetitionGroup(CompetitionGroupDefinitionMapper.toDto(entity.getCompetitionGroup(), groupExpand));
         }
 
         return dto;
@@ -54,6 +58,7 @@ public class DisciplineDefinitionMapper {
         entity.setName(request.getName());
         entity.setShortName(request.getShortName());
         entity.setCompetitionGroupId(request.getCompetitionGroupId());
+        entity.setGender(request.getGender());
         entity.setBoatClass(request.getBoatClass());
         entity.setCrewSize(boatClassFields.crewSize());
         entity.setHasCoxswain(boatClassFields.hasCoxswain());
@@ -61,6 +66,7 @@ public class DisciplineDefinitionMapper {
         entity.setDistanceMeters(request.getDistanceMeters());
         entity.setMaxCrewFromTransfer(request.getMaxCrewFromTransfer());
         entity.setActive(request.getIsActive());
+        entity.setMaxBoatsPerClub(request.getMaxBoatsPerClub());
         return entity;
     }
 
@@ -68,6 +74,7 @@ public class DisciplineDefinitionMapper {
         entity.setName(request.getName());
         entity.setShortName(request.getShortName());
         entity.setCompetitionGroupId(request.getCompetitionGroupId());
+        entity.setGender(request.getGender());
         entity.setBoatClass(request.getBoatClass());
         entity.setCrewSize(boatClassFields.crewSize());
         entity.setMaxCrewFromTransfer(request.getMaxCrewFromTransfer());
@@ -75,5 +82,6 @@ public class DisciplineDefinitionMapper {
         entity.setLightweight(request.getIsLightweight());
         entity.setDistanceMeters(request.getDistanceMeters());
         entity.setActive(request.getIsActive());
+        entity.setMaxBoatsPerClub(request.getMaxBoatsPerClub());
     }
 }

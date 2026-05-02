@@ -87,9 +87,9 @@ export class CompetitionsTableComponent implements OnInit {
 
   getCompetitionTypeLabel(type: string | undefined): string {
     const labels: Record<string, string> = {
-      STANDARD: 'Стандартно (вода)',
       ERG: 'Ергометър',
-      NATIONAL_TEAM_TEST: 'Тест национален отбор',
+      NATIONAL_WATER: 'Национално (вода)',
+      BALKAN: 'Балкански',
     };
     return type ? (labels[type] ?? type) : '-';
   }

@@ -1,8 +1,8 @@
 # ── Enums ──────────────────────────────────────────────────────────────────────
 
-CompetitionGroupGender:
+DisciplineGender:
   type: string
-  description: Gender classification for competition groups
+  description: Gender classification for a discipline
   enum:
     - MALE
     - FEMALE
@@ -42,26 +42,28 @@ CompetitionEventStatus:
   enum:
     - SCHEDULED
     - IN_PROGRESS
-    - FINISHED
+    - UNOFFICIAL_RESULTS
+    - OFFICIAL_RESULTS
     - CANCELLED
-    - POSTPONED
 
 CompetitionType:
   type: string
   description: Type/format of the competition
   enum:
-    - STANDARD
     - ERG
-    - NATIONAL_TEAM_TEST
+    - NATIONAL_WATER
+    - BALKAN
 
-FinishStatus:
+ParticipationStatus:
   type: string
-  description: Finish status of a participation
+  description: Status of a participation in a competition event
   enum:
-    - OK
+    - REGISTERED
+    - CHECKED_IN
     - DNS
     - DNF
     - DSQ
+    - FINISHED
 
 SeatPosition:
   type: string
@@ -121,14 +123,18 @@ CompetitionGroupDefinitionDto:
     shortName:
       type: string
       example: "M U23"
-    gender:
-      $ref: "#/CompetitionGroupGender"
     minAge:
       type: integer
       example: 18
     maxAge:
       type: integer
       example: 22
+    coxMinAge:
+      type: integer
+      description: "Minimum age for coxswain - nullable, falls back to minAge"
+    coxMaxAge:
+      type: integer
+      description: "Maximum age for coxswain - nullable, falls back to maxAge"
     maxDisciplinesPerAthlete:
       type: integer
       example: 3
@@ -141,20 +147,31 @@ CompetitionGroupDefinitionDto:
       type: integer
     transferRounding:
       $ref: "#/TransferRounding"
-    transferredMaxDisciplinesPerPerson:
+    transferredMaxDisciplinesPerAthlete:
       type: integer
-    coxRequiredWeightKg:
+    maleTeamCoxRequiredWeightKg:
       type: number
       format: double
-    coxMinWeightKg:
+    maleTeamCoxMinWeightKg:
       type: number
       format: double
-    lightMaxWeightKg:
+    maleTeamLightMaxWeightKg:
+      type: number
+      format: double
+    femaleTeamCoxRequiredWeightKg:
+      type: number
+      format: double
+    femaleTeamCoxMinWeightKg:
+      type: number
+      format: double
+    femaleTeamLightMaxWeightKg:
       type: number
       format: double
     isActive:
       type: boolean
       example: true
+    transferFromGroup:
+      $ref: "#/CompetitionGroupDefinitionDto"
     createdAt:
       type: string
       format: date-time
@@ -175,6 +192,8 @@ DisciplineDefinitionDto:
     shortName:
       type: string
       example: "M1x"
+    gender:
+      $ref: "#/DisciplineGender"
     competitionGroupId:
       type: string
       format: uuid
@@ -199,6 +218,10 @@ DisciplineDefinitionDto:
     isActive:
       type: boolean
       example: true
+    maxBoatsPerClub:
+      type: integer
+      minimum: 1
+      example: 2
     createdAt:
       type: string
       format: date-time
@@ -446,12 +469,18 @@ EntryDto:
     clubId:
       type: string
       format: uuid
+    club:
+      $ref: "../clubs/schemas.yaml#/ClubDto"
     disciplineId:
       type: string
       format: uuid
     teamNumber:
       type: integer
       example: 1
+    crewMembers:
+      type: array
+      items:
+        $ref: "#/CrewMemberDto"
     createdAt:
       type: string
       format: date-time
@@ -471,12 +500,11 @@ CrewMemberDto:
       format: uuid
     seatPosition:
       $ref: "#/SeatPosition"
-    athleteId:
+    accreditationId:
       type: string
       format: uuid
-    cardNumber:
-      type: string
-      example: "BG001234"
+    accreditation:
+      $ref: "../accreditations/schemas.yaml#/AccreditationDto"
     createdAt:
       type: string
       format: date-time
@@ -500,8 +528,8 @@ CompetitionParticipationDto:
     lane:
       type: integer
       example: 3
-    finishStatus:
-      $ref: "#/FinishStatus"
+    participationStatus:
+      $ref: "#/ParticipationStatus"
     finishTimeMs:
       type: integer
       example: 420500
@@ -534,7 +562,7 @@ CompetitionFinalStandingDto:
     overallRank:
       type: integer
       example: 1
-    bestTimeMs:
+    timeMs:
       type: integer
       example: 415200
     points:
@@ -562,10 +590,6 @@ AthleteWeightMeasurementDto:
       type: number
       format: double
       example: 75.50
-    measurementDate:
-      type: string
-      format: date
-      example: "2025-06-15"
     role:
       $ref: "#/WeightMeasurementRole"
     createdAt:
@@ -575,6 +599,28 @@ AthleteWeightMeasurementDto:
       type: string
       format: date-time
 
+RecordWeightRequest:
+  type: object
+  description: Request to record or update an athlete's weight measurement for today
+  required:
+    - athleteId
+    - weightKg
+    - role
+  properties:
+    athleteId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Athlete ID is required")'
+    weightKg:
+      type: number
+      format: double
+      example: 72.50
+      x-field-extra-annotation: '@NotNull(message = "Weight is required")'
+    role:
+      allOf:
+        - $ref: "#/WeightMeasurementRole"
+      x-field-extra-annotation: '@NotNull(message = "Role is required")'
+
 # ── Create/Update Requests ───────────────────────────────────────────────────
 
 CompetitionGroupDefinitionRequest:
@@ -583,7 +629,6 @@ CompetitionGroupDefinitionRequest:
   required:
     - name
     - shortName
-    - gender
     - minAge
     - maxAge
     - maxDisciplinesPerAthlete
@@ -597,10 +642,6 @@ CompetitionGroupDefinitionRequest:
       type: string
       minLength: 1
       x-field-extra-annotation: '@NotBlank(message = "Short name is required")'
-    gender:
-      allOf:
-        - $ref: "#/CompetitionGroupGender"
-      x-field-extra-annotation: '@NotNull(message = "Gender is required")'
     minAge:
       type: integer
       minimum: 0
@@ -613,6 +654,16 @@ CompetitionGroupDefinitionRequest:
       x-field-extra-annotation: |-
         @NotNull(message = "Max age is required")
         @Min(value = 0, message = "Max age must be >= 0")
+    coxMinAge:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: '@Min(value = 0, message = "Cox min age must be >= 0")'
+      description: "Nullable - minimum age for coxswain, falls back to minAge if null"
+    coxMaxAge:
+      type: integer
+      minimum: 0
+      x-field-extra-annotation: '@Min(value = 0, message = "Cox max age must be >= 0")'
+      description: "Nullable - maximum age for coxswain, falls back to maxAge if null"
     maxDisciplinesPerAthlete:
       type: integer
       minimum: 1
@@ -637,25 +688,39 @@ CompetitionGroupDefinitionRequest:
     transferRounding:
       $ref: "#/TransferRounding"
       description: "Nullable - all transfer fields must be set together or all null"
-    transferredMaxDisciplinesPerPerson:
+    transferredMaxDisciplinesPerAthlete:
       type: integer
       minimum: 1
       x-field-extra-annotation: '@Min(value = 1, message = "Transferred max disciplines per person must be >= 1")'
       description: "Nullable - all transfer fields must be set together or all null"
-    coxRequiredWeightKg:
+    maleTeamCoxRequiredWeightKg:
       type: number
       format: double
-      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Cox required weight must be positive")'
-      description: "Nullable - both cox weight fields must be set together or both null"
-    coxMinWeightKg:
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Male team cox required weight must be positive")'
+      description: "Nullable - both male team cox weight fields must be set together or both null"
+    maleTeamCoxMinWeightKg:
       type: number
       format: double
-      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Cox min weight must be positive")'
-      description: "Nullable - both cox weight fields must be set together or both null"
-    lightMaxWeightKg:
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Male team cox min weight must be positive")'
+      description: "Nullable - both male team cox weight fields must be set together or both null"
+    maleTeamLightMaxWeightKg:
       type: number
       format: double
-      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Light max weight must be positive")'
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Male team light max weight must be positive")'
+    femaleTeamCoxRequiredWeightKg:
+      type: number
+      format: double
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Female team cox required weight must be positive")'
+      description: "Nullable - both female team cox weight fields must be set together or both null"
+    femaleTeamCoxMinWeightKg:
+      type: number
+      format: double
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Female team cox min weight must be positive")'
+      description: "Nullable - both female team cox weight fields must be set together or both null"
+    femaleTeamLightMaxWeightKg:
+      type: number
+      format: double
+      x-field-extra-annotation: '@DecimalMin(value = "0.0", inclusive = false, message = "Female team light max weight must be positive")'
     isActive:
       type: boolean
       x-field-extra-annotation: '@NotNull(message = "isActive is required")'
@@ -667,10 +732,12 @@ DisciplineDefinitionRequest:
     - name
     - shortName
     - competitionGroupId
+    - gender
     - boatClass
     - isLightweight
     - distanceMeters
     - maxCrewFromTransfer
+    - maxBoatsPerClub
     - isActive
   properties:
     name:
@@ -685,6 +752,10 @@ DisciplineDefinitionRequest:
       type: string
       format: uuid
       x-field-extra-annotation: '@NotNull(message = "Competition group ID is required")'
+    gender:
+      allOf:
+        - $ref: "#/DisciplineGender"
+      x-field-extra-annotation: '@NotNull(message = "Gender is required")'
     boatClass:
       allOf:
         - $ref: "#/BoatClass"
@@ -707,6 +778,12 @@ DisciplineDefinitionRequest:
     isActive:
       type: boolean
       x-field-extra-annotation: '@NotNull(message = "isActive is required")'
+    maxBoatsPerClub:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Max boats per club is required")
+        @Min(value = 1, message = "Max boats per club must be >= 1")
 
 ScoringSchemeRequest:
   type: object
@@ -1088,4 +1165,389 @@ CompetitionTimetableEventBulkRequest:
       type: array
       items:
         $ref: "#/CompetitionTimetableEventRequest"
+
+CrewMemberRequest:
+  type: object
+  description: Request payload for a single crew member seat assignment
+  required:
+    - seatPosition
+    - accreditationId
+  properties:
+    seatPosition:
+      allOf:
+        - $ref: "#/SeatPosition"
+      x-field-extra-annotation: '@NotNull(message = "Seat position is required")'
+    accreditationId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Accreditation ID is required")'
+
+EntryRequest:
+  type: object
+  description: Request payload for a single entry (one team in one discipline)
+  required:
+    - disciplineId
+    - teamNumber
+    - crewMembers
+  properties:
+    disciplineId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
+    teamNumber:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: '@NotNull(message = "Team number is required") @Min(value = 1, message = "Team number must be at least 1")'
+    crewMembers:
+      type: array
+      items:
+        $ref: "#/CrewMemberRequest"
+      x-field-extra-annotation: '@NotNull(message = "Crew members are required")'
+
+ClubEntriesRequest:
+  type: object
+  description: Request payload for submitting or replacing all entries for a club in a competition
+  required:
+    - entries
+  properties:
+    entries:
+      type: array
+      items:
+        $ref: "#/EntryRequest"
+      x-field-extra-annotation: '@NotNull(message = "Entries are required")'
+
+ClubEntriesDto:
+  type: object
+  description: Response payload containing all entries for a club in a competition
+  properties:
+    entries:
+      type: array
+      items:
+        $ref: "#/EntryDto"
       x-field-extra-annotation: '@NotNull(message = "Events list is required")'
+    progressionWarning:
+      type: boolean
+      description: "True when entries are modified during RACE phase and progression data already exists. Indicates progression may need regeneration."
+
+# ── Progression Request/Response ─────────────────────────────────────────────
+
+ParticipationResultRequest:
+  type: object
+  description: Result for a single participation in a race event
+  required:
+    - participationId
+    - finishStatus
+  properties:
+    participationId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Participation ID is required")'
+    finishStatus:
+      allOf:
+        - $ref: "#/ParticipationStatus"
+      x-field-extra-annotation: '@NotNull(message = "Finish status is required")'
+    finishTimeMs:
+      type: integer
+      description: "Finish time in milliseconds. Required when finishStatus is FINISHED."
+      example: 420500
+
+RecordResultsRequest:
+  type: object
+  description: Request to record results for a race event
+  required:
+    - results
+    - eventStatus
+  properties:
+    results:
+      type: array
+      items:
+        $ref: "#/ParticipationResultRequest"
+      x-field-extra-annotation: '@NotNull(message = "Results are required")'
+    eventStatus:
+      allOf:
+        - $ref: "#/CompetitionEventStatus"
+      x-field-extra-annotation: '@NotNull(message = "Event status is required")'
+
+UpdateEventStatusRequest:
+  type: object
+  description: Request to update the status of a competition timetable event
+  required:
+    - eventStatus
+  properties:
+    eventStatus:
+      allOf:
+        - $ref: "#/CompetitionEventStatus"
+      x-field-extra-annotation: '@NotNull(message = "Event status is required")'
+
+UpdateParticipationStatusRequest:
+  type: object
+  description: Request to update the status of a participation
+  required:
+    - participationStatus
+  properties:
+    participationStatus:
+      allOf:
+        - $ref: "#/ParticipationStatus"
+      x-field-extra-annotation: '@NotNull(message = "Participation status is required")'
+
+AdvanceRequest:
+  type: object
+  description: Request to advance participants to the next round
+  required:
+    - eventId
+  properties:
+    eventId:
+      type: string
+      format: uuid
+      description: "UUID of the timetable event to advance from"
+      x-field-extra-annotation: '@NotNull(message = "Event ID is required")'
+
+ComputeStandingsRequest:
+  type: object
+  description: Request to compute final standings for disciplines
+  required:
+    - disciplineIds
+  properties:
+    disciplineIds:
+      type: array
+      minItems: 1
+      items:
+        type: string
+        format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Discipline IDs are required")'
+
+DeleteStandingsRequest:
+  type: object
+  description: Request to delete final standings for disciplines
+  required:
+    - disciplineIds
+  properties:
+    disciplineIds:
+      type: array
+      minItems: 1
+      items:
+        type: string
+        format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Discipline IDs are required")'
+
+ProgressionDataDto:
+  type: object
+  description: Response with progression participation data
+  properties:
+    participations:
+      type: array
+      items:
+        $ref: "#/CompetitionParticipationDto"
+
+FinalStandingsDto:
+  type: object
+  description: Response with final standings for a discipline
+  properties:
+    standings:
+      type: array
+      items:
+        $ref: "#/CompetitionFinalStandingDto"
+
+ComputeStandingsResponse:
+  type: object
+  description: Response with per-discipline standings computation results
+  properties:
+    results:
+      type: array
+      items:
+        $ref: "#/DisciplineStandingResult"
+
+DisciplineStandingResult:
+  type: object
+  description: Result of standings computation for a single discipline
+  properties:
+    disciplineId:
+      type: string
+      format: uuid
+    disciplineName:
+      type: string
+    status:
+      $ref: "#/ProgressionGenerationStatus"
+    reason:
+      type: string
+
+AdvanceProgressionRequest:
+  type: object
+  description: Request to advance progression to the next stage for selected disciplines
+  properties:
+    disciplineIds:
+      type: array
+      items:
+        type: string
+        format: uuid
+      description: "Disciplines to advance. Empty or null = all disciplines in competition."
+
+AdvanceProgressionResponse:
+  type: object
+  description: Response with per-discipline advancement results
+  properties:
+    results:
+      type: array
+      items:
+        $ref: "#/DisciplineProgressionResult"
+
+DisciplineProgressionResult:
+  type: object
+  description: Result of progression advancement for a single discipline
+  properties:
+    disciplineId:
+      type: string
+      format: uuid
+    disciplineName:
+      type: string
+    status:
+      $ref: "#/ProgressionGenerationStatus"
+    reason:
+      type: string
+    fromStage:
+      type: string
+      description: "Source stage (H, SF) advanced from. Null for first-stage generation."
+    stage:
+      type: string
+      description: "Generated/destination stage: H, SF, FA, etc."
+    eventCount:
+      type: integer
+    entryCount:
+      type: integer
+
+ProgressionGenerationStatus:
+  type: string
+  description: Status of progression generation for a discipline
+  enum:
+    - SUCCESS
+    - SKIPPED
+    - ERROR
+
+SetLanesRequest:
+  type: object
+  description: Request to set lane assignments for a discipline and stage
+  required:
+    - disciplineId
+    - qualificationEventType
+    - assignments
+  properties:
+    disciplineId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Discipline ID is required")'
+    qualificationEventType:
+      allOf:
+        - $ref: "#/QualificationEventType"
+      x-field-extra-annotation: '@NotNull(message = "Qualification event type is required")'
+    assignments:
+      type: array
+      items:
+        $ref: "#/LaneAssignment"
+      x-field-extra-annotation: '@NotNull(message = "Assignments are required")'
+
+LaneAssignment:
+  type: object
+  description: Assignment of an entry to a specific event and lane
+  required:
+    - entryId
+    - eventIndex
+    - lane
+  properties:
+    entryId:
+      type: string
+      format: uuid
+      x-field-extra-annotation: '@NotNull(message = "Entry ID is required")'
+    eventIndex:
+      type: integer
+      minimum: 0
+      description: "0-based index of the event (heat 1 = 0, heat 2 = 1, etc.)"
+      x-field-extra-annotation: '@NotNull(message = "Event index is required")'
+    lane:
+      type: integer
+      minimum: 1
+      x-field-extra-annotation: |-
+        @NotNull(message = "Lane is required")
+        @Min(value = 1, message = "Lane must be >= 1")
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Club Rankings
+# ═══════════════════════════════════════════════════════════════════════════════
+
+ClubRankingsRequest:
+  type: object
+  description: Request to compute club rankings across multiple competitions
+  required:
+    - competitionIds
+  properties:
+    competitionIds:
+      type: array
+      items:
+        type: string
+        format: uuid
+      minItems: 1
+
+ClubRankingsResponse:
+  type: object
+  description: Response with club rankings aggregated across competitions
+  properties:
+    rankings:
+      type: array
+      items:
+        $ref: "#/ClubRankingDto"
+
+ClubRankingDto:
+  type: object
+  description: A single club's ranking with per-competition breakdown
+  properties:
+    clubId:
+      type: string
+      format: uuid
+    clubName:
+      type: string
+    clubShortName:
+      type: string
+    clubLogoUrl:
+      type: string
+    competitions:
+      type: array
+      items:
+        $ref: "#/ClubRankingCompetitionDto"
+
+ClubRankingCompetitionDto:
+  type: object
+  description: Points breakdown for a single competition within a club ranking
+  properties:
+    competitionId:
+      type: string
+      format: uuid
+    competitionName:
+      type: string
+    competitionPoints:
+      type: number
+      format: double
+    disciplines:
+      type: array
+      items:
+        $ref: "#/ClubRankingDisciplineDto"
+
+ClubRankingDisciplineDto:
+  type: object
+  description: Points breakdown for a single discipline within a competition
+  properties:
+    disciplineId:
+      type: string
+      format: uuid
+    disciplineShortName:
+      type: string
+    competitionGroupId:
+      type: string
+      format: uuid
+    competitionGroupShortName:
+      type: string
+    gender:
+      $ref: "#/DisciplineGender"
+    points:
+      type: number
+      format: double
+    rank:
+      type: integer

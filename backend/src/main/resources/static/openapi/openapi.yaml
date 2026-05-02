@@ -122,6 +122,38 @@ paths:
     $ref: "./competitions/paths.yaml#/~1competition-timetable-events"
   /competition-timetable-events/{uuid}:
     $ref: "./competitions/paths.yaml#/~1competition-timetable-events~1{uuid}"
+  /competition-timetable-events/{uuid}/status:
+    $ref: "./competitions/paths.yaml#/~1competition-timetable-events~1{uuid}~1status"
+  /competitions/{uuid}/entries:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1entries"
+
+  # Competition progression
+  /competitions/{uuid}/progression:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1progression"
+  /competitions/{uuid}/progression/advance:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1progression~1advance"
+  /competitions/{uuid}/progression/set-lanes:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1progression~1set-lanes"
+  /competitions/{uuid}/progression/record-results/{eventUuid}:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1progression~1record-results~1{eventUuid}"
+  /competitions/{uuid}/progression/events/{eventUuid}:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1progression~1events~1{eventUuid}"
+  /competitions/{uuid}/progression/participations/{participationUuid}/status:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1progression~1participations~1{participationUuid}~1status"
+
+  # Weight measurements
+  /competitions/{uuid}/weight-measurements:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1weight-measurements"
+
+  # Final standings
+  /competitions/{uuid}/final-standings:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1final-standings"
+  /competitions/{uuid}/final-standings/compute:
+    $ref: "./competitions/paths.yaml#/~1competitions~1{uuid}~1final-standings~1compute"
+
+  # Club rankings
+  /club-rankings/compute:
+    $ref: "./competitions/paths.yaml#/~1club-rankings~1compute"
 
 components:
   securitySchemes:
@@ -216,8 +248,8 @@ components:
       $ref: "./accreditations/schemas.yaml#/AccreditationBatchRenewalResponse"
 
     # Competitions - Enums
-    CompetitionGroupGender:
-      $ref: "./competitions/schemas.yaml#/CompetitionGroupGender"
+    DisciplineGender:
+      $ref: "./competitions/schemas.yaml#/DisciplineGender"
     TransferRounding:
       $ref: "./competitions/schemas.yaml#/TransferRounding"
     BoatClass:
@@ -232,8 +264,8 @@ components:
       $ref: "./competitions/schemas.yaml#/CompetitionEventStatus"
     CompetitionType:
       $ref: "./competitions/schemas.yaml#/CompetitionType"
-    FinishStatus:
-      $ref: "./competitions/schemas.yaml#/FinishStatus"
+    ParticipationStatus:
+      $ref: "./competitions/schemas.yaml#/ParticipationStatus"
     SeatPosition:
       $ref: "./competitions/schemas.yaml#/SeatPosition"
     WeightMeasurementRole:
@@ -264,12 +296,16 @@ components:
       $ref: "./competitions/schemas.yaml#/EntryDto"
     CrewMemberDto:
       $ref: "./competitions/schemas.yaml#/CrewMemberDto"
+    ClubEntriesDto:
+      $ref: "./competitions/schemas.yaml#/ClubEntriesDto"
     CompetitionParticipationDto:
       $ref: "./competitions/schemas.yaml#/CompetitionParticipationDto"
     CompetitionFinalStandingDto:
       $ref: "./competitions/schemas.yaml#/CompetitionFinalStandingDto"
     AthleteWeightMeasurementDto:
       $ref: "./competitions/schemas.yaml#/AthleteWeightMeasurementDto"
+    RecordWeightRequest:
+      $ref: "./competitions/schemas.yaml#/RecordWeightRequest"
 
     # Competitions - Create/Update Requests
     CompetitionGroupDefinitionRequest:
@@ -294,3 +330,43 @@ components:
       $ref: "./competitions/schemas.yaml#/CompetitionUpdateRequest"
     CompetitionTimetableEventRequest:
       $ref: "./competitions/schemas.yaml#/CompetitionTimetableEventRequest"
+    ClubEntriesRequest:
+      $ref: "./competitions/schemas.yaml#/ClubEntriesRequest"
+    EntryRequest:
+      $ref: "./competitions/schemas.yaml#/EntryRequest"
+    CrewMemberRequest:
+      $ref: "./competitions/schemas.yaml#/CrewMemberRequest"
+    ParticipationResultRequest:
+      $ref: "./competitions/schemas.yaml#/ParticipationResultRequest"
+    RecordResultsRequest:
+      $ref: "./competitions/schemas.yaml#/RecordResultsRequest"
+    UpdateEventStatusRequest:
+      $ref: "./competitions/schemas.yaml#/UpdateEventStatusRequest"
+    UpdateParticipationStatusRequest:
+      $ref: "./competitions/schemas.yaml#/UpdateParticipationStatusRequest"
+    ProgressionDataDto:
+      $ref: "./competitions/schemas.yaml#/ProgressionDataDto"
+    AdvanceProgressionRequest:
+      $ref: "./competitions/schemas.yaml#/AdvanceProgressionRequest"
+    AdvanceProgressionResponse:
+      $ref: "./competitions/schemas.yaml#/AdvanceProgressionResponse"
+    DisciplineProgressionResult:
+      $ref: "./competitions/schemas.yaml#/DisciplineProgressionResult"
+    ProgressionGenerationStatus:
+      $ref: "./competitions/schemas.yaml#/ProgressionGenerationStatus"
+    SetLanesRequest:
+      $ref: "./competitions/schemas.yaml#/SetLanesRequest"
+    LaneAssignment:
+      $ref: "./competitions/schemas.yaml#/LaneAssignment"
+
+    # Club Rankings
+    ClubRankingsRequest:
+      $ref: "./competitions/schemas.yaml#/ClubRankingsRequest"
+    ClubRankingsResponse:
+      $ref: "./competitions/schemas.yaml#/ClubRankingsResponse"
+    ClubRankingDto:
+      $ref: "./competitions/schemas.yaml#/ClubRankingDto"
+    ClubRankingCompetitionDto:
+      $ref: "./competitions/schemas.yaml#/ClubRankingCompetitionDto"
+    ClubRankingDisciplineDto:
+      $ref: "./competitions/schemas.yaml#/ClubRankingDisciplineDto"

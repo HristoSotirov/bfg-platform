@@ -172,13 +172,14 @@ export class DisciplineDefinitionsService extends BaseService {
      * @param orderBy Predefined ordering (multiselect)
      * @param top Maximum number of items to return
      * @param skip Number of items to skip
+     * @param expand Related entities to expand
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllDisciplineDefinitions200Response>;
-    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllDisciplineDefinitions200Response>>;
-    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllDisciplineDefinitions200Response>>;
-    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<GetAllDisciplineDefinitions200Response>;
+    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<GetAllDisciplineDefinitions200Response>>;
+    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<GetAllDisciplineDefinitions200Response>>;
+    public getAllDisciplineDefinitions(filter?: string, search?: string, orderBy?: Array<'name_asc' | 'name_desc' | 'shortName_asc' | 'shortName_desc' | 'isActive_asc' | 'isActive_desc' | 'createdAt_asc' | 'createdAt_desc'>, top?: number, skip?: number, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
 
         let localVarQueryParameters = new HttpParams({encoder: this.encoder});
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
@@ -193,6 +194,10 @@ export class DisciplineDefinitionsService extends BaseService {
           <any>top, 'top');
         localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
           <any>skip, 'skip');
+        if (expand) {
+            localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+                [...expand].join(COLLECTION_FORMATS['csv']), 'expand');
+        }
 
         let localVarHeaders = this.defaultHeaders;
 
@@ -241,15 +246,22 @@ export class DisciplineDefinitionsService extends BaseService {
     /**
      * Get discipline definition by UUID
      * @param uuid UUID of the discipline definition
+     * @param expand Related entities to expand
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public getDisciplineDefinitionByUuid(uuid: string, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<DisciplineDefinitionDto>;
-    public getDisciplineDefinitionByUuid(uuid: string, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DisciplineDefinitionDto>>;
-    public getDisciplineDefinitionByUuid(uuid: string, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DisciplineDefinitionDto>>;
-    public getDisciplineDefinitionByUuid(uuid: string, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public getDisciplineDefinitionByUuid(uuid: string, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<DisciplineDefinitionDto>;
+    public getDisciplineDefinitionByUuid(uuid: string, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<DisciplineDefinitionDto>>;
+    public getDisciplineDefinitionByUuid(uuid: string, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<DisciplineDefinitionDto>>;
+    public getDisciplineDefinitionByUuid(uuid: string, expand?: Array<'competitionGroup' | 'competitionGroup.transferFromGroup'>, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (uuid === null || uuid === undefined) {
             throw new Error('Required parameter uuid was null or undefined when calling getDisciplineDefinitionByUuid.');
+        }
+
+        let localVarQueryParameters = new HttpParams({encoder: this.encoder});
+        if (expand) {
+            localVarQueryParameters = this.addToHttpParams(localVarQueryParameters,
+                [...expand].join(COLLECTION_FORMATS['csv']), 'expand');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -285,6 +297,7 @@ export class DisciplineDefinitionsService extends BaseService {
         return this.httpClient.request<DisciplineDefinitionDto>('get', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
+                params: localVarQueryParameters,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

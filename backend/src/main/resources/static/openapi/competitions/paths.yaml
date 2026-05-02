@@ -63,6 +63,17 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: Related entities to expand
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - transferFromGroup
     responses:
       "200":
         description: List of competition group definitions successfully retrieved
@@ -130,6 +141,17 @@
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
+      - name: expand
+        in: query
+        description: Related entities to expand
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - transferFromGroup
     responses:
       "200":
         description: Competition group definition details found
@@ -303,6 +325,18 @@
           type: integer
           minimum: 0
           default: 0
+      - name: expand
+        in: query
+        description: Related entities to expand
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - competitionGroup
+              - competitionGroup.transferFromGroup
     responses:
       "200":
         description: List of discipline definitions successfully retrieved
@@ -370,6 +404,18 @@
           type: string
           format: uuid
         x-parameter-extra-annotation: '@NotNull'
+      - name: expand
+        in: query
+        description: Related entities to expand
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - competitionGroup
+              - competitionGroup.transferFromGroup
     responses:
       "200":
         description: Discipline definition details found
@@ -1233,6 +1279,7 @@
             enum:
               - discipline
               - discipline.competitionGroup
+              - discipline.competitionGroup.transferFromGroup
     responses:
       "200":
         description: List of competition timetable events successfully retrieved
@@ -1416,6 +1463,65 @@
             example:
               code: 409
               message: "Cannot delete competition timetable event: it is referenced by other records."
+
+/competition-timetable-events/{uuid}/status:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition timetable event
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  put:
+    tags:
+      - Competition Timetable Events
+    summary: Update competition timetable event status
+    description: |
+      Updates the status of a competition timetable event with transition validation.
+      Allowed transitions:
+      - SCHEDULED → IN_PROGRESS, CANCELLED, POSTPONED
+      - IN_PROGRESS → SCHEDULED (if no results), UNOFFICIAL_RESULTS, OFFICIAL_RESULTS, CANCELLED, POSTPONED
+      - UNOFFICIAL_RESULTS → OFFICIAL_RESULTS
+      - OFFICIAL_RESULTS → UNOFFICIAL_RESULTS
+      - CANCELLED → SCHEDULED
+      - POSTPONED → SCHEDULED
+    operationId: updateCompetitionEventStatus
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/UpdateEventStatusRequest"
+    responses:
+      "200":
+        description: Event status updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionTimetableEventDto"
+      "404":
+        description: Competition timetable event not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+            example:
+              code: 404
+              message: "Competition timetable event not found."
+      "422":
+        description: Invalid status transition
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
 
 # ── Qualification Schemes ────────────────────────────────────────────────────
 
@@ -2258,3 +2364,622 @@
           application/json:
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
+
+# ── Entries ───────────────────────────────────────────────────────────────────
+
+/competitions/{uuid}/entries:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  get:
+    tags:
+      - Entries
+    summary: Get competition entries
+    description: |
+      Returns entries for the specified competition.
+      - CLUB_ADMIN / COACH: returns only their club's entries.
+      - APP_ADMIN / FEDERATION_ADMIN: returns all entries; optionally filter by `clubId`.
+    operationId: getCompetitionEntries
+    parameters:
+      - name: clubId
+        in: query
+        required: false
+        description: Filter by club UUID (admin only)
+        schema:
+          type: string
+          format: uuid
+      - name: expand
+        in: query
+        description: Related entities to expand (e.g., crewMembers)
+        style: form
+        explode: false
+        schema:
+          type: array
+          items:
+            type: string
+            enum:
+              - crewMembers
+              - crewMembers.accreditation
+              - crewMembers.accreditation.athlete
+              - club
+    responses:
+      "200":
+        description: Entries retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ClubEntriesDto"
+      "401":
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "403":
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+  put:
+    tags:
+      - Entries
+    summary: Submit or replace entries for a club
+    description: |
+      Atomically replaces all entries for the calling club in the specified competition.
+      - CLUB_ADMIN / COACH: submits for their own club.
+      - APP_ADMIN / FEDERATION_ADMIN: can submit for any club via `?clubId=`.
+      All validation errors are returned at once (HTTP 422) instead of failing on the first error.
+    operationId: submitCompetitionEntries
+    parameters:
+      - name: clubId
+        in: query
+        required: true
+        description: Club UUID to submit entries for
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ClubEntriesRequest"
+    responses:
+      "200":
+        description: Entries submitted successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ClubEntriesDto"
+      "400":
+        description: Bad request
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "401":
+        description: Unauthorized
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "403":
+        description: Forbidden
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "422":
+        description: Validation errors
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+
+# ── Progression ──────────────────────────────────────────────────────────────
+
+/competitions/{uuid}/progression:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  get:
+    tags:
+      - Progression
+    summary: Get progression data for a competition
+    description: Returns all participation records for the competition, organized by event.
+    operationId: getProgressionData
+    responses:
+      "200":
+        description: Progression data retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ProgressionDataDto"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/competitions/{uuid}/progression/advance:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  post:
+    tags:
+      - Progression
+    summary: Advance progression to the next stage for disciplines
+    description: |
+      Advances progression for the specified disciplines to their next stage.
+      - If a discipline has no progression yet: generates the first stage (heats or direct final)
+      - If a discipline has finished its current stage: advances to the next stage based on qualification progression rules
+      - If a discipline is already at the final stage: returns SKIPPED
+      If no disciplineIds provided, processes all disciplines in the competition.
+      Returns per-discipline results: SUCCESS, SKIPPED (with reason), or ERROR.
+    operationId: advanceProgression
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/AdvanceProgressionRequest"
+    responses:
+      "200":
+        description: Advancement results per discipline
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/AdvanceProgressionResponse"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/competitions/{uuid}/progression/record-results/{eventUuid}:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+    - name: eventUuid
+      in: path
+      required: true
+      description: UUID of the timetable event
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  post:
+    tags:
+      - Progression
+    summary: Record results for a race event
+    description: |
+      Records finish times and statuses for all participations in a race event.
+      Computes places from times. Sets participation statuses to terminal values (FINISHED, DNS, DNF, DSQ).
+      Also sets the event status (must be UNOFFICIAL_RESULTS or OFFICIAL_RESULTS).
+      If transitioning from OFFICIAL_RESULTS to UNOFFICIAL_RESULTS with time changes, next-stage participations are deleted.
+    operationId: recordResults
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/RecordResultsRequest"
+    responses:
+      "200":
+        description: Results recorded successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ProgressionDataDto"
+      "404":
+        description: Event not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "422":
+        description: Validation errors
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+
+/competitions/{uuid}/progression/set-lanes:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  post:
+    tags:
+      - Progression
+    summary: Set lane assignments for a discipline and stage
+    description: |
+      Sets the lane assignments for all entries in a discipline for a specific stage (H, SF, FB, FA).
+      Clears existing unraced participations for those events and creates new ones with the given assignments.
+    operationId: setLanes
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/SetLanesRequest"
+    responses:
+      "200":
+        description: Lane assignments set successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ProgressionDataDto"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "422":
+        description: Validation errors
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+
+/competitions/{uuid}/progression/events/{eventUuid}:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+    - name: eventUuid
+      in: path
+      required: true
+      description: UUID of the timetable event
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  get:
+    tags:
+      - Progression
+    summary: Get participations for a specific event
+    description: Returns all participation records for a specific timetable event.
+    operationId: getEventParticipations
+    responses:
+      "200":
+        description: Event participations retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ProgressionDataDto"
+      "404":
+        description: Event not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/competitions/{uuid}/progression/participations/{participationUuid}/status:
+  parameters:
+    - name: uuid
+      in: path
+      required: true
+      description: UUID of the competition
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+    - name: participationUuid
+      in: path
+      required: true
+      description: UUID of the participation
+      schema:
+        type: string
+        format: uuid
+      x-parameter-extra-annotation: '@NotNull'
+
+  put:
+    tags:
+      - Progression
+    summary: Update participation status
+    description: |
+      Updates the status of a single participation with transition validation.
+      Allowed transitions:
+      - REGISTERED → CHECKED_IN
+      - CHECKED_IN → REGISTERED
+    operationId: updateParticipationStatus
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/UpdateParticipationStatusRequest"
+    responses:
+      "200":
+        description: Participation status updated successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/CompetitionParticipationDto"
+      "404":
+        description: Participation not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+      "422":
+        description: Invalid status transition
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                errors:
+                  type: array
+                  items:
+                    type: string
+
+/competitions/{uuid}/weight-measurements:
+  get:
+    tags:
+      - Weight Measurements
+    summary: Get weight measurements for a competition
+    description: Returns all athlete weight measurements for the given date (defaults to today).
+    operationId: getWeightMeasurements
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: date
+        in: query
+        required: false
+        description: Date to filter measurements (defaults to today)
+        schema:
+          type: string
+          format: date
+    responses:
+      "200":
+        description: List of weight measurements
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "../competitions/schemas.yaml#/AthleteWeightMeasurementDto"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+  post:
+    tags:
+      - Weight Measurements
+    summary: Record athlete weight measurement
+    description: Records or updates an athlete's weight measurement for today. If a measurement already exists for the athlete today, it is updated (upsert).
+    operationId: recordWeight
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/RecordWeightRequest"
+    responses:
+      "200":
+        description: Weight measurement recorded successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/AthleteWeightMeasurementDto"
+      "404":
+        description: Competition or athlete not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/competitions/{uuid}/final-standings:
+  get:
+    tags:
+      - Final Standings
+    summary: Get final standings for a competition
+    description: Returns final standings, optionally filtered by discipline
+    operationId: getFinalStandings
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+      - name: disciplineId
+        in: query
+        required: false
+        schema:
+          type: string
+          format: uuid
+    responses:
+      "200":
+        description: Final standings retrieved successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/FinalStandingsDto"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+    security:
+      - bearerAuth: []
+  delete:
+    tags:
+      - Final Standings
+    summary: Delete final standings for disciplines
+    description: Deletes all final standings for the specified disciplines in this competition
+    operationId: deleteFinalStandings
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/DeleteStandingsRequest"
+    responses:
+      "204":
+        description: Final standings deleted successfully
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+    security:
+      - bearerAuth: []
+
+/competitions/{uuid}/final-standings/compute:
+  post:
+    tags:
+      - Final Standings
+    summary: Compute final standings for disciplines
+    description: Computes or regenerates final standings for the specified disciplines. All events in each discipline must have official results.
+    operationId: computeFinalStandings
+    parameters:
+      - name: uuid
+        in: path
+        required: true
+        schema:
+          type: string
+          format: uuid
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ComputeStandingsRequest"
+    responses:
+      "200":
+        description: Final standings computed successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ComputeStandingsResponse"
+      "404":
+        description: Competition not found
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+    security:
+      - bearerAuth: []
+
+# ═══════════════════════════════════════════════════════════════════════════════
+# Club Rankings
+# ═══════════════════════════════════════════════════════════════════════════════
+
+/club-rankings/compute:
+  post:
+    tags:
+      - Club Rankings
+    summary: Compute club rankings across multiple competitions
+    operationId: computeClubRankings
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../competitions/schemas.yaml#/ClubRankingsRequest"
+    responses:
+      "200":
+        description: Club rankings computed successfully
+        content:
+          application/json:
+            schema:
+              $ref: "../competitions/schemas.yaml#/ClubRankingsResponse"
+    security:
+      - bearerAuth: []

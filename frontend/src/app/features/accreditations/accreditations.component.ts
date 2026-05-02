@@ -18,6 +18,8 @@ import {
   ClubsService,
   ClubCoachesService,
   ScopeType,
+  Gender,
+  AccreditationStatus,
 } from '../../core/services/api';
 import { AccreditationDto, AthleteDto, ClubDto } from '../../core/services/api';
 import { SystemRole } from '../../core/models/navigation.model';
@@ -283,7 +285,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
 
   get canEdit(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
@@ -359,27 +361,27 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
 
   get canMigrate(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
   get canAddAthlete(): boolean {
     return (
-      (this.userRole === 'CLUB_ADMIN' || this.userRole === 'COACH') &&
+      (this.userRole === SystemRole.ClubAdmin || this.userRole === SystemRole.Coach) &&
       this.hasClubAccess
     );
   }
 
   get canRenewAccreditation(): boolean {
     return (
-      (this.userRole === 'CLUB_ADMIN' || this.userRole === 'COACH') &&
+      (this.userRole === SystemRole.ClubAdmin || this.userRole === SystemRole.Coach) &&
       this.hasClubAccess
     );
   }
 
   get showNoClubMessage(): boolean {
     return (
-      (this.userRole === 'CLUB_ADMIN' || this.userRole === 'COACH') &&
+      (this.userRole === SystemRole.ClubAdmin || this.userRole === SystemRole.Coach) &&
       !this.hasClubAccess
     );
   }
@@ -457,7 +459,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     this.applyRoleBasedColumnVisibility();
     this.applyScopeVisibility();
 
-    if (this.userRole === 'CLUB_ADMIN') {
+    if (this.userRole === SystemRole.ClubAdmin) {
       this.clubsService
         .getClubByAdminId(user.uuid)
         .pipe(
@@ -479,7 +481,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
             this.loadAccreditations();
           },
         });
-    } else if (this.userRole === 'COACH') {
+    } else if (this.userRole === SystemRole.Coach) {
       this.clubCoachesService
         .getClubByCoachId(user.uuid)
         .pipe(
@@ -514,7 +516,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     const hadSavedSettings = !!savedColumns;
 
     if (
-      (this.userRole === 'CLUB_ADMIN' || this.userRole === 'COACH') &&
+      (this.userRole === SystemRole.ClubAdmin || this.userRole === SystemRole.Coach) &&
       !hadSavedSettings
     ) {
       let modified = false;
@@ -1285,10 +1287,10 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.userRole === 'CLUB_ADMIN' && this.userClub?.uuid) {
+    if (this.userRole === SystemRole.ClubAdmin && this.userClub?.uuid) {
       filterParts.push(`clubId eq '${this.userClub.uuid}'`);
     } else if (
-      this.userRole === 'COACH' &&
+      this.userRole === SystemRole.Coach &&
       this.hasClubAccess &&
       this.userClub?.uuid
     ) {
@@ -1341,9 +1343,9 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                     break;
                   case 'gender':
                     row[col.label] =
-                      acc.athlete?.gender === 'MALE'
+                      acc.athlete?.gender === Gender.MALE
                         ? 'Мъж'
-                        : acc.athlete?.gender === 'FEMALE'
+                        : acc.athlete?.gender === Gender.FEMALE
                           ? 'Жена'
                           : '';
                     break;
@@ -1358,9 +1360,9 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                   case 'scopeType':
                     row[col.label] = acc.scopeType
                       ? ({
-                          INTERNAL: 'Вътрешен',
-                          EXTERNAL: 'Външен',
-                          NATIONAL: 'Национален',
+                          [ScopeType.Internal]: 'Вътрешен',
+                          [ScopeType.External]: 'Външен',
+                          [ScopeType.National]: 'Национален',
                         } as Record<string, string>)[acc.scopeType] ?? acc.scopeType
                       : '';
                     break;
@@ -1476,12 +1478,12 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
 
   private getStatusLabel(status: string | undefined): string {
     const statusMap: Record<string, string> = {
-      ACTIVE: 'Активна',
-      PENDING_VALIDATION: 'Заявена',
-      PENDING_PHOTO_VALIDATION: 'Чакаща снимка',
-      NEW_PHOTO_REQUIRED: 'Нова снимка',
-      EXPIRED: 'Изтекла',
-      SUSPENDED: 'Спряна',
+      [AccreditationStatus.Active]: 'Активна',
+      [AccreditationStatus.PendingValidation]: 'Заявена',
+      [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
+      [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
+      [AccreditationStatus.Expired]: 'Изтекла',
+      [AccreditationStatus.Suspended]: 'Спряна',
     };
     return statusMap[status || ''] || status || '';
   }

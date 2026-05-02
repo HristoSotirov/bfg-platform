@@ -156,15 +156,15 @@ export class UsersComponent implements OnInit, OnDestroy {
       return false;
     }
     return (
-      this.userRole === 'APP_ADMIN' ||
-      this.userRole === 'FEDERATION_ADMIN' ||
-      this.userRole === 'CLUB_ADMIN'
+      this.userRole === SystemRole.AppAdmin ||
+      this.userRole === SystemRole.FederationAdmin ||
+      this.userRole === SystemRole.ClubAdmin
     );
   }
 
   get canEditUser(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
@@ -613,9 +613,9 @@ export class UsersComponent implements OnInit, OnDestroy {
                 case 'scopeType':
                   row[col.label] = u.scopeType
                     ? ({
-                        INTERNAL: 'Вътрешен',
-                        EXTERNAL: 'Външен',
-                        NATIONAL: 'Национален',
+                        [ScopeType.Internal]: 'Вътрешен',
+                        [ScopeType.External]: 'Външен',
+                        [ScopeType.National]: 'Национален',
                       } as Record<string, string>)[u.scopeType] ?? u.scopeType
                     : '';
                   break;
@@ -710,10 +710,10 @@ export class UsersComponent implements OnInit, OnDestroy {
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
     const roleLabels: Record<SystemRole, string> = {
-      APP_ADMIN: 'Администратор',
-      FEDERATION_ADMIN: 'Администратор на федерацията',
-      CLUB_ADMIN: 'Администратор на клуб',
-      COACH: 'Треньор',
+      [SystemRole.AppAdmin]: 'Администратор',
+      [SystemRole.FederationAdmin]: 'Администратор на федерацията',
+      [SystemRole.ClubAdmin]: 'Администратор на клуб',
+      [SystemRole.Coach]: 'Треньор',
     };
     return roleLabels[role] || role;
   }

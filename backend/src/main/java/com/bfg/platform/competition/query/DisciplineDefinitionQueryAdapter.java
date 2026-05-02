@@ -23,6 +23,8 @@ public final class DisciplineDefinitionQueryAdapter {
             Map.entry("name_desc", new Sort.Order(Sort.Direction.DESC, "name")),
             Map.entry("shortName_asc", new Sort.Order(Sort.Direction.ASC, "shortName")),
             Map.entry("shortName_desc", new Sort.Order(Sort.Direction.DESC, "shortName")),
+            Map.entry("gender_asc", new Sort.Order(Sort.Direction.ASC, "gender")),
+            Map.entry("gender_desc", new Sort.Order(Sort.Direction.DESC, "gender")),
             Map.entry("boatClass_asc", new Sort.Order(Sort.Direction.ASC, "boatClass")),
             Map.entry("boatClass_desc", new Sort.Order(Sort.Direction.DESC, "boatClass")),
             Map.entry("crewSize_asc", new Sort.Order(Sort.Direction.ASC, "crewSize")),
@@ -103,7 +105,7 @@ public final class DisciplineDefinitionQueryAdapter {
         @Override
         public Predicate buildIn(Root<DisciplineDefinition> root, CriteriaBuilder cb, String field, List<String> values) {
             return switch (field) {
-                case "name", "shortName", "boatClass" -> QueryAdapterHelpers.stringInPredicate(root, cb, field, values);
+                case "name", "shortName", "boatClass", "gender" -> QueryAdapterHelpers.stringInPredicate(root, cb, field, values);
                 case "isActive" -> QueryAdapterHelpers.booleanInPredicate(root, cb, "isActive", values);
                 case "hasCoxswain" -> QueryAdapterHelpers.booleanInPredicate(root, cb, "hasCoxswain", values);
                 case "isLightweight" -> QueryAdapterHelpers.booleanInPredicate(root, cb, "isLightweight", values);
@@ -138,7 +140,7 @@ public final class DisciplineDefinitionQueryAdapter {
 
     private static Predicate buildPredicate(Root<DisciplineDefinition> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
         return switch (field) {
-            case "name", "shortName", "boatClass" -> QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
+            case "name", "shortName", "boatClass", "gender" -> QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
             case "crewSize", "distanceMeters", "maxCrewFromTransfer" -> QueryAdapterHelpers.integerPredicate(root, cb, field, op, valueRaw);
             case "hasCoxswain" -> QueryAdapterHelpers.booleanPredicate(root, cb, "hasCoxswain", op, valueRaw);
             case "isLightweight" -> QueryAdapterHelpers.booleanPredicate(root, cb, "isLightweight", op, valueRaw);

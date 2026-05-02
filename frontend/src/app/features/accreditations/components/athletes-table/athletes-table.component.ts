@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AthleteDto } from '../../../../core/services/api';
+import { AthleteDto, Gender, ScopeType } from '../../../../core/services/api';
 import { ColumnConfig } from '../../accreditations.component';
 
 @Component({
@@ -100,7 +100,7 @@ export class AthletesTableComponent implements OnInit {
       case 'dateOfBirth':
         return this.formatDate(athlete.dateOfBirth);
       case 'gender':
-        return athlete.gender === 'MALE' ? 'Мъж' : athlete.gender === 'FEMALE' ? 'Жена' : '-';
+        return athlete.gender === Gender.MALE ? 'Мъж' : athlete.gender === Gender.FEMALE ? 'Жена' : '-';
       case 'scopeType':
         return this.getScopeLabel(athlete.scopeType);
       case 'medicalExaminationDue':
@@ -140,7 +140,7 @@ export class AthletesTableComponent implements OnInit {
 
   private getScopeLabel(scope: string | undefined): string {
     if (!scope) return '-';
-    const map: Record<string, string> = { INTERNAL: 'Вътрешен', EXTERNAL: 'Външен', NATIONAL: 'Национален' };
+    const map: Record<string, string> = { [ScopeType.Internal]: 'Вътрешен', [ScopeType.External]: 'Външен', [ScopeType.National]: 'Национален' };
     return map[scope] ?? scope;
   }
 

@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { BoatClass } from './boatClass';
+import { DisciplineGender } from './disciplineGender';
 import { CompetitionGroupDefinitionDto } from './competitionGroupDefinitionDto';
 
 
@@ -18,6 +19,7 @@ export interface DisciplineDefinitionDto {
     uuid?: string;
     name?: string;
     shortName?: string;
+    gender?: DisciplineGender;
     competitionGroupId?: string;
     competitionGroup?: CompetitionGroupDefinitionDto;
     boatClass?: BoatClass;
@@ -27,6 +29,7 @@ export interface DisciplineDefinitionDto {
     distanceMeters?: number;
     maxCrewFromTransfer?: number;
     isActive?: boolean;
+    maxBoatsPerClub?: number;
     createdAt?: string;
     modifiedAt?: string;
 }

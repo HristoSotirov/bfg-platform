@@ -16,7 +16,7 @@ export class ScopeVisibilityService {
    */
   canViewScopeField(): boolean {
     const role = this.getCurrentRole();
-    return role === 'APP_ADMIN' || role === 'FEDERATION_ADMIN';
+    return role === SystemRole.AppAdmin || role === SystemRole.FederationAdmin;
   }
 
   /**
@@ -26,7 +26,7 @@ export class ScopeVisibilityService {
    */
   getAllowedScopes(): ScopeType[] {
     const role = this.getCurrentRole();
-    if (role === 'APP_ADMIN' || role === 'FEDERATION_ADMIN') {
+    if (role === SystemRole.AppAdmin || role === SystemRole.FederationAdmin) {
       return [ScopeType.Internal, ScopeType.External, ScopeType.National];
     }
     const userScope = this.authService.getScopeType();
@@ -42,12 +42,12 @@ export class ScopeVisibilityService {
     const scope = this.authService.getScopeType();
     
     // APP_ADMIN and FEDERATION_ADMIN can always see club filter
-    if (role === 'APP_ADMIN' || role === 'FEDERATION_ADMIN') {
+    if (role === SystemRole.AppAdmin || role === SystemRole.FederationAdmin) {
       return true;
     }
-    
+
     // INTERNAL scope users can see club filter
-    if (scope === 'INTERNAL') {
+    if (scope === ScopeType.Internal) {
       return true;
     }
     
@@ -85,7 +85,7 @@ export class ScopeVisibilityService {
    */
   canAssignDifferentScopes(): boolean {
     const role = this.getCurrentRole();
-    return role === 'APP_ADMIN' || role === 'FEDERATION_ADMIN';
+    return role === SystemRole.AppAdmin || role === SystemRole.FederationAdmin;
   }
 
   /**
@@ -105,7 +105,7 @@ export class ScopeVisibilityService {
    */
   isInternalScope(): boolean {
     const scope = this.authService.getScopeType();
-    return scope === 'INTERNAL' || scope === null || scope === undefined;
+    return scope === ScopeType.Internal || scope === null || scope === undefined;
   }
 
   private getCurrentRole(): SystemRole | undefined {

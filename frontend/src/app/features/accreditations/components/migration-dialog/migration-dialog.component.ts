@@ -18,6 +18,7 @@ import {
   AthleteBatchMigrationRequest,
   AthleteBatchMigrationRequestItem,
   AthleteBatchMigrationResponse,
+  Gender,
 } from '../../../../core/services/api';
 import { takeUntil, Subject, forkJoin, of, catchError, delay, retryWhen, scan, map, EMPTY } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -182,14 +183,14 @@ export class MigrationDialogComponent implements OnChanges {
 
   private normalizeGender(raw: string): 'MALE' | 'FEMALE' | null {
     const s = raw.trim().toLowerCase();
-    if (s === 'male' || s === 'мъж' || s === 'm') return 'MALE';
-    if (s === 'female' || s === 'жена' || s === 'f' || s === 'ж') return 'FEMALE';
+    if (s === 'male' || s === 'мъж' || s === 'm') return Gender.MALE;
+    if (s === 'female' || s === 'жена' || s === 'f' || s === 'ж') return Gender.FEMALE;
     return null;
   }
 
   genderLabel(gender: string): string {
-    if (gender === 'MALE') return 'Мъж';
-    if (gender === 'FEMALE') return 'Жена';
+    if (gender === Gender.MALE) return 'Мъж';
+    if (gender === Gender.FEMALE) return 'Жена';
     return gender ?? '';
   }
 

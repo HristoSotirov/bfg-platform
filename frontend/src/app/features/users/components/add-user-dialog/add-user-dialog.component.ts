@@ -71,7 +71,7 @@ export class AddUserDialogComponent implements OnChanges {
    * Only show when creating CLUB_ADMIN AND creator can assign different scopes.
    */
   get showScopeField(): boolean {
-    if (this.formData.role !== 'CLUB_ADMIN') return false;
+    if (this.formData.role !== SystemRole.ClubAdmin) return false;
     return this.scopeVisibility.canAssignDifferentScopes();
   }
 
@@ -92,10 +92,10 @@ export class AddUserDialogComponent implements OnChanges {
   }
 
   private roleLabels: Record<SystemRole, string> = {
-    APP_ADMIN: 'Администратор',
-    FEDERATION_ADMIN: 'Администратор на федерацията',
-    CLUB_ADMIN: 'Администратор на клуб',
-    COACH: 'Треньор',
+    [SystemRole.AppAdmin]: 'Администратор',
+    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
+    [SystemRole.ClubAdmin]: 'Администратор на клуб',
+    [SystemRole.Coach]: 'Треньор',
   };
 
   constructor(
@@ -123,7 +123,7 @@ export class AddUserDialogComponent implements OnChanges {
 
   private resetForm(): void {
     const defaultRole =
-      this.userRole === 'CLUB_ADMIN' ? 'COACH' : ('' as SystemRole | '');
+      this.userRole === SystemRole.ClubAdmin ? SystemRole.Coach : ('' as SystemRole | '');
 
     this.formData = {
       firstName: '',
@@ -146,12 +146,12 @@ export class AddUserDialogComponent implements OnChanges {
 
     let availableRoles: SystemRole[] = [];
 
-    if (this.userRole === 'APP_ADMIN') {
-      availableRoles = ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'];
-    } else if (this.userRole === 'FEDERATION_ADMIN') {
-      availableRoles = ['CLUB_ADMIN', 'COACH'];
-    } else if (this.userRole === 'CLUB_ADMIN') {
-      availableRoles = ['COACH'];
+    if (this.userRole === SystemRole.AppAdmin) {
+      availableRoles = [SystemRole.AppAdmin, SystemRole.FederationAdmin, SystemRole.ClubAdmin, SystemRole.Coach];
+    } else if (this.userRole === SystemRole.FederationAdmin) {
+      availableRoles = [SystemRole.ClubAdmin, SystemRole.Coach];
+    } else if (this.userRole === SystemRole.ClubAdmin) {
+      availableRoles = [SystemRole.Coach];
     }
 
     this.roleOptions = availableRoles.map((role) => ({
@@ -161,18 +161,18 @@ export class AddUserDialogComponent implements OnChanges {
   }
 
   isUsernameLocked(): boolean {
-    if (this.userRole === 'CLUB_ADMIN') {
+    if (this.userRole === SystemRole.ClubAdmin) {
       return true; // Always locked for club admin
     }
     return !this.formData.email; // Locked until email entered for admins
   }
 
   onEmailChange(): void {
-    if (this.userRole === 'CLUB_ADMIN') {
+    if (this.userRole === SystemRole.ClubAdmin) {
       this.formData.username = this.formData.email;
     } else if (
-      this.userRole === 'APP_ADMIN' ||
-      this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin ||
+      this.userRole === SystemRole.FederationAdmin
     ) {
       if (this.formData.email) {
         this.formData.username = this.formData.email;
@@ -200,7 +200,7 @@ export class AddUserDialogComponent implements OnChanges {
 
     // Determine scope for CLUB_ADMIN
     let scopeType: ScopeType | undefined = undefined;
-    if (this.formData.role === 'CLUB_ADMIN') {
+    if (this.formData.role === SystemRole.ClubAdmin) {
       if (this.showScopeField) {
         // User can assign different scopes - use their selection
         scopeType = this.formData.scopeType;

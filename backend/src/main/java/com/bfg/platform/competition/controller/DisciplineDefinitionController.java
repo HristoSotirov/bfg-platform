@@ -8,12 +8,10 @@ import com.bfg.platform.gen.api.DisciplineDefinitionsApi;
 import com.bfg.platform.gen.model.DisciplineDefinitionDto;
 import com.bfg.platform.gen.model.DisciplineDefinitionRequest;
 import com.bfg.platform.gen.model.GetAllDisciplineDefinitions200Response;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,15 +27,15 @@ public class DisciplineDefinitionController implements DisciplineDefinitionsApi 
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
     public ResponseEntity<GetAllDisciplineDefinitions200Response> getAllDisciplineDefinitions(
             String filter, String search, List<String> orderBy,
-            Integer top, Integer skip) {
-        var page = service.getAll(filter, search, orderBy, top, skip);
+            Integer top, Integer skip, List<String> expand) {
+        var page = service.getAll(filter, search, orderBy, top, skip, expand);
         return ResponseEntity.ok(PageConverter.toResponse(page, GetAllDisciplineDefinitions200Response.class));
     }
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<DisciplineDefinitionDto> createDisciplineDefinition(
-            @Valid @RequestBody DisciplineDefinitionRequest request) {
+            DisciplineDefinitionRequest request) {
         return service.create(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create discipline definition"));
@@ -45,8 +43,8 @@ public class DisciplineDefinitionController implements DisciplineDefinitionsApi 
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
-    public ResponseEntity<DisciplineDefinitionDto> getDisciplineDefinitionByUuid(UUID uuid) {
-        return service.getByUuid(uuid)
+    public ResponseEntity<DisciplineDefinitionDto> getDisciplineDefinitionByUuid(UUID uuid, List<String> expand) {
+        return service.getByUuid(uuid, expand)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Discipline definition", uuid));
     }
@@ -54,7 +52,7 @@ public class DisciplineDefinitionController implements DisciplineDefinitionsApi 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<DisciplineDefinitionDto> updateDisciplineDefinitionByUuid(
-            UUID uuid, @Valid @RequestBody DisciplineDefinitionRequest request) {
+            UUID uuid, DisciplineDefinitionRequest request) {
         return service.update(uuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Discipline definition", uuid));

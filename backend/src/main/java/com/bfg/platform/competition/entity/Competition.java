@@ -1,7 +1,11 @@
 package com.bfg.platform.competition.entity;
 
+import com.bfg.platform.gen.model.CompetitionStatus;
+import com.bfg.platform.gen.model.CompetitionType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -59,7 +63,9 @@ public class Competition {
     private Instant technicalMeetingAt;
 
     @Column(name = "status", nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private CompetitionStatus status = CompetitionStatus.PLANNED;
 
     @Column(name = "scoring_scheme_id", nullable = false)
     private UUID scoringSchemeId;
@@ -68,7 +74,8 @@ public class Competition {
     private UUID qualificationSchemeId;
 
     @Column(name = "competition_type", nullable = false)
-    private String competitionType;
+    @Enumerated(EnumType.STRING)
+    private CompetitionType competitionType;
 
     @Column(name = "is_template", nullable = false)
     private boolean isTemplate;

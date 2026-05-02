@@ -23,8 +23,6 @@ public final class CompetitionGroupDefinitionQueryAdapter {
             Map.entry("name_desc", new Sort.Order(Sort.Direction.DESC, "name")),
             Map.entry("shortName_asc", new Sort.Order(Sort.Direction.ASC, "shortName")),
             Map.entry("shortName_desc", new Sort.Order(Sort.Direction.DESC, "shortName")),
-            Map.entry("gender_asc", new Sort.Order(Sort.Direction.ASC, "gender")),
-            Map.entry("gender_desc", new Sort.Order(Sort.Direction.DESC, "gender")),
             Map.entry("minAge_asc", new Sort.Order(Sort.Direction.ASC, "minAge")),
             Map.entry("minAge_desc", new Sort.Order(Sort.Direction.DESC, "minAge")),
             Map.entry("maxAge_asc", new Sort.Order(Sort.Direction.ASC, "maxAge")),
@@ -92,7 +90,7 @@ public final class CompetitionGroupDefinitionQueryAdapter {
         @Override
         public Predicate buildRange(Root<CompetitionGroupDefinition> root, CriteriaBuilder cb, String field, String minValue, String maxValue) {
             return switch (field) {
-                case "minAge", "maxAge", "minCrewForTransfer", "transferRatio" ->
+                case "minAge", "maxAge", "coxMinAge", "coxMaxAge", "minCrewForTransfer", "transferRatio" ->
                     QueryAdapterHelpers.integerRangePredicate(root, cb, field, minValue, maxValue);
                 case "createdAt", "modifiedAt" ->
                     QueryAdapterHelpers.instantRangePredicate(root, cb, field, minValue, maxValue);
@@ -104,7 +102,6 @@ public final class CompetitionGroupDefinitionQueryAdapter {
         public Predicate buildIn(Root<CompetitionGroupDefinition> root, CriteriaBuilder cb, String field, List<String> values) {
             return switch (field) {
                 case "name", "shortName" -> QueryAdapterHelpers.stringInPredicate(root, cb, field, values);
-                case "gender" -> QueryAdapterHelpers.stringInPredicate(root, cb, "gender", values);
                 case "transferRounding" -> QueryAdapterHelpers.stringInPredicate(root, cb, "transferRounding", values);
                 case "isActive" -> QueryAdapterHelpers.booleanInPredicate(root, cb, "isActive", values);
                 case "transferFromGroupId" -> QueryAdapterHelpers.uuidInPredicate(root, cb, "transferFromGroupId", values);
@@ -139,9 +136,8 @@ public final class CompetitionGroupDefinitionQueryAdapter {
     private static Predicate buildPredicate(Root<CompetitionGroupDefinition> root, CriteriaBuilder cb, String field, String op, String valueRaw) {
         return switch (field) {
             case "name", "shortName" -> QueryAdapterHelpers.stringPredicate(root, cb, field, op, valueRaw);
-            case "gender" -> QueryAdapterHelpers.stringPredicate(root, cb, "gender", op, valueRaw);
             case "transferRounding" -> QueryAdapterHelpers.stringPredicate(root, cb, "transferRounding", op, valueRaw);
-            case "minAge", "maxAge", "minCrewForTransfer", "transferRatio" -> QueryAdapterHelpers.integerPredicate(root, cb, field, op, valueRaw);
+            case "minAge", "maxAge", "coxMinAge", "coxMaxAge", "minCrewForTransfer", "transferRatio" -> QueryAdapterHelpers.integerPredicate(root, cb, field, op, valueRaw);
             case "isActive" -> QueryAdapterHelpers.booleanPredicate(root, cb, "isActive", op, valueRaw);
             case "transferFromGroupId" -> QueryAdapterHelpers.uuidPredicate(root, cb, "transferFromGroupId", op, valueRaw);
             case "createdAt", "modifiedAt" -> QueryAdapterHelpers.instantPredicate(root, cb, field, op, valueRaw);

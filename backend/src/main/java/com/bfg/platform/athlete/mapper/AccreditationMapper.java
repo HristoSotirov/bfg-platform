@@ -2,6 +2,7 @@ package com.bfg.platform.athlete.mapper;
 
 import com.bfg.platform.athlete.entity.Accreditation;
 import com.bfg.platform.club.mapper.ClubMapper;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.gen.model.AccreditationDto;
 import com.bfg.platform.gen.model.AccreditationCreateRequest;
 import com.bfg.platform.gen.model.AccreditationStatus;
@@ -47,7 +48,8 @@ public class AccreditationMapper {
         }
         
         if (expandClub && accreditation.getClub() != null) {
-            dto.setClub(ClubMapper.toDto(accreditation.getClub(), expand));
+            Set<String> clubExpand = ExpandQueryParser.subExpand(expand, "club");
+            dto.setClub(ClubMapper.toDto(accreditation.getClub(), clubExpand));
         }
 
         return dto;

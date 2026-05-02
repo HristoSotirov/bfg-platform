@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AthleteFilters, AthleteFilterConfig } from '../../accreditations.component';
+import { Gender, ScopeType } from '../../../../core/services/api';
 import {
   MultiSelectDropdownComponent,
   DropdownOption,
@@ -49,14 +50,14 @@ export class AthletesFiltersComponent implements OnInit, OnChanges {
   selectedBirthYearsCache: string[] = [];
 
   readonly genderOptions: DropdownOption[] = [
-    { value: 'MALE', label: 'Мъж' },
-    { value: 'FEMALE', label: 'Жена' },
+    { value: Gender.MALE, label: 'Мъж' },
+    { value: Gender.FEMALE, label: 'Жена' },
   ];
 
   readonly scopeTypeOptions: DropdownOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Външен' },
-    { value: 'NATIONAL', label: 'Национален' },
+    { value: ScopeType.Internal, label: 'Вътрешен' },
+    { value: ScopeType.External, label: 'Външен' },
+    { value: ScopeType.National, label: 'Национален' },
   ];
 
   get birthYearOptions(): DropdownOption[] {

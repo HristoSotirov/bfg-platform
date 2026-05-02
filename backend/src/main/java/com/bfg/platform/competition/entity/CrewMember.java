@@ -1,6 +1,6 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.athlete.entity.Athlete;
+import com.bfg.platform.athlete.entity.Accreditation;
 import com.bfg.platform.gen.model.SeatPosition;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -53,18 +53,15 @@ public class CrewMember {
     @Enumerated(EnumType.STRING)
     private SeatPosition seatPosition;
 
-    @Column(name = "athlete_id")
-    private UUID athleteId;
+    @Column(name = "accreditation_id")
+    private UUID accreditationId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "athlete_id", insertable = false, updatable = false)
+    @JoinColumn(name = "accreditation_id", insertable = false, updatable = false)
     @Setter(AccessLevel.NONE)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Athlete athlete;
-
-    @Column(name = "card_number")
-    private String cardNumber;
+    private Accreditation accreditation;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

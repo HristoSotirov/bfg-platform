@@ -35,7 +35,6 @@ export interface FilterConfig {
 
 export interface CompetitionGroupFilters {
   search: string;
-  genders: string[];
   statuses: string[];
 }
 
@@ -69,7 +68,6 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
 
   filters: CompetitionGroupFilters = {
     search: '',
-    genders: [],
     statuses: [],
   };
   orderBy: string[] = ['name_asc'];
@@ -82,25 +80,28 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
   columns: ColumnConfig[] = [
     { id: 'name', label: 'Име', visible: true },
     { id: 'shortName', label: 'Кратко име', visible: true },
-    { id: 'gender', label: 'Пол', visible: true },
     { id: 'minAge', label: 'Мин. възраст', visible: true },
     { id: 'maxAge', label: 'Макс. възраст', visible: true },
+    { id: 'coxMinAge', label: 'Рулеви мин. възраст', visible: false },
+    { id: 'coxMaxAge', label: 'Рулеви макс. възраст', visible: false },
     { id: 'maxDisciplinesPerAthlete', label: 'Макс. дисциплини', visible: true },
     { id: 'transferFromGroupId', label: 'Трансфер от група', visible: true },
     { id: 'minCrewForTransfer', label: 'Мин. екипаж', visible: true },
     { id: 'transferRatio', label: 'Съотношение', visible: true },
     { id: 'transferRounding', label: 'Закръгляне', visible: true },
-    { id: 'transferredMaxDisciplinesPerPerson', label: 'Макс. дисц. (трансф.)', visible: true },
-    { id: 'coxRequiredWeightKg', label: 'Тегло кокс (изисквано)', visible: true },
-    { id: 'coxMinWeightKg', label: 'Тегло кокс (мин.)', visible: true },
-    { id: 'lightMaxWeightKg', label: 'Тегло лековес (макс.)', visible: true },
+    { id: 'transferredMaxDisciplinesPerAthlete', label: 'Макс. дисц. (трансф.)', visible: true },
+    { id: 'maleTeamCoxRequiredWeightKg', label: 'М. рулеви изискв. тегло', visible: true },
+    { id: 'maleTeamCoxMinWeightKg', label: 'М. рулеви мин. тегло', visible: true },
+    { id: 'maleTeamLightMaxWeightKg', label: 'М. лек макс. тегло', visible: true },
+    { id: 'femaleTeamCoxRequiredWeightKg', label: 'Ж. рулеви изискв. тегло', visible: true },
+    { id: 'femaleTeamCoxMinWeightKg', label: 'Ж. рулеви мин. тегло', visible: true },
+    { id: 'femaleTeamLightMaxWeightKg', label: 'Ж. лек макс. тегло', visible: true },
     { id: 'isActive', label: 'Статус', visible: true },
     { id: 'createdAt', label: 'Създаден на', visible: true },
     { id: 'modifiedAt', label: 'Променен на', visible: true },
   ];
 
   filterConfigs: FilterConfig[] = [
-    { id: 'gender', label: 'Пол', visible: true },
     { id: 'status', label: 'Статус', visible: true },
   ];
 
@@ -138,13 +139,13 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
 
   get canAdd(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
   get canEdit(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
@@ -185,17 +186,6 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [];
-
-    if (this.filters.genders.length > 0 && this.isFilterVisible('gender')) {
-      if (this.filters.genders.length === 1) {
-        filterParts.push(`gender eq '${this.filters.genders[0]}'`);
-      } else {
-        const genderConditions = this.filters.genders
-          .map((g) => `gender eq '${g}'`)
-          .join(' or ');
-        filterParts.push(`(${genderConditions})`);
-      }
-    }
 
     if (this.filters.statuses.length > 0 && this.isFilterVisible('status')) {
       if (this.filters.statuses.length === 1) {
@@ -413,7 +403,6 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
         const parsed = JSON.parse(savedFilters);
         this.filters = {
           search: parsed.search || '',
-          genders: parsed.genders || [],
           statuses: parsed.statuses || [],
         };
       } catch (e) {

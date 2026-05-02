@@ -25,13 +25,10 @@ databaseChangeLog:
                     nullable: false
                   remarks: "BOW, 2..7, STROKE, COX"
               - column:
-                  name: athlete_id
+                  name: accreditation_id
                   type: UUID
                   constraints:
                     nullable: false
-              - column:
-                  name: card_number
-                  type: VARCHAR(50)
               - column:
                   name: created_at
                   type: TIMESTAMPTZ
@@ -50,19 +47,19 @@ databaseChangeLog:
             constraintName: uq_crew_entry_seat
         - addUniqueConstraint:
             tableName: crew_members
-            columnNames: entry_id, athlete_id
-            constraintName: uq_crew_entry_athlete
+            columnNames: entry_id, accreditation_id
+            constraintName: uq_crew_entry_accreditation
         - addForeignKeyConstraint:
             baseTableName: crew_members
             baseColumnNames: entry_id
             referencedTableName: entries
             referencedColumnNames: id
             constraintName: fk_crew_entry
-            onDelete: RESTRICT
+            onDelete: CASCADE
         - addForeignKeyConstraint:
             baseTableName: crew_members
-            baseColumnNames: athlete_id
-            referencedTableName: athletes
+            baseColumnNames: accreditation_id
+            referencedTableName: accreditations
             referencedColumnNames: id
-            constraintName: fk_crew_athlete
+            constraintName: fk_crew_accreditation
             onDelete: RESTRICT

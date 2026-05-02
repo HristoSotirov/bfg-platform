@@ -198,17 +198,7 @@ ClubBatchCreateRequest:
       items:
         $ref: "#/ClubBatchCreateRequestItem"
       x-field-extra-annotation: '@NotEmpty(message = "{club.batchClubs.required}") @Size(max = 100, message = "{club.batchClubs.maxSize}")'
-      example:
-        - name: "Rowing Club Sofia"
-          shortName: "RC Sofia"
-          cardPrefix: "01"
-          clubEmail: "club@bfg-platform.bg"
-          adminEmail: "admin@bfg-platform.bg"
-        - name: "Rowing Club Plovdiv"
-          shortName: "RC Plovdiv"
-          cardPrefix: "02"
-          clubEmail: "club2@bfg-platform.bg"
-          adminEmail: "admin2@bfg-platform.bg"
+
 
 ClubBatchCreateResponse:
   type: object

@@ -8,12 +8,10 @@ import com.bfg.platform.gen.api.CompetitionGroupDefinitionsApi;
 import com.bfg.platform.gen.model.CompetitionGroupDefinitionDto;
 import com.bfg.platform.gen.model.CompetitionGroupDefinitionRequest;
 import com.bfg.platform.gen.model.GetAllCompetitionGroupDefinitions200Response;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -29,15 +27,15 @@ public class CompetitionGroupDefinitionController implements CompetitionGroupDef
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
     public ResponseEntity<GetAllCompetitionGroupDefinitions200Response> getAllCompetitionGroupDefinitions(
             String filter, String search, List<String> orderBy,
-            Integer top, Integer skip) {
-        var page = service.getAll(filter, search, orderBy, top, skip);
+            Integer top, Integer skip, List<String> expand) {
+        var page = service.getAll(filter, search, orderBy, top, skip, expand);
         return ResponseEntity.ok(PageConverter.toResponse(page, GetAllCompetitionGroupDefinitions200Response.class));
     }
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<CompetitionGroupDefinitionDto> createCompetitionGroupDefinition(
-            @Valid @RequestBody CompetitionGroupDefinitionRequest request) {
+            CompetitionGroupDefinitionRequest request) {
         return service.create(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create competition group definition"));
@@ -45,8 +43,8 @@ public class CompetitionGroupDefinitionController implements CompetitionGroupDef
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
-    public ResponseEntity<CompetitionGroupDefinitionDto> getCompetitionGroupDefinitionByUuid(UUID uuid) {
-        return service.getByUuid(uuid)
+    public ResponseEntity<CompetitionGroupDefinitionDto> getCompetitionGroupDefinitionByUuid(UUID uuid, List<String> expand) {
+        return service.getByUuid(uuid, expand)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Competition group definition", uuid));
     }
@@ -54,7 +52,7 @@ public class CompetitionGroupDefinitionController implements CompetitionGroupDef
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<CompetitionGroupDefinitionDto> updateCompetitionGroupDefinitionByUuid(
-            UUID uuid, @Valid @RequestBody CompetitionGroupDefinitionRequest request) {
+            UUID uuid, CompetitionGroupDefinitionRequest request) {
         return service.update(uuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Competition group definition", uuid));

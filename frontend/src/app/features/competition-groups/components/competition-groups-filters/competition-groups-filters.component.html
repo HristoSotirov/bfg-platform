@@ -11,25 +11,6 @@
       ></app-search-bar>
     </div>
 
-    @if (hasVisibleFilters() && isFilterVisible("gender")) {
-      <div
-        [class.hidden]="!filtersExpanded"
-        class="sm:block w-full sm:w-[180px]"
-      >
-        <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Пол:</label
-        >
-        <app-multi-select-dropdown
-          [options]="genderOptions"
-          [multiple]="true"
-          placeholder="Всички полове"
-          [ngModel]="filters.genders || []"
-          (selectionChange)="onGendersChange($event)"
-        >
-        </app-multi-select-dropdown>
-      </div>
-    }
-
     @if (hasVisibleFilters() && isFilterVisible("status")) {
       <div
         [class.hidden]="!filtersExpanded"

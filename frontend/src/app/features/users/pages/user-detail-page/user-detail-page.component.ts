@@ -22,6 +22,7 @@ import {
   ClubsService,
   ClubCoachesService,
   ClubDto,
+  ScopeType,
 } from '../../../../core/services/api';
 import { AuthService } from '../../../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
@@ -68,10 +69,10 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   ];
 
   private roleLabels: Record<SystemRole, string> = {
-    APP_ADMIN: 'Администратор',
-    FEDERATION_ADMIN: 'Администратор на федерацията',
-    CLUB_ADMIN: 'Администратор на клуб',
-    COACH: 'Треньор',
+    [SystemRole.AppAdmin]: 'Администратор',
+    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
+    [SystemRole.ClubAdmin]: 'Администратор на клуб',
+    [SystemRole.Coach]: 'Треньор',
   };
 
   constructor(
@@ -101,7 +102,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   get canEdit(): boolean {
     const user = this.authService.currentUser;
     if (!user) return false;
-    return user.roles.some(r => r === 'APP_ADMIN' || r === 'FEDERATION_ADMIN');
+    return user.roles.some(r => r === SystemRole.AppAdmin || r === SystemRole.FederationAdmin);
   }
 
   get showScopeInDetails(): boolean {
@@ -146,7 +147,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   private loadClub(user: UserDto): void {
     const role = user.role;
 
-    if (role === 'COACH') {
+    if (role === SystemRole.Coach) {
       this.clubCoachesService
         .getClubByCoachId(user.uuid!)
         .pipe(
@@ -160,7 +161,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
             this.cdr.markForCheck();
           },
         });
-    } else if (role === 'CLUB_ADMIN') {
+    } else if (role === SystemRole.ClubAdmin) {
       this.clubsService
         .getClubByAdminId(user.uuid!)
         .pipe(
@@ -182,7 +183,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
 
   shouldShowClubSection(): boolean {
     const role = this.userData?.role;
-    return role === 'COACH' || role === 'CLUB_ADMIN';
+    return role === SystemRole.Coach || role === SystemRole.ClubAdmin;
   }
 
   startEditing(): void {
@@ -278,9 +279,9 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }

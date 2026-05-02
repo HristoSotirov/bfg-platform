@@ -1,6 +1,6 @@
 package com.bfg.platform.competition.entity;
 
-import com.bfg.platform.gen.model.FinishStatus;
+import com.bfg.platform.gen.model.ParticipationStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -61,9 +61,10 @@ public class CompetitionParticipation {
     @Column(name = "lane")
     private Integer lane;
 
-    @Column(name = "finish_status")
+    @Column(name = "participation_status")
     @Enumerated(EnumType.STRING)
-    private FinishStatus finishStatus;
+    @Builder.Default
+    private ParticipationStatus participationStatus = ParticipationStatus.REGISTERED;
 
     @Column(name = "finish_time_ms")
     private Integer finishTimeMs;

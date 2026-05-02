@@ -1,6 +1,7 @@
 package com.bfg.platform.competition.entity;
 
 import com.bfg.platform.gen.model.BoatClass;
+import com.bfg.platform.gen.model.DisciplineGender;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -54,6 +55,10 @@ public class DisciplineDefinition {
     @EqualsAndHashCode.Exclude
     private CompetitionGroupDefinition competitionGroup;
 
+    @Column(name = "gender")
+    @Enumerated(EnumType.STRING)
+    private DisciplineGender gender;
+
     @Column(name = "boat_class")
     @Enumerated(EnumType.STRING)
     private BoatClass boatClass;
@@ -75,6 +80,9 @@ public class DisciplineDefinition {
 
     @Column(name = "is_active")
     private boolean isActive;
+
+    @Column(name = "max_boats_per_club")
+    private int maxBoatsPerClub;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

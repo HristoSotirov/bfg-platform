@@ -7,7 +7,6 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { CompetitionGroupGender } from './competitionGroupGender';
 import { TransferRounding } from './transferRounding';
 
 
@@ -18,19 +17,30 @@ export interface CompetitionGroupDefinitionDto {
     uuid?: string;
     name?: string;
     shortName?: string;
-    gender?: CompetitionGroupGender;
     minAge?: number;
     maxAge?: number;
+    /**
+     * Minimum age for coxswain - nullable, falls back to minAge
+     */
+    coxMinAge?: number;
+    /**
+     * Maximum age for coxswain - nullable, falls back to maxAge
+     */
+    coxMaxAge?: number;
     maxDisciplinesPerAthlete?: number;
     transferFromGroupId?: string;
     minCrewForTransfer?: number;
     transferRatio?: number;
     transferRounding?: TransferRounding;
-    transferredMaxDisciplinesPerPerson?: number;
-    coxRequiredWeightKg?: number;
-    coxMinWeightKg?: number;
-    lightMaxWeightKg?: number;
+    transferredMaxDisciplinesPerAthlete?: number;
+    maleTeamCoxRequiredWeightKg?: number;
+    maleTeamCoxMinWeightKg?: number;
+    maleTeamLightMaxWeightKg?: number;
+    femaleTeamCoxRequiredWeightKg?: number;
+    femaleTeamCoxMinWeightKg?: number;
+    femaleTeamLightMaxWeightKg?: number;
     isActive?: boolean;
+    transferFromGroup?: CompetitionGroupDefinitionDto;
     createdAt?: string;
     modifiedAt?: string;
 }

@@ -1,6 +1,7 @@
 package com.bfg.platform.competition.repository;
 
 import com.bfg.platform.competition.entity.QualificationProgression;
+import com.bfg.platform.gen.model.QualificationEventType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -20,6 +21,8 @@ public interface QualificationProgressionRepository extends JpaRepository<Qualif
     Page<QualificationProgression> findAll(@NonNull Specification<QualificationProgression> spec, @NonNull Pageable pageable);
 
     List<QualificationProgression> findByQualificationTierIdOrderByCreatedAtAsc(UUID qualificationTierId);
+
+    List<QualificationProgression> findByQualificationTierIdAndSourceEvent(UUID qualificationTierId, QualificationEventType sourceEvent);
 
     void deleteByQualificationTierId(UUID qualificationTierId);
 }

@@ -18,7 +18,7 @@ export interface CompetitionFinalStandingDto {
     disciplineId?: string;
     entryId?: string;
     overallRank?: number;
-    bestTimeMs?: number;
+    timeMs?: number;
     points?: number;
     createdAt?: string;
     modifiedAt?: string;

@@ -33,7 +33,6 @@ import { FilterToggleButtonComponent } from '../../../../shared/components/filte
 export class CompetitionGroupsFiltersComponent implements OnInit {
   @Input() filters: CompetitionGroupFilters = {
     search: '',
-    genders: [],
     statuses: [],
   };
   @Input() filterConfigs: FilterConfig[] = [];
@@ -43,12 +42,6 @@ export class CompetitionGroupsFiltersComponent implements OnInit {
 
   searchValue = '';
   filtersExpanded = false;
-
-  readonly genderOptions: DropdownOption[] = [
-    { value: 'MALE', label: 'Мъже' },
-    { value: 'FEMALE', label: 'Жени' },
-    { value: 'MIXED', label: 'Смесени' },
-  ];
 
   readonly statusOptions: DropdownOption[] = [
     { value: 'true', label: 'Активен' },
@@ -66,16 +59,12 @@ export class CompetitionGroupsFiltersComponent implements OnInit {
   }
 
   hasVisibleFilters(): boolean {
-    return this.isFilterVisible('gender') || this.isFilterVisible('status');
+    return this.isFilterVisible('status');
   }
 
   onSearchChange(value: string): void {
     this.searchValue = value;
     this.searchChange.emit(value);
-  }
-
-  onGendersChange(values: string[]): void {
-    this.emitFiltersChange({ genders: values });
   }
 
   onStatusesChange(values: string[]): void {

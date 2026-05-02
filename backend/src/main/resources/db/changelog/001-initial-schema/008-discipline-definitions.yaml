@@ -30,6 +30,12 @@ databaseChangeLog:
                   constraints:
                     nullable: false
               - column:
+                  name: gender
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+                  remarks: "MALE, FEMALE, or MIXED"
+              - column:
                   name: boat_class
                   type: VARCHAR(20)
                   constraints:
@@ -62,6 +68,11 @@ databaseChangeLog:
               - column:
                   name: is_active
                   type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_boats_per_club
+                  type: INTEGER
                   constraints:
                     nullable: false
               - column:

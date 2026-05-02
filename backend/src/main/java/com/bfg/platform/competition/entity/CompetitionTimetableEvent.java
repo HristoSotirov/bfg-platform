@@ -1,7 +1,11 @@
 package com.bfg.platform.competition.entity;
 
+import com.bfg.platform.gen.model.CompetitionEventStatus;
+import com.bfg.platform.gen.model.QualificationEventType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -49,13 +53,16 @@ public class CompetitionTimetableEvent {
     private DisciplineDefinition discipline;
 
     @Column(name = "qualification_event_type", nullable = false)
-    private String qualificationEventType;
+    @Enumerated(EnumType.STRING)
+    private QualificationEventType qualificationEventType;
 
     @Column(name = "scheduled_at", nullable = false)
     private Instant scheduledAt;
 
     @Column(name = "event_status", nullable = false)
-    private String eventStatus;
+    @Enumerated(EnumType.STRING)
+    @Builder.Default
+    private CompetitionEventStatus eventStatus = CompetitionEventStatus.SCHEDULED;
 
     @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
     @Setter(AccessLevel.NONE)

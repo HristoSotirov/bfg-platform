@@ -8,6 +8,7 @@
  * Do not edit the class manually.
  */
 import { BoatClass } from './boatClass';
+import { DisciplineGender } from './disciplineGender';
 
 
 /**
@@ -17,11 +18,13 @@ export interface DisciplineDefinitionRequest {
     name: string;
     shortName: string;
     competitionGroupId: string;
+    gender: DisciplineGender;
     boatClass: BoatClass;
     maxCrewFromTransfer: number;
     isLightweight: boolean;
     distanceMeters: number;
     isActive: boolean;
+    maxBoatsPerClub: number;
 }
 export namespace DisciplineDefinitionRequest {
 }

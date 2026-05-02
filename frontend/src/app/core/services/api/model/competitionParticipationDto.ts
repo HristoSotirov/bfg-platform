@@ -7,7 +7,7 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { FinishStatus } from './finishStatus';
+import { ParticipationStatus } from './participationStatus';
 
 
 /**
@@ -18,7 +18,7 @@ export interface CompetitionParticipationDto {
     competitionEventId?: string;
     entryId?: string;
     lane?: number;
-    finishStatus?: FinishStatus;
+    participationStatus?: ParticipationStatus;
     finishTimeMs?: number;
     place?: number;
     createdAt?: string;

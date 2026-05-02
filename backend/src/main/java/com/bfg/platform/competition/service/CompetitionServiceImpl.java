@@ -16,6 +16,8 @@ import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.gen.model.CompetitionCreateRequest;
 import com.bfg.platform.gen.model.CompetitionDto;
+import com.bfg.platform.gen.model.CompetitionStatus;
+import com.bfg.platform.gen.model.CompetitionType;
 import com.bfg.platform.gen.model.CompetitionUpdateRequest;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
@@ -71,7 +73,7 @@ public class CompetitionServiceImpl implements CompetitionService {
     public Optional<CompetitionDto> create(CompetitionCreateRequest request) {
         validateCreate(request);
         Competition entity = CompetitionMapper.fromRequest(request);
-        entity.setStatus("PLANNED");
+        entity.setStatus(CompetitionStatus.PLANNED);
         Competition saved = repository.save(entity);
         entityManager.flush();
         return Optional.of(CompetitionMapper.toDto(saved));
@@ -103,7 +105,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     private void validateCreate(CompetitionCreateRequest request) {
         validateScoringAndQualification(request.getScoringSchemeId(), request.getQualificationSchemeId(),
-                request.getCompetitionType() != null ? request.getCompetitionType().getValue() : null);
+                request.getCompetitionType());
 
         if (request.getLocation() == null || request.getLocation().isBlank()) {
             throw new ValidationException("Location is required");
@@ -124,7 +126,7 @@ public class CompetitionServiceImpl implements CompetitionService {
 
     private void validateUpdate(CompetitionUpdateRequest request, boolean isTemplate) {
         validateScoringAndQualification(request.getScoringSchemeId(), request.getQualificationSchemeId(),
-                request.getCompetitionType() != null ? request.getCompetitionType().getValue() : null);
+                request.getCompetitionType());
 
         if (request.getLocation() == null || request.getLocation().isBlank()) {
             throw new ValidationException("Location is required");
@@ -142,7 +144,7 @@ public class CompetitionServiceImpl implements CompetitionService {
         }
     }
 
-    private void validateScoringAndQualification(UUID scoringSchemeId, UUID qualificationSchemeId, String compType) {
+    private void validateScoringAndQualification(UUID scoringSchemeId, UUID qualificationSchemeId, CompetitionType compType) {
         scoringSchemeRepository.findById(scoringSchemeId)
                 .filter(s -> s.isActive())
                 .orElseThrow(() -> new ValidationException("Scoring scheme not found or not active"));
@@ -197,8 +199,8 @@ public class CompetitionServiceImpl implements CompetitionService {
         }
     }
 
-    private void validateQualificationSchemeForType(String competitionType, UUID qualificationSchemeId) {
-        if ("STANDARD".equals(competitionType)) return;
+    private void validateQualificationSchemeForType(CompetitionType competitionType, UUID qualificationSchemeId) {
+        if (CompetitionType.NATIONAL_WATER.equals(competitionType) || CompetitionType.BALKAN.equals(competitionType)) return;
         boolean incompatible = qualificationTierRepository
                 .findByQualificationSchemeIdOrderByBoatCountMinAsc(qualificationSchemeId)
                 .stream()

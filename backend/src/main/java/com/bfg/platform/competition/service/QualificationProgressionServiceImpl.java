@@ -15,6 +15,7 @@ import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
 import com.bfg.platform.common.query.EnhancedSortParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.gen.model.QualificationEventType;
 import com.bfg.platform.gen.model.QualificationProgressionDto;
 import com.bfg.platform.gen.model.QualificationProgressionRequest;
 import jakarta.persistence.EntityManager;
@@ -120,30 +121,27 @@ public class QualificationProgressionServiceImpl implements QualificationProgres
             throw new ValidationException("sourceEvent must not equal destEvent");
         }
 
-        // Validate flow
+        QualificationEventType sourceType = QualificationEventType.fromValue(source);
+        QualificationEventType destType = QualificationEventType.fromValue(dest);
+
         String flow = source + "->" + dest;
         if (!VALID_FLOWS.contains(flow)) {
             throw new ValidationException("Invalid progression flow: " + flow + ". Valid flows are: H->SF, H->FA, H->FB, SF->FA, SF->FB");
         }
 
-        // Validate source exists in tier
-        validateSourceEvent(source, tier);
-
-        // Validate dest exists in tier
-        validateDestEvent(dest, tier);
-
-        // Validate capacity: advancing boats must fit in destination
-        validateCapacity(request, tier);
+        validateSourceEvent(sourceType, tier);
+        validateDestEvent(destType, tier);
+        validateCapacity(request, tier, sourceType, destType);
     }
 
-    private void validateSourceEvent(String source, QualificationTier tier) {
+    private void validateSourceEvent(QualificationEventType source, QualificationTier tier) {
         switch (source) {
-            case "H":
+            case H:
                 if (tier.getHeatCount() <= 0) {
                     throw new ValidationException("Source event H requires tier heatCount > 0");
                 }
                 break;
-            case "SF":
+            case SF:
                 if (tier.getSemiFinalCount() <= 0) {
                     throw new ValidationException("Source event SF requires tier semiFinalCount > 0");
                 }
@@ -153,19 +151,19 @@ public class QualificationProgressionServiceImpl implements QualificationProgres
         }
     }
 
-    private void validateDestEvent(String dest, QualificationTier tier) {
+    private void validateDestEvent(QualificationEventType dest, QualificationTier tier) {
         switch (dest) {
-            case "SF":
+            case SF:
                 if (tier.getSemiFinalCount() <= 0) {
                     throw new ValidationException("Destination event SF requires tier semiFinalCount > 0");
                 }
                 break;
-            case "FA":
+            case FA:
                 if (tier.getFinalACount() <= 0) {
                     throw new ValidationException("Destination event FA requires tier finalACount > 0");
                 }
                 break;
-            case "FB":
+            case FB:
                 if (tier.getFinalBCount() <= 0) {
                     throw new ValidationException("Destination event FB requires tier finalBCount > 0");
                 }
@@ -175,8 +173,8 @@ public class QualificationProgressionServiceImpl implements QualificationProgres
         }
     }
 
-    private void validateCapacity(QualificationProgressionRequest request, QualificationTier tier) {
-        // Skip capacity check for remainder rules (byPos=0, byTime=0)
+    private void validateCapacity(QualificationProgressionRequest request, QualificationTier tier,
+                                  QualificationEventType sourceType, QualificationEventType destType) {
         if (request.getQualifyByPosition() == 0 && request.getQualifyByTime() == 0) {
             return;
         }
@@ -185,15 +183,9 @@ public class QualificationProgressionServiceImpl implements QualificationProgres
                 .orElseThrow(() -> new ValidationException("Qualification scheme not found"));
 
         int laneCount = scheme.getLaneCount();
-
-        // Source event count (how many heats/SFs)
-        int sourceEventCount = getEventCount(request.getSourceEvent(), tier);
-
-        // Total boats advancing from this progression
+        int sourceEventCount = getEventCount(sourceType, tier);
         int totalAdvancing = (request.getQualifyByPosition() * sourceEventCount) + request.getQualifyByTime();
-
-        // Destination capacity
-        int destEventCount = getEventCount(request.getDestEvent(), tier);
+        int destEventCount = getEventCount(destType, tier);
         int destCapacity = destEventCount * laneCount;
 
         if (totalAdvancing > destCapacity) {
@@ -205,13 +197,12 @@ public class QualificationProgressionServiceImpl implements QualificationProgres
         }
     }
 
-    private int getEventCount(String event, QualificationTier tier) {
+    private int getEventCount(QualificationEventType event, QualificationTier tier) {
         return switch (event) {
-            case "H" -> tier.getHeatCount();
-            case "SF" -> tier.getSemiFinalCount();
-            case "FA" -> tier.getFinalACount();
-            case "FB" -> tier.getFinalBCount();
-            default -> 0;
+            case H -> tier.getHeatCount();
+            case SF -> tier.getSemiFinalCount();
+            case FA -> tier.getFinalACount();
+            case FB -> tier.getFinalBCount();
         };
     }
 }

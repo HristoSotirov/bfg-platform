@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserDto, SystemRole } from '../../../../core/services/api';
+import { UserDto, SystemRole, ScopeType } from '../../../../core/services/api';
 import { UserColumnConfig } from '../../users.component';
 
 @Component({
@@ -32,10 +32,10 @@ export class UsersTableComponent implements OnInit {
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
 
   private roleLabels: Record<SystemRole, string> = {
-    APP_ADMIN: 'Администратор',
-    FEDERATION_ADMIN: 'Администратор на федерацията',
-    CLUB_ADMIN: 'Администратор на клуб',
-    COACH: 'Треньор',
+    [SystemRole.AppAdmin]: 'Администратор',
+    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
+    [SystemRole.ClubAdmin]: 'Администратор на клуб',
+    [SystemRole.Coach]: 'Треньор',
   };
 
   ngOnInit(): void {
@@ -155,9 +155,9 @@ export class UsersTableComponent implements OnInit {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }

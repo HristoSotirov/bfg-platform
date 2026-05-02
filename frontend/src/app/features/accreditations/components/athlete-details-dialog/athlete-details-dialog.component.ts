@@ -32,6 +32,7 @@ import {
   AthletePhotosService,
   ClubDto,
   Gender,
+  ScopeType,
 } from '../../../../core/services/api';
 import { forkJoin, of } from 'rxjs';
 import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
@@ -119,21 +120,21 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   statusChanges: Map<string, AccreditationStatus> = new Map();
 
   private statusLabels: Record<string, string> = {
-    ACTIVE: 'Активна',
-    PENDING_VALIDATION: 'Заявена',
-    PENDING_PHOTO_VALIDATION: 'Чакаща снимка',
-    NEW_PHOTO_REQUIRED: 'Нова снимка',
-    EXPIRED: 'Изтекла',
-    SUSPENDED: 'Спряна',
+    [AccreditationStatus.Active]: 'Активна',
+    [AccreditationStatus.PendingValidation]: 'Заявена',
+    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
+    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
+    [AccreditationStatus.Expired]: 'Изтекла',
+    [AccreditationStatus.Suspended]: 'Спряна',
   };
 
   readonly statusOptions: { value: AccreditationStatus; label: string }[] = [
-    { value: 'ACTIVE', label: 'Активна' },
-    { value: 'PENDING_VALIDATION', label: 'Заявена' },
-    { value: 'PENDING_PHOTO_VALIDATION', label: 'Чакаща снимка' },
-    { value: 'NEW_PHOTO_REQUIRED', label: 'Нова снимка' },
-    { value: 'EXPIRED', label: 'Изтекла' },
-    { value: 'SUSPENDED', label: 'Спряна' },
+    { value: AccreditationStatus.Active, label: 'Активна' },
+    { value: AccreditationStatus.PendingValidation, label: 'Заявена' },
+    { value: AccreditationStatus.PendingPhotoValidation, label: 'Чакаща снимка' },
+    { value: AccreditationStatus.NewPhotoRequired, label: 'Нова снимка' },
+    { value: AccreditationStatus.Expired, label: 'Изтекла' },
+    { value: AccreditationStatus.Suspended, label: 'Спряна' },
   ];
 
   get statusSelectOptions(): SearchableSelectOption[] {
@@ -144,8 +145,8 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   }
 
   readonly genderOptions = [
-    { value: 'MALE', label: 'Мъж' },
-    { value: 'FEMALE', label: 'Жена' },
+    { value: Gender.MALE, label: 'Мъж' },
+    { value: Gender.FEMALE, label: 'Жена' },
   ];
 
   get genderSelectOptions(): SearchableSelectOption[] {
@@ -202,7 +203,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
 
   get canUploadPhoto(): boolean {
     if (
-      (this.userRole !== 'CLUB_ADMIN' && this.userRole !== 'COACH') ||
+      (this.userRole !== SystemRole.ClubAdmin && this.userRole !== SystemRole.Coach) ||
       !this.userClub?.uuid ||
       !this.athlete?.uuid
     ) {
@@ -211,7 +212,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     return this.fullHistory.some(
       (acc) =>
         acc.year === this.currentYear &&
-        acc.status === 'NEW_PHOTO_REQUIRED' &&
+        acc.status === AccreditationStatus.NewPhotoRequired &&
         acc.clubId === this.userClub?.uuid,
     );
   }
@@ -274,16 +275,16 @@ export class AthleteDetailsDialogComponent implements OnChanges {
 
   getStatusClass(status: string | undefined): string {
     switch (status) {
-      case 'ACTIVE':
+      case AccreditationStatus.Active:
         return 'text-green-600';
-      case 'EXPIRED':
+      case AccreditationStatus.Expired:
         return 'text-gray-500';
-      case 'PENDING_VALIDATION':
-      case 'PENDING_PHOTO_VALIDATION':
+      case AccreditationStatus.PendingValidation:
+      case AccreditationStatus.PendingPhotoValidation:
         return 'text-yellow-600';
-      case 'NEW_PHOTO_REQUIRED':
+      case AccreditationStatus.NewPhotoRequired:
         return 'text-orange-500';
-      case 'SUSPENDED':
+      case AccreditationStatus.Suspended:
         return 'text-red-600';
       default:
         return 'text-gray-600';
@@ -292,15 +293,15 @@ export class AthleteDetailsDialogComponent implements OnChanges {
 
   getGenderLabel(gender: string | undefined): string {
     if (!gender) return '-';
-    return gender === 'MALE' ? 'Мъж' : gender === 'FEMALE' ? 'Жена' : gender;
+    return gender === Gender.MALE ? 'Мъж' : gender === Gender.FEMALE ? 'Жена' : gender;
   }
 
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }
@@ -410,7 +411,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
 
   get isAdminUser(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 

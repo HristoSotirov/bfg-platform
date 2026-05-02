@@ -23,6 +23,7 @@ import {
   QualificationProgressionDto,
   QualificationProgressionRequest,
   QualificationProgressionsService,
+  SystemRole,
 } from '../../../../core/services/api';
 import { AuthService } from '../../../../core/services/auth.service';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
@@ -134,7 +135,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
   get canEdit(): boolean {
     const user = this.authService.currentUser;
     if (!user) return false;
-    return user.roles.some(r => r === 'APP_ADMIN' || r === 'FEDERATION_ADMIN');
+    return user.roles.some(r => r === SystemRole.AppAdmin || r === SystemRole.FederationAdmin);
   }
 
   get isAddTierValid(): boolean {

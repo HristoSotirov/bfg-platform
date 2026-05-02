@@ -8,12 +8,10 @@ import com.bfg.platform.gen.api.QualificationSchemesApi;
 import com.bfg.platform.gen.model.GetAllQualificationSchemes200Response;
 import com.bfg.platform.gen.model.QualificationSchemeDto;
 import com.bfg.platform.gen.model.QualificationSchemeRequest;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -37,7 +35,7 @@ public class QualificationSchemeController implements QualificationSchemesApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<QualificationSchemeDto> createQualificationScheme(
-            @Valid @RequestBody QualificationSchemeRequest request) {
+            QualificationSchemeRequest request) {
         return service.create(request)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create qualification scheme"));
@@ -54,7 +52,7 @@ public class QualificationSchemeController implements QualificationSchemesApi {
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
     public ResponseEntity<QualificationSchemeDto> updateQualificationSchemeByUuid(
-            UUID uuid, @Valid @RequestBody QualificationSchemeRequest request) {
+            UUID uuid, QualificationSchemeRequest request) {
         return service.update(uuid, request)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Qualification scheme", uuid));

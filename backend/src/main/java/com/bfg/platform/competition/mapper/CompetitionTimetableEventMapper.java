@@ -1,10 +1,9 @@
 package com.bfg.platform.competition.mapper;
 
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.competition.entity.CompetitionTimetableEvent;
-import com.bfg.platform.gen.model.CompetitionEventStatus;
 import com.bfg.platform.gen.model.CompetitionTimetableEventDto;
 import com.bfg.platform.gen.model.CompetitionTimetableEventRequest;
-import com.bfg.platform.gen.model.QualificationEventType;
 
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
@@ -27,15 +26,11 @@ public class CompetitionTimetableEventMapper {
         dto.setUuid(entity.getId());
         dto.setCompetitionId(entity.getCompetitionId());
         dto.setDisciplineId(entity.getDisciplineId());
-        dto.setQualificationEventType(entity.getQualificationEventType() != null
-            ? QualificationEventType.fromValue(entity.getQualificationEventType())
-            : null);
+        dto.setQualificationEventType(entity.getQualificationEventType());
         dto.setScheduledAt(entity.getScheduledAt() != null
             ? OffsetDateTime.ofInstant(entity.getScheduledAt(), ZoneOffset.UTC)
             : null);
-        dto.setEventStatus(entity.getEventStatus() != null
-            ? CompetitionEventStatus.fromValue(entity.getEventStatus())
-            : null);
+        dto.setEventStatus(entity.getEventStatus());
         dto.setCreatedAt(entity.getCreatedAt() != null
             ? OffsetDateTime.ofInstant(entity.getCreatedAt(), ZoneOffset.UTC)
             : null);
@@ -43,9 +38,11 @@ public class CompetitionTimetableEventMapper {
             ? OffsetDateTime.ofInstant(entity.getModifiedAt(), ZoneOffset.UTC)
             : null);
 
-        if (expand != null && expand.contains("discipline") && entity.getDiscipline() != null) {
-            Set<String> disciplineExpand = expand.contains("discipline.competitionGroup")
-                    ? Set.of("competitionGroup") : null;
+        // Hybrid expand: deeper level implies parent
+        boolean expandDiscipline = expand != null && expand.contains("discipline");
+
+        if (expandDiscipline && entity.getDiscipline() != null) {
+            Set<String> disciplineExpand = ExpandQueryParser.subExpand(expand, "discipline");
             dto.setDiscipline(DisciplineDefinitionMapper.toDto(entity.getDiscipline(), disciplineExpand));
         }
 
@@ -56,29 +53,21 @@ public class CompetitionTimetableEventMapper {
         CompetitionTimetableEvent entity = new CompetitionTimetableEvent();
         entity.setCompetitionId(request.getCompetitionId());
         entity.setDisciplineId(request.getDisciplineId());
-        entity.setQualificationEventType(request.getQualificationEventType() != null
-            ? request.getQualificationEventType().getValue()
-            : null);
+        entity.setQualificationEventType(request.getQualificationEventType());
         entity.setScheduledAt(request.getScheduledAt() != null
             ? request.getScheduledAt().toInstant()
             : null);
-        entity.setEventStatus(request.getEventStatus() != null
-            ? request.getEventStatus().getValue()
-            : null);
+        entity.setEventStatus(request.getEventStatus());
         return entity;
     }
 
     public static void updateFromRequest(CompetitionTimetableEvent entity, CompetitionTimetableEventRequest request) {
         entity.setCompetitionId(request.getCompetitionId());
         entity.setDisciplineId(request.getDisciplineId());
-        entity.setQualificationEventType(request.getQualificationEventType() != null
-            ? request.getQualificationEventType().getValue()
-            : null);
+        entity.setQualificationEventType(request.getQualificationEventType());
         entity.setScheduledAt(request.getScheduledAt() != null
             ? request.getScheduledAt().toInstant()
             : null);
-        entity.setEventStatus(request.getEventStatus() != null
-            ? request.getEventStatus().getValue()
-            : null);
+        entity.setEventStatus(request.getEventStatus());
     }
 }
