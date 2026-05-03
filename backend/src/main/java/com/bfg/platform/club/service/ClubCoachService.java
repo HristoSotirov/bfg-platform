@@ -14,7 +14,7 @@ public interface ClubCoachService {
     Optional<ClubDto> getClubByCoachId(UUID coachId, List<String> expand);
     
     Optional<ClubCoachDto> assignCoachToClub(ClubCoachCreateRequest request);
-    
+
     void removeCoachFromClub(UUID clubCoachId);
 }
 

@@ -13,7 +13,7 @@ import { ClubRankingCompetitionDto } from './clubRankingCompetitionDto';
 /**
  * A single club\'s ranking with per-competition breakdown
  */
-export interface ClubRankingDto {
+export interface ClubRankingDto { 
     clubId?: string;
     clubName?: string;
     clubShortName?: string;

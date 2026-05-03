@@ -39,7 +39,7 @@ CompetitionType:
   type: string
   description: Type/format of the competition
   enum:
-    - ERG
+    - NATIONAL_ERGO
     - NATIONAL_WATER
     - BALKAN
 

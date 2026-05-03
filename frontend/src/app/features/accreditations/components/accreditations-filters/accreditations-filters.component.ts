@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AccreditationStatus, Gender, ScopeType } from '../../../../core/services/api';
+import { AccreditationStatus, Gender } from '../../../../core/services/api';
 import {
   AccreditationFilters,
   FilterConfig,
@@ -45,7 +45,6 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
     birthYears: [],
     clubs: [],
     years: [],
-    scopeTypes: [],
   };
   @Input() filterConfigs: FilterConfig[] = [];
   @Input() allClubs: ClubDto[] = [];
@@ -76,11 +75,6 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
 
   yearOptions: DropdownOption[] = [];
   clubOptions: DropdownOption[] = [];
-  readonly scopeTypeOptions: DropdownOption[] = [
-    { value: ScopeType.Internal, label: 'Вътрешен' },
-    { value: ScopeType.External, label: 'Външен' },
-    { value: ScopeType.National, label: 'Национален' },
-  ];
 
   get birthYearOptions(): DropdownOption[] {
     return this.availableBirthYears.map((y) => ({ value: String(y), label: String(y) }));
@@ -94,7 +88,6 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
       if (!this.filters.years) this.filters.years = [];
       if (!this.filters.clubs) this.filters.clubs = [];
       if (!this.filters.birthYears) this.filters.birthYears = [];
-      if (!this.filters.scopeTypes) this.filters.scopeTypes = [];
       this.updateSelectedYearsCache();
       this.updateSelectedBirthYearsCache();
       this.updateClubOptions();
@@ -114,7 +107,6 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
       if (this.filters && !this.filters.years) this.filters.years = [];
       if (this.filters && !this.filters.clubs) this.filters.clubs = [];
       if (this.filters && !this.filters.birthYears) this.filters.birthYears = [];
-      if (this.filters && !this.filters.scopeTypes) this.filters.scopeTypes = [];
       this.updateSelectedYearsCache();
       this.updateSelectedBirthYearsCache();
     }
@@ -141,8 +133,7 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
       this.isFilterVisible('gender') ||
       this.isFilterVisible('birthYear') ||
       this.isFilterVisible('year') ||
-      this.isFilterVisible('club') ||
-      this.isFilterVisible('scopeType')
+      this.isFilterVisible('club')
     );
   }
 
@@ -171,10 +162,6 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
   onYearsChange(values: string[]): void {
     this.selectedYearsCache = values;
     this.emitFiltersChange({ years: values.map((v) => parseInt(v, 10)) });
-  }
-
-  onScopeTypesChange(values: string[]): void {
-    this.emitFiltersChange({ scopeTypes: values });
   }
 
   private emitFiltersChange(changes: Partial<AccreditationFilters>): void {

@@ -169,7 +169,7 @@ export class CompetitionsService extends BaseService {
 
     /**
      * Get all competitions (templates and real)
-     * @param filter Filter expression (e.g., isTemplate eq \&#39;true\&#39;, isActive eq \&#39;true\&#39;, status eq \&#39;DRAFT\&#39;). Use isTemplate eq \&#39;true\&#39; to list only templates; isTemplate eq \&#39;false\&#39; for real competitions. 
+     * @param filter Filter expression (e.g., isTemplate eq \&#39;true\&#39;, isActive eq \&#39;true\&#39;). Use isTemplate eq \&#39;true\&#39; to list only templates; isTemplate eq \&#39;false\&#39; for real competitions. 
      * @param search Free-text search across competition name and short name (case-insensitive).  **Behavior:** - Tokenized by whitespace. - All tokens must match at least one field (AND across tokens).  **Matches:** - &#x60;name&#x60;, &#x60;shortName&#x60;  **Examples:** - &#x60;National Water&#x60; 
      * @param orderBy Predefined ordering (multiselect)
      * @param top Maximum number of items to return

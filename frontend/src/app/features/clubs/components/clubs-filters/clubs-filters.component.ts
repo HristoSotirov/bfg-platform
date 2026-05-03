@@ -68,7 +68,7 @@ export class ClubsFiltersComponent implements OnInit {
   }
 
   hasVisibleFilters(): boolean {
-    return this.isFilterVisible('status') || this.isFilterVisible('scopeType');
+    return this.isFilterVisible('status') || this.isFilterVisible('type');
   }
 
   onSearchChange(value: string): void {

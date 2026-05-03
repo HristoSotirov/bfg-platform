@@ -22,7 +22,6 @@ import {
   ClubsService,
   ClubCoachesService,
   ClubDto,
-  ScopeType,
 } from '../../../../core/services/api';
 import { takeUntil, Subject, catchError, of } from 'rxjs';
 
@@ -39,8 +38,6 @@ export class UserDetailsDialogComponent implements OnChanges {
   @Input() user: UserDto | null = null;
   @Input() canEdit = false;
   @Input() userRole: SystemRole | null = null;
-  /** Show scope type (APP_ADMIN / FEDERATION_ADMIN only) */
-  @Input() showScopeInDetails = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() saved = new EventEmitter<void>();
@@ -291,16 +288,6 @@ export class UserDetailsDialogComponent implements OnChanges {
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
     return this.roleLabels[role] || role;
-  }
-
-  getScopeTypeLabel(scopeType: string | undefined): string {
-    if (!scopeType) return '-';
-    const labels: Record<string, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
-    };
-    return labels[scopeType] ?? scopeType;
   }
 
 }

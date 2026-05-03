@@ -35,7 +35,7 @@ public class ClubMapper {
         dto.setCardPrefix(club.getCardPrefix());
         dto.setClubEmail(club.getClubEmail());
         dto.setIsActive(club.isActive());
-        dto.setScopeType(club.getScopeType());
+        dto.setType(club.getType());
         dto.clubAdminId(club.getClubAdmin());
         dto.setCreatedAt(club.getCreatedAt() != null 
             ? OffsetDateTime.ofInstant(club.getCreatedAt(), ZoneOffset.UTC) 
@@ -64,7 +64,8 @@ public class ClubMapper {
         club.setCardPrefix(cardPrefix);
         club.setClubEmail(request.getClubEmail());
         club.setClubAdmin(request.getClubAdminId());
-        club.setScopeType(request.getScopeType());
+        club.setType(request.getType());
+        club.setActive(true);
         return club;
     }
 
@@ -73,7 +74,7 @@ public class ClubMapper {
         if (request.getShortName() != null) club.setShortName(request.getShortName());
         if (request.getIsActive() != null) club.setActive(request.getIsActive());
         if (request.getClubAdminId() != null) club.setClubAdmin(request.getClubAdminId());
-        if (request.getScopeType() != null) club.setScopeType(request.getScopeType());
+        if (request.getType() != null) club.setType(request.getType());
     }
 
     public static Club fromBatchCreateRequestItem(ClubBatchCreateRequestItem item, UUID adminUserId) {
@@ -84,7 +85,7 @@ public class ClubMapper {
         club.setClubEmail(item.getClubEmail());
         club.setClubAdmin(adminUserId);
         club.setActive(true);
-        club.setScopeType(ScopeType.INTERNAL); // migrations are internal only
+        club.setType(ScopeType.INTERNAL); // migrations are internal only
         return club;
     }
 

@@ -203,7 +203,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get showScopeInDetails(): boolean {
-    return this.scopeVisibility.canViewScopeField();
+    return this.scopeVisibility.canViewTypeField();
   }
 
   get athlete() {
@@ -360,11 +360,6 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [`athleteId eq '${athleteId}'`];
-    const defaults = this.scopeVisibility.buildDefaultFilter();
-    if (defaults.scopeType) filterParts.push(`scopeType eq '${defaults.scopeType}'`);
-    if (!this.scopeVisibility.canViewClubFilter() && this.userClub?.uuid) {
-      filterParts.push(`clubId eq '${this.userClub.uuid}'`);
-    }
     const filter = filterParts.join(' and ');
 
     this.accreditationsService

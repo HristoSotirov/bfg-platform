@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { UserDto, SystemRole, ScopeType } from '../../../../core/services/api';
+import { UserDto, SystemRole } from '../../../../core/services/api';
 import { UserColumnConfig } from '../../users.component';
 
 @Component({
@@ -112,8 +112,6 @@ export class UsersTableComponent implements OnInit {
         return user.isActive ? 'Активен' : 'Неактивен';
       case 'role':
         return this.getRoleLabel(user.role);
-      case 'scopeType':
-        return this.getScopeTypeLabel(user.scopeType);
       case 'createdAt':
         return this.formatDateTime(user.createdAt);
       case 'updatedAt':
@@ -150,16 +148,6 @@ export class UsersTableComponent implements OnInit {
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
     return this.roleLabels[role] || role;
-  }
-
-  getScopeTypeLabel(scopeType: string | undefined): string {
-    if (!scopeType) return '-';
-    const labels: Record<string, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
-    };
-    return labels[scopeType] ?? scopeType;
   }
 
   onScroll(event: Event): void {

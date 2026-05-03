@@ -23,10 +23,8 @@ import {
   ClubsService,
   ClubCoachesService,
   ClubDto,
-  ScopeType,
 } from '../../../../core/services/api';
 import { AuthService } from '../../../../core/services/auth.service';
-import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 
 @Component({
   selector: 'app-user-detail-page',
@@ -84,7 +82,6 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
     private authService: AuthService,
-    private scopeVisibility: ScopeVisibilityService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -106,10 +103,6 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
     const user = this.authService.currentUser;
     if (!user) return false;
     return user.roles.some(r => r === SystemRole.AppAdmin || r === SystemRole.FederationAdmin);
-  }
-
-  get showScopeInDetails(): boolean {
-    return this.scopeVisibility.canViewScopeField();
   }
 
   get fullName(): string {
@@ -277,16 +270,6 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
     return this.roleLabels[role] || role;
-  }
-
-  getScopeTypeLabel(scopeType: string | undefined): string {
-    if (!scopeType) return '-';
-    const labels: Record<string, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
-    };
-    return labels[scopeType] ?? scopeType;
   }
 
   // ===== DELETE USER =====

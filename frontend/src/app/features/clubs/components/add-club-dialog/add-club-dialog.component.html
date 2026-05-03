@@ -3,7 +3,7 @@
   <div class="space-y-4 flex-1 min-h-0 overflow-y-auto">
     
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Име:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Име <span class="text-red-500">*</span>:</label>
       <input
         type="text"
         [(ngModel)]="formData.shortName"
@@ -13,7 +13,7 @@
 
     
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Пълно име:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Пълно име <span class="text-red-500">*</span>:</label>
       <input
         type="text"
         [(ngModel)]="formData.name"
@@ -23,7 +23,7 @@
 
     
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Имейл:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Имейл <span class="text-red-500">*</span>:</label>
       <input
         type="email"
         [(ngModel)]="formData.clubEmail"
@@ -33,18 +33,18 @@
 
     
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Тип обхват <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Тип <span class="text-red-500">*</span>:</label>
       <app-searchable-select-dropdown
         [options]="scopeTypeOptions"
         [placeholder]="'Изберете тип'"
-        [ngModel]="formData.scopeType"
-        (ngModelChange)="formData.scopeType = $event ?? ScopeType.Internal"
+        [ngModel]="formData.type"
+        (ngModelChange)="formData.type = $event ?? ScopeType.Internal"
         [disabled]="saving">
       </app-searchable-select-dropdown>
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Администратор:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Администратор <span class="text-red-500">*</span>:</label>
       <app-searchable-select-dropdown
         [serverSearch]="adminSearch"
         [placeholder]="'Изберете администратор'"

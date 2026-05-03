@@ -12,7 +12,6 @@ import {
   AccreditationDto,
   AccreditationStatus,
   Gender,
-  ScopeType,
 } from '../../../../core/services/api';
 import { ColumnConfig } from '../../accreditations.component';
 import { calculateRaceGroup } from '../../../../shared/utils/race-group.util';
@@ -187,8 +186,6 @@ export class AccreditationsTableComponent implements OnInit {
         return this.getGenderLabel(accreditation.athlete?.gender);
       case 'clubShortName':
         return accreditation.club?.shortName || '-';
-      case 'scopeType':
-        return this.getScopeTypeLabel(accreditation.scopeType);
       case 'clubName':
         return accreditation.club?.name || '-';
       case 'clubEmail':
@@ -224,16 +221,6 @@ export class AccreditationsTableComponent implements OnInit {
       FEMALE: 'Жена',
     };
     return genderLabels[gender.toUpperCase()] || gender;
-  }
-
-  private getScopeTypeLabel(scopeType: string | undefined): string {
-    if (!scopeType) return '-';
-    const labels: Record<string, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
-    };
-    return labels[scopeType] ?? scopeType;
   }
 
   getRaceGroup(accreditation: AccreditationDto): string {

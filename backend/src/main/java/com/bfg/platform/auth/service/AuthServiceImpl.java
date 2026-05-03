@@ -2,7 +2,6 @@ package com.bfg.platform.auth.service;
 
 import com.bfg.platform.auth.jwt.JwtService;
 import com.bfg.platform.common.exception.UnauthorizedException;
-import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.gen.model.TokenResponse;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.repository.UserRepository;
@@ -37,10 +36,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String role = user.getRole().getValue();
-        // Use the user's scopeType directly (defaulting to INTERNAL if not set)
-        String scopeType = (user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL).getValue();
-        String access = jwtService.issueAccessToken(user.getId(), role, scopeType);
-        String refresh = jwtService.issueRefreshToken(user.getId(), role, scopeType);
+        String access = jwtService.issueAccessToken(user.getId(), role);
+        String refresh = jwtService.issueRefreshToken(user.getId(), role);
         return new TokenResponse(access, refresh, "Bearer");
     }
 
@@ -64,10 +61,8 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String role = user.getRole().getValue();
-        // Use the user's scopeType directly (defaulting to INTERNAL if not set)
-        String scopeType = (user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL).getValue();
-        String access = jwtService.issueAccessToken(userId, role, scopeType);
-        String refresh = jwtService.issueRefreshToken(userId, role, scopeType);
+        String access = jwtService.issueAccessToken(userId, role);
+        String refresh = jwtService.issueRefreshToken(userId, role);
         return new TokenResponse(access, refresh, "Bearer");
     }
 
@@ -76,4 +71,3 @@ public class AuthServiceImpl implements AuthService {
     public void logout(UUID userId) {
     }
 }
-

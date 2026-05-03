@@ -27,8 +27,8 @@ public final class ClubQueryAdapter {
             Map.entry("isActive_desc", new Sort.Order(Sort.Direction.DESC, "isActive")),
             Map.entry("cardPrefix_asc", new Sort.Order(Sort.Direction.ASC, "cardPrefix")),
             Map.entry("cardPrefix_desc", new Sort.Order(Sort.Direction.DESC, "cardPrefix")),
-            Map.entry("scopeType_asc", new Sort.Order(Sort.Direction.ASC, "scopeType")),
-            Map.entry("scopeType_desc", new Sort.Order(Sort.Direction.DESC, "scopeType")),
+            Map.entry("type_asc", new Sort.Order(Sort.Direction.ASC, "type")),
+            Map.entry("type_desc", new Sort.Order(Sort.Direction.DESC, "type")),
             Map.entry("createdAt_asc", new Sort.Order(Sort.Direction.ASC, "createdAt")),
             Map.entry("createdAt_desc", new Sort.Order(Sort.Direction.DESC, "createdAt")),
             Map.entry("modifiedAt_asc", new Sort.Order(Sort.Direction.ASC, "modifiedAt")),
@@ -98,7 +98,7 @@ public final class ClubQueryAdapter {
                 case "name", "shortName" -> QueryAdapterHelpers.stringInPredicate(root, cb, field, values);
                 case "isActive" -> QueryAdapterHelpers.booleanInPredicate(root, cb, "isActive", values);
                 case "clubAdminId" -> QueryAdapterHelpers.uuidInPredicate(root, cb, "clubAdmin", values);
-                case "scopeType" -> QueryAdapterHelpers.stringInPredicate(root, cb, "scopeType", values);
+                case "type" -> QueryAdapterHelpers.stringInPredicate(root, cb, "type", values);
                 default -> throw new IllegalArgumentException("In operator not supported for field: " + field);
             };
         }
@@ -133,7 +133,7 @@ public final class ClubQueryAdapter {
             case "isActive", "clubStatus" -> QueryAdapterHelpers.booleanPredicate(root, cb, "isActive", op, valueRaw);
             case "createdAt", "modifiedAt" -> QueryAdapterHelpers.instantPredicate(root, cb, field, op, valueRaw);
             case "clubAdminId" -> QueryAdapterHelpers.uuidPredicate(root, cb, "clubAdmin", op, valueRaw);
-            case "scopeType" -> QueryAdapterHelpers.stringPredicate(root, cb, "scopeType", op, valueRaw);
+            case "type" -> QueryAdapterHelpers.stringPredicate(root, cb, "type", op, valueRaw);
             default -> throw new IllegalArgumentException("Unsupported filter field: " + field);
         };
     }

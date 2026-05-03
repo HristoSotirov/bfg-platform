@@ -23,6 +23,6 @@ export interface ClubBatchCreateRequestItem {
     /**
      * Email address of the club administrator user
      */
-    adminEmail: string;
+    adminEmail?: string;
 }
 

@@ -39,7 +39,6 @@ import com.bfg.platform.gen.model.AthleteBatchMigrationResponse;
 import com.bfg.platform.gen.model.AthleteBatchMigrationResponseSkippedInner;
 import com.bfg.platform.gen.model.AthleteCreateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
-import com.bfg.platform.gen.model.ScopeType;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -79,20 +78,22 @@ public class AccreditationServiceImpl implements AccreditationService {
             Integer skip,
             List<String> expand
     ) {
-        // Validate scope and club access - throws 403 if invalid
+        // Validate scope filter - throws 403 if requesting disallowed scopes
         scopeAccessValidator.validateFilterScope(filter);
-        scopeAccessValidator.validateFilterClub(filter, ResourceType.ACCREDITATION);
 
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Accreditation.class);
-        
-        EnhancedFilterExpressionParser.ParseResult<Accreditation> filterResult = 
+
+        EnhancedFilterExpressionParser.ParseResult<Accreditation> filterResult =
                 AccreditationQueryAdapter.parseFilter(filter, requestedExpand);
         Specification<Accreditation> filterSpec = filterResult.getSpecification();
         Set<String> usedInFilter = filterResult.getUsedExpandFields();
-        
+
         Specification<Accreditation> searchSpec = AccreditationQueryAdapter.parseSearch(search);
-        
-        Specification<Accreditation> spec = Specification.where(filterSpec).and(searchSpec);
+
+        Specification<Accreditation> scopeSpec = scopeAccessValidator.buildScopeRestriction(ResourceType.ACCREDITATION, "club.type");
+        Specification<Accreditation> clubSpec = scopeAccessValidator.buildClubRestriction(ResourceType.ACCREDITATION, "clubId");
+
+        Specification<Accreditation> spec = Specification.where(filterSpec).and(searchSpec).and(scopeSpec).and(clubSpec);
         
         EnhancedSortParser.ParseResult sortResult = 
                 AccreditationQueryAdapter.parseSort(orderBy, requestedExpand);
@@ -133,9 +134,11 @@ public class AccreditationServiceImpl implements AccreditationService {
         }
         
         if (accreditation != null) {
-            // Validate access to this specific resource
+            // Validate access to this specific resource - derive scope from the club
+            Club club = clubRepository.findById(accreditation.getClubId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Club", accreditation.getClubId()));
             scopeAccessValidator.validateResourceAccess(
-                    accreditation.getScopeType(),
+                    club.getType(),
                     accreditation.getClubId(),
                     ResourceType.ACCREDITATION
             );
@@ -181,13 +184,9 @@ public class AccreditationServiceImpl implements AccreditationService {
                     if (athlete == null) {
                         throw new ValidationException("Athlete not found");
                     }
-                    if (!athlete.getScopeType().equals(club.getScopeType())) {
-                        throw new ValidationException(
-                            "Athlete scope type does not match club (cannot create accreditation for different scope type)");
-                    }
 
                     boolean exists = accreditationRepository.existsByAthleteIdAndClubIdAndYear(athleteId, clubId, currentYear);
-                    
+
                     if (exists) {
                         throw new ConflictException("Accreditation for this athlete and year already exists");
                     }
@@ -207,7 +206,6 @@ public class AccreditationServiceImpl implements AccreditationService {
                             clubId,
                             cardNumber,
                             currentYear,
-                            club.getScopeType(),
                             AccreditationStatus.PENDING_VALIDATION
                     );
 
@@ -277,16 +275,12 @@ public class AccreditationServiceImpl implements AccreditationService {
 
         if (existingAthlete.isPresent()) {
             athlete = existingAthlete.get();
-            if (!athlete.getScopeType().equals(club.getScopeType())) {
-                throw new ValidationException(
-                    "Cannot create accreditation: athlete scope type does not match club (e.g. cannot create national accreditation for internal athlete)");
-            }
             Optional<String> existingCardNumber = accreditationRepository
                     .findExistingCardNumberForAthleteAndClub(athlete.getId(), clubId);
 
             cardNumber = existingCardNumber.orElseGet(() -> generateNextCardNumber(club.getCardPrefix(), clubId));
         } else {
-            athlete = saveAthlete(AthleteMapper.fromCreateRequest(request, club.getScopeType()));
+            athlete = saveAthlete(AthleteMapper.fromCreateRequest(request));
             cardNumber = generateNextCardNumber(club.getCardPrefix(), clubId);
         }
 
@@ -295,7 +289,6 @@ public class AccreditationServiceImpl implements AccreditationService {
                 clubId,
                 cardNumber,
                 Year.now().getValue(),
-                club.getScopeType(),
                 AccreditationStatus.PENDING_VALIDATION
         );
 
@@ -415,7 +408,6 @@ public class AccreditationServiceImpl implements AccreditationService {
                 club.getId(),
                 newCardNumber,
                 year,
-                ScopeType.INTERNAL,
                 status
         );
         

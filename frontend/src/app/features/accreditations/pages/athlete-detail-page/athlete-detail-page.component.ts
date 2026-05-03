@@ -40,7 +40,6 @@ import {
 import { AuthService } from '../../../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 import { SystemRole } from '../../../../core/models/navigation.model';
-import { ScopeType } from '../../../../core/services/api';
 import { calculateRaceGroup } from '../../../../shared/utils/race-group.util';
 
 const DEFAULT_MEDICAL_DURATION_MONTHS = 12;
@@ -236,7 +235,7 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get showScopeInDetails(): boolean {
-    return this.scopeVisibility.canViewScopeField();
+    return false;
   }
 
   get fullName(): string {
@@ -394,9 +393,7 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [`athleteId eq '${athleteId}'`];
-    const defaults = this.scopeVisibility.buildDefaultFilter();
-    if (defaults.scopeType) filterParts.push(`scopeType eq '${defaults.scopeType}'`);
-    if (!this.scopeVisibility.canViewClubFilter() && this.userClub?.uuid) {
+    if (!this.scopeVisibility.isAdmin() && this.userClub?.uuid) {
       filterParts.push(`clubId eq '${this.userClub.uuid}'`);
     }
     const filter = filterParts.join(' and ');
@@ -842,12 +839,6 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
   getGenderLabel(gender: string | undefined): string {
     if (!gender) return '-';
     return gender === Gender.MALE ? 'Мъж' : gender === Gender.FEMALE ? 'Жена' : gender;
-  }
-
-  getScopeTypeLabel(scopeType: string | undefined): string {
-    if (!scopeType) return '-';
-    const labels: Record<string, string> = { [ScopeType.Internal]: 'Вътрешен', [ScopeType.External]: 'Външен', [ScopeType.National]: 'Национален' };
-    return labels[scopeType] ?? scopeType;
   }
 
   getRaceGroup(): string {

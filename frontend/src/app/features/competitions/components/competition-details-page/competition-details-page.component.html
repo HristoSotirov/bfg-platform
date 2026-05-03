@@ -656,16 +656,44 @@
           <div class="flex flex-col gap-4">
 
             <!-- Toolbar -->
-            <div class="flex items-center justify-end">
-              @if (canEdit) {
-                <app-button
-                  variant="primary"
-                  size="sm"
-                  [text]="generatingProgression ? 'Изпълнение...' : 'Генерирай следващ етап'"
-                  [disabled]="generatingProgression"
-                  (click)="onAdvanceClick()"
-                ></app-button>
-              }
+            <div class="flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
+              <div class="flex items-center gap-2 shrink-0">
+                @if (startListEvents.length > 0 && startListDays.length > 1) {
+                  @for (day of startListDays; track day.key) {
+                    <button
+                      type="button"
+                      class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap"
+                      [class]="activeStartListDay === day.key
+                        ? 'border-bfg-blue bg-bfg-blue text-white'
+                        : 'border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white'"
+                      (click)="selectStartListDay(day.key)"
+                    >
+                      {{ day.label }}
+                    </button>
+                  }
+                }
+              </div>
+              <div class="flex items-center gap-2 shrink-0">
+                @if (startListEvents.length > 0) {
+                  <button type="button"
+                    class="px-3 py-1.5 text-sm font-medium rounded-lg border border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white transition-colors flex items-center gap-1.5"
+                    (click)="exportStartListPdf()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    PDF
+                  </button>
+                }
+                @if (canEdit) {
+                  <app-button
+                    variant="primary"
+                    size="sm"
+                    [text]="generatingProgression ? 'Изпълнение...' : 'Генерирай следващ етап'"
+                    [disabled]="generatingProgression"
+                    (click)="onAdvanceClick()"
+                  ></app-button>
+                }
+              </div>
             </div>
 
             @if (progressionError) {
@@ -690,28 +718,6 @@
                 <p class="text-sm">Няма генерирани стартови листи</p>
               </div>
             } @else {
-              <!-- Day pill buttons -->
-              @if (startListDays.length > 1) {
-                <div class="flex flex-wrap gap-2">
-                  @for (day of startListDays; track day.key) {
-                    <button
-                      type="button"
-                      class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap"
-                      [class]="activeStartListDay === day.key
-                        ? 'border-bfg-blue bg-bfg-blue text-white'
-                        : 'border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white'"
-                      (click)="selectStartListDay(day.key)"
-                    >
-                      {{ day.label }}
-                    </button>
-                  }
-                </div>
-              }
-
-              <!-- Events count for active day -->
-              <div class="text-sm text-gray-500">
-                {{ filteredStartListEvents.length }} {{ filteredStartListEvents.length === 1 ? 'събитие' : 'събития' }}
-              </div>
 
               <div class="space-y-6 max-w-2xl">
                 @for (ev of filteredStartListEvents; track ev.eventUuid) {
@@ -844,7 +850,17 @@
               </div>
             } @else {
               <!-- Bulk action -->
-              <div class="flex items-center justify-end px-1">
+              <div class="flex items-center justify-end gap-2 px-1 overflow-x-auto scrollbar-hide">
+                @if (hasAnyStandings) {
+                  <button type="button"
+                    class="px-3 py-1.5 text-sm font-medium rounded-lg border border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white transition-colors flex items-center gap-1.5"
+                    (click)="exportResultsPdf()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    PDF
+                  </button>
+                }
                 <app-button
                   variant="primary"
                   size="sm"
@@ -1261,22 +1277,36 @@
 
         @if (activeTab === 'weigh-in') {
           <div class="flex flex-col gap-4">
-            <!-- Day selector -->
-            @if (weighInDays.length > 1) {
-              <div class="flex flex-wrap gap-2">
-                @for (day of weighInDays; track day.key) {
-                  <button
-                    type="button"
-                    class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap"
-                    [class]="day.key === activeWeighInDay
-                      ? 'border-bfg-blue bg-bfg-blue text-white'
-                      : 'border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white'"
-                    (click)="selectWeighInDay(day.key)">
-                    {{ day.label }}
+            <!-- Day selector + PDF -->
+            <div class="flex items-center justify-between gap-4 overflow-x-auto scrollbar-hide">
+              <div class="flex items-center gap-2 shrink-0">
+                @if (weighInDays.length > 1) {
+                  @for (day of weighInDays; track day.key) {
+                    <button
+                      type="button"
+                      class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors whitespace-nowrap"
+                      [class]="day.key === activeWeighInDay
+                        ? 'border-bfg-blue bg-bfg-blue text-white'
+                        : 'border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white'"
+                      (click)="selectWeighInDay(day.key)">
+                      {{ day.label }}
+                    </button>
+                  }
+                }
+              </div>
+              <div class="shrink-0">
+                @if (weighInEventGroups.length > 0) {
+                  <button type="button"
+                    class="px-3 py-1.5 text-sm font-medium rounded-lg border border-bfg-blue text-bfg-blue bg-white hover:bg-bfg-blue hover:text-white transition-colors flex items-center gap-1.5"
+                    (click)="exportWeighInPdf()">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                    </svg>
+                    PDF
                   </button>
                 }
               </div>
-            }
+            </div>
 
             @if (loadingWeights || loadingProgression) {
               <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>

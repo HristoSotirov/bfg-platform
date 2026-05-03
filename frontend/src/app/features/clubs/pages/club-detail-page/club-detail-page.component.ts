@@ -13,7 +13,6 @@ import {
   takeUntil,
   catchError,
   of,
-  forkJoin,
   delay,
   retryWhen,
   throwError,
@@ -29,6 +28,7 @@ import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../..
 import { PhotoCropDialogComponent } from '../../../accreditations/components/photo-crop-dialog/photo-crop-dialog.component';
 import { ClubLogoViewDialogComponent, ClubLogoViewInfo } from '../../components/club-logo-view-dialog/club-logo-view-dialog.component';
 import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
+import { AddUserDialogComponent } from '../../../users/components/add-user-dialog/add-user-dialog.component';
 import {
   ClubDto,
   ClubCoachDto,
@@ -43,7 +43,6 @@ import { AuthService } from '../../../../core/services/auth.service';
 import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 import { SystemRole } from '../../../../core/models/navigation.model';
 import { ScopeType } from '../../../../core/services/api';
-import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-club-detail-page',
@@ -59,6 +58,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
     PhotoCropDialogComponent,
     ClubLogoViewDialogComponent,
     DeleteConfirmDialogComponent,
+    AddUserDialogComponent,
   ],
   templateUrl: './club-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -85,26 +85,19 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   };
 
   adminOptions: SearchableSelectOption[] = [];
-  assignedAdminIds: Set<string> = new Set();
 
   adminSearch = (query: string): Observable<SearchableSelectOption[]> =>
-    forkJoin({
-      admins: this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", query || undefined, undefined, 100, 0) as any,
-      clubs: fetchAllPages((skip, top) =>
-        this.clubsService.getAllClubs(undefined, undefined, undefined, top, skip, undefined) as any
-      ),
-    }).pipe(
-      map(({ admins, clubs }: any) => {
-        const assigned = new Set<string>();
-        (clubs as ClubDto[]).forEach((c: ClubDto) => {
-          if (c.clubAdminId && c.uuid !== this.club?.uuid) assigned.add(c.clubAdminId);
+    (this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", query || undefined, undefined, 100, 0) as any).pipe(
+      map((response: any) => {
+        const adminList: UserDto[] = response.content || [];
+        return adminList.map((admin: UserDto) => {
+          const isCurrentClubAdmin = admin.uuid === this.club?.clubAdminId;
+          return {
+            value: admin.uuid || '',
+            label: this.getAdminDisplayName(admin),
+            disabled: !isCurrentClubAdmin && !!admin.assignedToClub,
+          };
         });
-        this.assignedAdminIds = assigned;
-        return (admins.content || []).map((admin: UserDto) => ({
-          value: admin.uuid || '',
-          label: this.getAdminDisplayName(admin),
-          disabled: admin.uuid ? assigned.has(admin.uuid) : false,
-        }));
       }),
     );
 
@@ -120,28 +113,21 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   addingCoach = false;
 
   coachSearch = (query: string): Observable<SearchableSelectOption[]> =>
-    forkJoin({
-      coaches: this.usersService.getAllUsers("role eq 'COACH'", query || undefined, undefined, 100, 0) as any,
-      allClubs: fetchAllPages((skip, top) =>
-        this.clubsService.getAllClubs("scopeType eq 'INTERNAL'", undefined, undefined, top, skip, undefined) as any
-      ),
-    }).pipe(
-      map(({ coaches }: any) => {
-        const coachList: UserDto[] = coaches.content || [];
-        const alreadyAssignedIds = new Set<string>(
-          this.coaches.map((c) => c.userId).filter(Boolean) as string[]
-        );
+    (this.usersService.getAllUsers("role eq 'COACH'", query || undefined, undefined, 100, 0) as any).pipe(
+      map((response: any) => {
+        const coachList: UserDto[] = response.content || [];
         this.availableCoaches = coachList;
-        return coachList.map((coach) => ({
+        return coachList.map((coach: UserDto) => ({
           value: coach.uuid || '',
           label: this.getCoachDisplayName(coach),
-          disabled: coach.uuid ? alreadyAssignedIds.has(coach.uuid) : false,
+          disabled: !!coach.assignedToClub,
         }));
       }),
     );
 
   showRemoveCoachConfirm = false;
   coachToRemove: ClubCoachDto | null = null;
+  showCreateCoachDialog = false;
 
   uploadingLogo = false;
   logoError: string | null = null;
@@ -151,7 +137,7 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   private readonly allowedLogoTypes = ['image/jpeg', 'image/png'];
   private readonly maxLogoSizeBytes = 10 * 1024 * 1024;
 
-  private userRole: SystemRole | null = null;
+  userRole: SystemRole | null = null;
   private userClubId: string | null = null;
 
   constructor(
@@ -171,6 +157,22 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
       this.userRole = user.roles[0] as SystemRole;
     }
 
+    if (user && this.userRole === SystemRole.ClubAdmin) {
+      this.clubsService.getClubByAdminId(user.uuid)
+        .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
+        .subscribe((club) => {
+          this.userClubId = club?.uuid ?? null;
+          this.cdr.markForCheck();
+        });
+    } else if (user && this.userRole === SystemRole.Coach) {
+      this.clubCoachesService.getClubByCoachId(user.uuid)
+        .pipe(catchError(() => of(null)), takeUntil(this.destroy$))
+        .subscribe((club) => {
+          this.userClubId = club?.uuid ?? null;
+          this.cdr.markForCheck();
+        });
+    }
+
     this.route.paramMap.pipe(takeUntil(this.destroy$)).subscribe((params) => {
       const uuid = params.get('uuid');
       if (uuid) {
@@ -185,13 +187,17 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get canEdit(): boolean {
+    if (this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin) return true;
+    if (this.userRole === SystemRole.ClubAdmin && this.club?.uuid && this.userClubId === this.club.uuid) return true;
+    return false;
+  }
+
+  get canDelete(): boolean {
     return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
   }
 
   get canManageCoaches(): boolean {
     if (!this.club?.uuid) return false;
-    if (!this.scopeVisibility.canViewScopeField()) return false;
-    if ((this.club as any).scopeType !== ScopeType.Internal) return false;
     if (this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin) return true;
     if (this.userRole === SystemRole.ClubAdmin && this.userClubId === this.club.uuid) return true;
     return false;
@@ -202,7 +208,7 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get showScopeInDetails(): boolean {
-    return this.scopeVisibility.canViewScopeField();
+    return this.scopeVisibility.canViewTypeField();
   }
 
   get logoViewInfo(): ClubLogoViewInfo | null {
@@ -336,6 +342,22 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
     this.selectedCoachId = '';
     this.availableCoaches = [];
     this.coachOptions = [];
+    this.cdr.markForCheck();
+  }
+
+  openCreateCoachDialog(): void {
+    this.showCreateCoachDialog = true;
+    this.cdr.markForCheck();
+  }
+
+  closeCreateCoachDialog(): void {
+    this.showCreateCoachDialog = false;
+    this.cdr.markForCheck();
+  }
+
+  onCoachCreated(): void {
+    this.showCreateCoachDialog = false;
+    this.loadCoaches();
     this.cdr.markForCheck();
   }
 
@@ -529,11 +551,11 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (updatedClub) => {
-          if (updatedClub) this.club = updatedClub;
+        next: () => {
           this.saving = false;
           this.isEditing = false;
           this.error = null;
+          this.loadClub(this.club!.uuid!);
           this.cdr.markForCheck();
         },
         error: (err) => {

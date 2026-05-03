@@ -89,6 +89,7 @@ import {
 } from '../../../../core/services/api';
 import { SystemRole } from '../../../../core/models/navigation.model';
 import { computeCompetitionStatus, STATUS_LABELS, STATUS_CLASSES, ComputedCompetitionStatus } from '../../utils/competition-status.util';
+import { generateStartListPdf, StartListPdfEvent, generateResultsPdf, ResultsPdfDiscipline, generateWeighInPdf, WeighInPdfEvent } from '../../utils/start-list-pdf.util';
 import { NgChartsModule } from 'ng2-charts';
 import { Chart, ChartData, ChartOptions, BarElement, CategoryScale, LinearScale, Tooltip, Legend, Title, Plugin } from 'chart.js';
 
@@ -409,7 +410,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   get eventTypeOptions(): SearchableSelectOption[] {
     const type = this.competition?.competitionType as string | undefined;
-    if (type === CompetitionType.Erg) {
+    if (type === CompetitionType.NationalErgo) {
       return [{ value: QualificationEventType.H, label: 'Серия' }];
     }
     return [
@@ -442,7 +443,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   userRole: SystemRole | null = null;
 
   readonly competitionTypeOptions: SearchableSelectOption[] = [
-    { value: CompetitionType.Erg, label: 'Ергометър' },
+    { value: CompetitionType.NationalErgo, label: 'Национално (ерго)' },
     { value: CompetitionType.NationalWater, label: 'Национално (вода)' },
     { value: CompetitionType.Balkan, label: 'Балкански' },
   ];
@@ -1169,7 +1170,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     if (this.canEdit) {
       const compType = this.competition?.competitionType as string | undefined;
       let filter: string | undefined;
-      if (compType === CompetitionType.Erg || compType === CompetitionType.NationalWater) {
+      if (compType === CompetitionType.NationalErgo || compType === CompetitionType.NationalWater) {
         filter = `scopeType eq '${ScopeType.Internal}'`;
       } else if (compType === CompetitionType.Balkan) {
         filter = `scopeType eq '${ScopeType.National}'`;
@@ -3566,7 +3567,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   getCompetitionTypeLabel(type: string | undefined): string {
     const labels: Record<string, string> = {
-      [CompetitionType.Erg]: 'Ергометър',
+      [CompetitionType.NationalErgo]: 'Национално (ерго)',
       [CompetitionType.NationalWater]: 'Национално (вода)',
       [CompetitionType.Balkan]: 'Балкански',
     };
@@ -3583,5 +3584,100 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   getComputedStatus(): string | null {
     return this.competition ? computeCompetitionStatus(this.competition) : null;
+  }
+
+  exportStartListPdf(): void {
+    if (!this.competition) return;
+
+    const days = this.startListDays;
+    const activeDay = days.find(d => d.key === this.activeStartListDay);
+    const dayLabel = activeDay?.label || this.activeStartListDay;
+
+    const events: StartListPdfEvent[] = this.filteredStartListEvents.map(ev => ({
+      scheduledAt: ev.scheduledAt,
+      disciplineLabel: ev.disciplineLabel,
+      eventTypeLabel: ev.eventTypeLabel,
+      eventNumber: ev.eventNumber,
+      showNumber: ev.showNumber,
+      participations: ev.participations.map(p => ({
+        lane: p.lane,
+        clubName: p.clubName,
+        teamNumber: p.teamNumber,
+        crew: p.crew.map(c => ({ seat: c.seat, name: c.name })),
+      })),
+    }));
+
+    generateStartListPdf({
+      competitionName: this.competition.name || this.competition.shortName || '',
+      location: this.competition.location || '',
+      dayLabel,
+      events,
+    });
+  }
+
+  get hasAnyStandings(): boolean {
+    return this.finalStandings.length > 0;
+  }
+
+  exportResultsPdf(): void {
+    if (!this.competition) return;
+
+    const disciplines: ResultsPdfDiscipline[] = this.resultsDisciplines
+      .filter(disc => this.standingsForDiscipline(disc.disciplineId).length > 0)
+      .map(disc => {
+        const standings = this.standingsForDiscipline(disc.disciplineId);
+        return {
+          label: disc.label,
+          standings: standings.map(s => ({
+            rank: s.overallRank ?? null,
+            clubLabel: this.getEntryLabel(s.entryId!),
+            crew: this.getEntryCrew(s.entryId!).map(c => ({ seat: c.seat, name: c.name })),
+            time: s.timeMs != null ? this.formatTimeMs(s.timeMs) : '',
+            points: s.points ?? null,
+          })),
+        };
+      });
+
+    generateResultsPdf({
+      competitionName: this.competition.name || this.competition.shortName || '',
+      location: this.competition.location || '',
+      disciplines,
+    });
+  }
+
+  exportWeighInPdf(): void {
+    if (!this.competition) return;
+
+    const days = this.weighInDays;
+    const activeDay = days.find(d => d.key === this.activeWeighInDay);
+    const dayLabel = activeDay?.label || this.activeWeighInDay;
+
+    const events: WeighInPdfEvent[] = this.weighInEventGroups.map(group => ({
+      scheduledAt: group.scheduledAt,
+      disciplineLabel: group.disciplineLabel,
+      eventTypeLabel: group.eventTypeLabel,
+      eventNumber: group.eventNumber,
+      showNumber: group.showNumber,
+      crews: group.crews.map(crew => ({
+        clubName: crew.clubName,
+        teamNumber: crew.teamNumber,
+        athletes: crew.athletes.map(a => ({
+          seat: a.seat,
+          name: a.name,
+          cardNumber: a.cardNumber,
+          roleLabel: a.roleLabel,
+          weightLimit: a.weightLimit,
+          weightKg: a.weightKg,
+          comment: a.comment,
+        })),
+      })),
+    }));
+
+    generateWeighInPdf({
+      competitionName: this.competition.name || this.competition.shortName || '',
+      location: this.competition.location || '',
+      dayLabel,
+      events,
+    });
   }
 }

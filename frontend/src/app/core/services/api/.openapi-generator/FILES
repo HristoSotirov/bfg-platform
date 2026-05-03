@@ -73,12 +73,12 @@ model/competitionFinalStandingDto.ts
 model/competitionGroupDefinitionDto.ts
 model/competitionGroupDefinitionRequest.ts
 model/competitionParticipationDto.ts
-model/competitionStatus.ts
 model/competitionTimetableEventDto.ts
 model/competitionTimetableEventRequest.ts
 model/competitionType.ts
 model/competitionUpdateRequest.ts
 model/computeStandingsRequest.ts
+model/computeStandingsResponse.ts
 model/crewMemberDto.ts
 model/crewMemberRequest.ts
 model/deleteStandingsRequest.ts
@@ -86,6 +86,7 @@ model/disciplineDefinitionDto.ts
 model/disciplineDefinitionRequest.ts
 model/disciplineGender.ts
 model/disciplineProgressionResult.ts
+model/disciplineStandingResult.ts
 model/entryDto.ts
 model/entryRequest.ts
 model/errorResponse.ts

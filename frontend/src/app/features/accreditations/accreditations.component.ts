@@ -17,11 +17,10 @@ import {
   AthletesService,
   ClubsService,
   ClubCoachesService,
-  ScopeType,
   Gender,
   AccreditationStatus,
 } from '../../core/services/api';
-import { AccreditationDto, AthleteDto, ClubDto } from '../../core/services/api';
+import { AccreditationDto, AthleteDto, ClubDto, ScopeType } from '../../core/services/api';
 import { SystemRole } from '../../core/models/navigation.model';
 import { AccreditationsTableComponent } from './components/accreditations-table/accreditations-table.component';
 import { AthletesTableComponent } from './components/athletes-table/athletes-table.component';
@@ -61,7 +60,6 @@ export interface AthleteFilters {
   search: string;
   genders: string[];
   birthYears: number[];
-  scopeTypes: string[];
 }
 
 export interface AccreditationFilters {
@@ -71,7 +69,6 @@ export interface AccreditationFilters {
   birthYears: number[]; // Athlete birth years
   clubs: string[]; // Club UUIDs
   years: number[];
-  scopeTypes: string[]; // INTERNAL, EXTERNAL, NATIONAL – from cache only
 }
 
 @Component({
@@ -120,7 +117,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     search: '',
     genders: [],
     birthYears: [],
-    scopeTypes: [],
   };
   athleteFilterConfigs: AthleteFilterConfig[] = [
     { id: 'gender', label: 'Пол', visible: true },
@@ -135,7 +131,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     { id: 'middleName', label: 'Презиме', visible: true },
     { id: 'dateOfBirth', label: 'Дата на раждане', visible: true },
     { id: 'gender', label: 'Пол', visible: true },
-    { id: 'scopeType', label: 'Тип', visible: false },
     { id: 'medicalExaminationDue', label: 'Мед. преглед до', visible: false },
     { id: 'insurance', label: 'Застраховка', visible: false },
     { id: 'registeredOn', label: 'Регистриран на', visible: false },
@@ -155,7 +150,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     birthYears: [],
     clubs: [],
     years: [],
-    scopeTypes: [],
   };
   orderBy: string[] = ['accreditationNumber_asc'];
 
@@ -169,7 +163,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     { id: 'lastName', label: 'Фамилия', visible: true },
     { id: 'gender', label: 'Пол', visible: true },
     { id: 'dateOfBirth', label: 'Дата на раждане', visible: true },
-    { id: 'scopeType', label: 'Тип', visible: true },
     { id: 'clubShortName', label: 'Клуб', visible: true },
     { id: 'accreditationNumber', label: 'Номер', visible: true },
     { id: 'year', label: 'Година', visible: true },
@@ -185,7 +178,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     { id: 'birthYear', label: 'Година на раждане', visible: true },
     { id: 'year', label: 'Година', visible: true },
     { id: 'status', label: 'Статус', visible: true },
-    // Note: 'club' and 'scopeType' filters are added dynamically based on user permissions
+    // Note: 'club' filter is added dynamically based on user permissions
   ];
 
   isAddDialogOpen = false;
@@ -290,50 +283,15 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   }
 
   get showScopeFeatures(): boolean {
-    return this.scopeVisibility.canViewScopeField();
+    return this.scopeVisibility.canViewTypeField();
   }
 
   get showClubFilter(): boolean {
-    return this.scopeVisibility.canViewClubFilter();
+    return this.scopeVisibility.isAdmin() || this.userClub?.type === ScopeType.Internal;
   }
 
   private applyScopeVisibility(): void {
-    // Scope field visibility
-    if (this.showScopeFeatures) {
-      if (!this.filterConfigs.find((f) => f.id === 'scopeType')) {
-        this.filterConfigs = [
-          ...this.filterConfigs,
-          { id: 'scopeType', label: 'Тип', visible: true },
-        ];
-      }
-      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
-      if (scopeCol) scopeCol.visible = true;
-
-      // Athletes scope filter
-      if (!this.athleteFilterConfigs.find((f) => f.id === 'scopeType')) {
-        this.athleteFilterConfigs = [
-          ...this.athleteFilterConfigs,
-          { id: 'scopeType', label: 'Тип', visible: true },
-        ];
-      }
-      const athleteScopeCol = this.athleteColumns.find((c) => c.id === 'scopeType');
-      if (athleteScopeCol) athleteScopeCol.visible = true;
-    } else {
-      this.filterConfigs = this.filterConfigs.filter(
-        (f) => f.id !== 'scopeType',
-      );
-      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
-      if (scopeCol) scopeCol.visible = false;
-      this.filters.scopeTypes = [];
-
-      // Athletes
-      this.athleteFilterConfigs = this.athleteFilterConfigs.filter((f) => f.id !== 'scopeType');
-      const athleteScopeCol = this.athleteColumns.find((c) => c.id === 'scopeType');
-      if (athleteScopeCol) athleteScopeCol.visible = false;
-      this.athleteFilters.scopeTypes = [];
-    }
-
-    // Club filter visibility - hide for EXTERNAL/NATIONAL users
+    // Club filter visibility - hide for non-admin users
     if (this.showClubFilter) {
       // Ensure club filter is in the list if user can see it
       if (!this.filterConfigs.find((f) => f.id === 'club')) {
@@ -611,7 +569,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
 
   private buildFilterString(): string | undefined {
     const filterParts: string[] = [];
-    const defaults = this.scopeVisibility.buildDefaultFilter();
 
     if (this.filters.statuses.length > 0 && this.isFilterVisible('status')) {
       if (this.filters.statuses.length === 1) {
@@ -655,7 +612,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       filterParts.push(birthYearConditions.length === 1 ? birthYearConditions[0] : `(${birthYearConditions.join(' or ')})`);
     }
 
-    // Club filter - use user's selection if visible, otherwise use default from component's userClub or ScopeVisibilityService
+    // Club filter - use user's selection if visible, otherwise use userClub
     if (this.showClubFilter) {
       if (this.filters.clubs.length > 0 && this.isFilterVisible('club')) {
         if (this.filters.clubs.length === 1) {
@@ -668,31 +625,11 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
         }
       }
     } else {
-      // User can't see club filter - always filter by their club
-      // Use userClub from component (fetched via getClubByAdminId/getClubByCoachId)
-      if (this.userClub?.uuid) {
+      // INTERNAL users see all internal accreditations — no club restriction
+      // EXTERNAL/NATIONAL users are restricted to their own club
+      if (this.userClub?.uuid && this.userClub.type !== ScopeType.Internal) {
         filterParts.push(`clubId eq '${this.userClub.uuid}'`);
       }
-    }
-
-    // Scope filter - use user's selection if visible, otherwise use default from ScopeVisibilityService
-    if (this.showScopeFeatures) {
-      if (
-        this.filters.scopeTypes?.length > 0 &&
-        this.isFilterVisible('scopeType')
-      ) {
-        if (this.filters.scopeTypes.length === 1) {
-          filterParts.push(`scopeType eq '${this.filters.scopeTypes[0]}'`);
-        } else {
-          const scopeConditions = this.filters.scopeTypes
-            .map((s) => `scopeType eq '${s}'`)
-            .join(' or ');
-          filterParts.push(`(${scopeConditions})`);
-        }
-      }
-    } else if (defaults.scopeType) {
-      // User can't see scope filter - always filter by their scope
-      filterParts.push(`scopeType eq '${defaults.scopeType}'`);
     }
 
     return filterParts.length > 0 ? filterParts.join(' and ') : undefined;
@@ -893,13 +830,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       });
       parts.push(yearConditions.length === 1 ? yearConditions[0] : `(${yearConditions.join(' or ')})`);
     }
-    if (this.athleteFilters.scopeTypes.length > 0) {
-      if (this.athleteFilters.scopeTypes.length === 1) {
-        parts.push(`scopeType eq '${this.athleteFilters.scopeTypes[0]}'`);
-      } else {
-        parts.push(`(${this.athleteFilters.scopeTypes.map((s) => `scopeType eq '${s}'`).join(' or ')})`);
-      }
-    }
     return parts.length > 0 ? parts.join(' and ') : undefined;
   }
 
@@ -1020,14 +950,12 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
         if (newFilter.id === 'year') this.filters.years = [];
         if (newFilter.id === 'club') this.filters.clubs = [];
         if (newFilter.id === 'birthYear') this.filters.birthYears = [];
-        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
       } else if (
         (oldFilter && !oldFilter.visible && newFilter.visible) ||
         (!oldFilter && newFilter.visible)
       ) {
         if (newFilter.id === 'status') this.filters.statuses = [];
         if (newFilter.id === 'gender') this.filters.genders = [];
-        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
         if (newFilter.id === 'year') this.filters.years = [];
         if (newFilter.id === 'club') this.filters.clubs = [];
         if (newFilter.id === 'birthYear') this.filters.birthYears = [];
@@ -1077,7 +1005,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       if (oldFilter && oldFilter.visible && !newFilter.visible) {
         if (newFilter.id === 'gender') this.athleteFilters.genders = [];
         if (newFilter.id === 'birthYear') this.athleteFilters.birthYears = [];
-        if (newFilter.id === 'scopeType') this.athleteFilters.scopeTypes = [];
       }
     });
     this.athleteColumns = settings.columns;
@@ -1110,7 +1037,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           birthYears: parsed.birthYears ?? [],
           clubs: parsed.clubs ?? [],
           years: parsed.years ?? [],
-          scopeTypes: parsed.scopeTypes ?? [],
         };
       } catch (e) {
         console.error('Error loading filter settings:', e);
@@ -1197,7 +1123,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           search: parsed.search || '',
           genders: parsed.genders || [],
           birthYears: parsed.birthYears || [],
-          scopeTypes: parsed.scopeTypes || [],
         };
       } catch (e) {
         console.error('Error loading athlete filter values:', e);
@@ -1287,12 +1212,13 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (this.userRole === SystemRole.ClubAdmin && this.userClub?.uuid) {
+    if (this.userRole === SystemRole.ClubAdmin && this.userClub?.uuid && this.userClub.type !== ScopeType.Internal) {
       filterParts.push(`clubId eq '${this.userClub.uuid}'`);
     } else if (
       this.userRole === SystemRole.Coach &&
       this.hasClubAccess &&
-      this.userClub?.uuid
+      this.userClub?.uuid &&
+      this.userClub.type !== ScopeType.Internal
     ) {
       filterParts.push(`clubId eq '${this.userClub.uuid}'`);
     }
@@ -1356,15 +1282,6 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                     break;
                   case 'clubShortName':
                     row[col.label] = acc.club?.shortName || '';
-                    break;
-                  case 'scopeType':
-                    row[col.label] = acc.scopeType
-                      ? ({
-                          [ScopeType.Internal]: 'Вътрешен',
-                          [ScopeType.External]: 'Външен',
-                          [ScopeType.National]: 'Национален',
-                        } as Record<string, string>)[acc.scopeType] ?? acc.scopeType
-                      : '';
                     break;
                   case 'accreditationNumber':
                     row[col.label] = acc.accreditationNumber || '';
@@ -1506,25 +1423,9 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       return;
     }
 
-    // Build filter based on user's allowed scopes
-    const allowedScopes = this.scopeVisibility.getAllowedScopes();
-    let filter: string | undefined;
-
-    if (allowedScopes.length > 0 && !this.scopeVisibility.canViewScopeField()) {
-      // Non-admin users should only see clubs in their scope
-      if (allowedScopes.length === 1) {
-        filter = `scopeType eq '${allowedScopes[0]}'`;
-      } else {
-        const scopeConditions = allowedScopes
-          .map((s) => `scopeType eq '${s}'`)
-          .join(' or ');
-        filter = `(${scopeConditions})`;
-      }
-    }
-
     fetchAllPages((skip, top) =>
       this.clubsService.getAllClubs(
-        filter, // filter by scope if needed
+        undefined, // no filter needed — admins can see all clubs
         undefined, // search
         ['cardPrefix_asc'], // orderBy
         top, // top
@@ -1547,15 +1448,12 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   }
 
   private loadYears(): void {
-    // Build minimal filter to satisfy scope/club restrictions
-    const defaults = this.scopeVisibility.buildDefaultFilter();
+    // Build minimal filter to satisfy club restrictions
     const filterParts: string[] = [];
 
-    if (defaults.scopeType) {
-      filterParts.push(`scopeType eq '${defaults.scopeType}'`);
-    }
     // Use userClub from component (fetched via getClubByAdminId/getClubByCoachId)
-    if (!this.showClubFilter && this.userClub?.uuid) {
+    // INTERNAL users don't need club restriction
+    if (!this.showClubFilter && this.userClub?.uuid && this.userClub.type !== ScopeType.Internal) {
       filterParts.push(`clubId eq '${this.userClub.uuid}'`);
     }
 

@@ -11,7 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AthleteFilters, AthleteFilterConfig } from '../../accreditations.component';
-import { Gender, ScopeType } from '../../../../core/services/api';
+import { Gender } from '../../../../core/services/api';
 import {
   MultiSelectDropdownComponent,
   DropdownOption,
@@ -37,7 +37,6 @@ export class AthletesFiltersComponent implements OnInit, OnChanges {
     search: '',
     genders: [],
     birthYears: [],
-    scopeTypes: [],
   };
   @Input() filterConfigs: AthleteFilterConfig[] = [];
   @Input() availableBirthYears: number[] = [];
@@ -52,12 +51,6 @@ export class AthletesFiltersComponent implements OnInit, OnChanges {
   readonly genderOptions: DropdownOption[] = [
     { value: Gender.MALE, label: 'Мъж' },
     { value: Gender.FEMALE, label: 'Жена' },
-  ];
-
-  readonly scopeTypeOptions: DropdownOption[] = [
-    { value: ScopeType.Internal, label: 'Вътрешен' },
-    { value: ScopeType.External, label: 'Външен' },
-    { value: ScopeType.National, label: 'Национален' },
   ];
 
   get birthYearOptions(): DropdownOption[] {
@@ -89,8 +82,7 @@ export class AthletesFiltersComponent implements OnInit, OnChanges {
   hasVisibleFilters(): boolean {
     return (
       this.isFilterVisible('gender') ||
-      this.isFilterVisible('birthYear') ||
-      this.isFilterVisible('scopeType')
+      this.isFilterVisible('birthYear')
     );
   }
 
@@ -106,10 +98,6 @@ export class AthletesFiltersComponent implements OnInit, OnChanges {
   onBirthYearsChange(values: string[]): void {
     this.selectedBirthYearsCache = values;
     this.emitFiltersChange({ birthYears: values.map((v) => parseInt(v, 10)) });
-  }
-
-  onScopeTypesChange(values: string[]): void {
-    this.emitFiltersChange({ scopeTypes: values });
   }
 
   private emitFiltersChange(changes: Partial<AthleteFilters>): void {

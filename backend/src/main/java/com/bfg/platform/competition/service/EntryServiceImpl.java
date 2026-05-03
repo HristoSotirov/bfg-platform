@@ -113,11 +113,10 @@ public class EntryServiceImpl implements EntryService {
     @Override
     @Transactional(readOnly = true)
     public ClubEntriesDto getEntries(UUID competitionId, UUID clubId, List<String> expand) {
-        UUID resolvedClubId = resolveClubIdForRead(clubId);
+        Competition competition = competitionRepository.findById(competitionId)
+                .orElseThrow(() -> new ResourceNotFoundException("Competition", competitionId));
 
-        if (!competitionRepository.existsById(competitionId)) {
-            throw new ResourceNotFoundException("Competition", competitionId);
-        }
+        UUID resolvedClubId = resolveClubIdForRead(clubId, competition);
 
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Entry.class);
         Specification<Entry> spec = EntryQueryAdapter.scopeToCompetition(competitionId, resolvedClubId);
@@ -172,9 +171,9 @@ public class EntryServiceImpl implements EntryService {
         Club club = clubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubId));
         CompetitionType type = competition.getCompetitionType();
-        ScopeType clubScope = club.getScopeType();
+        ScopeType clubScope = club.getType();
 
-        if (type == CompetitionType.ERG || type == CompetitionType.NATIONAL_WATER) {
+        if (type == CompetitionType.NATIONAL_ERGO || type == CompetitionType.NATIONAL_WATER) {
             if (clubScope != ScopeType.INTERNAL) {
                 throw new ForbiddenException("Only INTERNAL clubs can participate in " + type + " competitions");
             }
@@ -895,15 +894,18 @@ public class EntryServiceImpl implements EntryService {
         return requestedClubId;
     }
 
-    /** For read operations — admins can omit clubId to see all clubs */
-    private UUID resolveClubIdForRead(UUID requestedClubId) {
+    private UUID resolveClubIdForRead(UUID requestedClubId, Competition competition) {
         if (isAdmin()) {
             return requestedClubId; // null = all clubs
         }
         if (requestedClubId != null) {
             throw new ForbiddenException("Only admins can filter by clubId");
         }
-        return authorizationService.requireCurrentUserClubId();
+        EntryPhase phase = EntryPhase.resolvePhase(competition);
+        if (phase == EntryPhase.SUBMISSION || phase == EntryPhase.NOT_OPEN) {
+            return authorizationService.requireCurrentUserClubId();
+        }
+        return null;
     }
 
     private boolean isEligibleForDiscipline(Athlete athlete, DisciplineDefinition discipline,

@@ -25,8 +25,6 @@ export class UserSettingsDialogComponent implements OnChanges {
   @Input() isOpen = false;
   @Input() columns: UserColumnConfig[] = [];
   @Input() filterConfigs: UserFilterConfig[] = [];
-  /** When false, scope type column and filter are hidden from settings (non-APP_ADMIN/FED_ADMIN) */
-  @Input() showScopeFeatures = false;
 
   @Output() closed = new EventEmitter<void>();
   @Output() settingsChange = new EventEmitter<{
@@ -47,15 +45,11 @@ export class UserSettingsDialogComponent implements OnChanges {
   }
 
   get visibleColumns(): UserColumnConfig[] {
-    return this.showScopeFeatures
-      ? this.localColumns
-      : this.localColumns.filter((c) => c.id !== 'scopeType');
+    return this.localColumns;
   }
 
   get visibleFilterConfigs(): UserFilterConfig[] {
-    return this.showScopeFeatures
-      ? this.localFilterConfigs
-      : this.localFilterConfigs.filter((f) => f.id !== 'scopeType');
+    return this.localFilterConfigs;
   }
 
   close(): void {

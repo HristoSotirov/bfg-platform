@@ -92,29 +92,15 @@
           [ngModel]="formData.role"
           (ngModelChange)="onRoleChange($event)"
           [placeholder]="'Изберете роля'"
-          [disabled]="saving"
+          [disabled]="saving || userRole === 'CLUB_ADMIN'"
         >
         </app-searchable-select-dropdown>
+        @if (userRole === 'CLUB_ADMIN') {
+          <p class="mt-1 text-xs text-gray-500">
+            Можете да създавате само потребители с роля Треньор
+          </p>
+        }
       </div>
-
-      @if (
-        (userRole === "APP_ADMIN" || userRole === "FEDERATION_ADMIN") &&
-        formData.role === "CLUB_ADMIN"
-      ) {
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-1">
-            Тип обхват
-          </label>
-          <app-searchable-select-dropdown
-            [options]="scopeTypeOptions"
-            [ngModel]="formData.scopeType"
-            (ngModelChange)="formData.scopeType = $event ?? ScopeType.Internal"
-            [placeholder]="'Изберете тип'"
-            [disabled]="saving"
-          >
-          </app-searchable-select-dropdown>
-        </div>
-      }
     </div>
   </div>
 

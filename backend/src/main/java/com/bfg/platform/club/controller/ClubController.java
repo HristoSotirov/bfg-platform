@@ -77,7 +77,7 @@ public class ClubController implements ClubsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN')")
     public ResponseEntity<ClubDto> patchClubByUuid(UUID clubUuid, ClubUpdateRequest clubUpdateRequest) {
         return clubService.updateClub(clubUuid, clubUpdateRequest)
                 .map(ResponseEntity::ok)

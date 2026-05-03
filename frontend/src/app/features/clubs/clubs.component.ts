@@ -97,14 +97,14 @@ export class ClubsComponent implements OnInit, OnDestroy {
     { id: 'clubEmail', label: 'Имейл', visible: true },
     { id: 'clubAdminName', label: 'Администратор', visible: true },
     { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'scopeType', label: 'Тип', visible: true },
+    { id: 'type', label: 'Тип', visible: true },
     { id: 'createdAt', label: 'Създаден на', visible: true },
     { id: 'updatedAt', label: 'Променен на', visible: true },
   ];
 
   filterConfigs: ClubFilterConfig[] = [
     { id: 'status', label: 'Статус', visible: true },
-    // Note: 'scopeType' filter is added dynamically based on user permissions
+    // Note: 'type' filter is added dynamically based on user permissions
   ];
 
   isAddDialogOpen = false;
@@ -175,25 +175,32 @@ export class ClubsComponent implements OnInit, OnDestroy {
     );
   }
 
+  get showNoClubMessage(): boolean {
+    return (
+      (this.userRole === SystemRole.ClubAdmin || this.userRole === SystemRole.Coach) &&
+      !this.userClubId
+    );
+  }
+
   get showScopeFeatures(): boolean {
-    return this.scopeVisibility.canViewScopeField();
+    return this.scopeVisibility.canViewTypeField();
   }
 
   private applyRoleBasedVisibility(): void {
     if (this.showScopeFeatures) {
-      if (!this.filterConfigs.find((f) => f.id === 'scopeType')) {
+      if (!this.filterConfigs.find((f) => f.id === 'type')) {
         this.filterConfigs = [
           ...this.filterConfigs,
-          { id: 'scopeType', label: 'Тип', visible: true },
+          { id: 'type', label: 'Тип', visible: true },
         ];
       }
-      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
+      const scopeCol = this.columns.find((c) => c.id === 'type');
       if (scopeCol) scopeCol.visible = true;
     } else {
       this.filterConfigs = this.filterConfigs.filter(
-        (f) => f.id !== 'scopeType',
+        (f) => f.id !== 'type',
       );
-      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
+      const scopeCol = this.columns.find((c) => c.id === 'type');
       if (scopeCol) scopeCol.visible = false;
       this.filters.scopeTypes = [];
     }
@@ -201,23 +208,8 @@ export class ClubsComponent implements OnInit, OnDestroy {
 
   canManageCoachesForClub(clubId: string | undefined): boolean {
     if (!clubId) return false;
-    // Only internal scope users can manage coaches
-    if (!this.showScopeFeatures) {
-      return false;
-    }
-
-    // Find the club to check if it's internal
-    const club = this.clubs.find((c) => c.uuid === clubId);
-    if (!club || club.scopeType !== ScopeType.Internal) {
-      return false;
-    }
-
-    if (this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin) {
-      return true;
-    }
-    if (this.userRole === SystemRole.ClubAdmin && this.userClubId === clubId) {
-      return true;
-    }
+    if (this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin) return true;
+    if (this.userRole === SystemRole.ClubAdmin && this.userClubId === clubId) return true;
     return false;
   }
 
@@ -279,7 +271,6 @@ export class ClubsComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [];
-    const defaults = this.scopeVisibility.buildDefaultFilter();
 
     if (this.filters.statuses.length > 0 && this.isFilterVisible('status')) {
       if (this.filters.statuses.length === 1) {
@@ -292,24 +283,21 @@ export class ClubsComponent implements OnInit, OnDestroy {
       }
     }
 
-    // Scope filter - use user's selection if visible, otherwise use default
+    // Type filter - use user's selection if visible
     if (this.showScopeFeatures) {
       if (
         this.filters.scopeTypes?.length > 0 &&
-        this.isFilterVisible('scopeType')
+        this.isFilterVisible('type')
       ) {
         if (this.filters.scopeTypes.length === 1) {
-          filterParts.push(`scopeType eq '${this.filters.scopeTypes[0]}'`);
+          filterParts.push(`type eq '${this.filters.scopeTypes[0]}'`);
         } else {
           const scopeConditions = this.filters.scopeTypes
-            .map((s) => `scopeType eq '${s}'`)
+            .map((s) => `type eq '${s}'`)
             .join(' or ');
           filterParts.push(`(${scopeConditions})`);
         }
       }
-    } else if (defaults.scopeType) {
-      // User can't see scope filter - always filter by their scope
-      filterParts.push(`scopeType eq '${defaults.scopeType}'`);
     }
 
     const filterString =
@@ -422,13 +410,13 @@ export class ClubsComponent implements OnInit, OnDestroy {
       const oldFilter = oldFilterConfigs.find((f) => f.id === newFilter.id);
       if (oldFilter && oldFilter.visible && !newFilter.visible) {
         if (newFilter.id === 'status') this.filters.statuses = [];
-        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
+        if (newFilter.id === 'type') this.filters.scopeTypes = [];
       } else if (
         (oldFilter && !oldFilter.visible && newFilter.visible) ||
         (!oldFilter && newFilter.visible)
       ) {
         if (newFilter.id === 'status') this.filters.statuses = [];
-        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
+        if (newFilter.id === 'type') this.filters.scopeTypes = [];
       }
     });
 
@@ -607,13 +595,13 @@ export class ClubsComponent implements OnInit, OnDestroy {
     }
     if (
       this.filters.scopeTypes?.length > 0 &&
-      this.isFilterVisible('scopeType')
+      this.isFilterVisible('type')
     ) {
       if (this.filters.scopeTypes.length === 1) {
-        filterParts.push(`scopeType eq '${this.filters.scopeTypes[0]}'`);
+        filterParts.push(`type eq '${this.filters.scopeTypes[0]}'`);
       } else {
         const scopeConditions = this.filters.scopeTypes
-          .map((s) => `scopeType eq '${s}'`)
+          .map((s) => `type eq '${s}'`)
           .join(' or ');
         filterParts.push(`(${scopeConditions})`);
       }
@@ -647,13 +635,13 @@ export class ClubsComponent implements OnInit, OnDestroy {
                 case 'name':
                   row[col.label] = c.name || '';
                   break;
-                case 'scopeType':
-                  row[col.label] = c.scopeType
+                case 'type':
+                  row[col.label] = c.type
                     ? ({
                         [ScopeType.Internal]: 'Вътрешен',
                         [ScopeType.External]: 'Външен',
                         [ScopeType.National]: 'Национален',
-                      } as Record<string, string>)[c.scopeType] ?? c.scopeType
+                      } as Record<string, string>)[c.type] ?? c.type
                     : '';
                   break;
                 case 'cardPrefix':

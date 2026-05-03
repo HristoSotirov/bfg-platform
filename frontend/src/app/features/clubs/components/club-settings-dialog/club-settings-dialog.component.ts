@@ -48,13 +48,13 @@ export class ClubSettingsDialogComponent implements OnChanges {
   get visibleColumns(): ClubColumnConfig[] {
     return this.showScopeFeatures
       ? this.localColumns
-      : this.localColumns.filter((c) => c.id !== 'scopeType');
+      : this.localColumns.filter((c) => c.id !== 'type');
   }
 
   get visibleFilterConfigs(): ClubFilterConfig[] {
     return this.showScopeFeatures
       ? this.localFilterConfigs
-      : this.localFilterConfigs.filter((f) => f.id !== 'scopeType');
+      : this.localFilterConfigs.filter((f) => f.id !== 'type');
   }
 
   close(): void {

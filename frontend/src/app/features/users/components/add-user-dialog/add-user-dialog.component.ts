@@ -21,9 +21,7 @@ import {
   UsersService,
   UserCreateRequest,
   SystemRole,
-  ScopeType,
 } from '../../../../core/services/api';
-import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 import { takeUntil, Subject, catchError, of } from 'rxjs';
 
 @Component({
@@ -57,39 +55,12 @@ export class AddUserDialogComponent implements OnChanges {
     email: '',
     username: '',
     role: '' as SystemRole | '',
-    scopeType: ScopeType.Internal as ScopeType,
   };
 
   saving = false;
   error: string | null = null;
 
   roleOptions: SearchableSelectOption[] = [];
-  readonly ScopeType = ScopeType;
-
-  /**
-   * Whether the scope field should be shown.
-   * Only show when creating CLUB_ADMIN AND creator can assign different scopes.
-   */
-  get showScopeField(): boolean {
-    if (this.formData.role !== SystemRole.ClubAdmin) return false;
-    return this.scopeVisibility.canAssignDifferentScopes();
-  }
-
-  /**
-   * Available scope options based on user's permissions.
-   */
-  get scopeTypeOptions(): SearchableSelectOption[] {
-    const allowedScopes = this.scopeVisibility.getAvailableScopeOptionsForCreate();
-    const scopeLabels: Record<ScopeType, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
-    };
-    return allowedScopes.map(scope => ({
-      value: scope,
-      label: scopeLabels[scope],
-    }));
-  }
 
   private roleLabels: Record<SystemRole, string> = {
     [SystemRole.AppAdmin]: 'Администратор',
@@ -100,7 +71,6 @@ export class AddUserDialogComponent implements OnChanges {
 
   constructor(
     private usersService: UsersService,
-    private scopeVisibility: ScopeVisibilityService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -132,7 +102,6 @@ export class AddUserDialogComponent implements OnChanges {
       email: '',
       username: '',
       role: defaultRole,
-      scopeType: ScopeType.Internal,
     };
     this.error = null;
     this.saving = false;
@@ -198,18 +167,6 @@ export class AddUserDialogComponent implements OnChanges {
     this.error = null;
     this.cdr.markForCheck();
 
-    // Determine scope for CLUB_ADMIN
-    let scopeType: ScopeType | undefined = undefined;
-    if (this.formData.role === SystemRole.ClubAdmin) {
-      if (this.showScopeField) {
-        // User can assign different scopes - use their selection
-        scopeType = this.formData.scopeType;
-      } else {
-        // User can only create with their own scope
-        scopeType = this.scopeVisibility.getUserScope();
-      }
-    }
-
     const createRequest: UserCreateRequest = {
       firstName: this.formData.firstName,
       lastName: this.formData.lastName,
@@ -217,7 +174,6 @@ export class AddUserDialogComponent implements OnChanges {
       email: this.formData.email,
       username: this.formData.username || undefined,
       role: this.formData.role as SystemRole,
-      scopeType: scopeType,
     };
 
     this.usersService

@@ -90,7 +90,7 @@
                     @if (showScopeInDetails) {
                       <div class="flex items-baseline">
                         <span class="text-xs text-gray-500 w-28 flex-shrink-0">Тип:</span>
-                        <span class="text-sm font-medium break-all min-w-0">{{ getScopeTypeLabel($any(club).scopeType) }}</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ getScopeTypeLabel(club.type) }}</span>
                       </div>
                     }
                     <div class="flex items-baseline">
@@ -137,7 +137,9 @@
                   @if (canEdit) {
                     <div class="flex items-center gap-2 pt-2">
                       <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
-                      <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDelete()"></app-button>
+                      @if (canDelete) {
+                        <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDelete()"></app-button>
+                      }
                     </div>
                   }
 
@@ -260,7 +262,12 @@
                     </div>
                   </div>
                 } @else {
-                  <app-button variant="outline" size="sm" text="Добави треньор" (click)="openAddCoachForm()"></app-button>
+                  <div class="flex gap-2">
+                    <app-button variant="outline" size="sm" text="Добави треньор" (click)="openAddCoachForm()"></app-button>
+                    @if (userRole === 'CLUB_ADMIN') {
+                      <app-button variant="outline" size="sm" text="Създай треньор" (click)="openCreateCoachDialog()"></app-button>
+                    }
+                  </div>
                 }
               }
             </div>
@@ -336,3 +343,10 @@
   (confirmed)="deleteClub()"
   (errorDismissed)="deleteError = null"
 />
+
+<app-add-user-dialog
+  [isOpen]="showCreateCoachDialog"
+  [userRole]="userRole"
+  (closed)="closeCreateCoachDialog()"
+  (added)="onCoachCreated()"
+></app-add-user-dialog>

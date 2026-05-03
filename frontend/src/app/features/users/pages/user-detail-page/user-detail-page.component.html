@@ -54,12 +54,6 @@
                     <span class="text-xs text-gray-500 w-36 flex-shrink-0">Роля:</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ getRoleLabel(userData.role) }}</span>
                   </div>
-                  @if (showScopeInDetails) {
-                    <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Тип:</span>
-                      <span class="text-sm font-medium break-all min-w-0">{{ getScopeTypeLabel(userData.scopeType) }}</span>
-                    </div>
-                  }
                   <div class="flex items-baseline">
                     <span class="text-xs text-gray-500 w-36 flex-shrink-0">Статус:</span>
                     <span

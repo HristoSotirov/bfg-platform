@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { AthleteDto, Gender, ScopeType } from '../../../../core/services/api';
+import { AthleteDto, Gender } from '../../../../core/services/api';
 import { ColumnConfig } from '../../accreditations.component';
 
 @Component({
@@ -43,7 +43,6 @@ export class AthletesTableComponent implements OnInit {
       middleName: 'middleName',
       dateOfBirth: 'dateOfBirth',
       gender: 'gender',
-      scopeType: 'scopeType',
       medicalExaminationDue: 'medicalExaminationDue',
       insurance: 'insuranceTo',
       registeredOn: 'registeredOn',
@@ -77,7 +76,6 @@ export class AthletesTableComponent implements OnInit {
       middleName: 'middleName',
       dateOfBirth: 'dateOfBirth',
       gender: 'gender',
-      scopeType: 'scopeType',
       medicalExaminationDue: 'medicalExaminationDue',
       insurance: 'insuranceTo',
       registeredOn: 'registeredOn',
@@ -101,8 +99,6 @@ export class AthletesTableComponent implements OnInit {
         return this.formatDate(athlete.dateOfBirth);
       case 'gender':
         return athlete.gender === Gender.MALE ? 'Мъж' : athlete.gender === Gender.FEMALE ? 'Жена' : '-';
-      case 'scopeType':
-        return this.getScopeLabel(athlete.scopeType);
       case 'medicalExaminationDue':
         return this.formatDate(athlete.medicalExaminationDue);
       case 'insurance':
@@ -136,12 +132,6 @@ export class AthletesTableComponent implements OnInit {
     if (!athlete.insuranceFrom || !athlete.insuranceTo) return false;
     const now = new Date();
     return now >= new Date(athlete.insuranceFrom) && now <= new Date(athlete.insuranceTo);
-  }
-
-  private getScopeLabel(scope: string | undefined): string {
-    if (!scope) return '-';
-    const map: Record<string, string> = { [ScopeType.Internal]: 'Вътрешен', [ScopeType.External]: 'Външен', [ScopeType.National]: 'Национален' };
-    return map[scope] ?? scope;
   }
 
   private getInsurancePeriod(athlete: AthleteDto): string {

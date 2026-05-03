@@ -7,7 +7,6 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ScopeType } from './scopeType';
 import { AccreditationStatus } from './accreditationStatus';
 
 
@@ -31,7 +30,6 @@ export interface AccreditationCreateRequest {
      * Year of the accreditation
      */
     year: number;
-    scopeType?: ScopeType;
     status?: AccreditationStatus;
 }
 export namespace AccreditationCreateRequest {

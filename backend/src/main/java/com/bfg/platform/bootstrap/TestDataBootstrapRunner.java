@@ -138,7 +138,7 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                     null,
                     Collections.singletonList(new SimpleGrantedAuthority(SystemRole.APP_ADMIN.getValue()))
             );
-            bootstrapAuth.setDetails(Map.of("scopeType", ScopeType.INTERNAL));
+            bootstrapAuth.setDetails(Map.of());
             SecurityContextHolder.getContext().setAuthentication(bootstrapAuth);
             doRun();
         } finally {
@@ -1505,7 +1505,7 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .location("София, НСА").startDate(LocalDate.of(2026, 3, 15)).endDate(LocalDate.of(2026, 3, 15))
                 .awardingCeremonyAt(Instant.parse("2026-03-15T17:00:00Z"))
                 .scoringSchemeId(scoringErg.getId()).qualificationSchemeId(qualJunior.getId())
-                .competitionType(CompetitionType.ERG).isTemplate(false).build());
+                .competitionType(CompetitionType.NATIONAL_ERGO).isTemplate(false).build());
 
         DisciplineDefinition dErgM = disc("Ергометър мъже", "ERG М", gSenior, BoatClass.ERGO, 1, false, false, 2000, 2, 0, DisciplineGender.MALE);
         DisciplineDefinition dErgF = disc("Ергометър жени", "ERG Ж", gSenior, BoatClass.ERGO, 1, false, false, 2000, 2, 0, DisciplineGender.FEMALE);
@@ -2444,8 +2444,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
             return UserMapper.toDto(userRepository.findByUsername(username).orElseThrow());
         }
 
-        ScopeType effectiveScope = scopeType != null ? scopeType : ScopeType.INTERNAL;
-
         User user = User.builder()
                 .username(username)
                 .email(username)
@@ -2454,7 +2452,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .lastName(lastName)
                 .dateOfBirth(dateOfBirth)
                 .role(role)
-                .scopeType(effectiveScope)
                 .isActive(true)
                 .build();
         return UserMapper.toDto(userRepository.save(user));
@@ -2466,7 +2463,7 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
         request.setShortName(shortName);
         request.setClubAdminId(clubAdmin);
         request.setClubEmail(clubEmail);
-        request.setScopeType(scopeType != null ? scopeType : ScopeType.INTERNAL);
+        request.setType(scopeType != null ? scopeType : ScopeType.INTERNAL);
         return clubService.createClub(request).orElseThrow();
     }
 
@@ -2483,7 +2480,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .lastName(lastName)
                 .gender(gender)
                 .dateOfBirth(dateOfBirth)
-                .scopeType(scopeType != null ? scopeType : ScopeType.INTERNAL)
                 .medicalExaminationDue(dateOfBirth.plusYears(1))
                 .insuranceFrom(LocalDate.now().minusMonths(6))
                 .insuranceTo(LocalDate.now().plusMonths(6))
@@ -2512,7 +2508,6 @@ public class TestDataBootstrapRunner implements CommandLineRunner {
                 .clubId(clubId)
                 .accreditationNumber(accreditationNumber)
                 .year(year)
-                .scopeType(scopeType != null ? scopeType : ScopeType.INTERNAL)
                 .status(status)
                 .build();
 

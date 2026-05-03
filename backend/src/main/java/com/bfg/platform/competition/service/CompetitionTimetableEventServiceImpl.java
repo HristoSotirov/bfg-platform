@@ -213,7 +213,7 @@ public class CompetitionTimetableEventServiceImpl implements CompetitionTimetabl
                 || CompetitionType.BALKAN.equals(competitionType)) {
             return;
         }
-        if (CompetitionType.ERG.equals(competitionType)) {
+        if (CompetitionType.NATIONAL_ERGO.equals(competitionType)) {
             if (eventType != QualificationEventType.H) {
                 throw new ValidationException("Only H (heat) events are valid for competition type " + competitionType);
             }

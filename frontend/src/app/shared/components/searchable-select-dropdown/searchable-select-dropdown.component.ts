@@ -22,7 +22,6 @@ import {
   Observable,
   Subject,
   debounceTime,
-  distinctUntilChanged,
   switchMap,
   catchError,
   of,
@@ -200,7 +199,6 @@ export class SearchableSelectDropdownComponent
     if (!this.serverSearch) return;
     this.searchSubject.pipe(
       debounceTime(500),
-      distinctUntilChanged(),
       switchMap((query) => {
         this.searchLoading = true;
         this.cdr.markForCheck();
@@ -266,6 +264,9 @@ export class SearchableSelectDropdownComponent
     this.cdr.markForCheck();
 
     if (this.serverSearch) {
+      this.searchLoading = true;
+      this.options = [];
+      this.cdr.markForCheck();
       this.searchSubject.next('');
     }
 

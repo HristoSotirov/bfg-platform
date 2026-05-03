@@ -7,7 +7,6 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ScopeType } from './scopeType';
 import { SystemRole } from './systemRole';
 
 
@@ -44,7 +43,6 @@ export interface UserDto {
      */
     isActive?: boolean;
     role?: SystemRole;
-    scopeType?: ScopeType;
     /**
      * Account creation timestamp
      */
@@ -53,6 +51,10 @@ export interface UserDto {
      * Last modification timestamp
      */
     updatedAt?: string;
+    /**
+     * Whether the user is currently assigned to a club (as coach or club admin)
+     */
+    assignedToClub?: boolean;
 }
 export namespace UserDto {
 }

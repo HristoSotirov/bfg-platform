@@ -15,7 +15,7 @@ import {
 } from '../../../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 import { SearchBarComponent } from '../../../../shared/components/search-bar/search-bar.component';
 import { FilterToggleButtonComponent } from '../../../../shared/components/filter-toggle-button/filter-toggle-button.component';
-import { SystemRole, ScopeType } from '../../../../core/services/api';
+import { SystemRole } from '../../../../core/services/api';
 
 @Component({
   selector: 'app-users-filters',
@@ -36,7 +36,6 @@ export class UsersFiltersComponent implements OnInit {
     search: '',
     roles: [],
     statuses: [],
-    scopeTypes: [],
   };
   @Input() filterConfigs: UserFilterConfig[] = [];
 
@@ -58,12 +57,6 @@ export class UsersFiltersComponent implements OnInit {
     { value: 'false', label: 'Неактивен' },
   ];
 
-  readonly scopeTypeOptions: DropdownOption[] = [
-    { value: ScopeType.Internal, label: 'Вътрешен' },
-    { value: ScopeType.External, label: 'Външен' },
-    { value: ScopeType.National, label: 'Национален' },
-  ];
-
   ngOnInit(): void {
     this.searchValue = this.filters.search || '';
   }
@@ -78,8 +71,7 @@ export class UsersFiltersComponent implements OnInit {
   hasVisibleFilters(): boolean {
     return (
       this.isFilterVisible('role') ||
-      this.isFilterVisible('status') ||
-      this.isFilterVisible('scopeType')
+      this.isFilterVisible('status')
     );
   }
 
@@ -94,10 +86,6 @@ export class UsersFiltersComponent implements OnInit {
 
   onStatusesChange(values: string[]): void {
     this.emitFiltersChange({ statuses: values });
-  }
-
-  onScopeTypesChange(values: string[]): void {
-    this.emitFiltersChange({ scopeTypes: values });
   }
 
   private emitFiltersChange(changes: Partial<UserFilters>): void {

@@ -13,7 +13,7 @@
  * Type/format of the competition
  */
 export const CompetitionType = {
-    Erg: 'ERG',
+    NationalErgo: 'NATIONAL_ERGO',
     NationalWater: 'NATIONAL_WATER',
     Balkan: 'BALKAN'
 } as const;

@@ -36,19 +36,6 @@
         ></app-multi-select-dropdown>
       </div>
     }
-
-    @if (hasVisibleFilters() && isFilterVisible('scopeType')) {
-      <div [class.hidden]="!filtersExpanded" class="sm:block w-full sm:w-[180px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Тип:</label>
-        <app-multi-select-dropdown
-          [options]="scopeTypeOptions"
-          [multiple]="true"
-          placeholder="Тип"
-          [ngModel]="filters.scopeTypes || []"
-          (selectionChange)="onScopeTypesChange($event)"
-        ></app-multi-select-dropdown>
-      </div>
-    }
   </div>
 
   <app-filter-toggle-button

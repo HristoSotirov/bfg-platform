@@ -141,12 +141,12 @@
                       </div>
                     </div>
 
-                    @if (showScopeInDetails) {
+                    @if (showScopeInDetails && accreditation.club?.type) {
                       <div class="pt-2 border-t border-gray-200">
                         <div class="space-y-1">
                           <div class="flex items-baseline">
                             <span class="text-xs text-gray-500 w-28 flex-shrink-0">Тип:</span>
-                            <span class="text-sm font-medium break-all min-w-0">{{ getScopeTypeLabel(accreditation.scopeType) }}</span>
+                            <span class="text-sm font-medium break-all min-w-0">{{ getScopeTypeLabel(accreditation.club?.type) }}</span>
                           </div>
                         </div>
                       </div>

@@ -59,7 +59,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
     { value: 'adminEmail', label: 'Имейл на администратор' }
   ];
 
-  private readonly requiredFields = ['name', 'shortName', 'cardPrefix', 'clubEmail', 'adminEmail'];
+  private readonly requiredFields = ['name', 'shortName', 'cardPrefix', 'clubEmail'];
 
   getExcelOptionsForField(field: FieldMapping): SearchableSelectOption[] {
     return [
@@ -171,7 +171,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
     if (!VALID_PREFIX_REGEX.test(prefix)) {
       return null;
     }
-    if (club.shortName && club.name && club.clubEmail && club.adminEmail) {
+    if (club.shortName && club.name && club.clubEmail) {
       return club as ClubBatchCreateRequestItem;
     }
     return null;

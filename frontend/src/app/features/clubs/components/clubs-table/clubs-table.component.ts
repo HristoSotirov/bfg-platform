@@ -104,8 +104,8 @@ export class ClubsTableComponent implements OnInit {
           ? `${club.clubAdminUser.firstName || ''} ${club.clubAdminUser.lastName || ''}`.trim() ||
               '-'
           : '-';
-      case 'scopeType':
-        return this.getScopeTypeLabel(club.scopeType);
+      case 'type':
+        return this.getScopeTypeLabel(club.type);
       case 'isActive':
         return club.isActive ? 'Активен' : 'Неактивен';
       case 'createdAt':

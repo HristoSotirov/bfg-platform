@@ -1,13 +1,11 @@
 package com.bfg.platform.common.security;
 
 import com.bfg.platform.common.exception.UnauthorizedException;
-import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.gen.model.SystemRole;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
-import java.util.Map;
 import java.util.UUID;
 
 @Component
@@ -47,22 +45,6 @@ public class SecurityContextHelperImpl implements SecurityContextHelper {
     }
 
     @Override
-    public ScopeType getScopeType() {
-        Authentication authentication = getCurrentAuthentication();
-        if (authentication == null || authentication.getDetails() == null) {
-            return ScopeType.INTERNAL;
-        }
-        Object details = authentication.getDetails();
-        if (details instanceof Map<?, ?> map && map.containsKey("scopeType")) {
-            Object scope = map.get("scopeType");
-            if (scope instanceof ScopeType) {
-                return (ScopeType) scope;
-            }
-        }
-        return ScopeType.INTERNAL;
-    }
-
-    @Override
     public boolean isFederationAdmin() {
         return SystemRole.FEDERATION_ADMIN.equals(getUserRole());
     }
@@ -82,4 +64,3 @@ public class SecurityContextHelperImpl implements SecurityContextHelper {
         return SystemRole.COACH.equals(getUserRole());
     }
 }
-

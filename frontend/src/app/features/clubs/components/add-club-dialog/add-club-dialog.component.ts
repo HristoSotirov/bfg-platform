@@ -30,7 +30,7 @@ export class AddClubDialogComponent implements OnChanges {
     shortName: '',
     clubEmail: '',
     clubAdminId: '',
-    scopeType: ScopeType.Internal as ScopeType,
+    type: ScopeType.Internal as ScopeType,
   };
 
   scopeTypeOptions: SearchableSelectOption[] = [
@@ -89,7 +89,7 @@ export class AddClubDialogComponent implements OnChanges {
       shortName: '',
       clubEmail: '',
       clubAdminId: '',
-      scopeType: ScopeType.Internal,
+      type: ScopeType.Internal,
     };
     this.error = null;
     this.saving = false;
@@ -106,7 +106,7 @@ export class AddClubDialogComponent implements OnChanges {
   }
 
   get isFormValid(): boolean {
-    return !!(this.formData.name && this.formData.shortName && this.formData.clubEmail && this.formData.clubAdminId && this.formData.scopeType);
+    return !!(this.formData.name && this.formData.shortName && this.formData.clubEmail && this.formData.type);
   }
 
   save(): void {
@@ -120,8 +120,8 @@ export class AddClubDialogComponent implements OnChanges {
       name: this.formData.name,
       shortName: this.formData.shortName,
       clubEmail: this.formData.clubEmail,
-      clubAdminId: this.formData.clubAdminId,
-      scopeType: this.formData.scopeType,
+      clubAdminId: this.formData.clubAdminId || undefined,
+      type: this.formData.type,
     };
 
     this.clubsService.createClub(request).pipe(

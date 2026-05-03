@@ -1,20 +1,18 @@
 package com.bfg.platform.user.service;
 
+import com.bfg.platform.club.entity.ClubCoach;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
-import com.bfg.platform.common.security.ResourceType;
-import com.bfg.platform.common.security.ScopeAccessPolicy;
-import com.bfg.platform.common.security.ScopeAccessValidator;
 import com.bfg.platform.common.security.SecurityContextHelper;
-import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserDto;
 import com.bfg.platform.gen.model.UserUpdateRequest;
+import com.bfg.platform.common.security.ScopeAccessValidator;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.query.UserQueryAdapter;
 import com.bfg.platform.user.repository.UserRepository;
@@ -30,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -42,7 +41,6 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final SecurityContextHelper securityContextHelper;
     private final ScopeAccessValidator scopeAccessValidator;
-    private final ScopeAccessPolicy scopeAccessPolicy;
 
     @Override
     public Page<UserDto> getAllUsers(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
@@ -55,7 +53,22 @@ public class UserServiceImpl implements UserService {
         Specification<User> searchSpec = UserQueryAdapter.parseSearch(search);
         Specification<User> spec = Specification.where(filterSpec).and(searchSpec);
         Pageable pageable = OffsetBasedPageRequest.of(skip, top, UserQueryAdapter.parseSort(orderBy));
-        return userRepository.findAll(spec, pageable).map(UserMapper::toDto);
+        Page<UserDto> page = userRepository.findAll(spec, pageable).map(UserMapper::toDto);
+
+        Set<UUID> assignedCoachIds = new java.util.HashSet<>(clubCoachRepository.findAllAssignedCoachIds());
+        Set<UUID> assignedAdminIds = new java.util.HashSet<>(clubRepository.findAllAssignedClubAdminIds());
+
+        page.forEach(dto -> {
+            if (dto.getRole() == SystemRole.COACH) {
+                dto.setAssignedToClub(assignedCoachIds.contains(dto.getUuid()));
+            } else if (dto.getRole() == SystemRole.CLUB_ADMIN) {
+                dto.setAssignedToClub(assignedAdminIds.contains(dto.getUuid()));
+            } else {
+                dto.setAssignedToClub(false);
+            }
+        });
+
+        return page;
     }
 
     @Override
@@ -65,14 +78,7 @@ public class UserServiceImpl implements UserService {
         if (opt.isEmpty()) {
             return Optional.empty();
         }
-        User user = opt.get();
-        // Use the user's actual scope type (defaulting to INTERNAL if not set)
-        ScopeType userScope = user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL;
-        
-        // Validate access using the policy
-        scopeAccessValidator.validateResourceAccess(userScope, null, ResourceType.USER);
-        
-        return Optional.of(UserMapper.toDto(user));
+        return Optional.of(UserMapper.toDto(opt.get()));
     }
 
     @Override
@@ -91,6 +97,17 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(randomPassword));
 
         User savedUser = userRepository.save(user);
+
+        if (currentRole == SystemRole.CLUB_ADMIN && request.getRole() == SystemRole.COACH) {
+            clubRepository.findByClubAdmin(securityContextHelper.getUserId())
+                .ifPresent(club -> {
+                    ClubCoach clubCoach = new ClubCoach();
+                    clubCoach.setClubId(club.getId());
+                    clubCoach.setCoachId(savedUser.getId());
+                    clubCoachRepository.save(clubCoach);
+                });
+        }
+
         return Optional.of(UserMapper.toDto(savedUser));
     }
 
@@ -99,9 +116,6 @@ public class UserServiceImpl implements UserService {
     public Optional<UserDto> updateUser(UUID uuid, UserUpdateRequest request) {
         return userRepository.findById(uuid)
                 .map(user -> {
-                    // Use the user's actual scope type (defaulting to INTERNAL if not set)
-                    ScopeType userScope = user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL;
-                    scopeAccessValidator.validateResourceAccess(userScope, null, ResourceType.USER);
                     validateUpdatePermissions(user, request);
 
                     UserMapper.updateUserFromRequest(user, request);
@@ -116,9 +130,6 @@ public class UserServiceImpl implements UserService {
     public void deleteUser(UUID uuid) {
         User user = userRepository.findById(uuid)
                 .orElseThrow(() -> new ResourceNotFoundException("User", uuid));
-        // Use the user's actual scope type (defaulting to INTERNAL if not set)
-        ScopeType userScope = user.getScopeType() != null ? user.getScopeType() : ScopeType.INTERNAL;
-        scopeAccessValidator.validateResourceAccess(userScope, null, ResourceType.USER);
         validateDeletePermissions(user);
 
         try {
@@ -137,14 +148,12 @@ public class UserServiceImpl implements UserService {
 
     private void validateCreatePermissions(UserCreateRequest request) {
         SystemRole currentRole = securityContextHelper.getUserRole();
-        ScopeType currentScope = securityContextHelper.getScopeType();
         SystemRole targetRole = request.getRole();
-        ScopeType targetScope = request.getScopeType() != null ? request.getScopeType() : ScopeType.INTERNAL;
-        
+
         if (currentRole == null) {
             throw new ForbiddenException("Current user role is not available");
         }
-        
+
         // Role hierarchy validation
         switch (currentRole) {
             case CLUB_ADMIN -> {
@@ -160,14 +169,6 @@ public class UserServiceImpl implements UserService {
             case APP_ADMIN -> {
             }
             default -> throw new ForbiddenException("You are not allowed to create users");
-        }
-        
-        // Scope validation using the policy
-        if (!scopeAccessPolicy.canCreateWithScope(currentRole, currentScope, targetRole, targetScope)) {
-            throw new ForbiddenException(
-                    "You cannot create a " + targetRole.getValue() + " with scope " + targetScope.getValue() + 
-                    ". Your scope is " + currentScope.getValue() + "."
-            );
         }
     }
 
@@ -217,19 +218,19 @@ public class UserServiceImpl implements UserService {
         String digits = "0123456789";
         String specialChars = "!@#$%^&*";
         String allChars = upperCase + lowerCase + digits + specialChars;
-        
+
         SecureRandom random = new SecureRandom();
         StringBuilder password = new StringBuilder(16);
-        
+
         password.append(upperCase.charAt(random.nextInt(upperCase.length())));
         password.append(lowerCase.charAt(random.nextInt(lowerCase.length())));
         password.append(digits.charAt(random.nextInt(digits.length())));
         password.append(specialChars.charAt(random.nextInt(specialChars.length())));
-        
+
         for (int i = 4; i < 16; i++) {
             password.append(allChars.charAt(random.nextInt(allChars.length())));
         }
-        
+
         char[] passwordArray = password.toString().toCharArray();
         for (int i = passwordArray.length - 1; i > 0; i--) {
             int j = random.nextInt(i + 1);
@@ -237,9 +238,8 @@ public class UserServiceImpl implements UserService {
             passwordArray[i] = passwordArray[j];
             passwordArray[j] = temp;
         }
-        
+
         return new String(passwordArray);
     }
 
 }
-

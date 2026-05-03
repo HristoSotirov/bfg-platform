@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,13 +25,16 @@ public interface ClubRepository extends JpaRepository<Club, UUID>, JpaSpecificat
 
     Optional<Club> findByClubAdmin(@NonNull UUID clubAdmin);
 
+    @Query("SELECT c.clubAdmin FROM Club c WHERE c.clubAdmin IS NOT NULL")
+    List<UUID> findAllAssignedClubAdminIds();
+
     @Query(value = """
         SELECT LPAD(CAST(COALESCE(MAX(CAST(card_prefix AS INTEGER)), 0) + 1 AS TEXT), 2, '0')
         FROM clubs
         WHERE card_prefix ~ '^[0-9]{2}$'
         """, nativeQuery = true)
     String findNextCardPrefix();
-    
+
     Optional<Club> findByCardPrefix(@NonNull String cardPrefix);
 }
 

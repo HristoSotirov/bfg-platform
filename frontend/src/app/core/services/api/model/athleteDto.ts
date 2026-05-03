@@ -7,7 +7,6 @@
  * https://openapi-generator.tech
  * Do not edit the class manually.
  */
-import { ScopeType } from './scopeType';
 import { Gender } from './gender';
 
 
@@ -21,7 +20,6 @@ export interface AthleteDto {
     lastName?: string;
     dateOfBirth?: string;
     gender?: Gender;
-    scopeType?: ScopeType;
     medicalExaminationDue?: string;
     insuranceFrom?: string;
     insuranceTo?: string;

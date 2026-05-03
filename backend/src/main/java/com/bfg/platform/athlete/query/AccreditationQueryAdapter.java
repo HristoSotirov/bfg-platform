@@ -54,9 +54,7 @@ public final class AccreditationQueryAdapter {
             Map.entry("athlete.insuranceTo_asc", new Sort.Order(Sort.Direction.ASC, "athlete.insuranceTo")),
             Map.entry("athlete.insuranceTo_desc", new Sort.Order(Sort.Direction.DESC, "athlete.insuranceTo")),
             Map.entry("club.name_asc", new Sort.Order(Sort.Direction.ASC, "club.name")),
-            Map.entry("club.name_desc", new Sort.Order(Sort.Direction.DESC, "club.name")),
-            Map.entry("scopeType_asc", new Sort.Order(Sort.Direction.ASC, "scopeType")),
-            Map.entry("scopeType_desc", new Sort.Order(Sort.Direction.DESC, "scopeType"))
+            Map.entry("club.name_desc", new Sort.Order(Sort.Direction.DESC, "club.name"))
     );
 
     private AccreditationQueryAdapter() {
@@ -275,7 +273,6 @@ public final class AccreditationQueryAdapter {
             return switch (field) {
                 case "athleteId" -> QueryAdapterHelpers.uuidPredicate(root, cb, "athleteId", op, valueRaw);
                 case "clubId" -> QueryAdapterHelpers.uuidPredicate(root, cb, "clubId", op, valueRaw);
-                case "scopeType" -> QueryAdapterHelpers.stringPredicate(root, cb, "scopeType", op, valueRaw);
                 case "year", "accreditationYear" -> QueryAdapterHelpers.integerPredicate(root, cb, "year", op, valueRaw);
                 case "status", "accreditationStatus" -> enumPredicate(root, cb, "status", op, valueRaw);
                 case "accreditationNumber" -> QueryAdapterHelpers.stringPredicate(root, cb, "accreditationNumber", op, valueRaw);
@@ -300,7 +297,6 @@ public final class AccreditationQueryAdapter {
             return switch (field) {
                 case "athleteId" -> QueryAdapterHelpers.uuidInPredicate(root, cb, "athleteId", values);
                 case "clubId" -> QueryAdapterHelpers.uuidInPredicate(root, cb, "clubId", values);
-                case "scopeType" -> QueryAdapterHelpers.stringInPredicate(root, cb, "scopeType", values);
                 case "status", "accreditationStatus" -> enumInPredicate(root, cb, "status", values);
                 case "year" -> QueryAdapterHelpers.integerInPredicate(root, cb, "year", values);
                 default -> throw new IllegalArgumentException("In operator not supported for field: " + field);

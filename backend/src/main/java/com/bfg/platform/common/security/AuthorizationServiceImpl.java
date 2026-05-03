@@ -12,6 +12,7 @@ import com.bfg.platform.gen.model.SystemRole;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -24,19 +25,14 @@ public class AuthorizationServiceImpl implements AuthorizationService {
     @Override
     public void requireCanModifyClub(UUID clubId) {
         SystemRole role = securityContextHelper.getUserRole();
-        ScopeType userScope = securityContextHelper.getScopeType();
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new ResourceNotFoundException("Club", clubId));
 
         if (SystemRole.APP_ADMIN.equals(role) || SystemRole.FEDERATION_ADMIN.equals(role)) {
-            if (!ScopeType.INTERNAL.equals(club.getScopeType())) {
-                throw new ForbiddenException("Federation/App admin can only modify internal clubs");
-            }
             return;
         }
 
-        if (!userScope.equals(club.getScopeType())) {
-            throw new ForbiddenException("Club scope type does not match your access scope");
+        UUID userClubId = requireCurrentUserClubId();
+        if (!clubId.equals(userClubId)) {
+            throw new ForbiddenException("You can only modify your own club");
         }
     }
 
@@ -70,43 +66,59 @@ public class AuthorizationServiceImpl implements AuthorizationService {
         throw new ForbiddenException("User role does not have associated club");
     }
 
+    @Override
+    public Optional<UUID> findCurrentUserClubId() {
+        UUID userId = securityContextHelper.getUserId();
+        SystemRole role = securityContextHelper.getUserRole();
+
+        if (SystemRole.CLUB_ADMIN.equals(role)) {
+            return clubRepository.findByClubAdmin(userId).map(Club::getId);
+        }
+
+        if (SystemRole.COACH.equals(role)) {
+            return clubCoachRepository.findByCoachId(userId).map(ClubCoach::getClubId);
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public ScopeType getCurrentUserClubType() {
+        UUID userId = securityContextHelper.getUserId();
+        SystemRole role = securityContextHelper.getUserRole();
+
+        if (SystemRole.CLUB_ADMIN.equals(role)) {
+            Club club = clubRepository.findByClubAdmin(userId)
+                    .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
+            return club.getType();
+        }
+
+        if (SystemRole.COACH.equals(role)) {
+            UUID clubId = clubCoachRepository.findByCoachId(userId)
+                    .map(ClubCoach::getClubId)
+                    .orElseThrow(() -> new ForbiddenException("Coach is not assigned to any club"));
+            Club club = clubRepository.findById(clubId)
+                    .orElseThrow(() -> new ForbiddenException("Coach's club not found"));
+            return club.getType();
+        }
+
+        throw new ForbiddenException("User role does not have associated club");
+    }
+
     private void requireCanOperateOnClub(UUID clubId) {
         if (clubId == null) {
             throw new ValidationException("Club ID is required");
         }
 
         SystemRole role = securityContextHelper.getUserRole();
-        UUID currentUserId = securityContextHelper.getUserId();
-        ScopeType userScope = securityContextHelper.getScopeType();
-        Club club = clubRepository.findById(clubId)
-                .orElseThrow(() -> new ResourceNotFoundException("Club", clubId));
 
         if (SystemRole.APP_ADMIN.equals(role) || SystemRole.FEDERATION_ADMIN.equals(role)) {
-            if (!ScopeType.INTERNAL.equals(club.getScopeType())) {
-                throw new ForbiddenException("Federation/App admin can only operate on internal clubs");
-            }
             return;
         }
 
-        if (!userScope.equals(club.getScopeType())) {
-            throw new ForbiddenException("Club scope type does not match your access scope");
+        UUID userClubId = requireCurrentUserClubId();
+        if (!clubId.equals(userClubId)) {
+            throw new ForbiddenException("You do not have permission to operate on this club");
         }
-
-        if (SystemRole.CLUB_ADMIN.equals(role)) {
-            Club myClub = clubRepository.findByClubAdmin(currentUserId)
-                    .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
-            if (clubId.equals(myClub.getId())) {
-                return;
-            }
-        }
-
-        if (SystemRole.COACH.equals(role)) {
-            if (clubCoachRepository.existsByClubIdAndCoachId(clubId, currentUserId)) {
-                return;
-            }
-        }
-
-        throw new ForbiddenException("You do not have permission to operate on this club");
     }
 }
-

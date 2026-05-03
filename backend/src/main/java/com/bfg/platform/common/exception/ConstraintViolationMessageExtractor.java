@@ -50,9 +50,9 @@ public class ConstraintViolationMessageExtractor {
             return "Email already exists";
         }
         
-        if (lowerMessage.contains("club_coaches_coach_id_key") || 
+        if (lowerMessage.contains("club_coaches_coach_id_key") ||
             (lowerMessage.contains("coach_id") && lowerMessage.contains("unique"))) {
-            return "Coach is already assigned to this club";
+            return "Треньорът вече е назначен към клуб";
         }
         
         if (lowerMessage.contains("uq_accreditations_athlete_club_year")) {

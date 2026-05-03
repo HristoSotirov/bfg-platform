@@ -115,7 +115,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
     }));
 
   readonly competitionTypeOptions: SearchableSelectOption[] = [
-    { value: CompetitionType.Erg, label: 'Ергометър' },
+    { value: CompetitionType.NationalErgo, label: 'Национално (ерго)' },
     { value: CompetitionType.NationalWater, label: 'Национално (вода)' },
     { value: CompetitionType.Balkan, label: 'Балкански' },
   ];

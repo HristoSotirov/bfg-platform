@@ -15,11 +15,6 @@ databaseChangeLog:
               - column: { name: role }
         - createIndex:
             tableName: users
-            indexName: idx_users_scope_type
-            columns:
-              - column: { name: scope_type }
-        - createIndex:
-            tableName: users
             indexName: idx_users_is_active
             columns:
               - column: { name: is_active }
@@ -34,9 +29,9 @@ databaseChangeLog:
         # =============================================
         - createIndex:
             tableName: clubs
-            indexName: idx_clubs_scope_type
+            indexName: idx_clubs_type
             columns:
-              - column: { name: scope_type }
+              - column: { name: type }
         - createIndex:
             tableName: clubs
             indexName: idx_clubs_is_active
@@ -51,11 +46,6 @@ databaseChangeLog:
             indexName: idx_athletes_gender
             columns:
               - column: { name: gender }
-        - createIndex:
-            tableName: athletes
-            indexName: idx_athletes_scope_type
-            columns:
-              - column: { name: scope_type }
         - createIndex:
             tableName: athletes
             indexName: idx_athletes_last_name
@@ -99,11 +89,6 @@ databaseChangeLog:
             indexName: idx_accreditations_status
             columns:
               - column: { name: status }
-        - createIndex:
-            tableName: accreditations
-            indexName: idx_accreditations_scope_type
-            columns:
-              - column: { name: scope_type }
 
         # =============================================
         # athlete_photo_history
