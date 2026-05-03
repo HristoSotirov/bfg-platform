@@ -34,6 +34,10 @@ paths:
     $ref: "./auth/paths.yaml#/~1auth~1refresh"
   /auth/logout:
     $ref: "./auth/paths.yaml#/~1auth~1logout"
+  /auth/forgot-password:
+    $ref: "./auth/paths.yaml#/~1auth~1forgot-password"
+  /auth/reset-password:
+    $ref: "./auth/paths.yaml#/~1auth~1reset-password"
 
   /clubs:
     $ref: "./clubs/paths.yaml#/~1clubs"
@@ -170,6 +174,10 @@ components:
       $ref: "./auth/schemas.yaml#/RefreshRequest"
     TokenResponse:
       $ref: "./auth/schemas.yaml#/TokenResponse"
+    ForgotPasswordRequest:
+      $ref: "./auth/schemas.yaml#/ForgotPasswordRequest"
+    ResetPasswordRequest:
+      $ref: "./auth/schemas.yaml#/ResetPasswordRequest"
 
     # Common
     ScopeType:

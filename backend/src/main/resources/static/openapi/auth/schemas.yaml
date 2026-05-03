@@ -44,4 +44,28 @@ TokenResponse:
       type: string
       example: Bearer
 
+ForgotPasswordRequest:
+  type: object
+  description: Request to send a password reset email
+  required:
+    - username
+  properties:
+    username:
+      type: string
+      minLength: 1
+
+ResetPasswordRequest:
+  type: object
+  description: Request to reset password using a token
+  required:
+    - token
+    - newPassword
+  properties:
+    token:
+      type: string
+      minLength: 1
+    newPassword:
+      type: string
+      minLength: 8
+
 

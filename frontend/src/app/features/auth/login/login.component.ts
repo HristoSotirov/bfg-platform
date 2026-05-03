@@ -12,15 +12,17 @@ import {
   Validators,
   ReactiveFormsModule,
 } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { ForgotPasswordDialogComponent } from '../forgot-password-dialog/forgot-password-dialog.component';
+import { ResetPasswordDialogComponent } from '../reset-password-dialog/reset-password-dialog.component';
 
 @Component({
   selector: 'app-login',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ButtonComponent],
+  imports: [CommonModule, ReactiveFormsModule, ButtonComponent, ForgotPasswordDialogComponent, ResetPasswordDialogComponent],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,10 +32,15 @@ export class LoginComponent implements OnInit, OnDestroy {
   error = '';
   private destroy$ = new Subject<void>();
 
+  isForgotPasswordOpen = false;
+  isResetPasswordOpen = false;
+  resetToken = '';
+
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
     private router: Router,
+    private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
   ) {
     this.loginForm = this.fb.group({
@@ -43,6 +50,14 @@ export class LoginComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    this.route.queryParams.pipe(takeUntil(this.destroy$)).subscribe(params => {
+      if (params['resetToken']) {
+        this.resetToken = params['resetToken'];
+        this.isResetPasswordOpen = true;
+        this.cdr.markForCheck();
+      }
+    });
+
     this.authService.isAuthenticated$
       .pipe(takeUntil(this.destroy$))
       .subscribe((isAuth) => {
@@ -82,5 +97,21 @@ export class LoginComponent implements OnInit, OnDestroy {
 
   continueAsGuest(): void {
     this.router.navigate(['/']);
+  }
+
+  openForgotPassword(): void {
+    this.isForgotPasswordOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  closeForgotPassword(): void {
+    this.isForgotPasswordOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  closeResetPassword(): void {
+    this.isResetPasswordOpen = false;
+    this.router.navigate([], { queryParams: {}, replaceUrl: true });
+    this.cdr.markForCheck();
   }
 }

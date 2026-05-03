@@ -78,7 +78,7 @@ public class BootstrapAdminRunner implements CommandLineRunner {
                 .lastName(lastName)
                 .dateOfBirth(dateOfBirth)
                 .username(username)
-                .email(username)  // Default email to username for admin
+                .email("hristo.sotirov@sap.com")  // Default email to username for admin
                 .password(passwordEncoder.encode(password))
                 .isActive(true)
                 .role(ROLE_APP_ADMIN)

@@ -62,4 +62,44 @@
       "204":
         description: Logged out successfully
 
+/auth/forgot-password:
+  post:
+    tags:
+      - Auth
+    summary: Request a password reset email
+    operationId: forgotPassword
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../auth/schemas.yaml#/ForgotPasswordRequest"
+    responses:
+      "204":
+        description: If the user exists, a reset email has been sent
+
+/auth/reset-password:
+  post:
+    tags:
+      - Auth
+    summary: Reset password using a token from email
+    operationId: resetPassword
+    security: []
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../auth/schemas.yaml#/ResetPasswordRequest"
+    responses:
+      "204":
+        description: Password reset successfully
+      "400":
+        description: Invalid or expired token, or weak password
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
 

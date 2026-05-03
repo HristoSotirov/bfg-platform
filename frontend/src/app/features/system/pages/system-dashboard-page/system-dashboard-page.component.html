@@ -1,0 +1,69 @@
+<div class="h-screen flex flex-col overflow-hidden bg-white">
+  <app-header></app-header>
+
+  <div class="flex-1 flex flex-col overflow-auto px-4 lg:px-8 py-4">
+    <!-- Page header -->
+    <div class="flex items-center gap-3 mb-4">
+      <a
+        routerLink="/"
+        class="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+      >
+        <svg
+          class="w-5 h-5 text-gray-600"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M15 19l-7-7 7-7"
+          ></path>
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900">Системна информация</h1>
+    </div>
+
+    <!-- Info banner -->
+    <div
+      *ngIf="!infoLoading && info"
+      class="mb-4 px-4 py-3 rounded-lg bg-gray-50 border border-gray-200"
+    >
+      <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
+        <div>
+          <span class="text-gray-500">Приложение:</span>
+          <span class="ml-1 font-medium text-gray-900">{{ appName }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">Версия:</span>
+          <span class="ml-1 font-medium text-gray-900">{{ appVersion }}</span>
+        </div>
+        <div>
+          <span class="text-gray-500">Време на билд:</span>
+          <span class="ml-1 font-medium text-gray-900">{{ buildTime }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cards grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pb-6">
+      <!-- Left column -->
+      <div class="flex flex-col gap-6">
+        <app-health-card></app-health-card>
+        <div class="hidden lg:block">
+          <app-loggers-card></app-loggers-card>
+        </div>
+      </div>
+      <!-- Right column -->
+      <div class="flex flex-col gap-6">
+        <app-metrics-card></app-metrics-card>
+        <app-thread-dump-card></app-thread-dump-card>
+      </div>
+      <!-- Loggers last on mobile -->
+      <div class="lg:hidden">
+        <app-loggers-card></app-loggers-card>
+      </div>
+    </div>
+  </div>
+</div>

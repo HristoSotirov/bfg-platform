@@ -43,6 +43,12 @@ export class NavigationService {
       route: '/results',
       requiredRoles: [], // visible to all
     },
+    {
+      id: 'system',
+      label: 'Система',
+      route: '/system',
+      requiredRoles: ['APP_ADMIN'],
+    },
   ];
 
   getVisibleItems(userRoles: SystemRole[]): NavigationItem[] {

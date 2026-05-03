@@ -1,0 +1,43 @@
+<div class="bg-white rounded-lg border border-gray-200 p-5">
+  <h3 class="text-lg font-semibold text-gray-900 mb-4">Логери</h3>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-8">
+    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="error && !loading" class="text-center py-4">
+    <p class="text-red-600 text-sm">{{ error }}</p>
+  </div>
+
+  <div
+    *ngIf="successMessage"
+    class="mb-4 px-3 py-2 rounded-md bg-green-50 border border-green-200"
+  >
+    <p class="text-green-700 text-sm">{{ successMessage }}</p>
+  </div>
+
+  <div *ngIf="!loading && !error" class="space-y-2">
+    <div
+      *ngFor="let logger of loggers"
+      class="flex items-center justify-between gap-3 py-2.5 px-3 rounded-md bg-gray-50"
+    >
+      <div class="flex-1 min-w-0">
+        <div class="text-sm font-medium text-gray-700 truncate">{{ logger.label }}</div>
+        <div class="text-xs text-gray-400 truncate">{{ logger.name }}</div>
+      </div>
+      <div class="w-[120px] flex-shrink-0">
+        <app-searchable-select-dropdown
+          [options]="levelOptions"
+          [ngModel]="getEffectiveLevel(logger)"
+          (selectionChange)="onLevelChange(logger, $event)"
+          [noScroll]="true"
+          placeholder="Ниво"
+        ></app-searchable-select-dropdown>
+      </div>
+    </div>
+
+    <div *ngIf="loggers.length === 0" class="text-center py-4">
+      <p class="text-gray-500 text-sm">Няма налични логери</p>
+    </div>
+  </div>
+</div>

@@ -59,8 +59,11 @@ public class SecurityConfig {
                     "/webjars/**",
                     "/auth/login",
                     "/auth/refresh",
+                    "/auth/forgot-password",
+                    "/auth/reset-password",
                     "/test-photo.html"
                 ).permitAll()
+                .requestMatchers("/actuator/**").hasAuthority("APP_ADMIN")
                 .anyRequest().authenticated()
             )
             .exceptionHandling(ex -> ex

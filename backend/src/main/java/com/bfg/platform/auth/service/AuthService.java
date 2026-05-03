@@ -8,6 +8,8 @@ public interface AuthService {
     TokenResponse login(String username, String password);
     TokenResponse refresh(String refreshToken);
     void logout(UUID userId);
+    void requestPasswordReset(String username);
+    void resetPassword(String token, String newPassword);
 }
 
 

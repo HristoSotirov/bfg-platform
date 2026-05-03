@@ -1,0 +1,63 @@
+<div class="bg-white rounded-lg border border-gray-200 p-5">
+  <div class="flex items-center justify-between mb-4">
+    <h3 class="text-lg font-semibold text-gray-900">Здравен статус</h3>
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2" *ngIf="!loading && !error">
+        <span
+          class="inline-block w-3 h-3 rounded-full"
+          [ngClass]="isUp ? 'bg-green-500' : 'bg-red-500'"
+        ></span>
+        <span
+          class="text-sm font-medium"
+          [ngClass]="isUp ? 'text-green-700' : 'text-red-700'"
+        >
+          {{ isUp ? 'РАБОТИ' : 'ПРОБЛЕМ' }}
+        </span>
+      </div>
+      <button
+        type="button"
+        class="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors"
+        (click)="refresh()"
+        [disabled]="loading"
+      >
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          ></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="loading" class="flex items-center justify-center py-8">
+    <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+  </div>
+
+  <div *ngIf="error && !loading" class="text-center py-4">
+    <p class="text-red-600 text-sm">{{ error }}</p>
+  </div>
+
+  <div *ngIf="!loading && !error && health" class="space-y-3">
+    <div
+      *ngFor="let comp of components"
+      class="flex items-center justify-between py-2 px-3 rounded-md bg-gray-50"
+    >
+      <div class="flex items-center gap-2">
+        <span
+          class="inline-block w-2 h-2 rounded-full"
+          [ngClass]="comp.status === 'UP' ? 'bg-green-500' : 'bg-red-500'"
+        ></span>
+        <span class="text-sm text-gray-700">{{ getComponentLabel(comp.name) }}</span>
+      </div>
+      <span
+        class="text-xs font-medium px-2 py-0.5 rounded-full"
+        [ngClass]="comp.status === 'UP' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
+      >
+        {{ comp.status }}
+      </span>
+    </div>
+  </div>
+</div>

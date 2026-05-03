@@ -91,6 +91,7 @@ model/entryDto.ts
 model/entryRequest.ts
 model/errorResponse.ts
 model/finalStandingsDto.ts
+model/forgotPasswordRequest.ts
 model/getAllAccreditations200Response.ts
 model/getAllAthletes200Response.ts
 model/getAllClubs200Response.ts
@@ -126,6 +127,7 @@ model/qualificationTierRequest.ts
 model/recordResultsRequest.ts
 model/recordWeightRequest.ts
 model/refreshRequest.ts
+model/resetPasswordRequest.ts
 model/scopeType.ts
 model/scoringRuleDto.ts
 model/scoringRuleRequest.ts

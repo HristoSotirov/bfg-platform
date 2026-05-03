@@ -2,8 +2,10 @@ package com.bfg.platform.auth.controller;
 
 import com.bfg.platform.auth.service.AuthService;
 import com.bfg.platform.gen.api.AuthApi;
+import com.bfg.platform.gen.model.ForgotPasswordRequest;
 import com.bfg.platform.gen.model.LoginRequest;
 import com.bfg.platform.gen.model.RefreshRequest;
+import com.bfg.platform.gen.model.ResetPasswordRequest;
 import com.bfg.platform.gen.model.TokenResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,18 @@ public class AuthController implements AuthApi {
         if (authentication != null && authentication.getPrincipal() instanceof UUID userId) {
             authService.logout(userId);
         }
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> forgotPassword(ForgotPasswordRequest request) {
+        authService.requestPasswordReset(request.getUsername());
+        return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> resetPassword(ResetPasswordRequest request) {
+        authService.resetPassword(request.getToken(), request.getNewPassword());
         return ResponseEntity.noContent().build();
     }
 }

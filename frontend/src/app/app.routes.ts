@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './core/guards/auth.guard';
+import { RoleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
   {
@@ -182,6 +183,17 @@ export const routes: Routes = [
     redirectTo: 'athletes/:uuid/details',
     pathMatch: 'full',
   },
+  // Admin-only pages
+  {
+    path: 'system',
+    loadComponent: () =>
+      import('./features/system/pages/system-dashboard-page/system-dashboard-page.component').then(
+        (m) => m.SystemDashboardPageComponent,
+      ),
+    canActivate: [AuthGuard, RoleGuard],
+    data: { roles: ['APP_ADMIN'] },
+  },
+
   // Fallback
   { path: '**', redirectTo: '/' },
 ];

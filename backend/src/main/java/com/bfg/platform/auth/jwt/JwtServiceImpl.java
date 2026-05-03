@@ -60,6 +60,22 @@ public class JwtServiceImpl implements JwtService {
     }
 
     @Override
+    public String issuePasswordResetToken(UUID userId, long ttlSeconds) {
+        Instant now = Instant.now();
+        Instant exp = now.plusSeconds(ttlSeconds);
+        var builder = Jwts.builder()
+                .issuer(properties.getIssuer())
+                .subject(userId.toString())
+                .issuedAt(Date.from(now))
+                .expiration(Date.from(exp))
+                .claim(CLAIM_TYPE, TYPE_PASSWORD_RESET);
+        if (properties.getAudience() != null && !properties.getAudience().isBlank()) {
+            builder.audience().add(properties.getAudience()).and();
+        }
+        return builder.signWith(privateKey).compact();
+    }
+
+    @Override
     public Jws<Claims> parseAndValidate(String jwt) {
         Jws<Claims> jws = Jwts.parser()
                 .verifyWith(publicKey)

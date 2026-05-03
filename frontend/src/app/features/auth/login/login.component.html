@@ -52,6 +52,11 @@
             loginForm.get('password')?.touched
           "
         />
+        <div class="text-right mt-1">
+          <button type="button" class="text-sm text-bfg-blue hover:underline" (click)="openForgotPassword()">
+            Забравена парола?
+          </button>
+        </div>
       </div>
 
       <div *ngIf="error" class="text-red-600 text-sm p-2 bg-red-50 rounded flex items-center justify-between">
@@ -94,3 +99,15 @@
     />
   </div>
 </div>
+
+<app-forgot-password-dialog
+  [isOpen]="isForgotPasswordOpen"
+  (closed)="closeForgotPassword()">
+</app-forgot-password-dialog>
+
+<app-reset-password-dialog
+  [isOpen]="isResetPasswordOpen"
+  [token]="resetToken"
+  (closed)="closeResetPassword()"
+  (resetSuccess)="closeResetPassword()">
+</app-reset-password-dialog>
