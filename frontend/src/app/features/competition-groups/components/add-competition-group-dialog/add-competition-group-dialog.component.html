@@ -12,7 +12,9 @@
             type="text"
             [(ngModel)]="formData.name"
             placeholder="Въведете име"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+            [class.border-red-500]="touched['name'] && !formData.name.trim()"
+            (blur)="touched['name'] = true">
         </div>
 
         <div>
@@ -21,7 +23,9 @@
             type="text"
             [(ngModel)]="formData.shortName"
             placeholder="Въведете кратко име"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+            [class.border-red-500]="touched['shortName'] && !formData.shortName.trim()"
+            (blur)="touched['shortName'] = true">
         </div>
 
         <div>
@@ -30,7 +34,9 @@
             type="number"
             [(ngModel)]="formData.minAge"
             placeholder="Въведете мин. възраст"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+            [class.border-red-500]="touched['minAge'] && !formData.minAge && formData.minAge !== 0"
+            (blur)="touched['minAge'] = true">
         </div>
 
         <div>
@@ -39,7 +45,9 @@
             type="number"
             [(ngModel)]="formData.maxAge"
             placeholder="Въведете макс. възраст"
-            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+            [class.border-red-500]="touched['maxAge'] && !formData.maxAge && formData.maxAge !== 0"
+            (blur)="touched['maxAge'] = true">
         </div>
 
         <div>

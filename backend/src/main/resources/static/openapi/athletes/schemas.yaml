@@ -138,18 +138,29 @@ AthleteUpdateRequest:
   type: object
   description: Request payload for updating an existing athlete's information
   x-class-extra-annotation: '@NotNull(message = "{athlete.updateRequest.required}")'
+  required:
+    - firstName
+    - lastName
+    - gender
+    - dateOfBirth
   properties:
     firstName:
       type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.firstName.required}")'
     middleName:
       type: string
     lastName:
       type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{athlete.lastName.required}")'
     gender:
       $ref: "#/Gender"
+      x-field-extra-annotation: '@NotNull(message = "{athlete.gender.required}")'
     dateOfBirth:
       type: string
       format: date
+      x-field-extra-annotation: '@NotNull(message = "{athlete.dateOfBirth.required}")'
     medicalExaminationDue:
       type: string
       format: date

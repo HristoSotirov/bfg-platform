@@ -24,7 +24,7 @@ public class QualificationProgressionController implements QualificationProgress
     private final QualificationProgressionService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllQualificationProgressions200Response> getAllQualificationProgressions(
             String filter, List<String> orderBy,
             Integer top, Integer skip) {
@@ -42,7 +42,7 @@ public class QualificationProgressionController implements QualificationProgress
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<QualificationProgressionDto> getQualificationProgressionByUuid(UUID uuid) {
         return service.getByUuid(uuid)
                 .map(ResponseEntity::ok)

@@ -181,11 +181,11 @@
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
-  patch:
+  put:
     tags:
       - Athletes
     summary: Update athlete details
-    operationId: patchAthleteByUuid
+    operationId: updateAthleteByUuid
     parameters:
       - name: athleteUuid
         in: path
@@ -221,7 +221,7 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
 /athletes/batch-medical:
-  patch:
+  put:
     tags:
       - Athletes
     summary: Batch update medical and insurance information for multiple athletes

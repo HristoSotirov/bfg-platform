@@ -60,12 +60,14 @@
             } @else {
               <div class="space-y-1.5 max-w-sm">
                 <div>
-                  <label class="block text-xs text-gray-500 mb-0.5">Ime:</label>
+                  <label class="block text-xs text-gray-500 mb-0.5">Ime <span class="text-red-500">*</span>:</label>
                   <input type="text" [(ngModel)]="editData.name"
+                    [class.border-red-500]="touched['name'] && !editData.name.trim()"
+                    (blur)="touched['name'] = true"
                     class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                 </div>
                 <div>
-                  <label class="block text-xs text-gray-500 mb-0.5">Тип:</label>
+                  <label class="block text-xs text-gray-500 mb-0.5">Тип <span class="text-red-500">*</span>:</label>
                   <app-searchable-select-dropdown [options]="scoringTypeOptions" [(ngModel)]="editData.scoringType" placeholder="Изберете тип..."></app-searchable-select-dropdown>
                 </div>
                 <div>
@@ -242,7 +244,7 @@
                 }
               } @else {
                 <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
-                <app-button variant="primary" size="md" text="Запази" [disabled]="saving" (click)="save()"></app-button>
+                <app-button variant="primary" size="md" text="Запази" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
               }
             </div>
           </div>

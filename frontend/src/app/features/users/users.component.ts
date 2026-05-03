@@ -20,6 +20,7 @@ import { UsersTableComponent } from './components/users-table/users-table.compon
 import { UsersFiltersComponent } from './components/users-filters/users-filters.component';
 import { AddUserDialogComponent } from './components/add-user-dialog/add-user-dialog.component';
 import { UserSettingsDialogComponent } from './components/user-settings-dialog/user-settings-dialog.component';
+import { UserMigrationDialogComponent } from './components/user-migration-dialog/user-migration-dialog.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import {
   MobileActionMenuComponent,
@@ -56,6 +57,7 @@ export interface UserFilters {
     UsersFiltersComponent,
     AddUserDialogComponent,
     UserSettingsDialogComponent,
+    UserMigrationDialogComponent,
     ButtonComponent,
     MobileActionMenuComponent,
   ],
@@ -103,6 +105,7 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   isAddDialogOpen = false;
   isSettingsDialogOpen = false;
+  isMigrationDialogOpen = false;
 
   exporting = false;
   mobileMenuOpen = false;
@@ -112,6 +115,11 @@ export class UsersComponent implements OnInit, OnDestroy {
       {
         label: 'Добавяне на потребител',
         action: () => this.openAddDialog(),
+        visible: this.canAddUser,
+      },
+      {
+        label: 'Мигриране',
+        action: () => this.openMigrationDialog(),
         visible: this.canAddUser,
       },
       {
@@ -291,6 +299,21 @@ export class UsersComponent implements OnInit, OnDestroy {
   closeSettingsDialog(): void {
     this.isSettingsDialogOpen = false;
     this.cdr.markForCheck();
+  }
+
+  openMigrationDialog(): void {
+    this.isMigrationDialogOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  closeMigrationDialog(): void {
+    this.isMigrationDialogOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  onUsersMigrated(): void {
+    this.loadUsers();
+    this.closeMigrationDialog();
   }
 
   onSettingsChange(data: {
@@ -615,6 +638,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       [SystemRole.FederationAdmin]: 'Администратор на федерацията',
       [SystemRole.ClubAdmin]: 'Администратор на клуб',
       [SystemRole.Coach]: 'Треньор',
+      [SystemRole.Umpire]: 'Съдия',
     };
     return roleLabels[role] || role;
   }

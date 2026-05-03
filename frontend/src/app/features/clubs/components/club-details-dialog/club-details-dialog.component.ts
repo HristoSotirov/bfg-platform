@@ -74,6 +74,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
   isEditing = false;
   saving = false;
   error: string | null = null;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
 
   editData = {
@@ -283,14 +284,14 @@ export class ClubDetailsDialogComponent implements OnChanges {
 
   getCoachName(coach: ClubCoachDto | null): string {
     if (!coach) return '';
-    
+
     if (coach.coach) {
       const firstName = coach.coach.firstName || '';
       const lastName = coach.coach.lastName || '';
       const fullName = `${firstName} ${lastName}`.trim();
       return fullName || '-';
     }
-    
+
     return '-';
   }
 
@@ -488,22 +489,29 @@ export class ClubDetailsDialogComponent implements OnChanges {
     this.cdr.markForCheck();
   }
 
+  get isEditFormValid(): boolean {
+    return !!(this.editData.shortName?.trim() && this.editData.name?.trim());
+  }
+
   save(): void {
     if (!this.club?.uuid) return;
+
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
 
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const updateRequest: ClubUpdateRequest = {
-      name: this.editData.name || undefined,
-      shortName: this.editData.shortName || undefined,
+      name: this.editData.name.trim(),
+      shortName: this.editData.shortName.trim(),
       isActive: this.editData.isActive,
       clubAdminId: this.editData.clubAdminId || undefined,
     };
 
     this.clubsService
-      .patchClubByUuid(this.club.uuid, updateRequest)
+      .updateClubByUuid(this.club.uuid, updateRequest)
       .pipe(
         retryWhen((errors) =>
           errors.pipe(
@@ -613,7 +621,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     this.clubsService
-      .patchClubLogoByUuid(this.club.uuid, file)
+      .updateClubLogoByUuid(this.club.uuid, file)
       .pipe(
         retryWhen((errors) =>
           errors.pipe(
@@ -669,6 +677,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
     this.showAddCoachForm = false;
     this.error = null;
     this.saving = false;
+    this.touched = {};
     this.coaches = [];
     this.availableCoaches = [];
     this.coachOptions = [];

@@ -46,13 +46,13 @@ public class CompetitionProgressionController implements ProgressionApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ProgressionDataDto> getProgressionData(UUID uuid) {
         return ResponseEntity.ok(progressionService.getProgressionData(uuid));
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ProgressionDataDto> getEventParticipations(UUID uuid, UUID eventUuid) {
         return ResponseEntity.ok(progressionService.getEventParticipations(eventUuid));
     }

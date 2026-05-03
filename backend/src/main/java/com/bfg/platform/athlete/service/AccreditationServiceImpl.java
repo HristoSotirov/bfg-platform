@@ -396,7 +396,7 @@ public class AccreditationServiceImpl implements AccreditationService {
 
         AccreditationStatus status;
         if (year == currentYear) {
-            status = AccreditationStatus.ACTIVE;
+            status = AccreditationStatus.NEW_PHOTO_REQUIRED;
         } else if (year < currentYear) {
             status = AccreditationStatus.EXPIRED;
         } else {

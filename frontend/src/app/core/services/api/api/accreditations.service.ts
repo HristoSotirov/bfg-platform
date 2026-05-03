@@ -23,7 +23,7 @@ import { AccreditationBatchRenewalResponse } from '../model/accreditationBatchRe
 // @ts-ignore
 import { AccreditationDto } from '../model/accreditationDto';
 // @ts-ignore
-import { AccreditationStatusPatchRequest } from '../model/accreditationStatusPatchRequest';
+import { AccreditationStatusUpdateRequest } from '../model/accreditationStatusUpdateRequest';
 // @ts-ignore
 import { AthleteBatchMigrationRequest } from '../model/athleteBatchMigrationRequest';
 // @ts-ignore
@@ -463,19 +463,19 @@ export class AccreditationsService extends BaseService {
      * Update accreditation status
      * Updates only the status of an accreditation. Only FEDERATION_ADMIN and APP_ADMIN can update accreditation status.
      * @param accreditationUuid UUID of the accreditation
-     * @param accreditationStatusPatchRequest 
+     * @param accreditationStatusUpdateRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public patchAccreditationStatus(accreditationUuid: string, accreditationStatusPatchRequest: AccreditationStatusPatchRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<AccreditationDto>;
-    public patchAccreditationStatus(accreditationUuid: string, accreditationStatusPatchRequest: AccreditationStatusPatchRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AccreditationDto>>;
-    public patchAccreditationStatus(accreditationUuid: string, accreditationStatusPatchRequest: AccreditationStatusPatchRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AccreditationDto>>;
-    public patchAccreditationStatus(accreditationUuid: string, accreditationStatusPatchRequest: AccreditationStatusPatchRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateAccreditationStatus(accreditationUuid: string, accreditationStatusUpdateRequest: AccreditationStatusUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<AccreditationDto>;
+    public updateAccreditationStatus(accreditationUuid: string, accreditationStatusUpdateRequest: AccreditationStatusUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AccreditationDto>>;
+    public updateAccreditationStatus(accreditationUuid: string, accreditationStatusUpdateRequest: AccreditationStatusUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AccreditationDto>>;
+    public updateAccreditationStatus(accreditationUuid: string, accreditationStatusUpdateRequest: AccreditationStatusUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (accreditationUuid === null || accreditationUuid === undefined) {
-            throw new Error('Required parameter accreditationUuid was null or undefined when calling patchAccreditationStatus.');
+            throw new Error('Required parameter accreditationUuid was null or undefined when calling updateAccreditationStatus.');
         }
-        if (accreditationStatusPatchRequest === null || accreditationStatusPatchRequest === undefined) {
-            throw new Error('Required parameter accreditationStatusPatchRequest was null or undefined when calling patchAccreditationStatus.');
+        if (accreditationStatusUpdateRequest === null || accreditationStatusUpdateRequest === undefined) {
+            throw new Error('Required parameter accreditationStatusUpdateRequest was null or undefined when calling updateAccreditationStatus.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -517,10 +517,10 @@ export class AccreditationsService extends BaseService {
 
         let localVarPath = `/accreditations/${this.configuration.encodeParam({name: "accreditationUuid", value: accreditationUuid, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: "uuid"})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<AccreditationDto>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<AccreditationDto>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
-                body: accreditationStatusPatchRequest,
+                body: accreditationStatusUpdateRequest,
                 responseType: <any>responseType_,
                 ...(withCredentials ? { withCredentials } : {}),
                 headers: localVarHeaders,

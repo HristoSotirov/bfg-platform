@@ -67,6 +67,8 @@ paths:
 
   /users:
     $ref: "./users/paths.yaml#/~1users"
+  /users/migrate:
+    $ref: "./users/paths.yaml#/~1users~1migrate"
   /users/{userUuid}:
     $ref: "./users/paths.yaml#/~1users~1{userUuid}"
 
@@ -190,6 +192,14 @@ components:
       $ref: "./users/schemas.yaml#/ClubCoachDto"
     ClubCoachCreateRequest:
       $ref: "./users/schemas.yaml#/ClubCoachCreateRequest"
+    UserBatchMigrationRequest:
+      $ref: "./users/schemas.yaml#/UserBatchMigrationRequest"
+    UserBatchMigrationRequestItem:
+      $ref: "./users/schemas.yaml#/UserBatchMigrationRequestItem"
+    UserBatchMigrationResponse:
+      $ref: "./users/schemas.yaml#/UserBatchMigrationResponse"
+    UserBatchMigrationSkippedItem:
+      $ref: "./users/schemas.yaml#/UserBatchMigrationSkippedItem"
 
     # Clubs
     ClubDto:
@@ -240,8 +250,8 @@ components:
       $ref: "./accreditations/schemas.yaml#/AccreditationCreateRequest"
     AccreditationStatus:
       $ref: "./accreditations/schemas.yaml#/AccreditationStatus"
-    AccreditationStatusPatchRequest:
-      $ref: "./accreditations/schemas.yaml#/AccreditationStatusPatchRequest"
+    AccreditationStatusUpdateRequest:
+      $ref: "./accreditations/schemas.yaml#/AccreditationStatusUpdateRequest"
     AccreditationBatchRenewalRequest:
       $ref: "./accreditations/schemas.yaml#/AccreditationBatchRenewalRequest"
     AccreditationBatchRenewalResponse:

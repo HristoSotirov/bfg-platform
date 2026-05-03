@@ -24,7 +24,7 @@ public class QualificationSchemeController implements QualificationSchemesApi {
     private final QualificationSchemeService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllQualificationSchemes200Response> getAllQualificationSchemes(
             String filter, String search, List<String> orderBy,
             Integer top, Integer skip) {
@@ -42,7 +42,7 @@ public class QualificationSchemeController implements QualificationSchemesApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<QualificationSchemeDto> getQualificationSchemeByUuid(UUID uuid) {
         return service.getByUuid(uuid)
                 .map(ResponseEntity::ok)

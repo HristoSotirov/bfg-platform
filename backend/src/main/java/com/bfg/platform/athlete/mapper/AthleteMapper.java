@@ -37,9 +37,9 @@ public class AthleteMapper {
 
     public static Athlete fromCreateRequest(AthleteCreateRequest request) {
         return Athlete.builder()
-                .firstName(request.getFirstName())
-                .middleName(request.getMiddleName())
-                .lastName(request.getLastName())
+                .firstName(request.getFirstName().trim())
+                .middleName(request.getMiddleName() != null ? request.getMiddleName().trim() : null)
+                .lastName(request.getLastName().trim())
                 .dateOfBirth(request.getDateOfBirth())
                 .gender(request.getGender())
                 .build();
@@ -47,13 +47,13 @@ public class AthleteMapper {
 
     public static void updateAthleteFromRequest(Athlete athlete, AthleteUpdateRequest request) {
         if (request.getFirstName() != null) {
-            athlete.setFirstName(request.getFirstName());
+            athlete.setFirstName(request.getFirstName().trim());
         }
         if (request.getMiddleName() != null) {
-            athlete.setMiddleName(request.getMiddleName());
+            athlete.setMiddleName(request.getMiddleName().trim());
         }
         if (request.getLastName() != null) {
-            athlete.setLastName(request.getLastName());
+            athlete.setLastName(request.getLastName().trim());
         }
         if (request.getGender() != null) {
             athlete.setGender(request.getGender());
@@ -65,9 +65,9 @@ public class AthleteMapper {
 
     public static Athlete fromMigrationItem(AthleteBatchMigrationRequestItem item) {
         return Athlete.builder()
-                .firstName(item.getFirstName())
-                .middleName(item.getMiddleName())
-                .lastName(item.getLastName())
+                .firstName(item.getFirstName().trim())
+                .middleName(item.getMiddleName() != null ? item.getMiddleName().trim() : null)
+                .lastName(item.getLastName().trim())
                 .dateOfBirth(item.getDateOfBirth())
                 .gender(item.getGender())
                 .build();

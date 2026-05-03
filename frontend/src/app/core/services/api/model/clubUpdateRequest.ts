@@ -14,8 +14,8 @@ import { ScopeType } from './scopeType';
  * Request payload for updating an existing rowing club
  */
 export interface ClubUpdateRequest { 
-    name?: string;
-    shortName?: string;
+    name: string;
+    shortName: string;
     /**
      * Whether the club is active
      */

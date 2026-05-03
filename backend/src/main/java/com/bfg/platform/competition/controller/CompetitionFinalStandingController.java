@@ -29,7 +29,7 @@ public class CompetitionFinalStandingController implements FinalStandingsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<FinalStandingsDto> getFinalStandings(UUID uuid, UUID disciplineId) {
         var standings = service.getStandings(uuid, disciplineId);
         FinalStandingsDto dto = new FinalStandingsDto();

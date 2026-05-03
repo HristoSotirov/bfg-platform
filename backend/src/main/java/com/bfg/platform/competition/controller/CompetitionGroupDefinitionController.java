@@ -24,7 +24,7 @@ public class CompetitionGroupDefinitionController implements CompetitionGroupDef
     private final CompetitionGroupDefinitionService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllCompetitionGroupDefinitions200Response> getAllCompetitionGroupDefinitions(
             String filter, String search, List<String> orderBy,
             Integer top, Integer skip, List<String> expand) {
@@ -42,7 +42,7 @@ public class CompetitionGroupDefinitionController implements CompetitionGroupDef
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<CompetitionGroupDefinitionDto> getCompetitionGroupDefinitionByUuid(UUID uuid, List<String> expand) {
         return service.getByUuid(uuid, expand)
                 .map(ResponseEntity::ok)

@@ -47,6 +47,13 @@
               (click)="openAddDialog()"
             >
             </app-button>
+            <app-button
+              variant="white"
+              size="md"
+              text="Мигриране"
+              (click)="openMigrationDialog()"
+            >
+            </app-button>
           }
 
           <app-button
@@ -150,3 +157,10 @@
   (settingsChange)="onSettingsChange($event)"
 >
 </app-user-settings-dialog>
+
+<app-user-migration-dialog
+  [isOpen]="isMigrationDialogOpen"
+  (closed)="closeMigrationDialog()"
+  (migrated)="onUsersMigrated()"
+>
+</app-user-migration-dialog>

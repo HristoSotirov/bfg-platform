@@ -86,6 +86,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   loadingHistory = false;
   saving = false;
   error: string | null = null;
+  touched: Record<string, boolean> = {};
   fullHistory: AccreditationDto[] = [];
   uploadingPhoto = false;
   photoError: string | null = null;
@@ -546,25 +547,35 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     this.cdr.markForCheck();
   }
 
+  get isEditFormValid(): boolean {
+    return !!(
+      this.editData.firstName?.trim() &&
+      this.editData.lastName?.trim() &&
+      this.editData.gender &&
+      this.editData.dateOfBirth
+    );
+  }
+
   save(): void {
     if (!this.athlete?.uuid) return;
+
+    this.touched['firstName'] = true;
+    this.touched['lastName'] = true;
+    this.touched['gender'] = true;
+    this.touched['dateOfBirth'] = true;
 
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const profileRequest: AthleteUpdateRequest = {
-      firstName: this.editData.firstName || undefined,
-      middleName: this.editData.middleName || undefined,
-      lastName: this.editData.lastName || undefined,
-      gender:
-        this.editData.gender &&
-        Object.values(Gender).includes(this.editData.gender as Gender)
-          ? (this.editData.gender as Gender)
-          : undefined,
-      dateOfBirth: this.editData.dateOfBirth || undefined,
+      firstName: this.editData.firstName.trim(),
+      middleName: this.editData.middleName?.trim() || undefined,
+      lastName: this.editData.lastName.trim(),
+      gender: this.editData.gender as Gender,
+      dateOfBirth: this.editData.dateOfBirth,
     };
-    const profileRequest$ = this.athletesService.patchAthleteByUuid(
+    const profileRequest$ = this.athletesService.updateAthleteByUuid(
       this.athlete.uuid,
       profileRequest,
     );
@@ -623,7 +634,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
         return originalAcc && originalAcc.status !== newStatus;
       })
       .map(([accreditationUuid, newStatus]) =>
-        this.accreditationsService.patchAccreditationStatus(accreditationUuid, {
+        this.accreditationsService.updateAccreditationStatus(accreditationUuid, {
           status: newStatus,
         }),
       );
@@ -695,6 +706,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     this.isEditing = false;
     this.error = null;
     this.saving = false;
+    this.touched = {};
     this.uploadingPhoto = false;
     this.photoError = null;
     this.latestPhoto = null;

@@ -24,7 +24,7 @@ public class QualificationTierController implements QualificationTiersApi {
     private final QualificationTierService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllQualificationTiers200Response> getAllQualificationTiers(
             String filter, List<String> orderBy,
             Integer top, Integer skip) {
@@ -42,7 +42,7 @@ public class QualificationTierController implements QualificationTiersApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<QualificationTierDto> getQualificationTierByUuid(UUID uuid) {
         return service.getByUuid(uuid)
                 .map(ResponseEntity::ok)

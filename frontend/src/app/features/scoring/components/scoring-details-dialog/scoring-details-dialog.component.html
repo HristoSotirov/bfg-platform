@@ -56,15 +56,17 @@
             <!-- Edit form -->
             <div class="space-y-1.5">
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Име:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Име <span class="text-red-500">*</span>:</label>
                 <input
                   type="text"
                   [(ngModel)]="editData.name"
+                  [class.border-red-500]="touched['name'] && !editData.name.trim()"
+                  (blur)="touched['name'] = true"
                   class="w-full max-w-md px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Тип:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Тип <span class="text-red-500">*</span>:</label>
                 <div class="max-w-md">
                   <app-searchable-select-dropdown
                     [options]="scoringTypeOptions"
@@ -320,7 +322,7 @@
               variant="primary"
               size="md"
               text="Запази"
-              [disabled]="saving"
+              [disabled]="saving || !isEditFormValid"
               (click)="save()"
             >
             </app-button>

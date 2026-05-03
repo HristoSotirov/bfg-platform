@@ -14,8 +14,10 @@
           type="text"
           [(ngModel)]="formData.firstName"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm leading-normal transition-colors focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue min-h-[38px]"
+          [class.border-red-500]="touched['firstName'] && !formData.firstName.trim()"
           [disabled]="saving"
           placeholder="Въведете име"
+          (blur)="touched['firstName'] = true"
         />
       </div>
 
@@ -27,8 +29,10 @@
           type="text"
           [(ngModel)]="formData.lastName"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm leading-normal transition-colors focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue min-h-[38px]"
+          [class.border-red-500]="touched['lastName'] && !formData.lastName.trim()"
           [disabled]="saving"
           placeholder="Въведете фамилия"
+          (blur)="touched['lastName'] = true"
         />
       </div>
 
@@ -54,8 +58,10 @@
           [(ngModel)]="formData.email"
           (ngModelChange)="onEmailChange()"
           class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm leading-normal transition-colors focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue min-h-[38px]"
+          [class.border-red-500]="touched['email'] && !formData.email.trim()"
           [disabled]="saving"
           placeholder="Въведете имейл"
+          (blur)="touched['email'] = true"
         />
       </div>
 

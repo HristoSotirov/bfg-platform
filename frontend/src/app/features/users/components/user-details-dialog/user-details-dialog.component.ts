@@ -51,6 +51,7 @@ export class UserDetailsDialogComponent implements OnChanges {
 
   isEditing = false;
   saving = false;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
 
   editData = {
@@ -71,6 +72,7 @@ export class UserDetailsDialogComponent implements OnChanges {
     [SystemRole.FederationAdmin]: 'Администратор на федерацията',
     [SystemRole.ClubAdmin]: 'Администратор на клуб',
     [SystemRole.Coach]: 'Треньор',
+    [SystemRole.Umpire]: 'Съдия',
   };
 
   constructor(
@@ -113,6 +115,7 @@ export class UserDetailsDialogComponent implements OnChanges {
     this.error = null;
     this.isEditing = false;
     this.saving = false;
+    this.touched = {};
     this.editData = {
       firstName: '',
       lastName: '',
@@ -153,7 +156,7 @@ export class UserDetailsDialogComponent implements OnChanges {
 
   private loadClub(user: UserDto): void {
     const role = user.role;
-    
+
     if (role === SystemRole.Coach) {
       this.clubCoachesService
         .getClubByCoachId(user.uuid!)
@@ -219,23 +222,30 @@ export class UserDetailsDialogComponent implements OnChanges {
     }
   }
 
+  get isEditFormValid(): boolean {
+    return !!(this.editData.firstName?.trim() && this.editData.lastName?.trim());
+  }
+
   save(): void {
     if (!this.userData?.uuid) return;
+
+    this.touched['firstName'] = true;
+    this.touched['lastName'] = true;
 
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const updateRequest: UserUpdateRequest = {
-      firstName: this.editData.firstName,
-      lastName: this.editData.lastName,
+      firstName: this.editData.firstName.trim(),
+      lastName: this.editData.lastName.trim(),
       dateOfBirth: this.editData.dateOfBirth || undefined,
-      username: this.editData.username,
+      username: this.editData.username.trim(),
       isActive: this.editData.isActive,
     };
 
     this.usersService
-      .patchUserByUuid(this.userData.uuid, updateRequest)
+      .updateUserByUuid(this.userData.uuid, updateRequest)
       .pipe(
         catchError((err) => {
           this.error = err?.error?.message || 'Грешка при запазване на промените';

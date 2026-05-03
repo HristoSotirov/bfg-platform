@@ -302,12 +302,12 @@
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
-  patch:
+  put:
     tags:
       - Accreditations
     summary: Update accreditation status
     description: Updates only the status of an accreditation. Only FEDERATION_ADMIN and APP_ADMIN can update accreditation status.
-    operationId: patchAccreditationStatus
+    operationId: updateAccreditationStatus
     parameters:
       - name: accreditationUuid
         in: path
@@ -322,7 +322,7 @@
       content:
         application/json:
           schema:
-            $ref: "../accreditations/schemas.yaml#/AccreditationStatusPatchRequest"
+            $ref: "../accreditations/schemas.yaml#/AccreditationStatusUpdateRequest"
     responses:
       "200":
         description: Accreditation status updated successfully

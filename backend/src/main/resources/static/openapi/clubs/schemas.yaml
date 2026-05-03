@@ -114,12 +114,19 @@ ClubUpdateRequest:
   type: object
   description: Request payload for updating an existing rowing club
   x-class-extra-annotation: '@NotNull(message = "{club.updateRequest.required}")'
+  required:
+    - name
+    - shortName
   properties:
     name:
       type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{club.name.required}")'
       example: "Rowing Club Sofia Updated"
     shortName:
       type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{club.shortName.required}")'
       example: "RCS"
     isActive:
       type: boolean

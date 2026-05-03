@@ -148,14 +148,18 @@
 
                 <div class="space-y-1.5">
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Ime:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">Ime: <span class="text-red-500">*</span></label>
                     <input type="text" [(ngModel)]="editData.shortName"
-                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                      [class.border-red-500]="touched['shortName'] && !editData.shortName.trim()"
+                      (blur)="touched['shortName'] = true" />
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Пълно ime:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">Пълно ime: <span class="text-red-500">*</span></label>
                     <input type="text" [(ngModel)]="editData.name"
-                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                      [class.border-red-500]="touched['name'] && !editData.name.trim()"
+                      (blur)="touched['name'] = true" />
                   </div>
                   <div>
                     <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
@@ -191,7 +195,7 @@
 
                   <div class="flex gap-2 pt-2">
                     <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
-                    <app-button variant="primary" size="md" text="Запази" [disabled]="saving" (click)="save()"></app-button>
+                    <app-button variant="primary" size="md" text="Запази" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
                   </div>
                 </div>
 

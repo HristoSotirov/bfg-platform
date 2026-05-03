@@ -76,6 +76,7 @@ export class HeaderComponent {
     [SystemRole.FederationAdmin]: 'Администратор на федерацията',
     [SystemRole.ClubAdmin]: 'Администратор на клуб',
     [SystemRole.Coach]: 'Треньор',
+    [SystemRole.Umpire]: 'Съдия',
   };
 
   constructor(

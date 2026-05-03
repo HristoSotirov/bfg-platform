@@ -243,6 +243,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   // Edit mode
   isEditing = false;
   saving = false;
+  touched: Record<string, boolean> = {};
   editError: string | null = null;
   editData: Partial<CompetitionUpdateRequest> = {};
 
@@ -3238,14 +3239,23 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       competitionType: this.competition.competitionType as CompetitionType,
     };
     this.isEditing = true;
+    this.touched = {};
     this.editError = null;
     this.cdr.markForCheck();
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.editError = null;
     this.cdr.markForCheck();
+  }
+
+  get isEditFormValid(): boolean {
+    return !!this.editData.shortName?.trim()
+      && !!this.editData.name?.trim()
+      && !!this.editData.startDate
+      && !!this.editData.endDate;
   }
 
   // ===== DELETE COMPETITION =====
@@ -3291,12 +3301,24 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   saveEditing(): void {
     if (!this.competition?.uuid) return;
+
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.saving = true;
     this.editError = null;
     this.cdr.markForCheck();
 
     const request: CompetitionUpdateRequest = {
       ...(this.editData as CompetitionUpdateRequest),
+      shortName: this.editData.shortName?.trim() || '',
+      name: this.editData.name?.trim() || '',
+      location: this.editData.location?.trim() || '',
       entrySubmissionsOpenAt: this.editData.entrySubmissionsOpenAt
         ? this.appendZ(this.editData.entrySubmissionsOpenAt) as any
         : undefined,

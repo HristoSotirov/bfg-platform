@@ -29,7 +29,7 @@ public class ClubController implements ClubsApi {
     private final ClubService clubService;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllClubs200Response> getAllClubs(
             String filter,
             String search,
@@ -43,7 +43,7 @@ public class ClubController implements ClubsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ClubDto> getClubByAdminId(UUID adminId, List<String> expand) {
         return clubService.getClubByAdminId(adminId, expand)
                 .map(ResponseEntity::ok)
@@ -51,7 +51,7 @@ public class ClubController implements ClubsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ClubDto> getClubByUuid(
             UUID clubUuid,
             List<String> expand
@@ -77,8 +77,8 @@ public class ClubController implements ClubsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN')")
-    public ResponseEntity<ClubDto> patchClubByUuid(UUID clubUuid, ClubUpdateRequest clubUpdateRequest) {
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
+    public ResponseEntity<ClubDto> updateClubByUuid(UUID clubUuid, ClubUpdateRequest clubUpdateRequest) {
         return clubService.updateClub(clubUuid, clubUpdateRequest)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubUuid));
@@ -86,7 +86,7 @@ public class ClubController implements ClubsApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<ClubDto> patchClubLogoByUuid(UUID clubUuid, MultipartFile file) {
+    public ResponseEntity<ClubDto> updateClubLogoByUuid(UUID clubUuid, MultipartFile file) {
         return clubService.updateClubLogo(clubUuid, file)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubUuid));

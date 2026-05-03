@@ -455,15 +455,15 @@ export class ClubsService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public patchClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ClubDto>;
-    public patchClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ClubDto>>;
-    public patchClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ClubDto>>;
-    public patchClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ClubDto>;
+    public updateClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ClubDto>>;
+    public updateClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ClubDto>>;
+    public updateClubByUuid(clubUuid: string, clubUpdateRequest: ClubUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (clubUuid === null || clubUuid === undefined) {
-            throw new Error('Required parameter clubUuid was null or undefined when calling patchClubByUuid.');
+            throw new Error('Required parameter clubUuid was null or undefined when calling updateClubByUuid.');
         }
         if (clubUpdateRequest === null || clubUpdateRequest === undefined) {
-            throw new Error('Required parameter clubUpdateRequest was null or undefined when calling patchClubByUuid.');
+            throw new Error('Required parameter clubUpdateRequest was null or undefined when calling updateClubByUuid.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -505,7 +505,7 @@ export class ClubsService extends BaseService {
 
         let localVarPath = `/clubs/${this.configuration.encodeParam({name: "clubUuid", value: clubUuid, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: "uuid"})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<ClubDto>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<ClubDto>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: clubUpdateRequest,
@@ -526,15 +526,15 @@ export class ClubsService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public patchClubLogoByUuid(clubUuid: string, file: Blob, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ClubDto>;
-    public patchClubLogoByUuid(clubUuid: string, file: Blob, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ClubDto>>;
-    public patchClubLogoByUuid(clubUuid: string, file: Blob, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ClubDto>>;
-    public patchClubLogoByUuid(clubUuid: string, file: Blob, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateClubLogoByUuid(clubUuid: string, file: Blob, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<ClubDto>;
+    public updateClubLogoByUuid(clubUuid: string, file: Blob, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<ClubDto>>;
+    public updateClubLogoByUuid(clubUuid: string, file: Blob, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<ClubDto>>;
+    public updateClubLogoByUuid(clubUuid: string, file: Blob, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (clubUuid === null || clubUuid === undefined) {
-            throw new Error('Required parameter clubUuid was null or undefined when calling patchClubLogoByUuid.');
+            throw new Error('Required parameter clubUuid was null or undefined when calling updateClubLogoByUuid.');
         }
         if (file === null || file === undefined) {
-            throw new Error('Required parameter file was null or undefined when calling patchClubLogoByUuid.');
+            throw new Error('Required parameter file was null or undefined when calling updateClubLogoByUuid.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -589,7 +589,7 @@ export class ClubsService extends BaseService {
 
         let localVarPath = `/clubs/${this.configuration.encodeParam({name: "clubUuid", value: clubUuid, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: "uuid"})}/logo`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<ClubDto>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<ClubDto>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: localVarConvertFormParamsToString ? localVarFormParams.toString() : localVarFormParams,

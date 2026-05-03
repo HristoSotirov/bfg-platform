@@ -59,6 +59,8 @@
         [(ngModel)]="formData.shortName"
         placeholder="Кратко наименование"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+        [class.border-red-500]="touched['shortName'] && !formData.shortName.trim()"
+        (blur)="touched['shortName'] = true"
       />
     </div>
 
@@ -70,6 +72,8 @@
         [(ngModel)]="formData.name"
         placeholder="Пълно наименование"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+        [class.border-red-500]="touched['name'] && !formData.name.trim()"
+        (blur)="touched['name'] = true"
       />
     </div>
 
@@ -81,6 +85,8 @@
         [(ngModel)]="formData.location"
         placeholder="Гр., обект"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+        [class.border-red-500]="touched['location'] && !formData.location.trim()"
+        (blur)="touched['location'] = true"
       />
     </div>
 

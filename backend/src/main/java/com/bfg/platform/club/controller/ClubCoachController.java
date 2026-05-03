@@ -24,14 +24,14 @@ public class ClubCoachController implements ClubCoachesApi {
     private final ClubCoachService clubCoachService;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetClubCoaches200Response> getClubCoaches(UUID clubUuid, String filter, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
         var page = clubCoachService.getCoachesByClubId(clubUuid, filter, orderBy, top, skip, expand);
         return ResponseEntity.ok(PageConverter.toResponse(page, GetClubCoaches200Response.class));
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ClubDto> getClubByCoachId(UUID coachId, List<String> expand) {
         return clubCoachService.getClubByCoachId(coachId, expand)
                 .map(ResponseEntity::ok)

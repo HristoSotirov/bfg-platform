@@ -11,12 +11,12 @@ import { AccreditationStatus } from './accreditationStatus';
 
 
 /**
- * Request body for PATCH accreditation status (single enum field)
+ * Request body for updating accreditation status (single enum field)
  */
-export interface AccreditationStatusPatchRequest { 
+export interface AccreditationStatusUpdateRequest { 
     status: AccreditationStatus;
 }
-export namespace AccreditationStatusPatchRequest {
+export namespace AccreditationStatusUpdateRequest {
 }
 
 

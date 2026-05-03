@@ -39,6 +39,8 @@ export class AddQualificationDialogComponent implements OnChanges {
     laneCount: null as number | null,
   };
 
+  touched: Record<string, boolean> = {};
+
   saving = false;
   error: string | null = null;
 
@@ -65,6 +67,7 @@ export class AddQualificationDialogComponent implements OnChanges {
       name: '',
       laneCount: null,
     };
+    this.touched = {};
     this.error = null;
     this.saving = false;
   }
@@ -74,6 +77,8 @@ export class AddQualificationDialogComponent implements OnChanges {
   }
 
   save(): void {
+    this.touched['name'] = true;
+    this.cdr.markForCheck();
     if (!this.isFormValid) return;
 
     this.saving = true;
@@ -81,7 +86,7 @@ export class AddQualificationDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     const request: QualificationSchemeRequest = {
-      name: this.formData.name,
+      name: this.formData.name.trim(),
       laneCount: this.formData.laneCount!,
       isActive: true,
     };

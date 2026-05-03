@@ -50,6 +50,8 @@ export class AddAthleteDialogComponent {
     gender: '' as Gender | '',
   };
 
+  touched: Record<string, boolean> = {};
+
   loading = false;
   error: string | null = null;
   isConfirmDialogOpen = false;
@@ -73,6 +75,7 @@ export class AddAthleteDialogComponent {
       dateOfBirth: '',
       gender: '' as Gender | '',
     };
+    this.touched = {};
     this.error = null;
     this.loading = false;
     this.closed.emit();
@@ -80,6 +83,11 @@ export class AddAthleteDialogComponent {
   }
 
   onSubmit(): void {
+    this.touched['firstName'] = true;
+    this.touched['lastName'] = true;
+    this.touched['gender'] = true;
+    this.touched['dateOfBirth'] = true;
+    this.cdr.markForCheck();
     if (!this.formData.firstName?.trim()) {
       this.error = 'Името е задължително';
       this.cdr.markForCheck();

@@ -11,7 +11,7 @@ export class NavigationService {
       id: 'accreditations',
       label: 'Картотеки',
       route: '/accreditations',
-      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'],
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE'],
     },
     {
       id: 'clubs',
@@ -23,19 +23,19 @@ export class NavigationService {
       id: 'users',
       label: 'Потребители',
       route: '/users',
-      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN'],
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'UMPIRE'],
     },
     {
       id: 'rules',
       label: 'Правилник',
       route: '/regulations',
-      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'],
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE'],
     },
     {
       id: 'competitions',
       label: 'Състезания',
       route: '/competitions',
-      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH'],
+      requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE'],
     },
     {
       id: 'results',

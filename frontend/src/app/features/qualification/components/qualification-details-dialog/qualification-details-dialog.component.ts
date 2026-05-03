@@ -68,6 +68,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   isEditing = false;
   saving = false;
   error: string | null = null;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
 
   editData = {
@@ -320,24 +321,40 @@ export class QualificationDetailsDialogComponent implements OnChanges {
       laneCount: this.scheme.laneCount || 0,
       isActive: this.scheme.isActive ?? true,
     };
+    this.touched = {};
     this.isEditing = true;
     this.cdr.markForCheck();
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.error = null;
     this.cdr.markForCheck();
   }
 
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && this.editData.laneCount != null && this.editData.laneCount > 0;
+  }
+
   saveScheme(): void {
     if (!this.scheme?.uuid) return;
+
+    this.touched['name'] = true;
+    this.touched['laneCount'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const request: QualificationSchemeRequest = {
-      name: this.editData.name,
+      name: this.editData.name.trim(),
       laneCount: this.editData.laneCount,
       isActive: this.editData.isActive,
     };
@@ -738,6 +755,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
     this.isEditing = false;
     this.error = null;
     this.saving = false;
+    this.touched = {};
     this.tierGroups = [];
     this.loadingTiers = false;
     this.isAddTierDialogOpen = false;

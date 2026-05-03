@@ -14,19 +14,18 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import {
-  AccreditationsService,
-  AthleteBatchMigrationRequest,
-  AthleteBatchMigrationRequestItem,
-  AthleteBatchMigrationResponse,
-  Gender,
+  UsersService,
+  UserBatchMigrationRequest,
+  UserBatchMigrationRequestItem,
+  UserBatchMigrationResponse,
+  SystemRole,
 } from '../../../../core/services/api';
-import { takeUntil, Subject, forkJoin, of, catchError, delay, retryWhen, scan, map, EMPTY } from 'rxjs';
+import { takeUntil, Subject, forkJoin, of, catchError, delay, retryWhen, scan, map } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as XLSX from 'xlsx';
 
-const VALID_CARD_NUMBER_REGEX = /^[0-9]{4,6}$/;
-const MAX_RETRIES = 3;
 const BATCH_SIZE = 100;
+const MAX_RETRIES = 3;
 
 interface FieldMapping {
   dataField: string;
@@ -36,23 +35,23 @@ interface FieldMapping {
 }
 
 interface MigrationResult {
-  totalMigrated: number;
+  totalCreated: number;
   totalSkipped: number;
-  skippedItems: Array<{ athlete: AthleteBatchMigrationRequestItem; reason: string }>;
+  skippedItems: Array<{ user: UserBatchMigrationRequestItem; reason: string }>;
   failedChunkCount: number;
   totalChunkCount: number;
   failedChunkErrors: Array<{ chunkIndex: number; message: string }>;
 }
 
 @Component({
-  selector: 'app-migration-dialog',
+  selector: 'app-user-migration-dialog',
   standalone: true,
   imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
-  templateUrl: './migration-dialog.component.html',
-  styleUrl: './migration-dialog.component.scss',
+  templateUrl: './user-migration-dialog.component.html',
+  styleUrl: './user-migration-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class MigrationDialogComponent implements OnChanges {
+export class UserMigrationDialogComponent implements OnChanges {
   @Input() isOpen = false;
 
   @Output() closed = new EventEmitter<void>();
@@ -65,21 +64,28 @@ export class MigrationDialogComponent implements OnChanges {
   excelColumns: string[] = [];
   fieldMappings: FieldMapping[] = [];
 
-  parsedAthletes: AthleteBatchMigrationRequestItem[] = [];
+  parsedUsers: UserBatchMigrationRequestItem[] = [];
 
   readonly dataFields = [
-    { value: 'oldCardNumber', label: 'Картотечен номер' },
     { value: 'firstName', label: 'Име' },
-    { value: 'middleName', label: 'Презиме' },
     { value: 'lastName', label: 'Фамилия' },
-    { value: 'gender', label: 'Пол' },
     { value: 'dateOfBirth', label: 'Дата на раждане' },
+    { value: 'email', label: 'Имейл' },
+    { value: 'role', label: 'Роля' },
   ];
 
-  private readonly requiredFields = ['oldCardNumber', 'firstName', 'middleName', 'lastName', 'gender', 'dateOfBirth'];
+  private readonly requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'email', 'role'];
 
-  migrationYear = new Date().getFullYear();
-  maxYear = new Date().getFullYear();
+  readonly roleOptions: SearchableSelectOption[] = [
+    { value: '', label: 'Не задавай' },
+    { value: SystemRole.FederationAdmin, label: 'Администратор на федерацията' },
+    { value: SystemRole.ClubAdmin, label: 'Администратор на клуб' },
+    { value: SystemRole.Coach, label: 'Треньор' },
+    { value: SystemRole.Umpire, label: 'Съдия' },
+  ];
+
+  defaultRole: SystemRole | '' = '';
+
   step: 'upload' | 'mapping' | 'preview' | 'results' = 'upload';
   migrating = false;
   error: string | null = null;
@@ -87,7 +93,7 @@ export class MigrationDialogComponent implements OnChanges {
   migrationProgress = '';
 
   constructor(
-    private accreditationsService: AccreditationsService,
+    private usersService: UsersService,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -109,12 +115,13 @@ export class MigrationDialogComponent implements OnChanges {
     this.fileName = '';
     this.excelColumns = [];
     this.fieldMappings = [];
-    this.parsedAthletes = [];
+    this.parsedUsers = [];
     this.step = 'upload';
     this.migrating = false;
     this.error = null;
     this.migrationResult = null;
     this.migrationProgress = '';
+    this.defaultRole = '';
   }
 
   onFileSelected(event: Event): void {
@@ -172,9 +179,13 @@ export class MigrationDialogComponent implements OnChanges {
   }
 
   get hasRequiredMappings(): boolean {
+    const roleField = this.fieldMappings.find(f => f.dataField === 'role');
+    const roleMapped = roleField?.excelColumn !== '';
+    const roleHasDefault = this.defaultRole !== '';
+
     return this.fieldMappings
-      .filter(f => f.required)
-      .every(f => f.excelColumn !== '');
+      .filter(f => f.required && f.dataField !== 'role')
+      .every(f => f.excelColumn !== '') && (roleMapped || roleHasDefault);
   }
 
   private excelSerialToDate(serial: number): string | null {
@@ -185,19 +196,6 @@ export class MigrationDialogComponent implements OnChanges {
     const m = String(date.getUTCMonth() + 1).padStart(2, '0');
     const d = String(date.getUTCDate()).padStart(2, '0');
     return `${y}-${m}-${d}`;
-  }
-
-  private normalizeGender(raw: string): 'MALE' | 'FEMALE' | null {
-    const s = raw.trim().toLowerCase();
-    if (s === 'male' || s === 'мъж' || s === 'm') return Gender.MALE;
-    if (s === 'female' || s === 'жена' || s === 'f' || s === 'ж') return Gender.FEMALE;
-    return null;
-  }
-
-  genderLabel(gender: string): string {
-    if (gender === Gender.MALE) return 'Мъж';
-    if (gender === Gender.FEMALE) return 'Жена';
-    return gender ?? '';
   }
 
   private normalizeDateOfBirth(value: string | number): string | null {
@@ -212,7 +210,27 @@ export class MigrationDialogComponent implements OnChanges {
     return null;
   }
 
-  private rowToAthlete(row: any[]): AthleteBatchMigrationRequestItem | null {
+  private normalizeRole(raw: string): SystemRole | null {
+    const s = raw.trim().toUpperCase();
+    if (s === 'FEDERATION_ADMIN' || s === 'АДМИНИСТРАТОР НА ФЕДЕРАЦИЯТА') return SystemRole.FederationAdmin;
+    if (s === 'CLUB_ADMIN' || s === 'АДМИНИСТРАТОР НА КЛУБ') return SystemRole.ClubAdmin;
+    if (s === 'COACH' || s === 'ТРЕНЬОР') return SystemRole.Coach;
+    if (s === 'UMPIRE' || s === 'СЪДИЯ') return SystemRole.Umpire;
+    return null;
+  }
+
+  roleLabel(role: string): string {
+    switch (role) {
+      case SystemRole.AppAdmin: return 'Администратор';
+      case SystemRole.FederationAdmin: return 'Админ. на фед.';
+      case SystemRole.ClubAdmin: return 'Админ. на клуб';
+      case SystemRole.Coach: return 'Треньор';
+      case SystemRole.Umpire: return 'Съдия';
+      default: return role ?? '';
+    }
+  }
+
+  private rowToUser(row: any[]): UserBatchMigrationRequestItem | null {
     const get = (field: string): string => {
       const f = this.fieldMappings.find(x => x.dataField === field);
       if (!f || !f.excelColumn) return '';
@@ -220,24 +238,21 @@ export class MigrationDialogComponent implements OnChanges {
       if (idx < 0) return '';
       return String(row[idx] ?? '').trim();
     };
-    const oldCardNumber = get('oldCardNumber');
-    if (!VALID_CARD_NUMBER_REGEX.test(oldCardNumber)) return null;
+
     const firstName = get('firstName');
-    const middleName = get('middleName');
     const lastName = get('lastName');
-    const genderNorm = this.normalizeGender(get('gender'));
-    if (!firstName || !middleName || !lastName || !genderNorm) return null;
+    const email = get('email');
+    if (!firstName || !lastName || !email) return null;
+
     const dateVal = get('dateOfBirth');
     const dateOfBirth = this.normalizeDateOfBirth(dateVal) ?? this.normalizeDateOfBirth(Number(dateVal));
     if (!dateOfBirth) return null;
-    return {
-      oldCardNumber,
-      firstName,
-      middleName,
-      lastName,
-      gender: genderNorm,
-      dateOfBirth,
-    };
+
+    const roleRaw = get('role');
+    const role = roleRaw ? this.normalizeRole(roleRaw) : (this.defaultRole || null);
+    if (!role) return null;
+
+    return { firstName, lastName, dateOfBirth, email, role, username: email };
   }
 
   goToPreview(): void {
@@ -249,12 +264,12 @@ export class MigrationDialogComponent implements OnChanges {
         const workbook = XLSX.read(data, { type: 'array' });
         const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
         const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as any[][];
-        const athletes: AthleteBatchMigrationRequestItem[] = [];
+        const users: UserBatchMigrationRequestItem[] = [];
         for (let i = 1; i < jsonData.length; i++) {
-          const item = this.rowToAthlete(jsonData[i]);
-          if (item) athletes.push(item);
+          const item = this.rowToUser(jsonData[i]);
+          if (item) users.push(item);
         }
-        this.parsedAthletes = athletes;
+        this.parsedUsers = users;
         this.step = 'preview';
         this.error = null;
         this.cdr.markForCheck();
@@ -268,13 +283,13 @@ export class MigrationDialogComponent implements OnChanges {
 
   goBackToMapping(): void {
     this.step = 'mapping';
-    this.parsedAthletes = [];
+    this.parsedUsers = [];
     this.cdr.markForCheck();
   }
 
-  private migrateChunkWithRetry(chunk: AthleteBatchMigrationRequestItem[]) {
-    const request: AthleteBatchMigrationRequest = { year: this.migrationYear, athletes: chunk };
-    return this.accreditationsService.batchMigrateAthletes(request).pipe(
+  private migrateChunkWithRetry(chunk: UserBatchMigrationRequestItem[]) {
+    const request: UserBatchMigrationRequest = { users: chunk };
+    return this.usersService.migrateUsers(request).pipe(
       retryWhen((errors) =>
         errors.pipe(
           scan((retryCount, err: HttpErrorResponse) => {
@@ -285,26 +300,26 @@ export class MigrationDialogComponent implements OnChanges {
           delay(1000),
         ),
       ),
-      map((r): { success: true; response: AthleteBatchMigrationResponse } => ({ success: true, response: r })),
+      map((r): { success: true; response: UserBatchMigrationResponse } => ({ success: true, response: r })),
       catchError((err: unknown) => of({ success: false as const, error: err })),
     );
   }
 
   migrate(): void {
-    if (this.parsedAthletes.length === 0) {
-      this.error = 'Няма валидни записи за миграция (картотечен номер 4–6 цифри, пол Мъж/Жена и всички полета).';
+    if (this.parsedUsers.length === 0) {
+      this.error = 'Няма валидни записи за миграция.';
       this.cdr.markForCheck();
       return;
     }
     this.migrating = true;
     this.error = null;
     this.migrationResult = null;
-    const chunks: AthleteBatchMigrationRequestItem[][] = [];
-    for (let i = 0; i < this.parsedAthletes.length; i += BATCH_SIZE) {
-      chunks.push(this.parsedAthletes.slice(i, i + BATCH_SIZE));
+    const chunks: UserBatchMigrationRequestItem[][] = [];
+    for (let i = 0; i < this.parsedUsers.length; i += BATCH_SIZE) {
+      chunks.push(this.parsedUsers.slice(i, i + BATCH_SIZE));
     }
     const totalChunks = chunks.length;
-    this.migrationProgress = `Изпращане на ${this.parsedAthletes.length} записа в ${totalChunks} заявки...`;
+    this.migrationProgress = `Изпращане на ${this.parsedUsers.length} записа в ${totalChunks} заявки...`;
     this.cdr.markForCheck();
 
     const requests = chunks.map((chunk) => this.migrateChunkWithRetry(chunk));
@@ -312,27 +327,32 @@ export class MigrationDialogComponent implements OnChanges {
     forkJoin(requests)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (results: Array<{ success: true; response: AthleteBatchMigrationResponse } | { success: false; error: unknown }>) => {
+        next: (results: Array<{ success: true; response: UserBatchMigrationResponse } | { success: false; error: unknown }>) => {
           this.migrating = false;
           this.migrationProgress = '';
-          let totalMigrated = 0;
+          let totalCreated = 0;
           let totalSkipped = 0;
-          const skippedItems: Array<{ athlete: AthleteBatchMigrationRequestItem; reason: string }> = [];
+          const skippedItems: Array<{ user: UserBatchMigrationRequestItem; reason: string }> = [];
           const failedChunkErrors: Array<{ chunkIndex: number; message: string }> = [];
           results.forEach((r, index) => {
             if (r.success) {
-              totalMigrated += r.response.migrated?.length ?? 0;
+              totalCreated += r.response.created?.length ?? 0;
               (r.response.skipped ?? []).forEach((s) => {
-                if (s.athlete != null && s.reason != null)
-                  skippedItems.push({ athlete: s.athlete, reason: s.reason });
+                if (s.user != null && s.reason != null)
+                  skippedItems.push({ user: s.user, reason: s.reason });
               });
               totalSkipped += r.response.skipped?.length ?? 0;
             } else {
-              failedChunkErrors.push({ chunkIndex: index + 1, message: this.getErrorMessage(r.error) });
+              const errorMsg = this.getErrorMessage(r.error);
+              failedChunkErrors.push({ chunkIndex: index + 1, message: errorMsg });
+              chunks[index].forEach((user) => {
+                skippedItems.push({ user, reason: errorMsg });
+              });
+              totalSkipped += chunks[index].length;
             }
           });
           this.migrationResult = {
-            totalMigrated,
+            totalCreated,
             totalSkipped,
             skippedItems,
             failedChunkCount: failedChunkErrors.length,
@@ -367,7 +387,7 @@ export class MigrationDialogComponent implements OnChanges {
   }
 
   finishResults(): void {
-    if (this.migrationResult && this.migrationResult.totalMigrated > 0) {
+    if (this.migrationResult && this.migrationResult.totalCreated > 0) {
       this.migrated.emit();
     }
     this.closed.emit();

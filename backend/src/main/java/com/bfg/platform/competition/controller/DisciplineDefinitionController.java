@@ -24,7 +24,7 @@ public class DisciplineDefinitionController implements DisciplineDefinitionsApi 
     private final DisciplineDefinitionService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllDisciplineDefinitions200Response> getAllDisciplineDefinitions(
             String filter, String search, List<String> orderBy,
             Integer top, Integer skip, List<String> expand) {
@@ -42,7 +42,7 @@ public class DisciplineDefinitionController implements DisciplineDefinitionsApi 
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<DisciplineDefinitionDto> getDisciplineDefinitionByUuid(UUID uuid, List<String> expand) {
         return service.getByUuid(uuid, expand)
                 .map(ResponseEntity::ok)

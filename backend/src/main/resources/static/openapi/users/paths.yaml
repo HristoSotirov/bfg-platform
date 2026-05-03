@@ -168,11 +168,11 @@
             schema:
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
-  patch:
+  put:
     tags:
       - Users
     summary: Update user by UUID
-    operationId: patchUserByUuid
+    operationId: updateUserByUuid
     parameters:
       - name: userUuid
         in: path
@@ -239,6 +239,32 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
       "409":
         description: Conflict - user is assigned as club admin or coach
+        content:
+          application/json:
+            schema:
+              $ref: "../common/schemas.yaml#/ErrorResponse"
+
+/users/migrate:
+  post:
+    tags:
+      - Users
+    summary: Batch migrate users from Excel import
+    operationId: migrateUsers
+    requestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            $ref: "../users/schemas.yaml#/UserBatchMigrationRequest"
+    responses:
+      "200":
+        description: Migration completed (some may be skipped)
+        content:
+          application/json:
+            schema:
+              $ref: "../users/schemas.yaml#/UserBatchMigrationResponse"
+      "400":
+        description: Bad request - validation error
         content:
           application/json:
             schema:

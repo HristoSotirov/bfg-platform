@@ -122,6 +122,8 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     isActive: true,
   };
 
+  touched: Record<string, boolean> = {};
+
   readonly statusOptions: SearchableSelectOption[] = [
     { value: 'true', label: 'Активен' },
     { value: 'false', label: 'Неактивен' },
@@ -388,8 +390,8 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     this.disciplineSaveError = null;
     this.cdr.markForCheck();
     const request: DisciplineDefinitionRequest = {
-      name: this.disciplineEditData.name,
-      shortName: this.disciplineEditData.shortName,
+      name: this.disciplineEditData.name.trim(),
+      shortName: this.disciplineEditData.shortName.trim(),
       competitionGroupId: this.group!.uuid!,
       gender: this.disciplineEditData.gender as DisciplineGender,
       boatClass: this.disciplineEditData.boatClass as BoatClass,
@@ -562,13 +564,22 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       isActive: this.group.isActive ?? true,
     };
     this.isEditing = true;
+    this.touched = {};
     this.cdr.markForCheck();
   }
 
   cancelEditing(): void {
     this.isEditing = false;
     this.saveError = null;
+    this.touched = {};
     this.cdr.markForCheck();
+  }
+
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && !!this.editData.shortName?.trim()
+      && this.editData.minAge != null && this.editData.minAge >= 0
+      && this.editData.maxAge != null && this.editData.maxAge >= 0;
   }
 
   onStatusChange(value: string | null): void {
@@ -582,14 +593,19 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
+    this.touched['name'] = true;
+    this.touched['shortName'] = true;
+    this.touched['minAge'] = true;
+    this.touched['maxAge'] = true;
     if (!this.group?.uuid) return;
+    if (!this.isEditFormValid) return;
     this.saving = true;
     this.saveError = null;
     this.cdr.markForCheck();
 
     const request: CompetitionGroupDefinitionRequest = {
-      name: this.editData.name,
-      shortName: this.editData.shortName,
+      name: this.editData.name.trim(),
+      shortName: this.editData.shortName.trim(),
       minAge: this.editData.minAge ?? 0,
       maxAge: this.editData.maxAge ?? 0,
       coxMinAge: this.editData.coxMinAge ?? undefined,

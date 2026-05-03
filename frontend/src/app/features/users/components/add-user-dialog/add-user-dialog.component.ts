@@ -57,6 +57,7 @@ export class AddUserDialogComponent implements OnChanges {
     role: '' as SystemRole | '',
   };
 
+  touched: Record<string, boolean> = {};
   saving = false;
   error: string | null = null;
 
@@ -67,6 +68,7 @@ export class AddUserDialogComponent implements OnChanges {
     [SystemRole.FederationAdmin]: 'Администратор на федерацията',
     [SystemRole.ClubAdmin]: 'Администратор на клуб',
     [SystemRole.Coach]: 'Треньор',
+    [SystemRole.Umpire]: 'Съдия',
   };
 
   constructor(
@@ -103,6 +105,7 @@ export class AddUserDialogComponent implements OnChanges {
       username: '',
       role: defaultRole,
     };
+    this.touched = {};
     this.error = null;
     this.saving = false;
   }
@@ -116,9 +119,9 @@ export class AddUserDialogComponent implements OnChanges {
     let availableRoles: SystemRole[] = [];
 
     if (this.userRole === SystemRole.AppAdmin) {
-      availableRoles = [SystemRole.AppAdmin, SystemRole.FederationAdmin, SystemRole.ClubAdmin, SystemRole.Coach];
+      availableRoles = [SystemRole.AppAdmin, SystemRole.FederationAdmin, SystemRole.ClubAdmin, SystemRole.Coach, SystemRole.Umpire];
     } else if (this.userRole === SystemRole.FederationAdmin) {
-      availableRoles = [SystemRole.ClubAdmin, SystemRole.Coach];
+      availableRoles = [SystemRole.ClubAdmin, SystemRole.Coach, SystemRole.Umpire];
     } else if (this.userRole === SystemRole.ClubAdmin) {
       availableRoles = [SystemRole.Coach];
     }
@@ -157,6 +160,12 @@ export class AddUserDialogComponent implements OnChanges {
   }
 
   save(): void {
+    this.touched['firstName'] = true;
+    this.touched['lastName'] = true;
+    this.touched['dateOfBirth'] = true;
+    this.touched['email'] = true;
+    this.touched['role'] = true;
+
     if (!this.isFormValid()) {
       this.error = 'Моля, попълнете всички задължителни полета';
       this.cdr.markForCheck();
@@ -168,11 +177,11 @@ export class AddUserDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     const createRequest: UserCreateRequest = {
-      firstName: this.formData.firstName,
-      lastName: this.formData.lastName,
+      firstName: this.formData.firstName.trim(),
+      lastName: this.formData.lastName.trim(),
       dateOfBirth: this.formData.dateOfBirth || '',
-      email: this.formData.email,
-      username: this.formData.username || undefined,
+      email: this.formData.email.trim(),
+      username: this.formData.username?.trim() || undefined,
       role: this.formData.role as SystemRole,
     };
 

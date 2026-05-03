@@ -33,14 +33,14 @@ public class ScoringSchemeMapper {
 
     public static ScoringScheme fromRequest(ScoringSchemeRequest request) {
         ScoringScheme entity = new ScoringScheme();
-        entity.setName(request.getName());
+        entity.setName(request.getName().trim());
         entity.setScoringType(request.getScoringType());
         entity.setActive(request.getIsActive());
         return entity;
     }
 
     public static void updateFromRequest(ScoringScheme entity, ScoringSchemeRequest request) {
-        entity.setName(request.getName());
+        entity.setName(request.getName().trim());
         entity.setScoringType(request.getScoringType());
         entity.setActive(request.getIsActive());
     }

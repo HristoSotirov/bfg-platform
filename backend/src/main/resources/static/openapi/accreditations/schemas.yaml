@@ -120,9 +120,9 @@ AccreditationStatus:
     - EXPIRED
     - SUSPENDED
 
-AccreditationStatusPatchRequest:
+AccreditationStatusUpdateRequest:
   type: object
-  description: Request body for PATCH accreditation status (single enum field)
+  description: Request body for updating accreditation status (single enum field)
   required:
     - status
   properties:

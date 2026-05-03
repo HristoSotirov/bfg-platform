@@ -71,6 +71,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
   isEditing = false;
   saving = false;
   error: string | null = null;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
 
   editData = {
@@ -491,25 +492,39 @@ export class ScoringDetailsDialogComponent implements OnChanges {
       scoringType: (this.scheme.scoringType as ScoringType) || ScoringType.Fixed,
       isActive: this.scheme.isActive ?? true,
     };
+    this.touched = {};
     this.isEditing = true;
     this.cdr.markForCheck();
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.error = null;
     this.cdr.markForCheck();
   }
 
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && !!this.editData.scoringType;
+  }
+
   save(): void {
     if (!this.scheme?.uuid) return;
+
+    this.touched['name'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
 
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const request: ScoringSchemeRequest = {
-      name: this.editData.name,
+      name: this.editData.name.trim(),
       scoringType: this.editData.scoringType,
       isActive: this.editData.isActive,
     };
@@ -547,6 +562,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
     this.isEditing = false;
     this.error = null;
     this.saving = false;
+    this.touched = {};
     this.rules = [];
     this.coefficients = [];
     this.loadingRules = false;

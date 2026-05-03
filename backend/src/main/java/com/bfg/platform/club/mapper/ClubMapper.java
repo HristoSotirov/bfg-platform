@@ -59,10 +59,10 @@ public class ClubMapper {
 
     public static Club fromCreateRequest(ClubCreateRequest request, String cardPrefix) {
         Club club = new Club();
-        club.setName(request.getName());
-        club.setShortName(request.getShortName());
-        club.setCardPrefix(cardPrefix);
-        club.setClubEmail(request.getClubEmail());
+        club.setName(request.getName().trim());
+        club.setShortName(request.getShortName().trim());
+        club.setCardPrefix(cardPrefix != null ? cardPrefix.trim() : null);
+        club.setClubEmail(request.getClubEmail().trim());
         club.setClubAdmin(request.getClubAdminId());
         club.setType(request.getType());
         club.setActive(true);
@@ -70,8 +70,8 @@ public class ClubMapper {
     }
 
     public static void updateClubFromRequest(Club club, ClubUpdateRequest request) {
-        if (request.getName() != null) club.setName(request.getName());
-        if (request.getShortName() != null) club.setShortName(request.getShortName());
+        if (request.getName() != null) club.setName(request.getName().trim());
+        if (request.getShortName() != null) club.setShortName(request.getShortName().trim());
         if (request.getIsActive() != null) club.setActive(request.getIsActive());
         if (request.getClubAdminId() != null) club.setClubAdmin(request.getClubAdminId());
         if (request.getType() != null) club.setType(request.getType());
@@ -79,10 +79,10 @@ public class ClubMapper {
 
     public static Club fromBatchCreateRequestItem(ClubBatchCreateRequestItem item, UUID adminUserId) {
         Club club = new Club();
-        club.setName(item.getName());
-        club.setShortName(item.getShortName());
-        club.setCardPrefix(item.getCardPrefix());
-        club.setClubEmail(item.getClubEmail());
+        club.setName(item.getName().trim());
+        club.setShortName(item.getShortName().trim());
+        club.setCardPrefix(item.getCardPrefix().trim());
+        club.setClubEmail(item.getClubEmail().trim());
         club.setClubAdmin(adminUserId);
         club.setActive(true);
         club.setType(ScopeType.INTERNAL); // migrations are internal only

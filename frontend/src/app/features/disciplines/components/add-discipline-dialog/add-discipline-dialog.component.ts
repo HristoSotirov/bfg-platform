@@ -54,6 +54,8 @@ export class AddDisciplineDialogComponent implements OnChanges {
     isActive: true,
   };
 
+  touched: Record<string, boolean> = {};
+
   readonly genderOptions: SearchableSelectOption[] = [
     { value: DisciplineGender.Male, label: 'Мъже' },
     { value: DisciplineGender.Female, label: 'Жени' },
@@ -128,6 +130,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
       maxBoatsPerClub: null,
       isActive: true,
     };
+    this.touched = {};
     this.error = null;
     this.saving = false;
   }
@@ -172,6 +175,9 @@ export class AddDisciplineDialogComponent implements OnChanges {
   }
 
   save(): void {
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
+    this.cdr.markForCheck();
     if (!this.isFormValid) return;
 
     this.saving = true;
@@ -179,8 +185,8 @@ export class AddDisciplineDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     const request: DisciplineDefinitionRequest = {
-      name: this.formData.name,
-      shortName: this.formData.shortName,
+      name: this.formData.name.trim(),
+      shortName: this.formData.shortName.trim(),
       gender: this.formData.gender as DisciplineGender,
       competitionGroupId: this.formData.competitionGroupId,
       boatClass: this.formData.boatClass as BoatClass,

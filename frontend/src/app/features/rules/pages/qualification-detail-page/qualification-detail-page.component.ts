@@ -67,6 +67,8 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
 
   editData = { name: '', laneCount: 0, isActive: true };
 
+  touched: Record<string, boolean> = {};
+
   isAddTierDialogOpen = false;
   addTierError: string | null = null;
   addTierData = {
@@ -284,6 +286,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
   startEditing(): void {
     if (!this.canEdit || !this.scheme) return;
     this.editData = { name: this.scheme.name || '', laneCount: this.scheme.laneCount || 0, isActive: this.scheme.isActive ?? true };
+    this.touched = {};
     this.isEditing = true;
     this.cdr.markForCheck();
   }
@@ -291,15 +294,24 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
   cancelEditing(): void {
     this.isEditing = false;
     this.saveError = null;
+    this.touched = {};
     this.cdr.markForCheck();
   }
 
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && this.editData.laneCount != null && this.editData.laneCount > 0;
+  }
+
   saveScheme(): void {
+    this.touched['name'] = true;
+    this.touched['laneCount'] = true;
     if (!this.scheme?.uuid) return;
+    if (!this.isEditFormValid) return;
     this.saving = true;
     this.saveError = null;
     this.cdr.markForCheck();
-    const request: QualificationSchemeRequest = { name: this.editData.name, laneCount: this.editData.laneCount, isActive: this.editData.isActive };
+    const request: QualificationSchemeRequest = { name: this.editData.name.trim(), laneCount: this.editData.laneCount, isActive: this.editData.isActive };
     this.schemesService.updateQualificationSchemeByUuid(this.scheme.uuid, request)
       .pipe(catchError((err) => throwError(() => ({ message: err?.error?.message || 'Грешка при запазване' }))), takeUntil(this.destroy$))
       .subscribe({

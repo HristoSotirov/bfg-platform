@@ -55,8 +55,8 @@ public class DisciplineDefinitionMapper {
 
     public static DisciplineDefinition fromCreateRequest(DisciplineDefinitionRequest request, BoatClassFields boatClassFields) {
         DisciplineDefinition entity = new DisciplineDefinition();
-        entity.setName(request.getName());
-        entity.setShortName(request.getShortName());
+        entity.setName(request.getName().trim());
+        entity.setShortName(request.getShortName().trim());
         entity.setCompetitionGroupId(request.getCompetitionGroupId());
         entity.setGender(request.getGender());
         entity.setBoatClass(request.getBoatClass());
@@ -71,8 +71,8 @@ public class DisciplineDefinitionMapper {
     }
 
     public static void updateFromRequest(DisciplineDefinition entity, DisciplineDefinitionRequest request, BoatClassFields boatClassFields) {
-        entity.setName(request.getName());
-        entity.setShortName(request.getShortName());
+        entity.setName(request.getName().trim());
+        entity.setShortName(request.getShortName().trim());
         entity.setCompetitionGroupId(request.getCompetitionGroupId());
         entity.setGender(request.getGender());
         entity.setBoatClass(request.getBoatClass());

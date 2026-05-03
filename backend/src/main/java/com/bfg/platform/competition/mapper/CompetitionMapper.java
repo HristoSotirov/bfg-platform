@@ -50,9 +50,9 @@ public class CompetitionMapper {
 
     public static Competition fromRequest(CompetitionCreateRequest request) {
         Competition entity = new Competition();
-        entity.setShortName(request.getShortName());
-        entity.setName(request.getName());
-        entity.setLocation(request.getLocation());
+        entity.setShortName(request.getShortName().trim());
+        entity.setName(request.getName().trim());
+        entity.setLocation(request.getLocation() != null ? request.getLocation().trim() : null);
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
         entity.setEntrySubmissionsOpenAt(request.getEntrySubmissionsOpenAt() != null
@@ -73,9 +73,9 @@ public class CompetitionMapper {
     }
 
     public static void updateFromRequest(Competition entity, CompetitionUpdateRequest request) {
-        entity.setShortName(request.getShortName());
-        entity.setName(request.getName());
-        entity.setLocation(request.getLocation());
+        entity.setShortName(request.getShortName().trim());
+        entity.setName(request.getName().trim());
+        entity.setLocation(request.getLocation() != null ? request.getLocation().trim() : null);
         entity.setStartDate(request.getStartDate());
         entity.setEndDate(request.getEndDate());
         entity.setEntrySubmissionsOpenAt(request.getEntrySubmissionsOpenAt() != null

@@ -16,7 +16,8 @@ export const SystemRole = {
     AppAdmin: 'APP_ADMIN',
     FederationAdmin: 'FEDERATION_ADMIN',
     ClubAdmin: 'CLUB_ADMIN',
-    Coach: 'COACH'
+    Coach: 'COACH',
+    Umpire: 'UMPIRE'
 } as const;
 export type SystemRole = typeof SystemRole[keyof typeof SystemRole];
 

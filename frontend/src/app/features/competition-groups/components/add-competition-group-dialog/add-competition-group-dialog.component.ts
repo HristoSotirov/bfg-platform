@@ -59,6 +59,8 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
     isActive: true,
   };
 
+  touched: Record<string, boolean> = {};
+
   saving = false;
   error: string | null = null;
 
@@ -127,6 +129,7 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
       femaleTeamLightMaxWeightKg: null,
       isActive: true,
     };
+    this.touched = {};
     this.error = null;
     this.saving = false;
   }
@@ -152,6 +155,9 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
   }
 
   save(): void {
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
+    this.cdr.markForCheck();
     if (!this.isFormValid) return;
 
     this.saving = true;
@@ -159,8 +165,8 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     const request: CompetitionGroupDefinitionRequest = {
-      name: this.formData.name,
-      shortName: this.formData.shortName,
+      name: this.formData.name.trim(),
+      shortName: this.formData.shortName.trim(),
       minAge: this.formData.minAge!,
       maxAge: this.formData.maxAge!,
       coxMinAge: this.formData.coxMinAge ?? undefined,

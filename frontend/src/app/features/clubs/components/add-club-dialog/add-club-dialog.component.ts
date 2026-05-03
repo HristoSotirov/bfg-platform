@@ -117,9 +117,9 @@ export class AddClubDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     const request: ClubCreateRequest = {
-      name: this.formData.name,
-      shortName: this.formData.shortName,
-      clubEmail: this.formData.clubEmail,
+      name: this.formData.name.trim(),
+      shortName: this.formData.shortName.trim(),
+      clubEmail: this.formData.clubEmail.trim(),
       clubAdminId: this.formData.clubAdminId || undefined,
       type: this.formData.type,
     };

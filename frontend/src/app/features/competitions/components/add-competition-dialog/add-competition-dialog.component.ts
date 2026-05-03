@@ -73,6 +73,8 @@ export class AddCompetitionDialogComponent implements OnChanges {
     isTemplate: false,
   };
 
+  touched: Record<string, boolean> = {};
+
   get isTemplate(): boolean {
     return this.formData.isTemplate;
   }
@@ -209,6 +211,9 @@ export class AddCompetitionDialogComponent implements OnChanges {
   }
 
   save(): void {
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
+    this.cdr.markForCheck();
     if (!this.isFormValid) return;
 
     this.saving = true;
@@ -217,9 +222,9 @@ export class AddCompetitionDialogComponent implements OnChanges {
     this.cdr.markForCheck();
 
     const request: CompetitionCreateRequest = {
-      shortName: this.formData.shortName,
-      name: this.formData.name,
-      location: this.formData.location,
+      shortName: this.formData.shortName.trim(),
+      name: this.formData.name.trim(),
+      location: this.formData.location.trim(),
       startDate: this.formData.startDate,
       endDate: this.formData.endDate,
       entrySubmissionsOpenAt: this.isTemplate ? undefined : (this.formData.entrySubmissionsOpenAt || undefined),
@@ -351,6 +356,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
       competitionType: '',
       isTemplate: false,
     };
+    this.touched = {};
     this.error = null;
     this.saving = false;
     this.showTemplatePicker = false;

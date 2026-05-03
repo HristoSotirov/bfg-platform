@@ -15,7 +15,7 @@ public class ScopeAccessPolicy {
             return Set.of();
         }
         return switch (role) {
-            case APP_ADMIN, FEDERATION_ADMIN ->
+            case APP_ADMIN, FEDERATION_ADMIN, UMPIRE ->
                 Set.of(ScopeType.INTERNAL, ScopeType.EXTERNAL, ScopeType.NATIONAL);
             case CLUB_ADMIN, COACH ->
                 clubType != null ? Set.of(clubType) : Set.of();
@@ -26,7 +26,7 @@ public class ScopeAccessPolicy {
         if (role == null) {
             return true;
         }
-        if (role == SystemRole.APP_ADMIN || role == SystemRole.FEDERATION_ADMIN) {
+        if (role == SystemRole.APP_ADMIN || role == SystemRole.FEDERATION_ADMIN || role == SystemRole.UMPIRE) {
             return false;
         }
         if (resourceType == ResourceType.ACCREDITATION || resourceType == ResourceType.ATHLETE) {

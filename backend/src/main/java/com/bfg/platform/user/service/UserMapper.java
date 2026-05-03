@@ -38,14 +38,14 @@ public class UserMapper {
 
     public static User fromCreateRequest(UserCreateRequest request) {
         User user = new User();
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
+        user.setFirstName(request.getFirstName().trim());
+        user.setLastName(request.getLastName().trim());
         user.setDateOfBirth(request.getDateOfBirth());
-        user.setEmail(request.getEmail());
+        user.setEmail(request.getEmail().trim());
         if (request.getUsername() != null && !request.getUsername().isBlank()) {
-            user.setUsername(request.getUsername());
+            user.setUsername(request.getUsername().trim());
         } else {
-            user.setUsername(request.getEmail());
+            user.setUsername(request.getEmail().trim());
         }
         user.setRole(request.getRole());
         user.setActive(true);
@@ -54,16 +54,16 @@ public class UserMapper {
 
     public static void updateUserFromRequest(User user, UserUpdateRequest request) {
         if (request.getFirstName() != null) {
-            user.setFirstName(request.getFirstName());
+            user.setFirstName(request.getFirstName().trim());
         }
         if (request.getLastName() != null) {
-            user.setLastName(request.getLastName());
+            user.setLastName(request.getLastName().trim());
         }
         if (request.getDateOfBirth() != null) {
             user.setDateOfBirth(request.getDateOfBirth());
         }
         if (request.getUsername() != null) {
-            user.setUsername(request.getUsername());
+            user.setUsername(request.getUsername().trim());
         }
         if (request.getIsActive() != null) {
             user.setActive(request.getIsActive());

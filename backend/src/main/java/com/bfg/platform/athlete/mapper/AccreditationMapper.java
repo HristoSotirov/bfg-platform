@@ -57,7 +57,7 @@ public class AccreditationMapper {
         Accreditation accreditation = new Accreditation();
         accreditation.setAthleteId(request.getAthleteId());
         accreditation.setClubId(request.getClubId());
-        accreditation.setAccreditationNumber(request.getAccreditationNumber());
+        accreditation.setAccreditationNumber(request.getAccreditationNumber() != null ? request.getAccreditationNumber().trim() : null);
         accreditation.setYear(request.getYear());
         accreditation.setStatus(request.getStatus());
 
@@ -74,7 +74,7 @@ public class AccreditationMapper {
         Accreditation accreditation = new Accreditation();
         accreditation.setAthleteId(athleteId);
         accreditation.setClubId(clubId);
-        accreditation.setAccreditationNumber(accreditationNumber);
+        accreditation.setAccreditationNumber(accreditationNumber != null ? accreditationNumber.trim() : null);
         accreditation.setYear(year);
         accreditation.setStatus(status);
         return accreditation;

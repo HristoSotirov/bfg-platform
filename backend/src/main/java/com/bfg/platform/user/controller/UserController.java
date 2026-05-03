@@ -6,6 +6,8 @@ import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.gen.api.UsersApi;
 import com.bfg.platform.common.util.PageConverter;
 import com.bfg.platform.gen.model.GetAllUsers200Response;
+import com.bfg.platform.gen.model.UserBatchMigrationRequest;
+import com.bfg.platform.gen.model.UserBatchMigrationResponse;
 import com.bfg.platform.gen.model.UserDto;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserUpdateRequest;
@@ -25,7 +27,7 @@ public class UserController implements UsersApi {
     private final UserService userService;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllUsers200Response> getAllUsers(
             String filter,
             String search,
@@ -39,7 +41,7 @@ public class UserController implements UsersApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<UserDto> getUserByUuid(
             UUID userUuid,
             List<String> expand
@@ -59,7 +61,7 @@ public class UserController implements UsersApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<UserDto> patchUserByUuid(UUID userUuid, UserUpdateRequest userUpdateRequest) {
+    public ResponseEntity<UserDto> updateUserByUuid(UUID userUuid, UserUpdateRequest userUpdateRequest) {
         return userService.updateUser(userUuid, userUpdateRequest)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("User", userUuid));
@@ -70,6 +72,13 @@ public class UserController implements UsersApi {
     public ResponseEntity<Void> deleteUserByUuid(UUID userUuid) {
         userService.deleteUser(userUuid);
         return ResponseEntity.noContent().build();
+    }
+
+    @Override
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
+    public ResponseEntity<UserBatchMigrationResponse> migrateUsers(UserBatchMigrationRequest userBatchMigrationRequest) {
+        UserBatchMigrationResponse response = userService.migrateUsers(userBatchMigrationRequest);
+        return ResponseEntity.ok(response);
     }
 }
 

@@ -75,6 +75,7 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
 
   isEditing = false;
   saving = false;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
 
   editData = {
@@ -194,6 +195,10 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
 
   get canDelete(): boolean {
     return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
+  }
+
+  get isEditFormValid(): boolean {
+    return !!(this.editData.shortName?.trim() && this.editData.name?.trim());
   }
 
   get canManageCoaches(): boolean {
@@ -485,6 +490,7 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
       isActive: this.club.isActive ?? true,
       clubAdminId: this.club.clubAdminId || '',
     };
+    this.touched = {};
     this.isEditing = true;
     this.cdr.markForCheck();
   }
@@ -506,6 +512,7 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.error = null;
     this.cdr.markForCheck();
   }
@@ -513,19 +520,27 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
   save(): void {
     if (!this.club?.uuid) return;
 
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const updateRequest: ClubUpdateRequest = {
-      name: this.editData.name || undefined,
-      shortName: this.editData.shortName || undefined,
+      name: this.editData.name.trim(),
+      shortName: this.editData.shortName.trim(),
       isActive: this.editData.isActive,
       clubAdminId: this.editData.clubAdminId || undefined,
     };
 
     this.clubsService
-      .patchClubByUuid(this.club.uuid, updateRequest)
+      .updateClubByUuid(this.club.uuid, updateRequest)
       .pipe(
         retryWhen((errors) =>
           errors.pipe(
@@ -617,7 +632,7 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     this.clubsService
-      .patchClubLogoByUuid(this.club.uuid, file)
+      .updateClubLogoByUuid(this.club.uuid, file)
       .pipe(
         retryWhen((errors) =>
           errors.pipe(
@@ -641,13 +656,13 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (updatedClub) => {
+        next: (updatedClub: ClubDto) => {
           this.uploadingLogo = false;
           this.logoError = null;
           if (updatedClub) this.club = updatedClub;
           this.cdr.markForCheck();
         },
-        error: (err) => {
+        error: (err: { message?: string }) => {
           this.uploadingLogo = false;
           this.logoError = err?.message || 'Грешка при качване на логото.';
           this.cdr.markForCheck();

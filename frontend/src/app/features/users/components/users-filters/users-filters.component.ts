@@ -50,6 +50,7 @@ export class UsersFiltersComponent implements OnInit {
     { value: SystemRole.FederationAdmin, label: 'Администратор на федерацията' },
     { value: SystemRole.ClubAdmin, label: 'Администратор на клуб' },
     { value: SystemRole.Coach, label: 'Треньор' },
+    { value: SystemRole.Umpire, label: 'Съдия' },
   ];
 
   readonly statusOptions: DropdownOption[] = [

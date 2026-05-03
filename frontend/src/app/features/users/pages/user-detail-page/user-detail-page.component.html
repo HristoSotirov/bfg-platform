@@ -130,6 +130,8 @@
                   type="text"
                   [(ngModel)]="editData.firstName"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                  [class.border-red-500]="touched['firstName'] && !editData.firstName.trim()"
+                  (blur)="touched['firstName'] = true"
                   [disabled]="saving"
                 />
               </div>
@@ -142,6 +144,8 @@
                   type="text"
                   [(ngModel)]="editData.lastName"
                   class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                  [class.border-red-500]="touched['lastName'] && !editData.lastName.trim()"
+                  (blur)="touched['lastName'] = true"
                   [disabled]="saving"
                 />
               </div>
@@ -190,7 +194,7 @@
 
               <div class="flex gap-2 pt-2">
                 <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
-                <app-button variant="primary" size="md" text="Запази" [disabled]="saving" (click)="save()"></app-button>
+                <app-button variant="primary" size="md" text="Запази" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
               </div>
 
             </div>

@@ -72,6 +72,8 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
     isActive: true,
   };
 
+  touched: Record<string, boolean> = {};
+
   readonly scoringTypeOptions: SearchableSelectOption[] = [
     { value: ScoringType.Fixed, label: 'Фиксирано' },
     { value: ScoringType.OffsetFromEnd, label: 'От края' },
@@ -218,6 +220,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
       scoringType: (this.scheme.scoringType as ScoringType) || ScoringType.Fixed,
       isActive: this.scheme.isActive ?? true,
     };
+    this.touched = {};
     this.isEditing = true;
     this.cdr.markForCheck();
   }
@@ -225,17 +228,25 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
   cancelEditing(): void {
     this.isEditing = false;
     this.saveError = null;
+    this.touched = {};
     this.cdr.markForCheck();
   }
 
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && !!this.editData.scoringType;
+  }
+
   save(): void {
+    this.touched['name'] = true;
     if (!this.scheme?.uuid) return;
+    if (!this.isEditFormValid) return;
     this.saving = true;
     this.saveError = null;
     this.cdr.markForCheck();
 
     const request: ScoringSchemeRequest = {
-      name: this.editData.name,
+      name: this.editData.name.trim(),
       scoringType: this.editData.scoringType,
       isActive: this.editData.isActive,
     };

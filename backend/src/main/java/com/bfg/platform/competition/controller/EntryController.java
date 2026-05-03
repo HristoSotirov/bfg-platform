@@ -19,7 +19,7 @@ public class EntryController implements EntriesApi {
     private final EntryService entryService;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ClubEntriesDto> getCompetitionEntries(
             UUID uuid, UUID clubId, List<String> expand) {
         return ResponseEntity.ok(entryService.getEntries(uuid, clubId, expand));

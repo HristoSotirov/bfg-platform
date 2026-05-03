@@ -6,6 +6,7 @@ SystemRole:
     - FEDERATION_ADMIN
     - CLUB_ADMIN
     - COACH
+    - UMPIRE
 
 UserDto:
   type: object
@@ -117,11 +118,18 @@ UserUpdateRequest:
   type: object
   description: Request payload for updating an existing user (partial update). Email and role cannot be updated.
   x-class-extra-annotation: '@NotNull(message = "{user.updateRequest.required}")'
+  required:
+    - firstName
+    - lastName
   properties:
     firstName:
       type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{user.firstName.required}")'
     lastName:
       type: string
+      minLength: 1
+      x-field-extra-annotation: '@NotBlank(message = "{user.lastName.required}")'
     dateOfBirth:
       type: string
       format: date
@@ -190,3 +198,81 @@ ClubCoachCreateRequest:
       description: UUID of the club to assign the coach to
       x-field-extra-annotation: '@NotNull(message = "{clubCoach.clubId.required}")'
       example: "550e8400-e29b-41d4-a716-446655440001"
+
+UserBatchMigrationRequest:
+  type: object
+  description: Request payload for batch migrating users from Excel
+  x-class-extra-annotation: '@NotNull(message = "{user.batchMigration.request.required}")'
+  required:
+    - users
+  properties:
+    users:
+      type: array
+      maxItems: 100
+      items:
+        $ref: "#/UserBatchMigrationRequestItem"
+      x-field-extra-annotation: '@NotNull(message = "{user.batchMigration.users.required}") @Size(min = 1, max = 100, message = "{user.batchMigration.users.size}")'
+
+UserBatchMigrationRequestItem:
+  type: object
+  description: Single user item within a batch migration request
+  required:
+    - firstName
+    - lastName
+    - dateOfBirth
+    - email
+    - role
+  properties:
+    firstName:
+      type: string
+      description: First name of the user
+      example: "Ivan"
+    lastName:
+      type: string
+      description: Last name of the user
+      example: "Petrov"
+    dateOfBirth:
+      type: string
+      format: date
+      description: Date of birth
+      example: "1980-01-15"
+    email:
+      type: string
+      format: email
+      description: Email address (also used as username if username not provided)
+      example: "ivan.petrov@example.com"
+    username:
+      type: string
+      description: Username for login (optional, defaults to email)
+      example: "ivan.petrov"
+    role:
+      $ref: "#/SystemRole"
+      description: System role to assign
+      example: "CLUB_ADMIN"
+
+UserBatchMigrationResponse:
+  type: object
+  description: Response from a batch user migration
+  properties:
+    created:
+      type: array
+      items:
+        $ref: "#/UserDto"
+      description: Successfully created users
+    skipped:
+      type: array
+      items:
+        $ref: "#/UserBatchMigrationSkippedItem"
+      description: Users that were skipped (e.g., email already exists)
+
+UserBatchMigrationSkippedItem:
+  type: object
+  description: A user that was skipped during migration with the reason
+  properties:
+    user:
+      $ref: "#/UserBatchMigrationRequestItem"
+      description: The original request item that was skipped
+    reason:
+      type: string
+      description: Reason why the user was skipped
+      example: "Email already exists"

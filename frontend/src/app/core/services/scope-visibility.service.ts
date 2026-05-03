@@ -20,11 +20,11 @@ export class ScopeVisibilityService {
   }
 
   /**
-   * Helper that returns true for APP_ADMIN/FEDERATION_ADMIN.
+   * Helper that returns true for APP_ADMIN/FEDERATION_ADMIN/UMPIRE.
    */
   isAdmin(): boolean {
     const role = this.getCurrentRole();
-    return role === SystemRole.AppAdmin || role === SystemRole.FederationAdmin;
+    return role === SystemRole.AppAdmin || role === SystemRole.FederationAdmin || role === SystemRole.Umpire;
   }
 
   private getCurrentRole(): SystemRole | undefined {

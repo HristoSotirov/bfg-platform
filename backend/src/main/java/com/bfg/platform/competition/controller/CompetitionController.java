@@ -25,7 +25,7 @@ public class CompetitionController implements CompetitionsApi {
     private final CompetitionService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllCompetitions200Response> getAllCompetitions(
             String filter, String search, List<String> orderBy,
             Integer top, Integer skip) {
@@ -43,7 +43,7 @@ public class CompetitionController implements CompetitionsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<CompetitionDto> getCompetitionByUuid(UUID uuid) {
         return service.getByUuid(uuid)
                 .map(ResponseEntity::ok)

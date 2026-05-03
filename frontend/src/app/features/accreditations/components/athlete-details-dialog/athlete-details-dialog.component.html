@@ -197,11 +197,13 @@
             } @else {
               <div class="space-y-1.5">
                 <div>
-                  <label class="block text-xs text-gray-500 mb-0.5">Име:</label>
+                  <label class="block text-xs text-gray-500 mb-0.5">Име: <span class="text-red-500">*</span></label>
                   <input
                     type="text"
                     [(ngModel)]="editData.firstName"
                     class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                    [class.border-red-500]="touched['firstName'] && !editData.firstName.trim()"
+                    (blur)="touched['firstName'] = true"
                   />
                 </div>
                 <div>
@@ -216,16 +218,18 @@
                 </div>
                 <div>
                   <label class="block text-xs text-gray-500 mb-0.5"
-                    >Фамилия:</label
+                    >Фамилия: <span class="text-red-500">*</span></label
                   >
                   <input
                     type="text"
                     [(ngModel)]="editData.lastName"
                     class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                    [class.border-red-500]="touched['lastName'] && !editData.lastName.trim()"
+                    (blur)="touched['lastName'] = true"
                   />
                 </div>
                 <div>
-                  <label class="block text-xs text-gray-500 mb-0.5">Пол:</label>
+                  <label class="block text-xs text-gray-500 mb-0.5">Пол: <span class="text-red-500">*</span></label>
                   <app-searchable-select-dropdown
                     [(ngModel)]="editData.gender"
                     [options]="genderSelectOptions"
@@ -234,7 +238,7 @@
                 </div>
                 <div>
                   <label class="block text-xs text-gray-500 mb-0.5"
-                    >Дата на раждане:</label
+                    >Дата на раждане: <span class="text-red-500">*</span></label
                   >
                   <app-date-picker
                     size="sm"
@@ -475,7 +479,7 @@
               variant="primary"
               size="md"
               text="Запази"
-              [disabled]="saving"
+              [disabled]="saving || !isEditFormValid"
               (click)="save()"
             >
             </app-button>

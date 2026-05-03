@@ -11,9 +11,9 @@
     <div class="flex flex-col max-h-[calc(90vh-120px)]">
       <div class="flex-1 min-h-0 overflow-y-auto space-y-4">
       @if (!isEditing) {
-        
+
         <div class="space-y-4">
-          
+
           <div>
             <div class="space-y-1">
               <div class="flex items-baseline">
@@ -52,7 +52,7 @@
             </div>
           </div>
 
-          
+
           <div class="pt-2 border-t border-gray-200">
             <div class="space-y-1">
               <div class="flex items-baseline">
@@ -64,7 +64,7 @@
             </div>
           </div>
 
-          
+
           @if (shouldShowClubSection()) {
             <div class="pt-2 border-t border-gray-200">
               <div class="space-y-1">
@@ -78,7 +78,7 @@
             </div>
           }
 
-          
+
           <div class="pt-2 border-t border-gray-200">
             <div class="space-y-1">
               <div class="flex items-baseline">
@@ -97,7 +97,7 @@
           </div>
         </div>
       } @else {
-        
+
         <div class="space-y-4">
           <div class="space-y-4">
             <div>
@@ -108,6 +108,8 @@
                 type="text"
                 [(ngModel)]="editData.firstName"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                [class.border-red-500]="touched['firstName'] && !editData.firstName.trim()"
+                (blur)="touched['firstName'] = true"
                 [disabled]="saving"
               />
             </div>
@@ -120,6 +122,8 @@
                 type="text"
                 [(ngModel)]="editData.lastName"
                 class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                [class.border-red-500]="touched['lastName'] && !editData.lastName.trim()"
+                (blur)="touched['lastName'] = true"
                 [disabled]="saving"
               />
             </div>
@@ -167,7 +171,7 @@
       }
       </div>
 
-      
+
       <div class="dialog-footer shrink-0 bg-white flex flex-col gap-2 mt-6 pt-4 border-t border-gray-200">
         @if (error && isEditing) {
           <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
@@ -210,7 +214,7 @@
               variant="primary"
               size="md"
               text="Запази"
-              [disabled]="saving"
+              [disabled]="saving || !isEditFormValid"
               (click)="save()"
             >
             </app-button>
@@ -221,7 +225,7 @@
   }
   </app-dialog>
 
-  
+
   <app-dialog
     [isOpen]="showEditingWarningDialog"
     title="Незапазени промени"

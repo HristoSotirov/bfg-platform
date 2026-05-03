@@ -78,6 +78,8 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
     isActive: true,
   };
 
+  touched: Record<string, boolean> = {};
+
   groupSearch = (): Observable<SearchableSelectOption[]> =>
     fetchAllPages((skip, top) =>
       this.competitionGroupDefinitionsService
@@ -224,6 +226,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
       maxBoatsPerClub: this.discipline.maxBoatsPerClub ?? 1,
       isActive: this.discipline.isActive ?? true,
     };
+    this.touched = {};
     this.isEditing = true;
     this.cdr.markForCheck();
   }
@@ -231,7 +234,17 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
   cancelEditing(): void {
     this.isEditing = false;
     this.saveError = null;
+    this.touched = {};
     this.cdr.markForCheck();
+  }
+
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && !!this.editData.shortName?.trim()
+      && !!this.editData.gender
+      && !!this.editData.competitionGroupId
+      && !!this.editData.boatClass
+      && this.editData.distanceMeters != null && this.editData.distanceMeters >= 0;
   }
 
   onCompetitionGroupChange(value: string | null): void {
@@ -260,14 +273,18 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
   }
 
   save(): void {
+    this.touched['name'] = true;
+    this.touched['shortName'] = true;
+    this.touched['distanceMeters'] = true;
     if (!this.discipline?.uuid) return;
+    if (!this.isEditFormValid) return;
     this.saving = true;
     this.saveError = null;
     this.cdr.markForCheck();
 
     const request: DisciplineDefinitionRequest = {
-      name: this.editData.name,
-      shortName: this.editData.shortName,
+      name: this.editData.name.trim(),
+      shortName: this.editData.shortName.trim(),
       gender: this.editData.gender as DisciplineGender,
       competitionGroupId: this.editData.competitionGroupId,
       boatClass: this.editData.boatClass as BoatClass,

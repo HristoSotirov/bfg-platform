@@ -339,11 +339,11 @@
               code: 404
               message: "Club with UUID '550e8400-e29b-41d4-a716-446655440000' not found."
 
-  patch:
+  put:
     tags:
       - Clubs
     summary: Update club by UUID
-    operationId: patchClubByUuid
+    operationId: updateClubByUuid
     parameters:
       - name: clubUuid
         in: path
@@ -450,11 +450,11 @@
               message: "Cannot delete club: club has assigned coaches"
 
 /clubs/{clubUuid}/logo:
-  patch:
+  put:
     tags:
       - Clubs
     summary: Update club logo by UUID
-    operationId: patchClubLogoByUuid
+    operationId: updateClubLogoByUuid
     parameters:
       - name: clubUuid
         in: path

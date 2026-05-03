@@ -13,8 +13,8 @@
  * Request payload for updating an existing user (partial update). Email and role cannot be updated.
  */
 export interface UserUpdateRequest { 
-    firstName?: string;
-    lastName?: string;
+    firstName: string;
+    lastName: string;
     dateOfBirth?: string;
     username?: string;
     isActive?: boolean;

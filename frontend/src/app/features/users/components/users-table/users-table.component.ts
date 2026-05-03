@@ -36,6 +36,7 @@ export class UsersTableComponent implements OnInit {
     [SystemRole.FederationAdmin]: 'Администратор на федерацията',
     [SystemRole.ClubAdmin]: 'Администратор на клуб',
     [SystemRole.Coach]: 'Треньор',
+    [SystemRole.Umpire]: 'Съдия',
   };
 
   ngOnInit(): void {

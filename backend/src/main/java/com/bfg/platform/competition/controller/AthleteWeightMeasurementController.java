@@ -20,7 +20,7 @@ public class AthleteWeightMeasurementController implements WeightMeasurementsApi
     private final AthleteWeightMeasurementService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<List<AthleteWeightMeasurementDto>> getWeightMeasurements(UUID uuid, LocalDate date) {
         return ResponseEntity.ok(service.getMeasurements(uuid, date));
     }

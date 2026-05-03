@@ -96,7 +96,7 @@ export class AthletesService extends BaseService {
 
         let localVarPath = `/athletes/batch-medical`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<Array<AthleteDto>>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<Array<AthleteDto>>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: athleteBatchMedicalUpdateRequest,
@@ -323,15 +323,15 @@ export class AthletesService extends BaseService {
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public patchAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<AthleteDto>;
-    public patchAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AthleteDto>>;
-    public patchAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AthleteDto>>;
-    public patchAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<AthleteDto>;
+    public updateAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<AthleteDto>>;
+    public updateAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<AthleteDto>>;
+    public updateAthleteByUuid(athleteUuid: string, athleteUpdateRequest: AthleteUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (athleteUuid === null || athleteUuid === undefined) {
-            throw new Error('Required parameter athleteUuid was null or undefined when calling patchAthleteByUuid.');
+            throw new Error('Required parameter athleteUuid was null or undefined when calling updateAthleteByUuid.');
         }
         if (athleteUpdateRequest === null || athleteUpdateRequest === undefined) {
-            throw new Error('Required parameter athleteUpdateRequest was null or undefined when calling patchAthleteByUuid.');
+            throw new Error('Required parameter athleteUpdateRequest was null or undefined when calling updateAthleteByUuid.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -373,7 +373,7 @@ export class AthletesService extends BaseService {
 
         let localVarPath = `/athletes/${this.configuration.encodeParam({name: "athleteUuid", value: athleteUuid, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: "uuid"})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<AthleteDto>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<AthleteDto>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: athleteUpdateRequest,

@@ -35,7 +35,7 @@ model/accreditationBatchRenewalResponseFailedInner.ts
 model/accreditationCreateRequest.ts
 model/accreditationDto.ts
 model/accreditationStatus.ts
-model/accreditationStatusPatchRequest.ts
+model/accreditationStatusUpdateRequest.ts
 model/advanceProgressionRequest.ts
 model/advanceProgressionResponse.ts
 model/athleteBatchMedicalUpdateRequest.ts
@@ -142,6 +142,10 @@ model/transferRounding.ts
 model/updateCompetitionEventStatus422Response.ts
 model/updateEventStatusRequest.ts
 model/updateParticipationStatusRequest.ts
+model/userBatchMigrationRequest.ts
+model/userBatchMigrationRequestItem.ts
+model/userBatchMigrationResponse.ts
+model/userBatchMigrationSkippedItem.ts
 model/userCreateRequest.ts
 model/userDto.ts
 model/userUpdateRequest.ts

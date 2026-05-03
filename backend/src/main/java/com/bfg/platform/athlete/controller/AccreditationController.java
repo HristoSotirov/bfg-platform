@@ -6,7 +6,7 @@ import com.bfg.platform.gen.api.AccreditationsApi;
 import com.bfg.platform.gen.model.AccreditationBatchRenewalRequest;
 import com.bfg.platform.gen.model.AccreditationBatchRenewalResponse;
 import com.bfg.platform.gen.model.AccreditationDto;
-import com.bfg.platform.gen.model.AccreditationStatusPatchRequest;
+import com.bfg.platform.gen.model.AccreditationStatusUpdateRequest;
 import com.bfg.platform.gen.model.AthleteBatchMigrationRequest;
 import com.bfg.platform.gen.model.AthleteBatchMigrationResponse;
 import com.bfg.platform.gen.model.AthleteCreateRequest;
@@ -29,7 +29,7 @@ public class AccreditationController implements AccreditationsApi {
     private final AccreditationService accreditationService;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllAccreditations200Response> getAllAccreditations(
             String filter,
             String search,
@@ -44,7 +44,7 @@ public class AccreditationController implements AccreditationsApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<AccreditationDto> getAccreditationByUuid(
             UUID accreditationUuid,
             List<String> expand
@@ -80,9 +80,9 @@ public class AccreditationController implements AccreditationsApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<AccreditationDto> patchAccreditationStatus(
+    public ResponseEntity<AccreditationDto> updateAccreditationStatus(
             UUID accreditationUuid,
-            AccreditationStatusPatchRequest body) {
+            AccreditationStatusUpdateRequest body) {
         return accreditationService.updateAccreditationStatus(accreditationUuid, body.getStatus())
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Accreditation", accreditationUuid));

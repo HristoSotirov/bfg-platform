@@ -16,7 +16,7 @@ public class ClubRankingController implements ClubRankingsApi {
     private final ClubRankingService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ClubRankingsResponse> computeClubRankings(ClubRankingsRequest request) {
         ClubRankingsResponse response = service.computeClubRankings(request.getCompetitionIds());
         return ResponseEntity.ok(response);

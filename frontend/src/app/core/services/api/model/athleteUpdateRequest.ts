@@ -14,11 +14,11 @@ import { Gender } from './gender';
  * Request payload for updating an existing athlete\'s information
  */
 export interface AthleteUpdateRequest { 
-    firstName?: string;
+    firstName: string;
     middleName?: string;
-    lastName?: string;
-    gender?: Gender;
-    dateOfBirth?: string;
+    lastName: string;
+    gender: Gender;
+    dateOfBirth: string;
     medicalExaminationDue?: string;
     insuranceFrom?: string;
     insuranceTo?: string;

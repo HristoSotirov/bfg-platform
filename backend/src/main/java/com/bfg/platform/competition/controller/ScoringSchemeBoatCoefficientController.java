@@ -24,7 +24,7 @@ public class ScoringSchemeBoatCoefficientController implements ScoringSchemeBoat
     private final ScoringSchemeBoatCoefficientService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllScoringSchemeBoatCoefficients200Response> getAllScoringSchemeBoatCoefficients(
             String filter, Integer top, Integer skip) {
         var page = service.getAll(filter, top, skip);
@@ -41,7 +41,7 @@ public class ScoringSchemeBoatCoefficientController implements ScoringSchemeBoat
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<ScoringSchemeBoatCoefficientDto> getScoringSchemeBoatCoefficientByUuid(UUID uuid) {
         return service.getByUuid(uuid)
                 .map(ResponseEntity::ok)

@@ -51,6 +51,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   saving = false;
   deleting = false;
   error: string | null = null;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
   showDeleteConfirmDialog = false;
   deleteError: string | null = null;
@@ -263,13 +264,22 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
       isActive: this.group.isActive ?? true,
     };
     this.isEditing = true;
+    this.touched = {};
     this.cdr.markForCheck();
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.error = null;
     this.cdr.markForCheck();
+  }
+
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && !!this.editData.shortName?.trim()
+      && this.editData.minAge != null && this.editData.minAge >= 0
+      && this.editData.maxAge != null && this.editData.maxAge >= 0;
   }
 
   onStatusChange(value: string | null): void {
@@ -285,13 +295,23 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   save(): void {
     if (!this.group?.uuid) return;
 
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
+    this.touched['minAge'] = true;
+    this.touched['maxAge'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const request: CompetitionGroupDefinitionRequest = {
-      name: this.editData.name,
-      shortName: this.editData.shortName,
+      name: this.editData.name.trim(),
+      shortName: this.editData.shortName.trim(),
       minAge: this.editData.minAge ?? 0,
       maxAge: this.editData.maxAge ?? 0,
       coxMinAge: this.editData.coxMinAge ?? undefined,
@@ -415,6 +435,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
     this.error = null;
     this.saving = false;
     this.deleting = false;
+    this.touched = {};
     this.showEditingWarningDialog = false;
     this.showDeleteConfirmDialog = false;
   }

@@ -21,6 +21,10 @@ import { ErrorResponse } from '../model/errorResponse';
 // @ts-ignore
 import { GetAllUsers200Response } from '../model/getAllUsers200Response';
 // @ts-ignore
+import { UserBatchMigrationRequest } from '../model/userBatchMigrationRequest';
+// @ts-ignore
+import { UserBatchMigrationResponse } from '../model/userBatchMigrationResponse';
+// @ts-ignore
 import { UserCreateRequest } from '../model/userCreateRequest';
 // @ts-ignore
 import { UserDto } from '../model/userDto';
@@ -317,21 +321,88 @@ export class UsersService extends BaseService {
     }
 
     /**
+     * Batch migrate users from Excel import
+     * @param userBatchMigrationRequest 
+     * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
+     * @param reportProgress flag to report request and response progress.
+     */
+    public migrateUsers(userBatchMigrationRequest: UserBatchMigrationRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<UserBatchMigrationResponse>;
+    public migrateUsers(userBatchMigrationRequest: UserBatchMigrationRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<UserBatchMigrationResponse>>;
+    public migrateUsers(userBatchMigrationRequest: UserBatchMigrationRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<UserBatchMigrationResponse>>;
+    public migrateUsers(userBatchMigrationRequest: UserBatchMigrationRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+        if (userBatchMigrationRequest === null || userBatchMigrationRequest === undefined) {
+            throw new Error('Required parameter userBatchMigrationRequest was null or undefined when calling migrateUsers.');
+        }
+
+        let localVarHeaders = this.defaultHeaders;
+
+        // authentication (bearerAuth) required
+        localVarHeaders = this.configuration.addCredentialToHeaders('bearerAuth', 'Authorization', localVarHeaders, 'Bearer ');
+
+        const localVarHttpHeaderAcceptSelected: string | undefined = options?.httpHeaderAccept ?? this.configuration.selectHeaderAccept([
+            'application/json'
+        ]);
+        if (localVarHttpHeaderAcceptSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Accept', localVarHttpHeaderAcceptSelected);
+        }
+
+        const localVarHttpContext: HttpContext = options?.context ?? new HttpContext();
+
+        const localVarTransferCache: boolean = options?.transferCache ?? true;
+
+
+        // to determine the Content-Type header
+        const consumes: string[] = [
+            'application/json'
+        ];
+        const httpContentTypeSelected: string | undefined = this.configuration.selectHeaderContentType(consumes);
+        if (httpContentTypeSelected !== undefined) {
+            localVarHeaders = localVarHeaders.set('Content-Type', httpContentTypeSelected);
+        }
+
+        let responseType_: 'text' | 'json' | 'blob' = 'json';
+        if (localVarHttpHeaderAcceptSelected) {
+            if (localVarHttpHeaderAcceptSelected.startsWith('text')) {
+                responseType_ = 'text';
+            } else if (this.configuration.isJsonMime(localVarHttpHeaderAcceptSelected)) {
+                responseType_ = 'json';
+            } else {
+                responseType_ = 'blob';
+            }
+        }
+
+        let localVarPath = `/users/migrate`;
+        const { basePath, withCredentials } = this.configuration;
+        return this.httpClient.request<UserBatchMigrationResponse>('post', `${basePath}${localVarPath}`,
+            {
+                context: localVarHttpContext,
+                body: userBatchMigrationRequest,
+                responseType: <any>responseType_,
+                ...(withCredentials ? { withCredentials } : {}),
+                headers: localVarHeaders,
+                observe: observe,
+                transferCache: localVarTransferCache,
+                reportProgress: reportProgress
+            }
+        );
+    }
+
+    /**
      * Update user by UUID
      * @param userUuid UUID of the user
      * @param userUpdateRequest 
      * @param observe set whether or not to return the data Observable as the body, response or events. defaults to returning the body.
      * @param reportProgress flag to report request and response progress.
      */
-    public patchUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<UserDto>;
-    public patchUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<UserDto>>;
-    public patchUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<UserDto>>;
-    public patchUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
+    public updateUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe?: 'body', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<UserDto>;
+    public updateUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe?: 'response', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpResponse<UserDto>>;
+    public updateUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe?: 'events', reportProgress?: boolean, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<HttpEvent<UserDto>>;
+    public updateUserByUuid(userUuid: string, userUpdateRequest: UserUpdateRequest, observe: any = 'body', reportProgress: boolean = false, options?: {httpHeaderAccept?: 'application/json', context?: HttpContext, transferCache?: boolean}): Observable<any> {
         if (userUuid === null || userUuid === undefined) {
-            throw new Error('Required parameter userUuid was null or undefined when calling patchUserByUuid.');
+            throw new Error('Required parameter userUuid was null or undefined when calling updateUserByUuid.');
         }
         if (userUpdateRequest === null || userUpdateRequest === undefined) {
-            throw new Error('Required parameter userUpdateRequest was null or undefined when calling patchUserByUuid.');
+            throw new Error('Required parameter userUpdateRequest was null or undefined when calling updateUserByUuid.');
         }
 
         let localVarHeaders = this.defaultHeaders;
@@ -373,7 +444,7 @@ export class UsersService extends BaseService {
 
         let localVarPath = `/users/${this.configuration.encodeParam({name: "userUuid", value: userUuid, in: "path", style: "simple", explode: false, dataType: "string", dataFormat: "uuid"})}`;
         const { basePath, withCredentials } = this.configuration;
-        return this.httpClient.request<UserDto>('patch', `${basePath}${localVarPath}`,
+        return this.httpClient.request<UserDto>('put', `${basePath}${localVarPath}`,
             {
                 context: localVarHttpContext,
                 body: userUpdateRequest,

@@ -87,6 +87,7 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
 
   isEditing = false;
   showEditingWarningDialog = false;
+  touched: Record<string, boolean> = {};
   loadingHistory = false;
   saving = false;
   fullHistory: AccreditationDto[] = [];
@@ -232,6 +233,10 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
 
   get canEdit(): boolean {
     return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
+  }
+
+  get isEditFormValid(): boolean {
+    return !!(this.editData.firstName?.trim() && this.editData.lastName?.trim() && this.editData.gender && this.editData.dateOfBirth);
   }
 
   get showScopeInDetails(): boolean {
@@ -512,31 +517,43 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
       insuranceTo: this.formatDateForInput(this.athlete.insuranceTo),
     };
     this.statusChanges.clear();
+    this.touched = {};
     this.isEditing = true;
     this.cdr.markForCheck();
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.error = null;
     this.cdr.markForCheck();
   }
 
   save(): void {
     if (!this.athlete?.uuid) return;
+
+    this.touched['firstName'] = true;
+    this.touched['lastName'] = true;
+    this.touched['gender'] = true;
+    this.touched['dateOfBirth'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const profileRequest: AthleteUpdateRequest = {
-      firstName: this.editData.firstName || undefined,
-      middleName: this.editData.middleName || undefined,
-      lastName: this.editData.lastName || undefined,
-      gender: this.editData.gender && Object.values(Gender).includes(this.editData.gender as Gender)
-        ? (this.editData.gender as Gender) : undefined,
-      dateOfBirth: this.editData.dateOfBirth || undefined,
+      firstName: this.editData.firstName.trim(),
+      middleName: this.editData.middleName?.trim() || undefined,
+      lastName: this.editData.lastName.trim(),
+      gender: this.editData.gender as Gender,
+      dateOfBirth: this.editData.dateOfBirth,
     };
-    const profileRequest$ = this.athletesService.patchAthleteByUuid(this.athlete.uuid, profileRequest);
+    const profileRequest$ = this.athletesService.updateAthleteByUuid(this.athlete.uuid, profileRequest);
 
     const { startDate: origMedicalStart, durationMonths: origMedicalDuration } =
       this.medicalDueToStartAndDuration(this.formatDateForInput(this.athlete.medicalExaminationDue));
@@ -621,7 +638,7 @@ export class AthleteDetailPageComponent implements OnInit, OnDestroy {
     }
     this.saving = true;
     this.cdr.markForCheck();
-    this.accreditationsService.patchAccreditationStatus(uuid, { status: newStatus }).subscribe({
+    this.accreditationsService.updateAccreditationStatus(uuid, { status: newStatus }).subscribe({
       next: () => {
         this.saving = false;
         this.editingStatusUuid = null;

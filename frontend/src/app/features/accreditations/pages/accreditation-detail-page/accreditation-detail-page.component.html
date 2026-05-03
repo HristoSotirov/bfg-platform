@@ -173,9 +173,11 @@
                 } @else {
                   <div class="space-y-1.5">
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Ime:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">Ime: <span class="text-red-500">*</span></label>
                       <input type="text" [(ngModel)]="editData.firstName"
-                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                        [class.border-red-500]="touched['firstName'] && !editData.firstName.trim()"
+                        (blur)="touched['firstName'] = true" />
                     </div>
                     <div>
                       <label class="block text-xs text-gray-500 mb-0.5">Презиме:</label>
@@ -183,12 +185,14 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                     </div>
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Фамилия:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">Фамилия: <span class="text-red-500">*</span></label>
                       <input type="text" [(ngModel)]="editData.lastName"
-                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                        class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                        [class.border-red-500]="touched['lastName'] && !editData.lastName.trim()"
+                        (blur)="touched['lastName'] = true" />
                     </div>
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Пол:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">Пол: <span class="text-red-500">*</span></label>
                       <app-searchable-select-dropdown
                         [(ngModel)]="editData.gender"
                         [options]="genderSelectOptions"
@@ -196,7 +200,7 @@
                       ></app-searchable-select-dropdown>
                     </div>
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Дата на раждане:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">Дата на раждане: <span class="text-red-500">*</span></label>
                       <app-date-picker size="sm" placeholder="Изберете дата" [(ngModel)]="editData.dateOfBirth"></app-date-picker>
                     </div>
                     <div class="pt-1 border-t border-gray-100 grid grid-cols-2 gap-2">
@@ -234,7 +238,7 @@
 
                     <div class="flex gap-2 pt-2">
                       <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
-                      <app-button variant="primary" size="md" text="Запази" [disabled]="saving" (click)="save()"></app-button>
+                      <app-button variant="primary" size="md" text="Запази" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
                     </div>
                   </div>
                 }

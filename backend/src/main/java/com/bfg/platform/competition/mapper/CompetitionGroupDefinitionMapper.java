@@ -61,8 +61,8 @@ public class CompetitionGroupDefinitionMapper {
 
     public static CompetitionGroupDefinition fromCreateRequest(CompetitionGroupDefinitionRequest request) {
         CompetitionGroupDefinition entity = new CompetitionGroupDefinition();
-        entity.setName(request.getName());
-        entity.setShortName(request.getShortName());
+        entity.setName(request.getName().trim());
+        entity.setShortName(request.getShortName().trim());
         entity.setMinAge(request.getMinAge());
         entity.setMaxAge(request.getMaxAge());
         entity.setCoxMinAge(request.getCoxMinAge());
@@ -84,8 +84,8 @@ public class CompetitionGroupDefinitionMapper {
     }
 
     public static void updateFromRequest(CompetitionGroupDefinition entity, CompetitionGroupDefinitionRequest request) {
-        entity.setName(request.getName());
-        entity.setShortName(request.getShortName());
+        entity.setName(request.getName().trim());
+        entity.setShortName(request.getShortName().trim());
         entity.setMinAge(request.getMinAge());
         entity.setMaxAge(request.getMaxAge());
         entity.setCoxMinAge(request.getCoxMinAge());

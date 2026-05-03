@@ -33,14 +33,14 @@ public class QualificationSchemeMapper {
 
     public static QualificationScheme fromRequest(QualificationSchemeRequest request) {
         QualificationScheme entity = new QualificationScheme();
-        entity.setName(request.getName());
+        entity.setName(request.getName().trim());
         entity.setLaneCount(request.getLaneCount());
         entity.setActive(request.getIsActive());
         return entity;
     }
 
     public static void updateFromRequest(QualificationScheme entity, QualificationSchemeRequest request) {
-        entity.setName(request.getName());
+        entity.setName(request.getName().trim());
         entity.setLaneCount(request.getLaneCount());
         entity.setActive(request.getIsActive());
     }

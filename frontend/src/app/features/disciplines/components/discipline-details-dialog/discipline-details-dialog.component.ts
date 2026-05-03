@@ -66,6 +66,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   saving = false;
   deleting = false;
   error: string | null = null;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
   showDeleteConfirmDialog = false;
   deleteError: string | null = null;
@@ -212,13 +213,24 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
       isActive: this.discipline.isActive ?? true,
     };
     this.isEditing = true;
+    this.touched = {};
     this.cdr.markForCheck();
   }
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.error = null;
     this.cdr.markForCheck();
+  }
+
+  get isEditFormValid(): boolean {
+    return !!this.editData.name?.trim()
+      && !!this.editData.shortName?.trim()
+      && !!this.editData.gender
+      && !!this.editData.competitionGroupId
+      && !!this.editData.boatClass
+      && this.editData.distanceMeters != null && this.editData.distanceMeters >= 0;
   }
 
   onCompetitionGroupChange(value: string | null): void {
@@ -249,13 +261,22 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   save(): void {
     if (!this.discipline?.uuid) return;
 
+    this.touched['shortName'] = true;
+    this.touched['name'] = true;
+    this.touched['distanceMeters'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const request: DisciplineDefinitionRequest = {
-      name: this.editData.name,
-      shortName: this.editData.shortName,
+      name: this.editData.name.trim(),
+      shortName: this.editData.shortName.trim(),
       gender: this.editData.gender as DisciplineGender,
       competitionGroupId: this.editData.competitionGroupId,
       boatClass: this.editData.boatClass as BoatClass,
@@ -370,6 +391,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     this.error = null;
     this.saving = false;
     this.deleting = false;
+    this.touched = {};
     this.showEditingWarningDialog = false;
     this.showDeleteConfirmDialog = false;
   }

@@ -9,6 +9,10 @@ import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.security.SecurityContextHelper;
 import com.bfg.platform.gen.model.SystemRole;
+import com.bfg.platform.gen.model.UserBatchMigrationRequest;
+import com.bfg.platform.gen.model.UserBatchMigrationRequestItem;
+import com.bfg.platform.gen.model.UserBatchMigrationResponse;
+import com.bfg.platform.gen.model.UserBatchMigrationSkippedItem;
 import com.bfg.platform.gen.model.UserCreateRequest;
 import com.bfg.platform.gen.model.UserDto;
 import com.bfg.platform.gen.model.UserUpdateRequest;
@@ -144,6 +148,69 @@ public class UserServiceImpl implements UserService {
             }
             throw new ConflictException(message);
         }
+    }
+
+    @Override
+    @Transactional
+    public UserBatchMigrationResponse migrateUsers(UserBatchMigrationRequest request) {
+        List<UserDto> created = new java.util.ArrayList<>();
+        List<UserBatchMigrationSkippedItem> skipped = new java.util.ArrayList<>();
+
+        for (UserBatchMigrationRequestItem item : request.getUsers()) {
+            String email = item.getEmail() != null ? item.getEmail().trim() : "";
+            String username = (item.getUsername() != null && !item.getUsername().isBlank())
+                    ? item.getUsername().trim()
+                    : email;
+
+            if (email.isEmpty()) {
+                UserBatchMigrationSkippedItem skip = new UserBatchMigrationSkippedItem();
+                skip.setUser(item);
+                skip.setReason("Email is required");
+                skipped.add(skip);
+                continue;
+            }
+
+            if (item.getRole() == SystemRole.APP_ADMIN) {
+                UserBatchMigrationSkippedItem skip = new UserBatchMigrationSkippedItem();
+                skip.setUser(item);
+                skip.setReason("Cannot migrate users with APP_ADMIN role");
+                skipped.add(skip);
+                continue;
+            }
+
+            if (userRepository.existsByUsername(username)) {
+                UserBatchMigrationSkippedItem skip = new UserBatchMigrationSkippedItem();
+                skip.setUser(item);
+                skip.setReason("Username already exists: " + username);
+                skipped.add(skip);
+                continue;
+            }
+
+            try {
+                User user = new User();
+                user.setFirstName(item.getFirstName() != null ? item.getFirstName().trim() : "");
+                user.setLastName(item.getLastName() != null ? item.getLastName().trim() : "");
+                user.setDateOfBirth(item.getDateOfBirth());
+                user.setEmail(email);
+                user.setUsername(username);
+                user.setRole(item.getRole());
+                user.setActive(true);
+                user.setPassword(passwordEncoder.encode(generateRandomPassword()));
+
+                User savedUser = userRepository.save(user);
+                created.add(UserMapper.toDto(savedUser));
+            } catch (DataIntegrityViolationException e) {
+                UserBatchMigrationSkippedItem skip = new UserBatchMigrationSkippedItem();
+                skip.setUser(item);
+                skip.setReason("Duplicate entry: " + ConstraintViolationMessageExtractor.extractMessage(e));
+                skipped.add(skip);
+            }
+        }
+
+        UserBatchMigrationResponse response = new UserBatchMigrationResponse();
+        response.setCreated(created);
+        response.setSkipped(skipped);
+        return response;
     }
 
     private void validateCreatePermissions(UserCreateRequest request) {

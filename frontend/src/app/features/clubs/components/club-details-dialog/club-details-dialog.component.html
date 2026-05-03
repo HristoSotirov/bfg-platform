@@ -8,11 +8,11 @@
   @if (club) {
     <div class="flex flex-col max-h-[calc(90vh-120px)]">
       <div class="flex-1 overflow-y-auto space-y-2">
-      
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        
+
         <div class="space-y-2">
-          
+
           <div class="flex flex-col gap-2 items-start">
             <button
               type="button"
@@ -20,14 +20,14 @@
               (click)="openLogoView()"
             >
               @if (club.logoUrl) {
-                <img 
-                  [src]="club.logoUrl" 
+                <img
+                  [src]="club.logoUrl"
                   alt="Лого на клуба"
                   class="w-full h-full object-contain"
                 />
               } @else {
-                <img 
-                  src="assets/images/default-club.png" 
+                <img
+                  src="assets/images/default-club.png"
                   alt="Лого по подразбиране"
                   class="w-full h-full object-contain"
                 />
@@ -63,7 +63,7 @@
             (closed)="closeCropDialog()"
             (cropped)="onLogoCropped($event)"
           />
-          
+
           <app-club-logo-view-dialog
             [isOpen]="showLogoViewDialog"
             [logoUrl]="club.logoUrl ?? null"
@@ -72,9 +72,9 @@
           />
 
           @if (!isEditing) {
-            
+
             <div class="space-y-4">
-              
+
               <div class="space-y-1">
                 <div class="flex items-baseline">
                   <span class="text-xs text-gray-500 w-28 flex-shrink-0"
@@ -129,7 +129,7 @@
                 </div>
               </div>
 
-              
+
               <div class="pt-2 border-t border-gray-200">
                 <div class="space-y-1">
                   <div class="flex items-baseline">
@@ -141,7 +141,7 @@
                 </div>
               </div>
 
-              
+
               <div class="pt-2 border-t border-gray-200">
                 <div class="space-y-1">
                   <div class="flex items-baseline">
@@ -164,24 +164,28 @@
               </div>
             </div>
           } @else {
-            
+
             <div class="space-y-1.5">
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Име:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">Име: <span class="text-red-500">*</span></label>
                 <input
                   type="text"
                   [(ngModel)]="editData.shortName"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                  [class.border-red-500]="touched['shortName'] && !editData.shortName.trim()"
+                  (blur)="touched['shortName'] = true"
                 />
               </div>
               <div>
                 <label class="block text-xs text-gray-500 mb-0.5"
-                  >Пълно име:</label
+                  >Пълно име: <span class="text-red-500">*</span></label
                 >
                 <input
                   type="text"
                   [(ngModel)]="editData.name"
                   class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                  [class.border-red-500]="touched['name'] && !editData.name.trim()"
+                  (blur)="touched['name'] = true"
                 />
               </div>
               <div>
@@ -212,7 +216,7 @@
           }
         </div>
 
-        
+
         <div class="space-y-1.5">
           <h4 class="text-sm font-medium text-gray-700">Треньори</h4>
 
@@ -302,7 +306,7 @@
             </table>
           </div>
 
-          
+
           @if (canManageCoaches) {
             @if (showAddCoachForm) {
               <div class="p-2 border rounded-lg bg-gray-50 space-y-1.5">
@@ -349,7 +353,7 @@
       </div>
 
       </div>
-      
+
       <div class="shrink-0 bg-white flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200">
         @if (error && isEditing) {
           <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
@@ -392,7 +396,7 @@
             variant="primary"
             size="md"
             text="Запази"
-            [disabled]="saving"
+            [disabled]="saving || !isEditFormValid"
             (click)="save()"
           >
           </app-button>

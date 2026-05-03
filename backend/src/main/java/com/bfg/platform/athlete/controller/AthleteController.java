@@ -24,7 +24,7 @@ public class AthleteController implements AthletesApi {
     private final AthleteService athleteService;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllAthletes200Response> getAllAthletes(
             String filter,
             String search,
@@ -38,7 +38,7 @@ public class AthleteController implements AthletesApi {
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<AthleteDto> getAthleteByUuid(
             UUID athleteUuid,
             List<String> expand
@@ -50,7 +50,7 @@ public class AthleteController implements AthletesApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<AthleteDto> patchAthleteByUuid(UUID athleteUuid,
+    public ResponseEntity<AthleteDto> updateAthleteByUuid(UUID athleteUuid,
                                                              AthleteUpdateRequest request) {
         return athleteService.updateAthlete(athleteUuid, request)
                 .map(ResponseEntity::ok)

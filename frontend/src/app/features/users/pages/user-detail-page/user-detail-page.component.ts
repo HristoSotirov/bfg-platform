@@ -53,6 +53,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
 
   isEditing = false;
   saving = false;
+  touched: Record<string, boolean> = {};
   showEditingWarningDialog = false;
 
   editData = {
@@ -73,6 +74,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
     [SystemRole.FederationAdmin]: 'Администратор на федерацията',
     [SystemRole.ClubAdmin]: 'Администратор на клуб',
     [SystemRole.Coach]: 'Треньор',
+    [SystemRole.Umpire]: 'Съдия',
   };
 
   constructor(
@@ -103,6 +105,10 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
     const user = this.authService.currentUser;
     if (!user) return false;
     return user.roles.some(r => r === SystemRole.AppAdmin || r === SystemRole.FederationAdmin);
+  }
+
+  get isEditFormValid(): boolean {
+    return !!(this.editData.firstName?.trim() && this.editData.lastName?.trim());
   }
 
   get fullName(): string {
@@ -185,6 +191,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   startEditing(): void {
     if (!this.userData) return;
     this.isEditing = true;
+    this.touched = {};
     this.editData = {
       firstName: this.userData.firstName || '',
       lastName: this.userData.lastName || '',
@@ -197,6 +204,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
 
   cancelEditing(): void {
     this.isEditing = false;
+    this.touched = {};
     this.error = null;
     this.cdr.markForCheck();
   }
@@ -210,20 +218,28 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
   save(): void {
     if (!this.userData?.uuid) return;
 
+    this.touched['firstName'] = true;
+    this.touched['lastName'] = true;
+
+    if (!this.isEditFormValid) {
+      this.cdr.markForCheck();
+      return;
+    }
+
     this.saving = true;
     this.error = null;
     this.cdr.markForCheck();
 
     const updateRequest: UserUpdateRequest = {
-      firstName: this.editData.firstName,
-      lastName: this.editData.lastName,
+      firstName: this.editData.firstName.trim(),
+      lastName: this.editData.lastName.trim(),
       dateOfBirth: this.editData.dateOfBirth || undefined,
-      username: this.editData.username,
+      username: this.editData.username.trim(),
       isActive: this.editData.isActive,
     };
 
     this.usersService
-      .patchUserByUuid(this.userData.uuid, updateRequest)
+      .updateUserByUuid(this.userData.uuid, updateRequest)
       .pipe(
         catchError((err) => {
           this.error = err?.error?.message || 'Грешка при запазване на промените';
@@ -234,7 +250,7 @@ export class UserDetailPageComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$),
       )
       .subscribe({
-        next: (updatedUser) => {
+        next: (updatedUser: UserDto | null) => {
           if (updatedUser) {
             this.userData = updatedUser;
             this.isEditing = false;

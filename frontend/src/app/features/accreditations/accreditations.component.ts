@@ -428,6 +428,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           next: (club) => {
             this.userClub = club;
             this.hasClubAccess = !!club;
+            this.applyScopeVisibility();
             this.applyDefaultFiltersIfNeeded();
             this.loadFilterData();
             this.loadAccreditations();
@@ -450,6 +451,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           next: (club) => {
             this.userClub = club;
             this.hasClubAccess = !!club;
+            this.applyScopeVisibility();
             this.applyDefaultFiltersIfNeeded();
             this.loadFilterData();
             this.loadAccreditations();
@@ -1425,7 +1427,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
 
     fetchAllPages((skip, top) =>
       this.clubsService.getAllClubs(
-        undefined, // no filter needed — admins can see all clubs
+        "type eq 'INTERNAL'",
         undefined, // search
         ['cardPrefix_asc'], // orderBy
         top, // top

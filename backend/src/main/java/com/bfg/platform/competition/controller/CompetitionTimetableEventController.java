@@ -23,7 +23,7 @@ public class CompetitionTimetableEventController implements CompetitionTimetable
     private final CompetitionTimetableEventService service;
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<GetAllCompetitionTimetableEvents200Response> getAllCompetitionTimetableEvents(
             String filter, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
         var page = service.getAll(filter, orderBy, top, skip, expand);
@@ -40,7 +40,7 @@ public class CompetitionTimetableEventController implements CompetitionTimetable
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH')")
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE')")
     public ResponseEntity<CompetitionTimetableEventDto> getCompetitionTimetableEventByUuid(UUID uuid) {
         return service.getByUuid(uuid)
                 .map(ResponseEntity::ok)
