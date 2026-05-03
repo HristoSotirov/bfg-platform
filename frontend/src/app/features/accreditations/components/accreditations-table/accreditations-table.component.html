@@ -74,10 +74,10 @@
           }
           @for (column of visibleColumns; track column.id) {
             <td
-              class="px-4 py-3 text-sm whitespace-nowrap"
+              class="px-4 py-3 text-sm max-w-[240px]"
               [class]="getCellClass(accreditation, column.id)"
             >
-              {{ getCellValue(accreditation, column.id) }}
+              <span class="block truncate" [title]="getCellValue(accreditation, column.id)">{{ getCellValue(accreditation, column.id) }}</span>
             </td>
           }
         </tr>

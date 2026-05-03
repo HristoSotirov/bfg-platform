@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
-    "build": "ng build",
+    "start": "npm run generate:api && ng serve",
+    "build": "npm run generate:api && ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "generate:api": "openapi-generator-cli generate -i ../backend/src/main/resources/static/openapi/openapi.yaml -g typescript-angular -o src/app/core/services/api --skip-validate-spec --additional-properties=ngVersion=17.3.0,providedInRoot=true,serviceSuffix=Service"
@@ -12,6 +12,7 @@
   "private": true,
   "dependencies": {
     "@angular/animations": "17.3.0",
+    "@angular/cdk": "17.3.10",
     "@angular/common": "17.3.0",
     "@angular/compiler": "17.3.0",
     "@angular/core": "17.3.0",
@@ -21,6 +22,10 @@
     "@angular/router": "17.3.0",
     "@ngx-translate/core": "17.0.0",
     "@ngx-translate/http-loader": "17.0.0",
+    "chart.js": "4.5.1",
+    "jspdf": "4.2.1",
+    "jspdf-autotable": "5.0.7",
+    "ng2-charts": "5.0.4",
     "ngx-image-cropper": "9.1.6",
     "rxjs": "7.8.1",
     "tslib": "2.3.0",

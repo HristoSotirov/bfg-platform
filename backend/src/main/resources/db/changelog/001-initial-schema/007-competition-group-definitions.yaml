@@ -1,0 +1,110 @@
+databaseChangeLog:
+  - changeSet:
+      id: 007-competition-group-definitions
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competition_group_definitions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: name
+                  type: VARCHAR(100)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: short_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: min_age
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_age
+                  type: INTEGER
+              - column:
+                  name: cox_min_age
+                  type: INTEGER
+                  remarks: "Minimum age for coxswain - nullable, falls back to min_age"
+              - column:
+                  name: cox_max_age
+                  type: INTEGER
+                  remarks: "Maximum age for coxswain - nullable, falls back to max_age"
+              - column:
+                  name: max_disciplines_per_athlete
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: transfer_from_group_id
+                  type: UUID
+              - column:
+                  name: min_crew_for_transfer
+                  type: INTEGER
+              - column:
+                  name: transfer_ratio
+                  type: INTEGER
+              - column:
+                  name: transfer_rounding
+                  type: VARCHAR(20)
+              - column:
+                  name: transferred_max_disciplines_per_athlete
+                  type: INTEGER
+              - column:
+                  name: male_team_cox_required_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Recommended cox weight for male team"
+              - column:
+                  name: male_team_cox_min_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Minimal allowed cox weight for male team"
+              - column:
+                  name: male_team_light_max_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Maximum allowed weight for male team lightweight rowers"
+              - column:
+                  name: female_team_cox_required_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Recommended cox weight for female team"
+              - column:
+                  name: female_team_cox_min_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Minimal allowed cox weight for female team"
+              - column:
+                  name: female_team_light_max_weight_kg
+                  type: NUMERIC(5,2)
+                  remarks: "Maximum allowed weight for female team lightweight rowers"
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: competition_group_definitions
+            baseColumnNames: transfer_from_group_id
+            referencedTableName: competition_group_definitions
+            referencedColumnNames: id
+            constraintName: fk_comp_group_transfer_group
+            onDelete: RESTRICT

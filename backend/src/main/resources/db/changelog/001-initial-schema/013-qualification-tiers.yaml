@@ -1,0 +1,73 @@
+databaseChangeLog:
+  - changeSet:
+      id: 013-qualification-tiers
+      author: bfg
+      changes:
+        - createTable:
+            tableName: qualification_tiers
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: qualification_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: boat_count_min
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: boat_count_max
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: heat_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: semi_final_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: final_b_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: final_a_count
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addUniqueConstraint:
+            tableName: qualification_tiers
+            columnNames: qualification_scheme_id, boat_count_min, boat_count_max
+            constraintName: uq_qual_tier_scheme_range
+        - addForeignKeyConstraint:
+            baseTableName: qualification_tiers
+            baseColumnNames: qualification_scheme_id
+            referencedTableName: qualification_schemes
+            referencedColumnNames: id
+            constraintName: fk_qual_tier_scheme
+            onDelete: RESTRICT

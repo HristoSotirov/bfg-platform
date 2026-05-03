@@ -46,15 +46,11 @@ export class AccreditationSettingsDialogComponent implements OnChanges {
   }
 
   get visibleColumns(): ColumnConfig[] {
-    return this.showScopeFeatures
-      ? this.localColumns
-      : this.localColumns.filter((c) => c.id !== 'scopeType');
+    return this.localColumns;
   }
 
   get visibleFilterConfigs(): FilterConfig[] {
-    return this.showScopeFeatures
-      ? this.localFilterConfigs
-      : this.localFilterConfigs.filter((f) => f.id !== 'scopeType');
+    return this.localFilterConfigs;
   }
 
   close(): void {

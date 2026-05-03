@@ -1,4 +1,3 @@
-import { ScopeType } from '../services/api/model/scopeType';
 import { SystemRole } from '../services/api/model/systemRole';
 
 export interface User {
@@ -7,7 +6,6 @@ export interface User {
   firstName: string;
   lastName: string;
   roles: SystemRole[];
-  scopeType?: ScopeType;
 }
 
 // Re-export generated types so consumers can import from one place

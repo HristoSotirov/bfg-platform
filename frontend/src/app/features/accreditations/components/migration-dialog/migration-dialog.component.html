@@ -24,8 +24,13 @@
           <p class="text-sm text-gray-600">{{ fileName }}</p>
         }
         @if (error) {
-          <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg max-w-md mx-auto">
+          <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg max-w-md mx-auto flex items-start justify-between gap-2">
             <p class="text-sm text-red-700">{{ error }}</p>
+            <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="error = null">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
           </div>
         }
       </div>
@@ -34,18 +39,21 @@
     @if (step === 'mapping') {
       <div class="space-y-4">
         <h4 class="font-medium text-gray-900">Съпоставка на колони</h4>
-        <p class="text-sm text-gray-500">Изберете какво представлява всяка колона от файла.</p>
+        <p class="text-sm text-gray-500">Изберете от коя колона на файла да се вземе всяко поле.</p>
 
         <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
-          @for (mapping of columnMappings; track mapping.excelColumn) {
+          @for (field of fieldMappings; track field.dataField) {
             <div class="flex items-center gap-3">
-              <span class="w-1/2 text-sm font-medium text-gray-700 truncate">{{ mapping.excelColumn }}</span>
+              <span class="w-1/2 text-sm font-medium text-gray-700 truncate">
+                {{ field.label }}
+                @if (field.required) { <span class="text-red-500">*</span> }
+              </span>
               <div class="w-1/2">
                 <app-searchable-select-dropdown
-                  [options]="getFieldOptionsForMapping(mapping)"
+                  [options]="getExcelOptionsForField(field)"
                   [placeholder]="'Не импортирай'"
-                  [ngModel]="mapping.dataField || null"
-                  (ngModelChange)="onMappingFieldChange(mapping, $event)">
+                  [ngModel]="field.excelColumn || null"
+                  (ngModelChange)="onFieldExcelColumnChange(field, $event)">
                 </app-searchable-select-dropdown>
               </div>
             </div>
@@ -115,8 +123,13 @@
         }
 
         @if (error) {
-          <div class="p-3 bg-red-50 border border-red-200 rounded-lg">
+          <div class="p-3 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
             <p class="text-sm text-red-700">{{ error }}</p>
+            <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="error = null">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
           </div>
         }
 

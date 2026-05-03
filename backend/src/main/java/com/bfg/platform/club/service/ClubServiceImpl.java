@@ -3,6 +3,7 @@ package com.bfg.platform.club.service;
 import com.bfg.platform.club.entity.Club;
 import com.bfg.platform.club.mapper.ClubMapper;
 import com.bfg.platform.club.query.ClubQueryAdapter;
+import com.bfg.platform.club.repository.ClubCoachRepository;
 import com.bfg.platform.club.repository.ClubRepository;
 import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
@@ -61,11 +62,13 @@ import java.util.UUID;
 public class ClubServiceImpl implements ClubService {
 
     private final ClubRepository clubRepository;
+    private final ClubCoachRepository clubCoachRepository;
     private final UserRepository userRepository;
     private final S3Service s3Service;
     private final EntityManager entityManager;
     private final PlatformTransactionManager transactionManager;
     private final ScopeAccessValidator scopeAccessValidator;
+    private final com.bfg.platform.common.security.SecurityContextHelper securityContextHelper;
 
     @Override
     @Transactional(readOnly = true)
@@ -74,14 +77,16 @@ public class ClubServiceImpl implements ClubService {
         scopeAccessValidator.validateFilterScope(filter);
 
         Set<String> requestedExpand = ExpandQueryParser.parse(expand, Club.class);
-        
-        EnhancedFilterExpressionParser.ParseResult<Club> filterResult = 
+
+        EnhancedFilterExpressionParser.ParseResult<Club> filterResult =
                 ClubQueryAdapter.parseFilter(filter, requestedExpand);
         Specification<Club> filterSpec = filterResult.getSpecification();
-        
+
         Specification<Club> searchSpec = ClubQueryAdapter.parseSearch(search);
-        
-        Specification<Club> spec = Specification.where(filterSpec).and(searchSpec);
+
+        Specification<Club> scopeSpec = scopeAccessValidator.buildScopeRestriction(ResourceType.CLUB, "type");
+
+        Specification<Club> spec = Specification.where(filterSpec).and(searchSpec).and(scopeSpec);
         
         EnhancedSortParser.ParseResult sortResult = 
                 ClubQueryAdapter.parseSort(orderBy, requestedExpand);
@@ -146,7 +151,7 @@ public class ClubServiceImpl implements ClubService {
         
         if (club != null) {
             // Validate access - clubs don't have a clubId since they ARE the club
-            scopeAccessValidator.validateResourceAccess(club.getScopeType(), null, ResourceType.CLUB);
+            scopeAccessValidator.validateResourceAccess(club.getType(), null, ResourceType.CLUB);
         }
         
         final int presignedExpirySeconds = 3600;
@@ -167,7 +172,9 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public Optional<ClubDto> createClub(ClubCreateRequest request) {
-        validateClubAdmin(request.getClubAdminId());
+        if (request.getClubAdminId() != null) {
+            validateClubAdmin(request.getClubAdminId());
+        }
 
         String cardPrefix = findNextCardPrefix();
 
@@ -215,10 +222,21 @@ public class ClubServiceImpl implements ClubService {
     @Override
     @Transactional
     public Optional<ClubDto> updateClub(UUID uuid, ClubUpdateRequest request) {
+        validateClubModifyPermission(uuid);
         final int presignedExpirySeconds = 3600;
         return clubRepository.findById(uuid)
                 .map(club -> {
+                    boolean deactivating = request.getIsActive() != null && !request.getIsActive();
+                    if (deactivating) {
+                        clubCoachRepository.deleteByClubId(club.getId());
+                        club.setClubAdmin(null);
+                    } else if (!club.isActive() && request.getClubAdminId() != null) {
+                        throw new ValidationException("Не може да се назначава администратор към неактивен клуб");
+                    }
                     ClubMapper.updateClubFromRequest(club, request);
+                    if (deactivating) {
+                        club.setClubAdmin(null);
+                    }
                     Club savedClub = clubRepository.save(club);
                     ClubDto dto = ClubMapper.toDto(savedClub);
                     String logoPath = savedClub.getLogoUrl();
@@ -316,8 +334,11 @@ public class ClubServiceImpl implements ClubService {
     private void processClubMigrationItem(ClubBatchCreateRequestItem item,
                                           List<ClubDto> created,
                                           List<ClubBatchCreateResponseSkippedInner> skipped) {
-        User adminUser = userRepository.findByUsername(item.getAdminEmail())
-                .orElse(null);
+        User adminUser = null;
+        if (item.getAdminEmail() != null && !item.getAdminEmail().isBlank()) {
+            adminUser = userRepository.findByUsername(item.getAdminEmail())
+                    .orElse(null);
+        }
 
         String skipReason = validateClubMigrationItem(item, adminUser);
         if (skipReason != null) {
@@ -325,7 +346,8 @@ public class ClubServiceImpl implements ClubService {
             return;
         }
 
-        Club club = ClubMapper.fromBatchCreateRequestItem(item, adminUser.getId());
+        UUID adminUserId = adminUser != null ? adminUser.getId() : null;
+        Club club = ClubMapper.fromBatchCreateRequestItem(item, adminUserId);
 
         try {
             ClubDto dto = saveClubInNewTransaction(club);
@@ -362,12 +384,13 @@ public class ClubServiceImpl implements ClubService {
     }
 
     private String validateClubMigrationItem(ClubBatchCreateRequestItem item, User adminUser) {
-        if (adminUser == null) {
-            return "Admin user with email '" + item.getAdminEmail() + "' not found";
-        }
-
-        if (!userRepository.isClubAdmin(adminUser.getId())) {
-            return "User must have CLUB_ADMIN role to be assigned as club administrator";
+        if (item.getAdminEmail() != null && !item.getAdminEmail().isBlank()) {
+            if (adminUser == null) {
+                return "Admin user with email '" + item.getAdminEmail() + "' not found";
+            }
+            if (!userRepository.isClubAdmin(adminUser.getId())) {
+                return "User must have CLUB_ADMIN role to be assigned as club administrator";
+            }
         }
 
         String cardPrefix = item.getCardPrefix();
@@ -396,6 +419,21 @@ public class ClubServiceImpl implements ClubService {
         if (!userRepository.isClubAdmin(clubAdminId)) {
             throw new ValidationException("User is not assigned the CLUB_ADMIN role оr does not exist");
         }
+    }
+
+    private void validateClubModifyPermission(UUID clubId) {
+        com.bfg.platform.gen.model.SystemRole role = securityContextHelper.getUserRole();
+        if (role == com.bfg.platform.gen.model.SystemRole.APP_ADMIN || role == com.bfg.platform.gen.model.SystemRole.FEDERATION_ADMIN) {
+            return;
+        }
+        if (role == com.bfg.platform.gen.model.SystemRole.CLUB_ADMIN) {
+            UUID currentUserId = securityContextHelper.getUserId();
+            Optional<Club> ownClub = clubRepository.findByClubAdmin(currentUserId);
+            if (ownClub.isPresent() && ownClub.get().getId().equals(clubId)) {
+                return;
+            }
+        }
+        throw new com.bfg.platform.common.exception.ForbiddenException("You are not allowed to modify this club");
     }
 
     @Transactional

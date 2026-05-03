@@ -24,7 +24,7 @@ export interface ClubUpdateRequest {
      * UUID of the club administrator user
      */
     clubAdminId?: string;
-    scopeType?: ScopeType;
+    type?: ScopeType;
 }
 export namespace ClubUpdateRequest {
 }

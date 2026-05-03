@@ -1,7 +1,7 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
+type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl' | 'fullscreen';
 
 @Component({
   selector: 'app-dialog',
@@ -25,25 +25,29 @@ type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
           <h2 class="text-xl font-semibold text-gray-900 truncate mr-4">
             {{ title }}
           </h2>
-          <button
-            type="button"
-            class="text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
-            (click)="close()"
-          >
-            <svg
-              class="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+          <div class="flex items-center gap-1 flex-shrink-0">
+            <ng-content select="[slot=header-extra]"></ng-content>
+            <button
+              *ngIf="!preventBackdropClose"
+              type="button"
+              class="text-gray-400 hover:text-gray-600 transition-colors"
+              (click)="close()"
             >
-              <path
-                stroke-linecap="round"
-                stroke-linejoin="round"
-                stroke-width="2"
-                d="M6 18L18 6M6 6l12 12"
-              ></path>
-            </svg>
-          </button>
+              <svg
+                class="w-6 h-6"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"
+                ></path>
+              </svg>
+            </button>
+          </div>
         </div>
 
         <!-- Body -->
@@ -76,6 +80,17 @@ type DialogSize = 'sm' | 'md' | 'lg' | 'xl' | '2xl';
         min-height: 0;
         overflow-y: auto;
       }
+      .dialog-fullscreen {
+        width: 95vw;
+        max-height: 90vh;
+      }
+      @media (min-width: 1024px) {
+        .dialog-fullscreen {
+          width: min(85vw, 85vh);
+          height: min(85vh, 85vw);
+          max-height: none;
+        }
+      }
     `,
   ],
 })
@@ -85,11 +100,14 @@ export class DialogComponent {
   @Input() size: DialogSize = 'md';
   /** When true, body has no scroll (overflow hidden). Use when content is fixed height. */
   @Input() noScroll = false;
+  @Input() tall = false;
+  @Input() preventBackdropClose = false;
   @Output() closed = new EventEmitter<void>();
 
   get dialogClasses(): string {
     const baseClasses =
-      'relative bg-white rounded-lg shadow-xl w-full max-h-[90vh] overflow-hidden flex flex-col';
+      'relative bg-white rounded-lg shadow-xl w-full overflow-hidden flex flex-col';
+    const heightClasses = this.size === 'fullscreen' ? '' : this.tall ? 'h-[90vh]' : 'max-h-[90vh]';
 
     const sizeClasses: Record<DialogSize, string> = {
       sm: 'max-w-sm',
@@ -97,9 +115,10 @@ export class DialogComponent {
       lg: 'max-w-2xl',
       xl: 'max-w-4xl',
       '2xl': 'max-w-6xl',
+      fullscreen: 'dialog-fullscreen',
     };
 
-    return `${baseClasses} ${sizeClasses[this.size]}`;
+    return `${baseClasses} ${heightClasses} ${sizeClasses[this.size]}`;
   }
 
   close(): void {
@@ -107,7 +126,7 @@ export class DialogComponent {
   }
 
   onBackdropClick(event: MouseEvent): void {
-    if (event.target === event.currentTarget) {
+    if (event.target === event.currentTarget && !this.preventBackdropClose) {
       this.close();
     }
   }

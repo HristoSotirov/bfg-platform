@@ -36,7 +36,6 @@ export class UsersFiltersComponent implements OnInit {
     search: '',
     roles: [],
     statuses: [],
-    scopeTypes: [],
   };
   @Input() filterConfigs: UserFilterConfig[] = [];
 
@@ -47,21 +46,15 @@ export class UsersFiltersComponent implements OnInit {
   filtersExpanded = false; // Start collapsed on mobile
 
   readonly roleOptions: DropdownOption[] = [
-    { value: 'APP_ADMIN', label: 'Администратор' },
-    { value: 'FEDERATION_ADMIN', label: 'Администратор на федерацията' },
-    { value: 'CLUB_ADMIN', label: 'Администратор на клуб' },
-    { value: 'COACH', label: 'Треньор' },
+    { value: SystemRole.AppAdmin, label: 'Администратор' },
+    { value: SystemRole.FederationAdmin, label: 'Администратор на федерацията' },
+    { value: SystemRole.ClubAdmin, label: 'Администратор на клуб' },
+    { value: SystemRole.Coach, label: 'Треньор' },
   ];
 
   readonly statusOptions: DropdownOption[] = [
     { value: 'true', label: 'Активен' },
     { value: 'false', label: 'Неактивен' },
-  ];
-
-  readonly scopeTypeOptions: DropdownOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Външен' },
-    { value: 'NATIONAL', label: 'Национален' },
   ];
 
   ngOnInit(): void {
@@ -78,8 +71,7 @@ export class UsersFiltersComponent implements OnInit {
   hasVisibleFilters(): boolean {
     return (
       this.isFilterVisible('role') ||
-      this.isFilterVisible('status') ||
-      this.isFilterVisible('scopeType')
+      this.isFilterVisible('status')
     );
   }
 
@@ -94,10 +86,6 @@ export class UsersFiltersComponent implements OnInit {
 
   onStatusesChange(values: string[]): void {
     this.emitFiltersChange({ statuses: values });
-  }
-
-  onScopeTypesChange(values: string[]): void {
-    this.emitFiltersChange({ scopeTypes: values });
   }
 
   private emitFiltersChange(changes: Partial<UserFilters>): void {

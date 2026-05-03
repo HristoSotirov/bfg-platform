@@ -129,16 +129,6 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
 /users/{userUuid}:
-  parameters:
-    - name: userUuid
-      in: path
-      required: true
-      description: UUID of the user
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
-
   get:
     tags:
       - Users
@@ -152,6 +142,7 @@
         schema:
           type: string
           format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{user.uuid.required}")'
       - name: expand
         in: query
         description: |
@@ -254,22 +245,20 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
 /clubs/{clubUuid}/coaches:
-  parameters:
-    - name: clubUuid
-      in: path
-      required: true
-      description: UUID of the club
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
-
   get:
     tags:
       - Club Coaches
     summary: Get all coaches for a club
     operationId: getClubCoaches
     parameters:
+      - name: clubUuid
+        in: path
+        required: true
+        description: UUID of the club
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{club.uuid.required}")'
       - name: filter
         in: query
         description: Filter expression (e.g., clubId eq '...') - optional when using clubUuid path
@@ -392,16 +381,6 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
 /coaches/{coachId}/club:
-  parameters:
-    - name: coachId
-      in: path
-      required: true
-      description: UUID of the coach user
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{coach.uuid.required}")'
-
   get:
     tags:
       - Club Coaches
@@ -409,6 +388,14 @@
     description: Returns the club where the coach is registered. Returns null if coach is not assigned to any club.
     operationId: getClubByCoachId
     parameters:
+      - name: coachId
+        in: path
+        required: true
+        description: UUID of the coach user
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{coach.uuid.required}")'
       - name: expand
         in: query
         description: |
@@ -446,16 +433,6 @@
               $ref: "../common/schemas.yaml#/ErrorResponse"
 
 /clubs/coaches/{clubCoachId}:
-  parameters:
-    - name: clubCoachId
-      in: path
-      required: true
-      description: UUID of the club coach assignment record
-      schema:
-        type: string
-        format: uuid
-      x-parameter-extra-annotation: '@NotNull(message = "{clubCoach.uuid.required}")'
-
   delete:
     tags:
       - Club Coaches
@@ -465,6 +442,15 @@
       - FEDERATION_ADMIN and APP_ADMIN can remove any assignment (only validation that record exists)
       - CLUB_ADMIN can only remove assignments from their own club
     operationId: removeCoachFromClub
+    parameters:
+      - name: clubCoachId
+        in: path
+        required: true
+        description: UUID of the club coach assignment record
+        schema:
+          type: string
+          format: uuid
+        x-parameter-extra-annotation: '@NotNull(message = "{clubCoach.uuid.required}")'
     responses:
       "204":
         description: Coach removed successfully (no content)

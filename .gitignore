@@ -93,3 +93,10 @@ frontend/out.json
 frontend/.cache/
 frontend/openapi/
 *.tsbuildinfo
+
+# Claude Code
+.claude/
+CLAUDE.md
+
+# Documentation (generated plans, notes)
+docs/

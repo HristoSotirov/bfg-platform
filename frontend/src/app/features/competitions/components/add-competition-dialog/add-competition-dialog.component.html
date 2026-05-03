@@ -1,0 +1,198 @@
+<app-dialog [isOpen]="isOpen" title="Добавяне на състезание" size="lg" [tall]="true" (closed)="close()">
+  <div class="flex flex-col h-full min-h-0">
+  <div class="space-y-3 flex-1 min-h-0 overflow-y-auto pb-4">
+
+    <!-- 1. Type toggle: Реално / Шаблон -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Тип <span class="text-red-500">*</span>:</label>
+      <div class="flex rounded-lg border border-gray-300 overflow-hidden">
+        <button
+          type="button"
+          class="flex-1 px-4 py-2 text-sm font-medium transition-colors"
+          [class]="!formData.isTemplate ? 'bg-bfg-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+          (click)="onTemplateToggle(false)"
+        >Реално</button>
+        <button
+          type="button"
+          class="flex-1 px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300"
+          [class]="formData.isTemplate ? 'bg-bfg-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
+          (click)="onTemplateToggle(true)"
+        >Шаблон</button>
+      </div>
+    </div>
+
+    @if (!isTemplate) {
+      <!-- 2. Use a template -->
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          class="text-sm text-bfg-blue hover:underline"
+          (click)="showTemplatePicker = !showTemplatePicker"
+        >
+          Използвай шаблон
+        </button>
+        @if (selectedTemplateId) {
+          <span class="text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-0.5">
+            {{ selectedTemplateName }}@if (selectedTemplateDuration) { · {{ selectedTemplateDuration }} {{ selectedTemplateDuration === 1 ? 'ден' : 'дни' }}}</span>
+          <button
+            type="button"
+            class="text-xs text-red-400 hover:text-red-600"
+            (click)="clearTemplate()"
+          >✕</button>
+        }
+      </div>
+      @if (showTemplatePicker) {
+        <app-searchable-select-dropdown
+          [staticSearch]="templateSearch"
+          [ngModel]="selectedTemplateId"
+          (selectionChange)="onUseTemplate($event)"
+          placeholder="Изберете шаблон..."
+        ></app-searchable-select-dropdown>
+      }
+    }
+
+    <!-- 4. Short name -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Кратко име <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.shortName"
+        placeholder="Кратко наименование"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
+    </div>
+
+    <!-- 4b. Name -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Пълно име <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.name"
+        placeholder="Пълно наименование"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
+    </div>
+
+    <!-- 5. Location (all competitions) -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Място <span class="text-red-500">*</span>:</label>
+      <input
+        type="text"
+        [(ngModel)]="formData.location"
+        placeholder="Гр., обект"
+        class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+      />
+    </div>
+
+    <!-- 5c. Competition type -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1">Формат <span class="text-red-500">*</span>:</label>
+      <app-searchable-select-dropdown
+        [options]="competitionTypeOptions"
+        [(ngModel)]="formData.competitionType"
+        placeholder="Изберете формат..."
+      ></app-searchable-select-dropdown>
+    </div>
+
+    <!-- 6. Start date | End date (all competitions) -->
+    <div class="grid grid-cols-2 gap-3">
+      <app-date-picker
+        label="Начална дата"
+        [required]="true"
+        [(ngModel)]="formData.startDate"
+        placeholder="Изберете дата..."
+      ></app-date-picker>
+      <app-date-picker
+        label="Крайна дата"
+        [required]="true"
+        [(ngModel)]="formData.endDate"
+        placeholder="Изберете дата..."
+      ></app-date-picker>
+    </div>
+
+    @if (!isTemplate) {
+      <!-- 7. Submissions open | Submissions closed -->
+      <div class="grid grid-cols-2 gap-3">
+        <app-datetime-picker
+          label="Отваряне на записвания"
+          [required]="true"
+          [(ngModel)]="formData.entrySubmissionsOpenAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
+        <app-datetime-picker
+          label="Затваряне на записвания"
+          [required]="true"
+          [(ngModel)]="formData.entrySubmissionsClosedAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
+      </div>
+
+      <!-- 8. Last changes before TM | Technical meeting -->
+      <div class="grid grid-cols-2 gap-3">
+        <app-datetime-picker
+          label="Последни промени преди ТС"
+          [required]="true"
+          [(ngModel)]="formData.lastChangesBeforeTmAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
+        <app-datetime-picker
+          label="Техническо съвещание"
+          [required]="true"
+          [(ngModel)]="formData.technicalMeetingAt"
+          placeholder="Изберете дата и час..."
+        ></app-datetime-picker>
+      </div>
+
+      <!-- 9. Awarding ceremony -->
+      <app-datetime-picker
+        label="Награждаване"
+        [(ngModel)]="formData.awardingCeremonyAt"
+        placeholder="Изберете дата и час..."
+      ></app-datetime-picker>
+    }
+
+    <!-- 10. Scoring scheme | Qualification scheme -->
+    <div class="grid grid-cols-2 gap-3">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Схема за точкуване <span class="text-red-500">*</span>:</label>
+        <app-searchable-select-dropdown
+          [staticSearch]="scoringSchemeSearch"
+          [(ngModel)]="formData.scoringSchemeId"
+          placeholder="Изберете схема..."
+        ></app-searchable-select-dropdown>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Квалификационна схема <span class="text-red-500">*</span>:</label>
+        <app-searchable-select-dropdown
+          [staticSearch]="qualificationSchemeSearch"
+          [(ngModel)]="formData.qualificationSchemeId"
+          placeholder="Изберете схема..."
+        ></app-searchable-select-dropdown>
+      </div>
+    </div>
+  </div>
+  <div class="bg-white flex flex-col gap-2 pt-4 border-t border-gray-200">
+      @if (error) {
+        <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+          <p class="text-sm text-red-700">{{ error }}</p>
+          <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="error = null">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      }
+      @if (copyPartialError) {
+        <div class="w-full px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+          <p class="text-sm text-yellow-800">{{ copyPartialError }}</p>
+        </div>
+      }
+      <div class="flex justify-center gap-3">
+        <app-button variant="outline" size="md" text="Затвори" [disabled]="saving" (click)="close()"></app-button>
+        @if (!copyPartialError) {
+          <app-button variant="primary" size="md" text="Запази" [disabled]="!isFormValid || saving" (click)="save()"></app-button>
+        }
+      </div>
+    </div>
+  </div>
+</app-dialog>

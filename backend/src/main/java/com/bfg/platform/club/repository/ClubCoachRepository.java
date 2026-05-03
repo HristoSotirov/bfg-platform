@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -27,5 +28,10 @@ public interface ClubCoachRepository extends JpaRepository<ClubCoach, UUID>, Jpa
     boolean existsByClubIdAndCoachId(@NonNull UUID clubId, @NonNull UUID coachId);
 
     Optional<ClubCoach> findByClubIdAndCoachId(@NonNull UUID clubId, @NonNull UUID coachId);
+
+    @org.springframework.data.jpa.repository.Query("SELECT cc.coachId FROM ClubCoach cc")
+    List<UUID> findAllAssignedCoachIds();
+
+    void deleteByClubId(@NonNull UUID clubId);
 }
 

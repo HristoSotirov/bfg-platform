@@ -1,0 +1,425 @@
+<app-dialog
+  [isOpen]="isOpen"
+  title="Подаване на заявки"
+  size="xl"
+  [noScroll]="true"
+  [preventBackdropClose]="true"
+  (closed)="close()"
+>
+  <div class="flex flex-col max-h-[calc(90vh-120px)]">
+    <div class="flex-1 overflow-y-auto">
+
+      @if (loadingAthletes) {
+        <div class="text-gray-500 text-sm py-4 text-center">Зареждане на спортисти...</div>
+      } @else {
+
+        @for (ge of groupEntries; track ge.groupId) {
+          <div class="mb-6 border border-gray-200 rounded-lg overflow-hidden">
+
+            <!-- Group header -->
+            <div class="bg-blue-50 px-4 py-2.5 border-b border-gray-200">
+              <div class="flex items-center justify-between">
+                <button type="button" class="text-sm font-semibold text-bfg-blue hover:underline cursor-pointer" (click)="openGroupDetails(ge.group)">{{ ge.groupLabel }}</button>
+              </div>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-0.5 mt-1 text-xs text-gray-500">
+                <span>{{ ge.ownAthletes.length }} допустими</span>
+                @if (ge.transferAthletes.length > 0) {
+                  <span class="text-orange-500">+ {{ ge.transferAthletes.length }} трансфер (избрани {{ getSelectedTransferCount(ge) }})</span>
+                }
+                @if (ge.group.maxDisciplinesPerAthlete != null) {
+                  <span>| макс. {{ ge.group.maxDisciplinesPerAthlete }} дисц./спортист</span>
+                }
+                @if (ge.transferAthletes.length > 0 && ge.group.transferredMaxDisciplinesPerAthlete != null) {
+                  <span class="text-orange-500">| макс. {{ ge.group.transferredMaxDisciplinesPerAthlete }} дисц./трансфер</span>
+                }
+              </div>
+            </div>
+
+            <!-- Athlete pool button -->
+            <div class="border-b border-gray-200 px-4 py-2">
+              <button
+                type="button"
+                class="w-full flex items-center justify-between px-3 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                (click)="openAthletePoolDialog(ge)"
+              >
+                <span class="text-gray-700">
+                  Избрани спортисти: <span class="font-semibold text-bfg-blue">{{ ge.selectedAthleteIds.size }}</span>
+                  @if (getSelectedTransferCount(ge) > 0) {
+                    <span class="ml-2 text-orange-600">({{ getSelectedTransferCount(ge) }} трансфер)</span>
+                  }
+                </span>
+                <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                </svg>
+              </button>
+              @if (isGroupOverTransferSchema(ge)) {
+                <p class="text-xs text-red-600 mt-1">Превишен лимит за трансфер!</p>
+              }
+              <!-- Selected athletes table -->
+              @if (ge.selectedAthleteIds.size > 0 || getSelectedAthletes(ge).length > 0) {
+                <div class="mt-2 max-h-32 overflow-y-auto">
+                  <table class="w-full text-xs">
+                    <tbody>
+                      @for (athlete of getSelectedAthletes(ge); track athlete.accreditationId; let i = $index) {
+                        <tr class="border-b border-gray-50 last:border-0">
+                          <td class="py-1 pr-2 text-gray-400 w-6 text-right">{{ i + 1 }}</td>
+                          <td class="py-1"
+                            [class.text-orange-600]="athlete.isTransfer"
+                            [class.text-teal-600]="!ge.selectedAthleteIds.has(athlete.accreditationId)"
+                            [class.text-gray-700]="!athlete.isTransfer && ge.selectedAthleteIds.has(athlete.accreditationId)">
+                            @if (athlete.isTransfer) { <span class="font-medium">[Т]</span> }
+                            @if (!ge.selectedAthleteIds.has(athlete.accreditationId)) { <span class="font-medium">[К]</span> }
+                            {{ athlete.label }}
+                          </td>
+                          @if (getAthleteGroupCounts(ge, athlete.accreditationId).disc > 0 || getAthleteGroupCounts(ge, athlete.accreditationId).cox > 0) {
+                            <td class="py-1 pl-2 text-right text-gray-400 whitespace-nowrap">
+                              {{ getAthleteGroupCounts(ge, athlete.accreditationId).disc }} дисц.@if (getAthleteGroupCounts(ge, athlete.accreditationId).cox > 0) { + {{ getAthleteGroupCounts(ge, athlete.accreditationId).cox }} корм.}
+                            </td>
+                          }
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              }
+            </div>
+
+            <!-- Discipline chips -->
+            <div class="px-4 py-2 border-b border-gray-200">
+              <p class="text-xs text-gray-500 mb-1.5 font-medium">Дисциплини</p>
+              <div class="flex flex-wrap gap-1.5">
+                @for (avail of ge.availableDisciplines; track avail.disciplineId) {
+                  <button
+                    type="button"
+                    class="px-2.5 py-1 text-xs rounded border transition-colors"
+                    [class]="isDisciplineAdded(ge, avail.disciplineId)
+                      ? 'bg-bfg-blue text-white border-bfg-blue'
+                      : 'bg-white text-gray-600 border-gray-300 hover:border-bfg-blue hover:text-bfg-blue'"
+                    (click)="toggleDiscipline(ge, avail)"
+                  >{{ avail.label }}</button>
+                }
+              </div>
+            </div>
+
+            <!-- Selected disciplines with teams -->
+            @for (de of ge.disciplines; track de.disciplineId) {
+              <div class="border-b border-gray-100 last:border-0">
+                <div class="px-4 py-2 bg-gray-50 flex items-center justify-between">
+                  <div class="flex items-center gap-2">
+                    <button type="button" class="text-xs font-semibold text-bfg-blue hover:underline cursor-pointer" (click)="openDisciplineDetails(de.discipline)">{{ de.label }}</button>
+                    @if (de.discipline.maxCrewFromTransfer != null && ge.transferAthletes.length > 0) {
+                      <span class="text-xs text-orange-500">макс. {{ de.discipline.maxCrewFromTransfer }} трансфер/отбор</span>
+                    }
+                  </div>
+                  <button
+                    type="button"
+                    class="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                    (click)="removeDiscipline(ge, de.disciplineId)"
+                  >Премахни</button>
+                </div>
+
+                @for (team of de.teams; track team.teamNumber; let ti = $index) {
+                  <div class="px-4 py-2.5 border-b border-gray-50 last:border-0" [class.bg-red-50]="hasTeamError(de, ge, team)">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium text-gray-500">Отбор {{ team.teamNumber }}</span>
+                        <!-- Dynamic crew schema: filled/total, own + transfer breakdown -->
+                        <span class="text-xs text-gray-400">
+                          {{ getTeamFilledCount(team) }}/{{ team.crew.length }}
+                        </span>
+                        @if (ge.transferAthletes.length > 0) {
+                          <span
+                            class="text-xs px-1.5 py-0.5 rounded-full"
+                            [class]="isTeamOverTransferLimit(de, ge, team)
+                              ? 'bg-red-100 text-red-600 font-medium'
+                              : getTeamTransferCount(ge, team) > 0
+                                ? 'bg-orange-100 text-orange-600'
+                                : 'bg-gray-100 text-gray-400'"
+                          >
+                            {{ getTeamOwnCount(ge, team) }} собств. + {{ getTeamTransferCount(ge, team) }}@if (de.discipline.maxCrewFromTransfer != null) {/{{ de.discipline.maxCrewFromTransfer }}} Т
+                          </span>
+                        }
+                        @if (hasTeamDuplicateAthletes(team)) {
+                          <span class="text-xs px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">дубликат!</span>
+                        }
+                        @if (hasTeamGenderImbalance(de, ge, team)) {
+                          <span class="text-xs px-1.5 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">50/50 М/Ж!</span>
+                        }
+                      </div>
+                      @if (de.teams.length > 1) {
+                        <button
+                          type="button"
+                          class="text-xs text-gray-400 hover:text-red-500 transition-colors"
+                          (click)="removeTeam(de, ti)"
+                        >Изтрий</button>
+                      }
+                    </div>
+                    <div class="space-y-1.5">
+                      @for (crewItem of team.crew; track crewItem.seat) {
+                        <div class="flex items-center gap-2">
+                          <span class="text-xs text-gray-500 w-5 flex-shrink-0 text-right">{{ getSeatLabel(crewItem.seat) }}</span>
+                          <div class="flex-1 min-w-0">
+                            <app-searchable-select-dropdown
+                              [options]="crewItem.seat === 'COX' ? getCoxOptions(ge) : getPoolOptions(ge)"
+                              [placeholder]="ge.selectedAthleteIds.size === 0 && crewItem.seat !== 'COX' ? 'Първо изберете спортисти' : 'Изберете спортист'"
+                              [ngModel]="crewItem.accreditationId || null"
+                              (ngModelChange)="onAthleteChange(crewItem, $event)"
+                              [disabled]="saving || (ge.selectedAthleteIds.size === 0 && crewItem.seat !== 'COX')"
+                            ></app-searchable-select-dropdown>
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+
+                @if (canAddTeam(de)) {
+                  <div class="px-4 py-1.5">
+                    <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="addTeam(de)">+ Добави отбор</button>
+                  </div>
+                }
+              </div>
+            }
+
+            @if (ge.disciplines.length === 0) {
+              <div class="px-4 py-3 text-center text-xs text-gray-400">
+                Изберете дисциплини от бутоните по-горе
+              </div>
+            }
+          </div>
+        }
+
+        @if (groupEntries.length === 0) {
+          <div class="py-6 text-center text-sm text-gray-400">Няма дисциплини в разписанието</div>
+        }
+
+      }
+    </div>
+
+    <!-- Errors + actions -->
+    <div class="shrink-0 bg-white pt-4 border-t border-gray-200 flex flex-col gap-3 mt-4">
+      @if (errors.length > 0) {
+        <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg">
+          <p class="text-sm font-medium text-red-700 mb-1">Грешки при валидация:</p>
+          <ul class="list-disc list-inside space-y-0.5">
+            @for (err of errors; track err) {
+              <li class="text-sm text-red-600">{{ err }}</li>
+            }
+          </ul>
+        </div>
+      }
+      @if (saveError) {
+        <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+          <p class="text-sm text-red-700">{{ saveError }}</p>
+          <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="saveError = null">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+            </svg>
+          </button>
+        </div>
+      }
+      <div class="flex items-center justify-center gap-2">
+        <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="close()"></app-button>
+        <app-button variant="primary" size="md" text="Подай заявки" [disabled]="saving || !hasAnyDiscipline" (click)="submit()"></app-button>
+      </div>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Discipline details dialog (read-only) -->
+<app-discipline-details-dialog
+  [isOpen]="!!selectedDiscipline"
+  [discipline]="selectedDiscipline"
+  [canEdit]="false"
+  [groupMap]="groupMap"
+  [permalinkRoute]="disciplinePermalinkRoute"
+  (closed)="closeDisciplineDetails()"
+  (navigated)="closeDisciplineDetails()"
+></app-discipline-details-dialog>
+
+<!-- Competition group details dialog (read-only) -->
+<app-competition-group-details-dialog
+  [isOpen]="!!selectedGroup"
+  [group]="selectedGroup"
+  [canEdit]="false"
+  [groupMap]="groupMap"
+  [permalinkRoute]="groupPermalinkRoute"
+  (closed)="closeGroupDetails()"
+  (navigated)="closeGroupDetails()"
+></app-competition-group-details-dialog>
+
+<!-- Transfer schema dialog -->
+@for (ge of groupEntries; track ge.groupId) {
+  @if (showTransferSchemaGroupId === ge.groupId && ge.group.transferRatio != null) {
+    <app-dialog
+      [isOpen]="true"
+      [title]="'Схема за трансфер — ' + ge.groupLabel"
+      size="md"
+      [noScroll]="true"
+      (closed)="closeTransferSchema()"
+    >
+      <div class="flex flex-col max-h-[calc(90vh-80px)]">
+        <p class="text-sm text-gray-600 mb-3 px-2 pt-2 flex-shrink-0">
+          Допуска се до <strong>{{ ge.group.transferRatio }}%</strong> от стартиралите състезатели да бъдат от
+          <strong>{{ ge.transferGroupLabel }}</strong>.
+        </p>
+
+        <div class="flex-1 overflow-y-auto">
+          <table class="w-full text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-gray-200">
+              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">Общ брой на отбора</th>
+              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">Макс. трансфер</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of getTransferSchemaTable(ge); track row.total) {
+              <tr
+                class="border-b border-gray-100"
+                [class.bg-blue-50]="ge.selectedAthleteIds.size === row.total"
+                [class.font-medium]="ge.selectedAthleteIds.size === row.total"
+              >
+                <td class="py-1.5 px-3">{{ row.total }}</td>
+                <td class="py-1.5 px-3">
+                  {{ row.maxTransfer }}
+                  @if (ge.selectedAthleteIds.size === row.total) {
+                    <span class="text-xs text-gray-400 ml-1">(текущо)</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+        </div>
+
+        @if (ge.selectedAthleteIds.size > 0) {
+          <div class="mt-3 px-3 py-2 rounded text-sm flex-shrink-0"
+            [class]="isGroupOverTransferSchema(ge) ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">
+            @if (isGroupOverTransferSchema(ge)) {
+              Избрани {{ getSelectedTransferCount(ge) }} трансфер от {{ ge.selectedAthleteIds.size }} общо — надвишен лимит (макс. {{ getMaxAllowedTransferForGroup(ge) }}).
+            } @else {
+              Избрани {{ getSelectedTransferCount(ge) }} трансфер от {{ ge.selectedAthleteIds.size }} общо — в рамките на лимита (макс. {{ getMaxAllowedTransferForGroup(ge) }}).
+            }
+          </div>
+        }
+
+        <div class="mt-4 flex justify-center flex-shrink-0">
+          <app-button variant="primary" size="md" text="Затвори" (click)="closeTransferSchema()"></app-button>
+        </div>
+      </div>
+    </app-dialog>
+  }
+}
+
+<!-- Athlete pool multi-select dialog -->
+@if (athletePoolDialogGroup) {
+  <app-dialog
+    [isOpen]="true"
+    [title]="'Избор на спортисти — ' + athletePoolDialogGroup.groupLabel"
+    size="lg"
+    [tall]="true"
+    [noScroll]="true"
+    (closed)="athletePoolDialogGroup = null"
+  >
+    <div class="flex flex-col h-full">
+      <!-- Search -->
+      <div class="px-4 py-3 border-b flex-shrink-0">
+        <input type="text" placeholder="Търси по име, година, картон..."
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+          [(ngModel)]="athletePoolDialogGroup.athleteSearch" />
+      </div>
+
+      <!-- Athletes list (scrollable) -->
+      <div class="flex-1 overflow-y-auto px-4 py-2 space-y-0.5">
+        <!-- Own athletes section -->
+        @if (getFilteredOwn(athletePoolDialogGroup).length > 0) {
+          <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-2 mb-1 px-2">Собствени</p>
+          @for (athlete of getFilteredOwn(athletePoolDialogGroup); track athlete.accreditationId) {
+            <label
+              class="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer hover:bg-gray-50"
+              [class.bg-blue-50]="isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)"
+            >
+              <input type="checkbox"
+                class="h-4 w-4 rounded border-gray-300 text-bfg-blue focus:ring-bfg-blue"
+                [checked]="isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)"
+                (change)="toggleAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)" />
+              <span class="text-sm flex-1 min-w-0 truncate"
+                [class.text-gray-800]="isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)"
+                [class.text-gray-500]="!isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)">
+                {{ athlete.label }}
+              </span>
+              @if (isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId) && getAthleteTeamCount(athlete.accreditationId) > 0) {
+                <span class="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
+                  [class]="isAthleteOverLimit(athletePoolDialogGroup, athlete.accreditationId) ? 'bg-red-100 text-red-600' : 'bg-gray-100 text-gray-500'">
+                  {{ getAthleteGroupCounts(athletePoolDialogGroup, athlete.accreditationId).disc }} дисц.@if (getAthleteGroupCounts(athletePoolDialogGroup, athlete.accreditationId).cox > 0) { + {{ getAthleteGroupCounts(athletePoolDialogGroup, athlete.accreditationId).cox }} корм.}
+                </span>
+              }
+            </label>
+          }
+        }
+
+        <!-- Transfer athletes section -->
+        @if (athletePoolDialogGroup.transferAthletes.length > 0 && getFilteredTransfer(athletePoolDialogGroup).length > 0) {
+          <p class="text-xs font-semibold text-orange-500 uppercase tracking-wide mt-4 mb-1 px-2 pt-2 border-t border-gray-100">
+            Трансфер от {{ athletePoolDialogGroup.transferGroupLabel }}
+          </p>
+          @for (athlete of getFilteredTransfer(athletePoolDialogGroup); track athlete.accreditationId) {
+            <label
+              class="flex items-center gap-2 px-2 py-1.5 rounded cursor-pointer hover:bg-orange-50"
+              [class.bg-orange-50]="isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)"
+            >
+              <input type="checkbox"
+                class="h-4 w-4 rounded border-orange-300 text-orange-500 focus:ring-orange-400"
+                [checked]="isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)"
+                (change)="toggleAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)" />
+              <span class="text-sm flex-1 min-w-0 truncate"
+                [class.text-gray-800]="isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)"
+                [class.text-gray-500]="!isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId)">
+                {{ athlete.label }}
+              </span>
+              <span class="text-xs text-orange-500 flex-shrink-0">[Т]</span>
+              @if (isAthleteInPool(athletePoolDialogGroup, athlete.accreditationId) && getAthleteTeamCount(athlete.accreditationId) > 0) {
+                <span class="text-xs px-1.5 py-0.5 rounded-full flex-shrink-0"
+                  [class]="isTransferAthleteOverDisciplineLimit(athletePoolDialogGroup, athlete.accreditationId) ? 'bg-red-100 text-red-600' : 'bg-orange-100 text-orange-600'">
+                  {{ getAthleteGroupCounts(athletePoolDialogGroup, athlete.accreditationId).disc }}@if (getAthleteGroupCounts(athletePoolDialogGroup, athlete.accreditationId).cox > 0) {+{{ getAthleteGroupCounts(athletePoolDialogGroup, athlete.accreditationId).cox }}к}@if (athletePoolDialogGroup.group.transferredMaxDisciplinesPerAthlete != null) {/{{ athletePoolDialogGroup.group.transferredMaxDisciplinesPerAthlete }}} дисц.
+                </span>
+              }
+            </label>
+          }
+        }
+
+        @if (getFilteredOwn(athletePoolDialogGroup).length === 0 && getFilteredTransfer(athletePoolDialogGroup).length === 0) {
+          <p class="text-sm text-gray-400 py-4 text-center">Няма намерени спортисти</p>
+        }
+      </div>
+
+      <!-- Footer summary -->
+      <div class="px-4 py-3 border-t bg-gray-50 flex items-center justify-between flex-shrink-0">
+        <div class="text-sm text-gray-600">
+          <span class="font-semibold">{{ athletePoolDialogGroup.selectedAthleteIds.size }}</span> спортисти
+          @if (getSelectedTransferCount(athletePoolDialogGroup) > 0) {
+            <span class="ml-2 text-orange-600">
+              ({{ getSelectedTransferCount(athletePoolDialogGroup) }} трансфер
+              @if (getMaxAllowedTransferForGroup(athletePoolDialogGroup) !== null) {
+                / макс. {{ getMaxAllowedTransferForGroup(athletePoolDialogGroup) }}
+              }
+              )
+            </span>
+          }
+          @if (isGroupOverTransferSchema(athletePoolDialogGroup)) {
+            <span class="ml-2 text-red-600 font-medium">Превишен лимит!</span>
+          }
+        </div>
+        <div class="flex items-center gap-2">
+          @if (athletePoolDialogGroup.group.transferRatio != null && athletePoolDialogGroup.group.transferRatio > 0) {
+            <button type="button" class="text-xs text-bfg-blue hover:underline"
+              (click)="openTransferSchemaFromPool()">
+              Схема
+            </button>
+          }
+          <app-button variant="primary" size="md" text="Готово" (click)="athletePoolDialogGroup = null"></app-button>
+        </div>
+      </div>
+    </div>
+  </app-dialog>
+}

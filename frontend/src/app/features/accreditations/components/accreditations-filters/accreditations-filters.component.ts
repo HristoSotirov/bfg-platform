@@ -10,7 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AccreditationStatus } from '../../../../core/services/api';
+import { AccreditationStatus, Gender } from '../../../../core/services/api';
 import {
   AccreditationFilters,
   FilterConfig,
@@ -22,7 +22,6 @@ import {
 import { SearchBarComponent } from '../../../../shared/components/search-bar/search-bar.component';
 import { FilterToggleButtonComponent } from '../../../../shared/components/filter-toggle-button/filter-toggle-button.component';
 import { ClubDto } from '../../../../core/services/api';
-import { getRaceGroupOptions } from '../../../../shared/utils/race-group.util';
 
 @Component({
   selector: 'app-accreditations-filters',
@@ -42,14 +41,15 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
   @Input() filters: AccreditationFilters = {
     search: '',
     statuses: [],
-    years: [],
+    genders: [],
+    birthYears: [],
     clubs: [],
-    raceGroups: [],
-    scopeTypes: [],
+    years: [],
   };
   @Input() filterConfigs: FilterConfig[] = [];
   @Input() allClubs: ClubDto[] = [];
   @Input() availableYears: number[] = [];
+  @Input() availableBirthYears: number[] = [];
 
   @Output() filtersChange = new EventEmitter<AccreditationFilters>();
   @Output() searchChange = new EventEmitter<string>();
@@ -57,46 +57,39 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
   searchValue = '';
   filtersExpanded = false;
   selectedYearsCache: string[] = [];
+  selectedBirthYearsCache: string[] = [];
 
   readonly statusOptions: DropdownOption[] = [
-    { value: 'ACTIVE', label: 'Активна' },
-    { value: 'PENDING_VALIDATION', label: 'Чакаща валидация' },
-    { value: 'PENDING_PHOTO_VALIDATION', label: 'Чакаща снимка' },
-    { value: 'NEW_PHOTO_REQUIRED', label: 'Нова снимка' },
-    { value: 'EXPIRED', label: 'Изтекла' },
-    { value: 'SUSPENDED', label: 'Спряна' },
+    { value: AccreditationStatus.Active, label: 'Активна' },
+    { value: AccreditationStatus.PendingValidation, label: 'Чакаща валидация' },
+    { value: AccreditationStatus.PendingPhotoValidation, label: 'Чакаща снимка' },
+    { value: AccreditationStatus.NewPhotoRequired, label: 'Нова снимка' },
+    { value: AccreditationStatus.Expired, label: 'Изтекла' },
+    { value: AccreditationStatus.Suspended, label: 'Спряна' },
+  ];
+
+  readonly genderOptions: DropdownOption[] = [
+    { value: Gender.MALE, label: 'Мъж' },
+    { value: Gender.FEMALE, label: 'Жена' },
   ];
 
   yearOptions: DropdownOption[] = [];
   clubOptions: DropdownOption[] = [];
-  readonly raceGroupOptions: DropdownOption[] = getRaceGroupOptions();
-  readonly scopeTypeOptions: DropdownOption[] = [
-    { value: 'INTERNAL', label: 'Вътрешен' },
-    { value: 'EXTERNAL', label: 'Външен' },
-    { value: 'NATIONAL', label: 'Национален' },
-  ];
 
-  constructor() {}
+  get birthYearOptions(): DropdownOption[] {
+    return this.availableBirthYears.map((y) => ({ value: String(y), label: String(y) }));
+  }
 
   ngOnInit(): void {
     try {
       this.searchValue = this.filters.search || '';
-      if (!this.filters.statuses) {
-        this.filters.statuses = [];
-      }
-      if (!this.filters.years) {
-        this.filters.years = [];
-      }
-      if (!this.filters.clubs) {
-        this.filters.clubs = [];
-      }
-      if (!this.filters.raceGroups) {
-        this.filters.raceGroups = [];
-      }
-      if (!this.filters.scopeTypes) {
-        this.filters.scopeTypes = [];
-      }
+      if (!this.filters.statuses) this.filters.statuses = [];
+      if (!this.filters.genders) this.filters.genders = [];
+      if (!this.filters.years) this.filters.years = [];
+      if (!this.filters.clubs) this.filters.clubs = [];
+      if (!this.filters.birthYears) this.filters.birthYears = [];
       this.updateSelectedYearsCache();
+      this.updateSelectedBirthYearsCache();
       this.updateClubOptions();
       this.updateYearOptions();
     } catch (error) {
@@ -109,22 +102,13 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['filters']) {
-      if (this.filters && !this.filters.statuses) {
-        this.filters.statuses = [];
-      }
-      if (this.filters && !this.filters.years) {
-        this.filters.years = [];
-      }
-      if (this.filters && !this.filters.clubs) {
-        this.filters.clubs = [];
-      }
-      if (this.filters && !this.filters.raceGroups) {
-        this.filters.raceGroups = [];
-      }
-      if (this.filters && !this.filters.scopeTypes) {
-        this.filters.scopeTypes = [];
-      }
+      if (this.filters && !this.filters.statuses) this.filters.statuses = [];
+      if (this.filters && !this.filters.genders) this.filters.genders = [];
+      if (this.filters && !this.filters.years) this.filters.years = [];
+      if (this.filters && !this.filters.clubs) this.filters.clubs = [];
+      if (this.filters && !this.filters.birthYears) this.filters.birthYears = [];
       this.updateSelectedYearsCache();
+      this.updateSelectedBirthYearsCache();
     }
 
     if (changes['allClubs']) {
@@ -139,7 +123,6 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
 
   isFilterVisible(filterId: string): boolean {
     const config = this.filterConfigs.find((f) => f.id === filterId);
-    // If config doesn't exist, the filter is not available for this user
     if (!config) return false;
     return config.visible;
   }
@@ -147,10 +130,10 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
   hasVisibleFilters(): boolean {
     return (
       this.isFilterVisible('status') ||
+      this.isFilterVisible('gender') ||
+      this.isFilterVisible('birthYear') ||
       this.isFilterVisible('year') ||
-      this.isFilterVisible('club') ||
-      this.isFilterVisible('raceGroup') ||
-      this.isFilterVisible('scopeType')
+      this.isFilterVisible('club')
     );
   }
 
@@ -163,21 +146,22 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
     this.emitFiltersChange({ statuses: values as AccreditationStatus[] });
   }
 
-  onYearsChange(values: string[]): void {
-    this.selectedYearsCache = values;
-    this.emitFiltersChange({ years: values.map((v) => parseInt(v, 10)) });
+  onGendersChange(values: string[]): void {
+    this.emitFiltersChange({ genders: values });
+  }
+
+  onBirthYearsChange(values: string[]): void {
+    this.selectedBirthYearsCache = values;
+    this.emitFiltersChange({ birthYears: values.map((v) => parseInt(v, 10)) });
   }
 
   onClubsChange(values: string[]): void {
     this.emitFiltersChange({ clubs: values });
   }
 
-  onRaceGroupsChange(values: string[]): void {
-    this.emitFiltersChange({ raceGroups: values });
-  }
-
-  onScopeTypesChange(values: string[]): void {
-    this.emitFiltersChange({ scopeTypes: values });
+  onYearsChange(values: string[]): void {
+    this.selectedYearsCache = values;
+    this.emitFiltersChange({ years: values.map((v) => parseInt(v, 10)) });
   }
 
   private emitFiltersChange(changes: Partial<AccreditationFilters>): void {
@@ -189,6 +173,10 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
 
   private updateSelectedYearsCache(): void {
     this.selectedYearsCache = (this.filters.years || []).map((y) => String(y));
+  }
+
+  private updateSelectedBirthYearsCache(): void {
+    this.selectedBirthYearsCache = (this.filters.birthYears || []).map((y) => String(y));
   }
 
   private updateClubOptions(): void {

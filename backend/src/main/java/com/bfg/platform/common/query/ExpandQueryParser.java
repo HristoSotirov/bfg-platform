@@ -29,43 +29,93 @@ public final class ExpandQueryParser {
         if (expandParam == null || expandParam.isBlank()) {
             return Collections.emptySet();
         }
-        
+
         Set<String> requested = Stream.of(expandParam.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .collect(Collectors.toSet());
-        
+
         if (requested.isEmpty()) {
             return Collections.emptySet();
         }
-        
-        Set<String> expandableFields = ExpandConfig.getExpandableFields(entityClass);
+
         Set<String> invalid = new HashSet<>();
-        
+
         for (String field : requested) {
-            if (!expandableFields.contains(field)) {
+            if (!isValidExpandPath(field, entityClass)) {
                 invalid.add(field);
             }
         }
-        
+
         if (!invalid.isEmpty()) {
             throw new IllegalArgumentException(
-                "Invalid expand options for " + entityClass.getSimpleName() + ": " + invalid +
-                ". Available options: " + expandableFields
+                "Invalid expand options for " + entityClass.getSimpleName() + ": " + invalid
             );
         }
-        
+
+        // Validate that parent is explicitly expanded when using nested paths
+        for (String field : requested) {
+            if (field.contains(".")) {
+                String parent = field.substring(0, field.lastIndexOf('.'));
+                if (!requested.contains(parent)) {
+                    throw new IllegalArgumentException(
+                        "Cannot expand '" + field + "' without also expanding '" + parent + "'"
+                    );
+                }
+            }
+        }
+
         return requested;
+    }
+
+    /**
+     * Validates a dotted expand path by walking the ExpandConfig chain segment by segment.
+     * E.g. "discipline.competitionGroup.transferFromGroup" on CompetitionTimetableEvent:
+     *   1. "discipline" valid on CompetitionTimetableEvent → resolves to DisciplineDefinition
+     *   2. "competitionGroup" valid on DisciplineDefinition → resolves to CompetitionGroupDefinition
+     *   3. "transferFromGroup" valid on CompetitionGroupDefinition → valid
+     */
+    private static boolean isValidExpandPath(String path, Class<?> rootEntityClass) {
+        String[] segments = path.split("\\.");
+        Class<?> currentClass = rootEntityClass;
+
+        for (String segment : segments) {
+            if (!ExpandConfig.isExpandable(currentClass, segment)) {
+                return false;
+            }
+            Class<?> nextClass = ExpandConfig.getExpandableFieldType(currentClass, segment);
+            if (nextClass == null) {
+                return false;
+            }
+            currentClass = nextClass;
+        }
+        return true;
     }
     
     public static Set<String> parseWithoutValidation(String expandParam) {
         if (expandParam == null || expandParam.isBlank()) {
             return Collections.emptySet();
         }
-        
+
         return Stream.of(expandParam.split(","))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
+                .collect(Collectors.toSet());
+    }
+
+    /**
+     * Strips a prefix from dotted expand keys and returns the child-level expand set.
+     * E.g. subExpand({"competitionGroup", "competitionGroup.transferFromGroup"}, "competitionGroup")
+     *   → {"transferFromGroup"}
+     */
+    public static Set<String> subExpand(Set<String> expand, String prefix) {
+        if (expand == null || expand.isEmpty()) {
+            return Collections.emptySet();
+        }
+        String dotPrefix = prefix + ".";
+        return expand.stream()
+                .filter(s -> s.startsWith(dotPrefix))
+                .map(s -> s.substring(dotPrefix.length()))
                 .collect(Collectors.toSet());
     }
 }

@@ -1,6 +1,7 @@
-import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-search-bar',
@@ -60,7 +61,7 @@ import { FormsModule } from '@angular/forms';
   `,
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class SearchBarComponent {
+export class SearchBarComponent implements OnInit, OnDestroy {
   @Input() placeholder = 'Търсене...';
   @Input() searchValue = '';
   @Input() showIcon = true;
@@ -72,13 +73,28 @@ export class SearchBarComponent {
   @Output() searchChange = new EventEmitter<string>();
   @Output() search = new EventEmitter<string>();
 
+  private searchSubject = new Subject<string>();
+
+  ngOnInit(): void {
+    this.searchSubject.pipe(
+      debounceTime(300),
+      distinctUntilChanged((a, b) => a.trim() === b.trim()),
+    ).subscribe((value) => {
+      this.searchValueChange.emit(value.trim());
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.searchSubject.complete();
+  }
+
   onValueChange(value: string): void {
     this.searchValue = value;
-    this.searchValueChange.emit(value);
+    this.searchSubject.next(value);
   }
 
   onSearchKeydown(event: KeyboardEvent): void {
-    if (event.key === 'Enter' || event.key === ' ') {
+    if (event.key === 'Enter') {
       event.preventDefault();
       this.triggerSearch();
     }

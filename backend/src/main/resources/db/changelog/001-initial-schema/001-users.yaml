@@ -67,8 +67,3 @@ databaseChangeLog:
                   type: VARCHAR(50)
                   constraints:
                     nullable: false
-              - column:
-                  name: scope_type
-                  type: VARCHAR(20)
-                  constraints:
-                    nullable: true

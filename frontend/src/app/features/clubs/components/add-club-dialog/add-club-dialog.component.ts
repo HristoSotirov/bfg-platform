@@ -5,7 +5,8 @@ import { DialogComponent } from '../../../../shared/components/dialog/dialog.com
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { ClubsService, UsersService, UserDto, ClubCreateRequest, ClubDto, ScopeType } from '../../../../core/services/api';
-import { takeUntil, Subject, forkJoin } from 'rxjs';
+import { takeUntil, Subject, Observable, forkJoin, map } from 'rxjs';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-add-club-dialog',
@@ -22,20 +23,16 @@ export class AddClubDialogComponent implements OnChanges {
   @Output() added = new EventEmitter<void>();
 
   private destroy$ = new Subject<void>();
+  private assignedAdminIds: Set<string> = new Set();
 
   formData = {
     name: '',
     shortName: '',
     clubEmail: '',
     clubAdminId: '',
-    scopeType: ScopeType.Internal as ScopeType,
+    type: ScopeType.Internal as ScopeType,
   };
 
-  availableAdmins: UserDto[] = [];
-  adminOptions: SearchableSelectOption[] = [];
-  loadingAdmins = false;
-  
-  assignedAdminIds: Set<string> = new Set();
   scopeTypeOptions: SearchableSelectOption[] = [
     { value: ScopeType.Internal, label: 'Вътрешен' },
     { value: ScopeType.External, label: 'Външен' },
@@ -55,12 +52,32 @@ export class AddClubDialogComponent implements OnChanges {
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen) {
       this.resetForm();
-      this.loadAdminsAndClubs();
     }
     if (changes['isOpen'] && !this.isOpen) {
       this.destroy$.next();
     }
   }
+
+  adminSearch = (query: string): Observable<SearchableSelectOption[]> =>
+    forkJoin({
+      admins: this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", query || undefined, undefined, 100, 0) as any,
+      clubs: fetchAllPages((skip, top) =>
+        this.clubsService.getAllClubs(undefined, undefined, undefined, top, skip, ['clubAdminUser'] as any) as any
+      ),
+    }).pipe(
+      map(({ admins, clubs }: any) => {
+        const assigned = new Set<string>();
+        (clubs as ClubDto[]).forEach((club: ClubDto) => {
+          if (club.clubAdminId) assigned.add(club.clubAdminId);
+        });
+        this.assignedAdminIds = assigned;
+        return (admins.content || []).map((admin: UserDto) => ({
+          value: admin.uuid || '',
+          label: this.getAdminDisplayName(admin),
+          disabled: admin.uuid ? assigned.has(admin.uuid) : false,
+        }));
+      }),
+    );
 
   close(): void {
     this.closed.emit();
@@ -72,49 +89,10 @@ export class AddClubDialogComponent implements OnChanges {
       shortName: '',
       clubEmail: '',
       clubAdminId: '',
-      scopeType: ScopeType.Internal,
+      type: ScopeType.Internal,
     };
     this.error = null;
     this.saving = false;
-  }
-
-  private loadAdminsAndClubs(): void {
-    this.loadingAdmins = true;
-    this.cdr.markForCheck();
-
-    forkJoin({
-      admins: this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", undefined, undefined, 1000, 0),
-      clubs: this.clubsService.getAllClubs(undefined, undefined, undefined, 1000, 0, ['clubAdminUser'] as Array<'clubAdminUser'>)
-    }).pipe(
-      takeUntil(this.destroy$)
-    ).subscribe({
-      next: ({ admins, clubs }) => {
-        this.availableAdmins = admins.content || [];
-        
-        this.assignedAdminIds = new Set();
-        (clubs.content || []).forEach((club: ClubDto) => {
-          if (club.clubAdminId) {
-            this.assignedAdminIds.add(club.clubAdminId);
-          }
-        });
-
-        this.adminOptions = this.availableAdmins.map(admin => ({
-          value: admin.uuid || '',
-          label: this.getAdminDisplayName(admin),
-          disabled: admin.uuid ? this.assignedAdminIds.has(admin.uuid) : false
-        }));
-
-        this.loadingAdmins = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.availableAdmins = [];
-        this.adminOptions = [];
-        this.assignedAdminIds = new Set();
-        this.loadingAdmins = false;
-        this.cdr.markForCheck();
-      }
-    });
   }
 
   getAdminDisplayName(admin: UserDto): string {
@@ -128,7 +106,7 @@ export class AddClubDialogComponent implements OnChanges {
   }
 
   get isFormValid(): boolean {
-    return !!(this.formData.name && this.formData.shortName && this.formData.clubEmail && this.formData.clubAdminId && this.formData.scopeType);
+    return !!(this.formData.name && this.formData.shortName && this.formData.clubEmail && this.formData.type);
   }
 
   save(): void {
@@ -142,8 +120,8 @@ export class AddClubDialogComponent implements OnChanges {
       name: this.formData.name,
       shortName: this.formData.shortName,
       clubEmail: this.formData.clubEmail,
-      clubAdminId: this.formData.clubAdminId,
-      scopeType: this.formData.scopeType,
+      clubAdminId: this.formData.clubAdminId || undefined,
+      type: this.formData.type,
     };
 
     this.clubsService.createClub(request).pipe(
@@ -161,4 +139,5 @@ export class AddClubDialogComponent implements OnChanges {
     });
   }
 }
+
 

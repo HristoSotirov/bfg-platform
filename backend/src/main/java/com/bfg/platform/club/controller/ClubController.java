@@ -11,13 +11,11 @@ import com.bfg.platform.gen.model.ClubDto;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
 import com.bfg.platform.common.util.PageConverter;
 import com.bfg.platform.gen.model.GetAllClubs200Response;
-import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -65,7 +63,7 @@ public class ClubController implements ClubsApi {
 
     @Override
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<ClubDto> createClub(@Valid @RequestBody ClubCreateRequest clubCreateRequest) {
+    public ResponseEntity<ClubDto> createClub(ClubCreateRequest clubCreateRequest) {
         return clubService.createClub(clubCreateRequest)
                 .map(dto -> ResponseEntity.status(HttpStatus.CREATED).body(dto))
                 .orElseThrow(() -> new ResourceCreationException("Failed to create club"));
@@ -73,14 +71,14 @@ public class ClubController implements ClubsApi {
 
     @PostMapping("/clubs/migrate")
     @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<ClubBatchCreateResponse> migrateClubs(@Valid @RequestBody ClubBatchCreateRequest clubBatchCreateRequest) {
+    public ResponseEntity<ClubBatchCreateResponse> migrateClubs(ClubBatchCreateRequest clubBatchCreateRequest) {
         ClubBatchCreateResponse response = clubService.migrateClubs(clubBatchCreateRequest);
         return ResponseEntity.ok(response);
     }
 
     @Override
-    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN')")
-    public ResponseEntity<ClubDto> patchClubByUuid(UUID clubUuid, @Valid @RequestBody ClubUpdateRequest clubUpdateRequest) {
+    @PreAuthorize("hasAnyAuthority('FEDERATION_ADMIN', 'APP_ADMIN', 'CLUB_ADMIN')")
+    public ResponseEntity<ClubDto> patchClubByUuid(UUID clubUuid, ClubUpdateRequest clubUpdateRequest) {
         return clubService.updateClub(clubUuid, clubUpdateRequest)
                 .map(ResponseEntity::ok)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubUuid));

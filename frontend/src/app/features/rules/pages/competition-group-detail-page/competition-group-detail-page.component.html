@@ -1,0 +1,548 @@
+<div class="h-screen flex flex-col overflow-hidden bg-white">
+  <app-header></app-header>
+
+  <div class="flex-1 flex flex-col overflow-hidden px-4 lg:px-8 py-4">
+
+    <!-- Back row + title -->
+    <div class="flex items-center gap-3 mb-4">
+      <a [routerLink]="['/regulations', 'groups']" class="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+        </svg>
+      </a>
+      <h1 class="text-2xl font-bold text-gray-900 break-words min-w-0">{{ group?.name || 'Состезателна група' }}</h1>
+    </div>
+
+    @if (loading) {
+      <div class="flex items-center justify-center flex-1 text-gray-500">Зареждане...</div>
+    } @else if (error) {
+      <div class="flex items-center justify-center flex-1 text-red-500">{{ error }}</div>
+    } @else if (group) {
+
+      <!-- Tab bar -->
+      <div class="border-b border-gray-200 mb-4">
+        <nav class="-mb-px flex gap-1">
+          <button type="button"
+            class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+            [class]="activeTab === 'details' ? 'border-bfg-blue text-bfg-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+            (click)="setTab('details')">
+            Детайли
+          </button>
+          <button type="button"
+            class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors"
+            [class]="activeTab === 'disciplines' ? 'border-bfg-blue text-bfg-blue' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+            (click)="setTab('disciplines')">
+            Дисциплини
+          </button>
+        </nav>
+      </div>
+
+      <!-- Tab content -->
+      @if (activeTab === 'details') {
+      <div class="flex-1 overflow-y-auto">
+        <div class="max-w-4xl">
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+            <!-- Left column -->
+            <div class="space-y-2">
+              @if (!isEditing) {
+                <div class="space-y-4">
+                  <div class="space-y-1">
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Име:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.name || "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Кратко име:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.shortName || "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Мин. възраст:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.minAge != null ? group.minAge : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Макс. възраст:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Рулеви мин. възраст:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinAge != null ? group.coxMinAge : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Рулеви макс. възраст:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.coxMaxAge != null ? group.coxMaxAge : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Макс. дисциплини:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Статус:</span>
+                      <span class="text-sm font-medium" [class]="group.isActive ? 'text-green-600' : 'text-red-600'">
+                        {{ group.isActive ? "Активен" : "Неактивен" }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div class="pt-2 border-t border-gray-200">
+                    <div class="space-y-1">
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">М. лек макс. тегло (кг):</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamLightMaxWeightKg != null ? group.maleTeamLightMaxWeightKg : "-" }}</span>
+                      </div>
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">М. рулеви мин. тегло (кг):</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxMinWeightKg != null ? group.maleTeamCoxMinWeightKg : "-" }}</span>
+                      </div>
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">М. рулеви изискв. тегло (кг):</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxRequiredWeightKg != null ? group.maleTeamCoxRequiredWeightKg : "-" }}</span>
+                      </div>
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Ж. лек макс. тегло (кг):</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamLightMaxWeightKg != null ? group.femaleTeamLightMaxWeightKg : "-" }}</span>
+                      </div>
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Ж. рулеви мин. тегло (кг):</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxMinWeightKg != null ? group.femaleTeamCoxMinWeightKg : "-" }}</span>
+                      </div>
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Ж. рулеви изискв. тегло (кг):</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxRequiredWeightKg != null ? group.femaleTeamCoxRequiredWeightKg : "-" }}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="pt-2 border-t border-gray-200">
+                    <div class="space-y-1">
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Създадена на:</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.createdAt) }}</span>
+                      </div>
+                      <div class="flex items-baseline">
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Променена на:</span>
+                        <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.modifiedAt) }}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              } @else {
+                <div class="space-y-1.5">
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Име <span class="text-red-500">*</span>:</label>
+                    <input type="text" [(ngModel)]="editData.name"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Кратко име <span class="text-red-500">*</span>:</label>
+                    <input type="text" [(ngModel)]="editData.shortName"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Мин. възраст <span class="text-red-500">*</span>:</label>
+                    <input type="number" [(ngModel)]="editData.minAge"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Макс. възраст <span class="text-red-500">*</span>:</label>
+                    <input type="number" [(ngModel)]="editData.maxAge"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Рулеви мин. възраст:</label>
+                    <input type="number" [(ngModel)]="editData.coxMinAge"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Рулеви макс. възраст:</label>
+                    <input type="number" [(ngModel)]="editData.coxMaxAge"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Макс. дисциплини <span class="text-red-500">*</span>:</label>
+                    <input type="number" [(ngModel)]="editData.maxDisciplinesPerAthlete" min="1"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Статус <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown
+                      [options]="statusOptions" [placeholder]="'Изберете статус'"
+                      [ngModel]="editData.isActive ? 'true' : 'false'" (ngModelChange)="onStatusChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Right column -->
+            <div class="space-y-2">
+              @if (!isEditing) {
+                <div class="space-y-4">
+                  <div class="space-y-1">
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Група за трансфер:</span>
+                      @if (group.transferFromGroupId) {
+                        <button type="button" class="text-sm font-medium text-bfg-blue hover:underline cursor-pointer"
+                          (click)="openTransferGroupDialog()">
+                          {{ getGroupName(group.transferFromGroupId) }}
+                        </button>
+                      } @else {
+                        <span class="text-sm font-medium break-all min-w-0">-</span>
+                      }
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Мин. екипаж:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.minCrewForTransfer != null ? group.minCrewForTransfer : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Коефициент:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.transferRatio != null ? group.transferRatio : "-" }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Закръгляне:</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ getRoundingLabel(group.transferRounding) }}</span>
+                    </div>
+                    <div class="flex items-baseline">
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Макс. дисц. (трансф.):</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerAthlete != null ? group.transferredMaxDisciplinesPerAthlete : "-" }}</span>
+                    </div>
+                  </div>
+                  @if (hasTransferData) {
+                    <button type="button" class="mt-2 text-xs text-bfg-blue hover:underline"
+                      (click)="showTransferSchemaDialog = true">
+                      Преглед на схема за трансфер
+                    </button>
+                  }
+                </div>
+              } @else {
+                <div class="space-y-1.5">
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Група за трансфер:</label>
+                    <app-searchable-select-dropdown
+                      [staticSearch]="groupSearch" [(ngModel)]="editData.transferFromGroupId"
+                      placeholder="Изберете група...">
+                    </app-searchable-select-dropdown>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Мин. екипаж за трансфер:</label>
+                    <input type="number" [(ngModel)]="editData.minCrewForTransfer"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Коефициент на трансфер:</label>
+                    <input type="number" step="0.01" [(ngModel)]="editData.transferRatio"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Закръгляне:</label>
+                    <app-searchable-select-dropdown
+                      [options]="roundingOptions" [placeholder]="'Изберете закръгляне'"
+                      [ngModel]="editData.transferRounding" (ngModelChange)="onRoundingChange($event)"
+                      [disabled]="saving">
+                    </app-searchable-select-dropdown>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Макс. дисц. (трансф.):</label>
+                    <input type="number" [(ngModel)]="editData.transferredMaxDisciplinesPerAthlete" min="1"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Лек макс. тегло (кг):</label>
+                    <input type="number" step="0.1" [(ngModel)]="editData.maleTeamLightMaxWeightKg"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви мин. тегло (кг):</label>
+                    <input type="number" step="0.1" [(ngModel)]="editData.maleTeamCoxMinWeightKg"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви изискв. тегло (кг):</label>
+                    <input type="number" step="0.1" [(ngModel)]="editData.maleTeamCoxRequiredWeightKg"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Лек макс. тегло (кг):</label>
+                    <input type="number" step="0.1" [(ngModel)]="editData.femaleTeamLightMaxWeightKg"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви мин. тегло (кг):</label>
+                    <input type="number" step="0.1" [(ngModel)]="editData.femaleTeamCoxMinWeightKg"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви изискв. тегло (кг):</label>
+                    <input type="number" step="0.1" [(ngModel)]="editData.femaleTeamCoxRequiredWeightKg"
+                      class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Action buttons -->
+          <div class="mt-6 flex flex-col gap-2">
+            @if (saveError) {
+              <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+                <p class="text-sm text-red-700">{{ saveError }}</p>
+                <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="saveError = null">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                  </svg>
+                </button>
+              </div>
+            }
+            <div class="flex items-center gap-2">
+              @if (!isEditing) {
+                @if (canEdit) {
+                  <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
+                  <app-button variant="white" size="md" text="Изтрий" [disabled]="deleting" (click)="confirmDelete()"></app-button>
+                }
+              } @else {
+                <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
+                <app-button variant="primary" size="md" text="Запази" [disabled]="saving" (click)="save()"></app-button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      } @else if (activeTab === 'disciplines') {
+      <div class="max-w-6xl space-y-2">
+        @if (canEdit) {
+          <div class="flex justify-end">
+            <app-button variant="outline" size="sm" text="Добави дисциплина" (click)="openAddDisciplineDialog()"></app-button>
+          </div>
+        }
+        @if (disciplineSaveError) {
+          <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+            <p class="text-sm text-red-700">{{ disciplineSaveError }}</p>
+            <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="disciplineSaveError = null">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        }
+        <div class="border rounded-lg overflow-hidden overflow-y-auto max-h-[calc(100vh-280px)] scrollbar-hover">
+          <table class="min-w-full divide-y divide-gray-200 text-sm">
+            <thead class="sticky top-0 z-10">
+              <tr>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Име</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Кратко</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Пол</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Клас</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Екипаж</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Прехвърлени</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Кокс</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Лековес</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Дист. (м)</th>
+                <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500 bg-gray-50">Статус</th>
+                @if (canEdit) {
+                  <th class="px-2 py-1.5 bg-gray-50"></th>
+                }
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @if (disciplinesLoading) {
+                <tr>
+                  <td colspan="11" class="px-2 py-3 text-center text-gray-500">Зареждане...</td>
+                </tr>
+              } @else if (disciplinesError) {
+                <tr>
+                  <td colspan="11" class="px-2 py-3 text-center text-red-500">{{ disciplinesError }}</td>
+                </tr>
+              } @else {
+                @for (d of disciplines; track d.uuid) {
+                  @if (editingDisciplineId === d.uuid) {
+                    <tr class="bg-blue-50">
+                      <td class="px-2 py-1.5">
+                        <input type="text" [(ngModel)]="disciplineEditData.name" class="w-28 px-1 py-0.5 border border-gray-300 rounded text-sm" />
+                      </td>
+                      <td class="px-2 py-1.5">
+                        <input type="text" [(ngModel)]="disciplineEditData.shortName" class="w-20 px-1 py-0.5 border border-gray-300 rounded text-sm" />
+                      </td>
+                      <td class="px-2 py-1.5">
+                        <app-searchable-select-dropdown [options]="disciplineGenderOptions" [(ngModel)]="disciplineEditData.gender" placeholder="Пол..." class="w-20"></app-searchable-select-dropdown>
+                      </td>
+                      <td class="px-2 py-1.5">
+                        <app-searchable-select-dropdown [options]="boatClassOptions" [(ngModel)]="disciplineEditData.boatClass" placeholder="Клас..." class="w-20"></app-searchable-select-dropdown>
+                      </td>
+                      <td class="px-2 py-1.5 text-gray-500 text-sm">{{ getBoatClassCrewSize(disciplineEditData.boatClass) }}</td>
+                      <td class="px-2 py-1.5">
+                        <input type="number" [(ngModel)]="disciplineEditData.maxCrewFromTransfer" min="0" class="w-14 px-1 py-0.5 border border-gray-300 rounded text-sm" />
+                      </td>
+                      <td class="px-2 py-1.5 text-gray-500 text-sm">{{ getBoatClassHasCoxswain(disciplineEditData.boatClass) }}</td>
+                      <td class="px-2 py-1.5">
+                        <app-searchable-select-dropdown [options]="booleanOptions" [(ngModel)]="disciplineEditData.isLightweight" placeholder="..." class="w-16"></app-searchable-select-dropdown>
+                      </td>
+                      <td class="px-2 py-1.5">
+                        <input type="number" [(ngModel)]="disciplineEditData.distanceMeters" min="0" class="w-16 px-1 py-0.5 border border-gray-300 rounded text-sm" />
+                      </td>
+                      <td class="px-2 py-1.5">
+                        <app-searchable-select-dropdown [options]="statusOptions" [(ngModel)]="disciplineEditData.isActive" placeholder="..." class="w-24"></app-searchable-select-dropdown>
+                      </td>
+                      <td class="px-2 py-1.5">
+                        <div class="flex gap-2">
+                          <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50" [disabled]="savingDiscipline" (click)="saveDiscipline()" title="Запази">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                          </button>
+                          <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50" [disabled]="savingDiscipline" (click)="cancelEditingDiscipline()" title="Отказ">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  } @else {
+                    <tr class="hover:bg-gray-50 cursor-pointer" (click)="openDisciplineDetails(d)">
+                      <td class="px-2 py-1.5 max-w-[160px]"><span class="block truncate" [title]="d.name || ''">{{ d.name || '-' }}</span></td>
+                      <td class="px-2 py-1.5 max-w-[100px]"><span class="block truncate" [title]="d.shortName || ''">{{ d.shortName || '-' }}</span></td>
+                      <td class="px-2 py-1.5 whitespace-nowrap">{{ d.gender === 'MALE' ? 'Мъже' : d.gender === 'FEMALE' ? 'Жени' : d.gender === 'MIXED' ? 'Смесени' : '-' }}</td>
+                      <td class="px-2 py-1.5 whitespace-nowrap">{{ getBoatClassLabel(d.boatClass) }}</td>
+                      <td class="px-2 py-1.5">{{ d.crewSize ?? '-' }}</td>
+                      <td class="px-2 py-1.5">{{ d.maxCrewFromTransfer ?? '-' }}</td>
+                      <td class="px-2 py-1.5">{{ d.hasCoxswain ? 'Да' : 'Не' }}</td>
+                      <td class="px-2 py-1.5">{{ d.isLightweight ? 'Да' : 'Не' }}</td>
+                      <td class="px-2 py-1.5">{{ d.distanceMeters ?? '-' }}</td>
+                      <td class="px-2 py-1.5" [class]="d.isActive ? 'text-green-600' : 'text-red-600'">{{ d.isActive ? 'Активен' : 'Неактивен' }}</td>
+                      @if (canEdit) {
+                        <td class="px-2 py-1.5" (click)="$event.stopPropagation()">
+                          <div class="flex gap-2">
+                            <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditingDiscipline(d)" title="Редактирай">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            </button>
+                            <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteDiscipline(d)" title="Изтрий">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                          </div>
+                        </td>
+                      }
+                    </tr>
+                  }
+                } @empty {
+                  <tr>
+                    <td colspan="11" class="px-2 py-3 text-center text-gray-500">Няма дисциплини</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+      }
+    }
+  </div>
+</div>
+
+<!-- Transfer Schema Dialog -->
+<app-dialog [isOpen]="showTransferSchemaDialog" title="Схема за трансфер" size="sm" (closed)="showTransferSchemaDialog = false">
+  <div class="flex flex-col max-h-[60vh]">
+    <div class="flex-1 overflow-y-auto">
+      <table class="w-full text-sm">
+        <thead class="sticky top-0 bg-white">
+          <tr class="border-b border-gray-200">
+            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">Размер на екипажа</th>
+            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">Брой трансферирани</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of transferSchemaRows; track row.crewSize) {
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-1.5 px-3">{{ row.crewSize }}</td>
+              <td class="py-1.5 px-3 font-medium" [class.text-gray-400]="row.transferCount === 0">{{ row.transferCount }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="flex justify-center pt-4 flex-shrink-0">
+      <app-button variant="outline" size="md" text="Затвори" (click)="showTransferSchemaDialog = false"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Transfer Group Preview Dialog -->
+<app-dialog [isOpen]="showTransferGroupDialog" [title]="transferGroup?.name || 'Состезателна група'" size="lg" (closed)="closeTransferGroupDialog()">
+  @if (transferGroupPermalinkRoute) {
+    <a slot="header-extra" [routerLink]="transferGroupPermalinkRoute" (click)="closeTransferGroupDialog()"
+      class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded" title="Отвори страницата">
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+      </svg>
+    </a>
+  }
+  @if (transferGroup) {
+    <div class="space-y-4 py-2">
+      <div class="space-y-1">
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Име:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.name || "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.shortName || "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.minAge != null ? transferGroup.minAge : "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.maxAge != null ? transferGroup.maxAge : "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
+          <span class="text-sm font-medium" [class]="transferGroup.isActive ? 'text-green-600' : 'text-red-600'">
+            {{ transferGroup.isActive ? "Активен" : "Неактивен" }}
+          </span>
+        </div>
+      </div>
+      <div class="flex justify-center pt-2">
+        <app-button variant="primary" size="md" text="Затвори" (click)="closeTransferGroupDialog()"></app-button>
+      </div>
+    </div>
+  }
+</app-dialog>
+
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteConfirmDialog"
+  [itemName]="group?.name || ''"
+  [deleting]="deleting"
+  [error]="deleteError"
+  (closed)="cancelDelete()"
+  (confirmed)="deleteGroup()"
+  (errorDismissed)="deleteError = null"
+/>
+
+<!-- Discipline Details Dialog -->
+<app-discipline-details-dialog
+  [isOpen]="showDisciplineDialog"
+  [discipline]="selectedDiscipline"
+  [canEdit]="false"
+  [groupMap]="groupLookup"
+  [permalinkRoute]="disciplinePermalinkRoute"
+  (closed)="closeDisciplineDialog()"
+  (navigated)="closeAllDialogs()"
+  (saved)="onDisciplineSaved()"
+  (deleted)="onDisciplineDeleted()"
+></app-discipline-details-dialog>
+
+<!-- Add Discipline Dialog -->
+<app-add-discipline-dialog
+  [isOpen]="isAddDisciplineDialogOpen"
+  [defaultGroupId]="group?.uuid || ''"
+  [defaultGroupName]="group?.name || ''"
+  (closed)="closeAddDisciplineDialog()"
+  (added)="onDisciplineAdded()"
+></app-add-discipline-dialog>
+
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteDisciplineConfirm"
+  [itemName]="disciplineToDelete?.name || ''"
+  [error]="disciplineDeleteError"
+  (closed)="cancelDeleteDiscipline()"
+  (confirmed)="executeDeleteDiscipline()"
+  (errorDismissed)="disciplineDeleteError = null"
+/>

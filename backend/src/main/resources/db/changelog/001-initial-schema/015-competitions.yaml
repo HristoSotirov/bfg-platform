@@ -1,0 +1,107 @@
+databaseChangeLog:
+  - changeSet:
+      id: 015-competitions
+      author: bfg
+      changes:
+        - createTable:
+            tableName: competitions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: short_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: location
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: start_date
+                  type: DATE
+                  remarks: "Only for real competitions (is_template=false)"
+              - column:
+                  name: end_date
+                  type: DATE
+                  remarks: "Only for real competitions (is_template=false)"
+              - column:
+                  name: entry_submissions_open_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Entry submissions open at this datetime."
+              - column:
+                  name: entry_submissions_closed_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Entry submissions close at this datetime."
+              - column:
+                  name: last_changes_before_tm_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Deadline for last changes before technical meeting."
+              - column:
+                  name: technical_meeting_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Technical meeting datetime."
+              - column:
+                  name: awarding_ceremony_at
+                  type: TIMESTAMPTZ
+                  remarks: "Only for real competitions (is_template=false). Must be on the endDate."
+              - column:
+                  name: scoring_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: qualification_scheme_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_type
+                  type: VARCHAR(30)
+                  constraints:
+                    nullable: false
+                  remarks: "STANDARD, ERG, NATIONAL_TEAM_TEST"
+              - column:
+                  name: is_template
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+                  defaultValueBoolean: false
+                  remarks: "true = reusable template, false = real competition"
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: competitions
+            baseColumnNames: scoring_scheme_id
+            referencedTableName: scoring_schemes
+            referencedColumnNames: id
+            constraintName: fk_competition_scoring_scheme
+            onDelete: RESTRICT
+        - addForeignKeyConstraint:
+            baseTableName: competitions
+            baseColumnNames: qualification_scheme_id
+            referencedTableName: qualification_schemes
+            referencedColumnNames: id
+            constraintName: fk_competition_qual_scheme
+            onDelete: RESTRICT

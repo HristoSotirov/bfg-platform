@@ -18,6 +18,7 @@ import {
   AthleteBatchMigrationRequest,
   AthleteBatchMigrationRequestItem,
   AthleteBatchMigrationResponse,
+  Gender,
 } from '../../../../core/services/api';
 import { takeUntil, Subject, forkJoin, of, catchError, delay, retryWhen, scan, map, EMPTY } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
@@ -27,9 +28,11 @@ const VALID_CARD_NUMBER_REGEX = /^[0-9]{4,6}$/;
 const MAX_RETRIES = 3;
 const BATCH_SIZE = 100;
 
-interface ColumnMapping {
-  excelColumn: string;
+interface FieldMapping {
   dataField: string;
+  label: string;
+  excelColumn: string;
+  required: boolean;
 }
 
 interface MigrationResult {
@@ -60,12 +63,11 @@ export class MigrationDialogComponent implements OnChanges {
   file: File | null = null;
   fileName = '';
   excelColumns: string[] = [];
-  columnMappings: ColumnMapping[] = [];
+  fieldMappings: FieldMapping[] = [];
 
   parsedAthletes: AthleteBatchMigrationRequestItem[] = [];
 
   readonly dataFields = [
-    { value: '', label: 'Не импортирай' },
     { value: 'oldCardNumber', label: 'Картотечен номер' },
     { value: 'firstName', label: 'Име' },
     { value: 'middleName', label: 'Презиме' },
@@ -73,6 +75,8 @@ export class MigrationDialogComponent implements OnChanges {
     { value: 'gender', label: 'Пол' },
     { value: 'dateOfBirth', label: 'Дата на раждане' },
   ];
+
+  private readonly requiredFields = ['oldCardNumber', 'firstName', 'middleName', 'lastName', 'gender', 'dateOfBirth'];
 
   migrationYear = new Date().getFullYear();
   step: 'upload' | 'mapping' | 'preview' | 'results' = 'upload';
@@ -103,7 +107,7 @@ export class MigrationDialogComponent implements OnChanges {
     this.file = null;
     this.fileName = '';
     this.excelColumns = [];
-    this.columnMappings = [];
+    this.fieldMappings = [];
     this.parsedAthletes = [];
     this.step = 'upload';
     this.migrating = false;
@@ -132,9 +136,11 @@ export class MigrationDialogComponent implements OnChanges {
         const jsonData = XLSX.utils.sheet_to_json(firstSheet, { header: 1 }) as any[][];
         if (jsonData.length > 0) {
           this.excelColumns = jsonData[0].map((col: any) => String(col ?? ''));
-          this.columnMappings = this.excelColumns.map((col) => ({
-            excelColumn: col,
-            dataField: '',
+          this.fieldMappings = this.dataFields.map(f => ({
+            dataField: f.value,
+            label: f.label,
+            excelColumn: '',
+            required: this.requiredFields.includes(f.value),
           }));
           this.step = 'mapping';
           this.error = null;
@@ -148,26 +154,26 @@ export class MigrationDialogComponent implements OnChanges {
     reader.readAsArrayBuffer(this.file);
   }
 
-  getFieldOptionsForMapping(mapping: ColumnMapping): SearchableSelectOption[] {
-    return this.dataFields.map((f) => ({
-      value: f.value,
-      label: f.label,
-      disabled:
-        f.value !== '' &&
-        this.columnMappings.some((m) => m !== mapping && m.dataField === f.value),
-    }));
+  getExcelOptionsForField(field: FieldMapping): SearchableSelectOption[] {
+    return [
+      { value: '', label: 'Не импортирай' },
+      ...this.excelColumns.map(col => ({
+        value: col,
+        label: col,
+        disabled: this.fieldMappings.some(f => f !== field && f.excelColumn === col),
+      })),
+    ];
   }
 
-  onMappingFieldChange(mapping: ColumnMapping, value: string | null): void {
-    mapping.dataField = value ?? '';
+  onFieldExcelColumnChange(field: FieldMapping, value: string | null): void {
+    field.excelColumn = value ?? '';
     this.cdr.markForCheck();
   }
 
   get hasRequiredMappings(): boolean {
-    const required = ['oldCardNumber', 'firstName', 'middleName', 'lastName', 'gender', 'dateOfBirth'];
-    return required.every((field) =>
-      this.columnMappings.some((m) => m.dataField === field),
-    );
+    return this.fieldMappings
+      .filter(f => f.required)
+      .every(f => f.excelColumn !== '');
   }
 
   private excelSerialToDate(serial: number): string | null {
@@ -182,14 +188,14 @@ export class MigrationDialogComponent implements OnChanges {
 
   private normalizeGender(raw: string): 'MALE' | 'FEMALE' | null {
     const s = raw.trim().toLowerCase();
-    if (s === 'male' || s === 'мъж' || s === 'm') return 'MALE';
-    if (s === 'female' || s === 'жена' || s === 'f' || s === 'ж') return 'FEMALE';
+    if (s === 'male' || s === 'мъж' || s === 'm') return Gender.MALE;
+    if (s === 'female' || s === 'жена' || s === 'f' || s === 'ж') return Gender.FEMALE;
     return null;
   }
 
   genderLabel(gender: string): string {
-    if (gender === 'MALE') return 'Мъж';
-    if (gender === 'FEMALE') return 'Жена';
+    if (gender === Gender.MALE) return 'Мъж';
+    if (gender === Gender.FEMALE) return 'Жена';
     return gender ?? '';
   }
 
@@ -207,9 +213,9 @@ export class MigrationDialogComponent implements OnChanges {
 
   private rowToAthlete(row: any[]): AthleteBatchMigrationRequestItem | null {
     const get = (field: string): string => {
-      const m = this.columnMappings.find((x) => x.dataField === field);
-      if (!m) return '';
-      const idx = this.excelColumns.indexOf(m.excelColumn);
+      const f = this.fieldMappings.find(x => x.dataField === field);
+      if (!f || !f.excelColumn) return '';
+      const idx = this.excelColumns.indexOf(f.excelColumn);
       if (idx < 0) return '';
       return String(row[idx] ?? '').trim();
     };

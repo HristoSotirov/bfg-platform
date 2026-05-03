@@ -24,8 +24,8 @@ export interface ClubCreateRequest {
     /**
      * UUID of the club administrator user
      */
-    clubAdminId: string;
-    scopeType: ScopeType;
+    clubAdminId?: string;
+    type: ScopeType;
 }
 export namespace ClubCreateRequest {
 }

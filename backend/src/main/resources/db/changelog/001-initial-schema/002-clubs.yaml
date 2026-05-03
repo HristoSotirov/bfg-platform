@@ -47,7 +47,7 @@ databaseChangeLog:
                     nullable: false
                     unique: true
               - column:
-                  name: scope_type
+                  name: type
                   type: VARCHAR(20)
                   constraints:
                     nullable: false

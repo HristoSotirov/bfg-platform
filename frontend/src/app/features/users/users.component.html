@@ -134,17 +134,6 @@
   </div>
 </div>
 
-<app-user-details-dialog
-  [isOpen]="isDetailsDialogOpen"
-  [user]="selectedUser"
-  [canEdit]="canEditUser"
-  [userRole]="userRole"
-  [showScopeInDetails]="showScopeFeatures"
-  (closed)="closeDetailsDialog()"
-  (saved)="onUserSaved()"
->
-</app-user-details-dialog>
-
 <app-add-user-dialog
   [isOpen]="isAddDialogOpen"
   [userRole]="userRole"
@@ -157,7 +146,6 @@
   [isOpen]="isSettingsDialogOpen"
   [columns]="columns"
   [filterConfigs]="filterConfigs"
-  [showScopeFeatures]="showScopeFeatures"
   (closed)="closeSettingsDialog()"
   (settingsChange)="onSettingsChange($event)"
 >

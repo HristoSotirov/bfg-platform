@@ -1,4 +1,5 @@
 databaseChangeLog:
+  # Initial schema - tables
   - include:
       file: db/changelog/001-initial-schema/001-users.yaml
   - include:
@@ -11,11 +12,55 @@ databaseChangeLog:
       file: db/changelog/001-initial-schema/005-accreditations.yaml
   - include:
       file: db/changelog/001-initial-schema/006-athlete-photo-history.yaml
+
+  # Competition module - definitions
+  - include:
+      file: db/changelog/001-initial-schema/007-competition-group-definitions.yaml
+  - include:
+      file: db/changelog/001-initial-schema/008-discipline-definitions.yaml
+
+  # Competition module - scoring schemes
+  - include:
+      file: db/changelog/001-initial-schema/009-scoring-schemes.yaml
+  - include:
+      file: db/changelog/001-initial-schema/010-scoring-rules.yaml
+  - include:
+      file: db/changelog/001-initial-schema/011-scoring-scheme-boat-coefficients.yaml
+
+  # Competition module - qualification schemes
+  - include:
+      file: db/changelog/001-initial-schema/012-qualification-schemes.yaml
+  - include:
+      file: db/changelog/001-initial-schema/013-qualification-tiers.yaml
+  - include:
+      file: db/changelog/001-initial-schema/014-qualification-progressions.yaml
+
+  # Competition module - unified competitions (templates + real)
+  - include:
+      file: db/changelog/001-initial-schema/015-competitions.yaml
+  - include:
+      file: db/changelog/001-initial-schema/016-competition-timetable-events.yaml
+
+  # Competition module - runtime tables
+  - include:
+      file: db/changelog/001-initial-schema/017-entries.yaml
+  - include:
+      file: db/changelog/001-initial-schema/018-crew-members.yaml
+  - include:
+      file: db/changelog/001-initial-schema/019-competition-participations.yaml
+  - include:
+      file: db/changelog/001-initial-schema/020-competition-final-standings.yaml
+  - include:
+      file: db/changelog/001-initial-schema/021-athlete-weight-measurements.yaml
+  - include:
+      file: db/changelog/001-initial-schema/022-alter-final-standings.yaml
+
+  # Functions and triggers
   - include:
       file: db/changelog/002-functions/001-timestamp-triggers.yaml
   - include:
       file: db/changelog/002-functions/002-apply-timestamp-triggers.yaml
+
+  # Indexes
   - include:
-      file: db/changelog/003-indexes/001-accreditations-indexes.yaml
-  - include:
-      file: db/changelog/004-data/001-athletes-gender-uppercase.yaml
+      file: db/changelog/003-indexes/001-indexes.yaml

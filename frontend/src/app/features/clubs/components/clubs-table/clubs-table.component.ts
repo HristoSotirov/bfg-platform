@@ -7,7 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ClubDto } from '../../../../core/services/api';
+import { ClubDto, ScopeType } from '../../../../core/services/api';
 import { ClubColumnConfig } from '../../clubs.component';
 
 @Component({
@@ -104,8 +104,8 @@ export class ClubsTableComponent implements OnInit {
           ? `${club.clubAdminUser.firstName || ''} ${club.clubAdminUser.lastName || ''}`.trim() ||
               '-'
           : '-';
-      case 'scopeType':
-        return this.getScopeTypeLabel(club.scopeType);
+      case 'type':
+        return this.getScopeTypeLabel(club.type);
       case 'isActive':
         return club.isActive ? 'Активен' : 'Неактивен';
       case 'createdAt':
@@ -134,9 +134,9 @@ export class ClubsTableComponent implements OnInit {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }

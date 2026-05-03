@@ -13,11 +13,22 @@ import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
 import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
+import com.bfg.platform.common.repository.DynamicEntityGraph;
+import com.bfg.platform.common.security.AuthorizationService;
 import com.bfg.platform.common.security.SecurityContextHelper;
 import com.bfg.platform.gen.model.ClubCoachCreateRequest;
 import com.bfg.platform.gen.model.ClubCoachDto;
 import com.bfg.platform.gen.model.ClubDto;
+import com.bfg.platform.gen.model.ScopeType;
+import jakarta.persistence.EntityGraph;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -29,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 @Service
@@ -38,22 +50,32 @@ public class ClubCoachServiceImpl implements ClubCoachService {
     private final ClubCoachRepository clubCoachRepository;
     private final ClubRepository clubRepository;
     private final UserRepository userRepository;
+    private final EntityManager entityManager;
     private final SecurityContextHelper securityContextHelper;
+    private final AuthorizationService authorizationService;
 
     @Override
     public Page<ClubCoachDto> getCoachesByClubId(UUID clubId, String filter, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
         clubRepository.findById(clubId)
                 .orElseThrow(() -> new ResourceNotFoundException("Club", clubId));
 
-        java.util.Set<String> requestedExpand = ExpandQueryParser.parse(expand, ClubCoach.class);
+        Set<String> requestedExpand = ExpandQueryParser.parse(expand, ClubCoach.class);
 
         Pageable pageable = OffsetBasedPageRequest.of(skip, top, ClubCoachQueryAdapter.parseSort(orderBy));
         Specification<ClubCoach> spec = Specification
                 .where(ClubCoachQueryAdapter.parseFilter(filter))
                 .and((root, query, cb) -> cb.equal(root.get("clubId"), clubId));
-        
-        return clubCoachRepository.findAll(spec, pageable)
-                .map(clubCoach -> ClubCoachMapper.toDto(clubCoach, requestedExpand));
+
+        Page<ClubCoach> page;
+        if (!requestedExpand.isEmpty()) {
+            EntityGraph<ClubCoach> entityGraph =
+                    DynamicEntityGraph.create(entityManager, ClubCoach.class, requestedExpand);
+            page = findAllWithEntityGraph(spec, pageable, entityGraph);
+        } else {
+            page = clubCoachRepository.findAll(spec, pageable);
+        }
+
+        return page.map(clubCoach -> ClubCoachMapper.toDto(clubCoach, requestedExpand));
     }
 
     @Override
@@ -74,9 +96,8 @@ public class ClubCoachServiceImpl implements ClubCoachService {
         Club club = clubRepository.findById(request.getClubId())
                 .orElseThrow(() -> new ResourceNotFoundException("Club", request.getClubId()));
 
-        // Only INTERNAL clubs can have coaches assigned
-        if (club.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
-            throw new ValidationException("Coaches can only be assigned to internal clubs");
+        if (!club.isActive()) {
+            throw new ValidationException("Не може да се назначават треньори към неактивен клуб");
         }
 
         validateCoachRole(request.getCoachId());
@@ -117,16 +138,9 @@ public class ClubCoachServiceImpl implements ClubCoachService {
 
         switch (currentRole) {
             case APP_ADMIN, FEDERATION_ADMIN -> {
-                // Only INTERNAL scope admins can assign coaches
-                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
-                    throw new ForbiddenException("Only internal administrators can assign coaches to clubs");
-                }
+                // Admins can always assign coaches
             }
             case CLUB_ADMIN -> {
-                // Only INTERNAL scope club admins can assign coaches
-                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
-                    throw new ForbiddenException("Only internal club administrators can assign coaches to clubs");
-                }
                 UUID currentUserId = securityContextHelper.getUserId();
                 Club club = clubRepository.findByClubAdmin(currentUserId)
                         .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
@@ -146,16 +160,9 @@ public class ClubCoachServiceImpl implements ClubCoachService {
 
         switch (currentRole) {
             case APP_ADMIN, FEDERATION_ADMIN -> {
-                // Only INTERNAL scope admins can remove coaches
-                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
-                    throw new ForbiddenException("Only internal administrators can remove coaches from clubs");
-                }
+                // Admins can always remove coaches
             }
             case CLUB_ADMIN -> {
-                // Only INTERNAL scope club admins can remove coaches
-                if (securityContextHelper.getScopeType() != com.bfg.platform.gen.model.ScopeType.INTERNAL) {
-                    throw new ForbiddenException("Only internal club administrators can remove coaches from clubs");
-                }
                 UUID currentUserId = securityContextHelper.getUserId();
                 Club club = clubRepository.findByClubAdmin(currentUserId)
                         .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
@@ -165,6 +172,46 @@ public class ClubCoachServiceImpl implements ClubCoachService {
             }
             default -> throw new ForbiddenException("You are not allowed to remove coaches");
         }
+    }
+
+    private Page<ClubCoach> findAllWithEntityGraph(
+            Specification<ClubCoach> spec, Pageable pageable, EntityGraph<ClubCoach> entityGraph) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<ClubCoach> query = cb.createQuery(ClubCoach.class);
+        Root<ClubCoach> root = query.from(ClubCoach.class);
+
+        Predicate predicate = spec != null ? spec.toPredicate(root, query, cb) : cb.conjunction();
+        if (predicate != null) {
+            query.where(predicate);
+        }
+
+        if (pageable.getSort().isSorted()) {
+            List<jakarta.persistence.criteria.Order> orders = new java.util.ArrayList<>();
+            pageable.getSort().forEach(order -> {
+                jakarta.persistence.criteria.Path<?> path = root.get(order.getProperty());
+                orders.add(order.isAscending() ? cb.asc(path) : cb.desc(path));
+            });
+            query.orderBy(orders);
+        }
+
+        TypedQuery<ClubCoach> typedQuery = entityManager.createQuery(query);
+        if (entityGraph != null) {
+            typedQuery.setHint("jakarta.persistence.loadgraph", entityGraph);
+        }
+        typedQuery.setFirstResult((int) pageable.getOffset());
+        typedQuery.setMaxResults(pageable.getPageSize());
+        List<ClubCoach> content = typedQuery.getResultList();
+
+        CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+        Root<ClubCoach> countRoot = countQuery.from(ClubCoach.class);
+        Predicate countPredicate = spec != null ? spec.toPredicate(countRoot, countQuery, cb) : cb.conjunction();
+        if (countPredicate != null) {
+            countQuery.where(countPredicate);
+        }
+        countQuery.select(cb.count(countRoot));
+        Long total = entityManager.createQuery(countQuery).getSingleResult();
+
+        return new PageImpl<>(content, pageable, total);
     }
 }
 

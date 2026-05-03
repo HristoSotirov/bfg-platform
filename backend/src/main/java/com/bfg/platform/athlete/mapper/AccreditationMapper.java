@@ -2,10 +2,10 @@ package com.bfg.platform.athlete.mapper;
 
 import com.bfg.platform.athlete.entity.Accreditation;
 import com.bfg.platform.club.mapper.ClubMapper;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.gen.model.AccreditationDto;
 import com.bfg.platform.gen.model.AccreditationCreateRequest;
 import com.bfg.platform.gen.model.AccreditationStatus;
-import com.bfg.platform.gen.model.ScopeType;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.Set;
@@ -29,25 +29,25 @@ public class AccreditationMapper {
         dto.setClubId(accreditation.getClubId());
         dto.setAccreditationNumber(accreditation.getAccreditationNumber());
         dto.setYear(accreditation.getYear());
-        dto.setScopeType(accreditation.getScopeType());
         dto.setStatus(accreditation.getStatus());
 
-        dto.setCreatedAt(accreditation.getCreatedAt() != null 
-            ? OffsetDateTime.ofInstant(accreditation.getCreatedAt(), ZoneOffset.UTC) 
+        dto.setCreatedAt(accreditation.getCreatedAt() != null
+            ? OffsetDateTime.ofInstant(accreditation.getCreatedAt(), ZoneOffset.UTC)
             : null);
-        dto.setUpdatedAt(accreditation.getModifiedAt() != null 
-            ? OffsetDateTime.ofInstant(accreditation.getModifiedAt(), ZoneOffset.UTC) 
+        dto.setUpdatedAt(accreditation.getModifiedAt() != null
+            ? OffsetDateTime.ofInstant(accreditation.getModifiedAt(), ZoneOffset.UTC)
             : null);
 
         boolean expandAthlete = expand != null && expand.contains("athlete");
         boolean expandClub = expand != null && expand.contains("club");
-        
+
         if (expandAthlete && accreditation.getAthlete() != null) {
             dto.setAthlete(AthleteMapper.toDto(accreditation.getAthlete()));
         }
-        
+
         if (expandClub && accreditation.getClub() != null) {
-            dto.setClub(ClubMapper.toDto(accreditation.getClub(), expand));
+            Set<String> clubExpand = ExpandQueryParser.subExpand(expand, "club");
+            dto.setClub(ClubMapper.toDto(accreditation.getClub(), clubExpand));
         }
 
         return dto;
@@ -59,11 +59,8 @@ public class AccreditationMapper {
         accreditation.setClubId(request.getClubId());
         accreditation.setAccreditationNumber(request.getAccreditationNumber());
         accreditation.setYear(request.getYear());
-        if (request.getScopeType() != null) {
-            accreditation.setScopeType(request.getScopeType());
-        }
         accreditation.setStatus(request.getStatus());
-        
+
         return accreditation;
     }
 
@@ -72,7 +69,6 @@ public class AccreditationMapper {
             java.util.UUID clubId,
             String accreditationNumber,
             Integer year,
-            ScopeType scopeType,
             AccreditationStatus status
     ) {
         Accreditation accreditation = new Accreditation();
@@ -80,9 +76,7 @@ public class AccreditationMapper {
         accreditation.setClubId(clubId);
         accreditation.setAccreditationNumber(accreditationNumber);
         accreditation.setYear(year);
-        accreditation.setScopeType(scopeType);
         accreditation.setStatus(status);
         return accreditation;
     }
 }
-

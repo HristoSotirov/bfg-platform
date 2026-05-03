@@ -45,9 +45,9 @@ public class Club {
     @Column(name = "card_prefix")
     private String cardPrefix;
 
-    @Column(name = "scope_type", nullable = false)
+    @Column(name = "type", nullable = false)
     @Enumerated(EnumType.STRING)
-    private ScopeType scopeType;
+    private ScopeType type;
 
     @Column(name = "is_active", nullable = false)
     private boolean isActive;

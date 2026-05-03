@@ -1,0 +1,72 @@
+package com.bfg.platform.competition.entity;
+
+import com.bfg.platform.gen.model.QualificationEventType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+import java.time.Instant;
+import java.util.UUID;
+
+@Entity
+@Table(name = "qualification_progressions")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class QualificationProgression {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false)
+    @Setter(AccessLevel.NONE)
+    private UUID id;
+
+    @Column(name = "qualification_tier_id")
+    private UUID qualificationTierId;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "qualification_tier_id", insertable = false, updatable = false)
+    @Setter(AccessLevel.NONE)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private QualificationTier qualificationTier;
+
+    @Column(name = "source_event")
+    @Enumerated(EnumType.STRING)
+    private QualificationEventType sourceEvent;
+
+    @Column(name = "dest_event")
+    @Enumerated(EnumType.STRING)
+    private QualificationEventType destEvent;
+
+    @Column(name = "qualify_by_position")
+    private int qualifyByPosition;
+
+    @Column(name = "qualify_by_time")
+    private int qualifyByTime;
+
+    @Column(name = "created_at", insertable = false, updatable = false, nullable = false)
+    @Setter(AccessLevel.NONE)
+    private Instant createdAt;
+
+    @Column(name = "modified_at", insertable = false, nullable = false)
+    @Setter(AccessLevel.NONE)
+    private Instant modifiedAt;
+}

@@ -2,7 +2,7 @@ import { Component, Input, HostBinding } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 
-export type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'transparent' | 'white';
+export type ButtonVariant = 'primary' | 'outline' | 'secondary' | 'transparent' | 'white' | 'danger';
 export type ButtonSize = 'sm' | 'md' | 'lg';
 
 @Component({
@@ -56,6 +56,7 @@ export class ButtonComponent {
       secondary: 'border border-gray-300 text-gray-600 bg-white hover:bg-gray-50',
       transparent: 'text-gray-700 hover:bg-gray-100',
       white: 'bg-white border border-bfg-blue text-bfg-blue hover:bg-bfg-blue hover:text-white',
+      danger: 'bg-red-600 text-white hover:bg-red-700',
     };
 
     const sizeClasses: Record<ButtonSize, string> = {

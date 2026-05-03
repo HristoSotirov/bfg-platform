@@ -3,48 +3,43 @@
     <div class="w-full sm:flex-1 sm:min-w-[180px] sm:max-w-[180px]">
       <app-search-bar
         [searchValue]="searchValue"
-        (searchValueChange)="searchValue = $event"
-        (searchChange)="onSearchChange($event)"
-        placeholder="Потърси... (Enter за търсене)"
+        (searchValueChange)="onSearchChange($event)"
+        placeholder="Потърси..."
         [showIcon]="true"
         [showClearButton]="false"
         inputClasses="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
       ></app-search-bar>
     </div>
 
-    @if (hasVisibleFilters() && isFilterVisible("status")) {
+    @if (hasVisibleFilters() && isFilterVisible("gender")) {
       <div
         [class.hidden]="!filtersExpanded"
         class="sm:block w-full sm:w-[180px]"
       >
-        <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Статус:</label
-        >
+        <label class="block text-xs font-medium text-gray-500 mb-1">Пол:</label>
         <app-multi-select-dropdown
-          [options]="statusOptions"
+          [options]="genderOptions"
           [multiple]="true"
-          placeholder="Всички статуси"
-          [ngModel]="filters.statuses || []"
-          (selectionChange)="onStatusesChange($event)"
+          placeholder="Всички"
+          [ngModel]="filters.genders || []"
+          (selectionChange)="onGendersChange($event)"
         >
         </app-multi-select-dropdown>
       </div>
     }
 
-    @if (hasVisibleFilters() && isFilterVisible("year")) {
+    @if (hasVisibleFilters() && isFilterVisible("birthYear")) {
       <div
         [class.hidden]="!filtersExpanded"
         class="sm:block w-full sm:w-[180px]"
       >
-        <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Година:</label
-        >
+        <label class="block text-xs font-medium text-gray-500 mb-1">Год. на раждане:</label>
         <app-multi-select-dropdown
-          [options]="yearOptions"
+          [options]="birthYearOptions"
           [multiple]="true"
           placeholder="Всички години"
-          [ngModel]="selectedYearsCache"
-          (selectionChange)="onYearsChange($event)"
+          [ngModel]="selectedBirthYearsCache"
+          (selectionChange)="onBirthYearsChange($event)"
         >
         </app-multi-select-dropdown>
       </div>
@@ -55,9 +50,7 @@
         [class.hidden]="!filtersExpanded"
         class="sm:block w-full sm:w-[180px]"
       >
-        <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Клуб:</label
-        >
+        <label class="block text-xs font-medium text-gray-500 mb-1">Клуб:</label>
         <app-multi-select-dropdown
           [options]="clubOptions"
           [multiple]="true"
@@ -69,38 +62,35 @@
       </div>
     }
 
-    @if (hasVisibleFilters() && isFilterVisible("raceGroup")) {
+    @if (hasVisibleFilters() && isFilterVisible("year")) {
       <div
         [class.hidden]="!filtersExpanded"
         class="sm:block w-full sm:w-[180px]"
       >
-        <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Състез. група:</label
-        >
+        <label class="block text-xs font-medium text-gray-500 mb-1">Година:</label>
         <app-multi-select-dropdown
-          [options]="raceGroupOptions"
+          [options]="yearOptions"
           [multiple]="true"
-          [twoColumnLayout]="true"
-          placeholder="Всички групи"
-          [ngModel]="filters.raceGroups || []"
-          (selectionChange)="onRaceGroupsChange($event)"
+          placeholder="Всички години"
+          [ngModel]="selectedYearsCache"
+          (selectionChange)="onYearsChange($event)"
         >
         </app-multi-select-dropdown>
       </div>
     }
 
-    @if (hasVisibleFilters() && isFilterVisible("scopeType")) {
+    @if (hasVisibleFilters() && isFilterVisible("status")) {
       <div
         [class.hidden]="!filtersExpanded"
         class="sm:block w-full sm:w-[180px]"
       >
-        <label class="block text-xs font-medium text-gray-500 mb-1">Тип:</label>
+        <label class="block text-xs font-medium text-gray-500 mb-1">Статус:</label>
         <app-multi-select-dropdown
-          [options]="scopeTypeOptions"
+          [options]="statusOptions"
           [multiple]="true"
-          placeholder="Тип"
-          [ngModel]="filters.scopeTypes || []"
-          (selectionChange)="onScopeTypesChange($event)"
+          placeholder="Всички статуси"
+          [ngModel]="filters.statuses || []"
+          (selectionChange)="onStatusesChange($event)"
         >
         </app-multi-select-dropdown>
       </div>

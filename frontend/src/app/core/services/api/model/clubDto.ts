@@ -47,7 +47,7 @@ export interface ClubDto {
      * UUID of the club administrator user
      */
     clubAdminId?: string;
-    scopeType?: ScopeType;
+    type?: ScopeType;
     clubAdminUser?: UserDto;
     /**
      * Timestamp when the club was created

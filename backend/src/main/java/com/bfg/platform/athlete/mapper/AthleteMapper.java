@@ -5,7 +5,6 @@ import com.bfg.platform.gen.model.AthleteBatchMigrationRequestItem;
 import com.bfg.platform.gen.model.AthleteCreateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.gen.model.AthleteUpdateRequest;
-import com.bfg.platform.gen.model.ScopeType;
 import org.springframework.stereotype.Component;
 
 import java.time.OffsetDateTime;
@@ -28,23 +27,21 @@ public class AthleteMapper {
                 .medicalExaminationDue(athlete.getMedicalExaminationDue())
                 .insuranceFrom(athlete.getInsuranceFrom())
                 .insuranceTo(athlete.getInsuranceTo())
-                .scopeType(athlete.getScopeType())
-                .registeredOn(athlete.getRegisteredOn() != null 
-                    ? OffsetDateTime.ofInstant(athlete.getRegisteredOn(), ZoneOffset.UTC) 
+                .registeredOn(athlete.getRegisteredOn() != null
+                    ? OffsetDateTime.ofInstant(athlete.getRegisteredOn(), ZoneOffset.UTC)
                     : null)
-                .modifiedAt(athlete.getModifiedAt() != null 
-                    ? OffsetDateTime.ofInstant(athlete.getModifiedAt(), ZoneOffset.UTC) 
+                .modifiedAt(athlete.getModifiedAt() != null
+                    ? OffsetDateTime.ofInstant(athlete.getModifiedAt(), ZoneOffset.UTC)
                     : null);
     }
 
-    public static Athlete fromCreateRequest(AthleteCreateRequest request, ScopeType scopeType) {
+    public static Athlete fromCreateRequest(AthleteCreateRequest request) {
         return Athlete.builder()
                 .firstName(request.getFirstName())
                 .middleName(request.getMiddleName())
                 .lastName(request.getLastName())
                 .dateOfBirth(request.getDateOfBirth())
                 .gender(request.getGender())
-                .scopeType(scopeType)
                 .build();
     }
 
@@ -73,8 +70,6 @@ public class AthleteMapper {
                 .lastName(item.getLastName())
                 .dateOfBirth(item.getDateOfBirth())
                 .gender(item.getGender())
-                .scopeType(ScopeType.INTERNAL)
                 .build();
     }
 }
-

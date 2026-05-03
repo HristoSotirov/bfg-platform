@@ -11,6 +11,7 @@ import { CommonModule } from '@angular/common';
 import {
   AccreditationDto,
   AccreditationStatus,
+  Gender,
 } from '../../../../core/services/api';
 import { ColumnConfig } from '../../accreditations.component';
 import { calculateRaceGroup } from '../../../../shared/utils/race-group.util';
@@ -44,12 +45,12 @@ export class AccreditationsTableComponent implements OnInit {
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
 
   private statusLabels: Record<string, string> = {
-    ACTIVE: 'Активна',
-    PENDING_VALIDATION: 'Чакаща валидация',
-    PENDING_PHOTO_VALIDATION: 'Чакаща снимка',
-    NEW_PHOTO_REQUIRED: 'Нова снимка',
-    EXPIRED: 'Изтекла',
-    SUSPENDED: 'Спряна',
+    [AccreditationStatus.Active]: 'Активна',
+    [AccreditationStatus.PendingValidation]: 'Чакаща валидация',
+    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
+    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
+    [AccreditationStatus.Expired]: 'Изтекла',
+    [AccreditationStatus.Suspended]: 'Спряна',
   };
 
   constructor(private elementRef: ElementRef) {}
@@ -151,7 +152,7 @@ export class AccreditationsTableComponent implements OnInit {
       lastName: 'athlete.lastName',
       gender: 'athlete.gender',
       dateOfBirth: 'athlete.dateOfBirth',
-      raceGroup: 'athlete.dateOfBirth', // Sort by dateOfBirth for race group
+      raceGroup: 'athlete.dateOfBirth', // kept for compatibility but column removed
       clubShortName: 'club.name',
       clubName: 'club.name',
       accreditationNumber: 'accreditationNumber',
@@ -185,8 +186,6 @@ export class AccreditationsTableComponent implements OnInit {
         return this.getGenderLabel(accreditation.athlete?.gender);
       case 'clubShortName':
         return accreditation.club?.shortName || '-';
-      case 'scopeType':
-        return this.getScopeTypeLabel(accreditation.scopeType);
       case 'clubName':
         return accreditation.club?.name || '-';
       case 'clubEmail':
@@ -222,16 +221,6 @@ export class AccreditationsTableComponent implements OnInit {
       FEMALE: 'Жена',
     };
     return genderLabels[gender.toUpperCase()] || gender;
-  }
-
-  private getScopeTypeLabel(scopeType: string | undefined): string {
-    if (!scopeType) return '-';
-    const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
-    };
-    return labels[scopeType] ?? scopeType;
   }
 
   getRaceGroup(accreditation: AccreditationDto): string {

@@ -1,0 +1,527 @@
+<app-dialog
+  [isOpen]="isOpen"
+  [title]="group?.name || 'Състезателна група'"
+  size="xl"
+  [noScroll]="true"
+  (closed)="close()"
+>
+  @if (permalinkRoute) {
+    <a
+      slot="header-extra"
+      [routerLink]="permalinkRoute"
+      (click)="onPermalinkClick()"
+      class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
+      title="Отвори страницата"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+      </svg>
+    </a>
+  }
+  @if (group) {
+    <div class="flex flex-col max-h-[calc(90vh-120px)]">
+      <div class="flex-1 overflow-y-auto space-y-2">
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+        <!-- Left column -->
+        <div class="space-y-2">
+          @if (!isEditing) {
+            <!-- View mode -->
+            <div class="space-y-4">
+              <!-- Basic info -->
+              <div class="space-y-1">
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Име:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.name || "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.shortName || "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.minAge != null ? group.minAge : "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви мин. възраст:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinAge != null ? group.coxMinAge : "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви макс. възраст:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.coxMaxAge != null ? group.coxMaxAge : "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисциплини:</span>
+                  <span class="text-sm font-medium break-all min-w-0">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
+                </div>
+                <div class="flex items-baseline">
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
+                  <span
+                    class="text-sm font-medium break-all min-w-0"
+                    [class]="group.isActive ? 'text-green-600' : 'text-red-600'"
+                  >
+                    {{ group.isActive ? "Активен" : "Неактивен" }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Weight info -->
+              <div class="pt-2 border-t border-gray-200">
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. лек макс. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamLightMaxWeightKg != null ? group.maleTeamLightMaxWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. рулеви мин. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxMinWeightKg != null ? group.maleTeamCoxMinWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. рулеви изискв. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxRequiredWeightKg != null ? group.maleTeamCoxRequiredWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. лек макс. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamLightMaxWeightKg != null ? group.femaleTeamLightMaxWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. рулеви мин. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxMinWeightKg != null ? group.femaleTeamCoxMinWeightKg : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. рулеви изискв. тегло:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxRequiredWeightKg != null ? group.femaleTeamCoxRequiredWeightKg : "-" }}</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dates -->
+              <div class="pt-2 border-t border-gray-200">
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Създадена на:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.createdAt) }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Променена на:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.modifiedAt) }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <!-- Edit mode -->
+            <div class="space-y-1.5">
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Име <span class="text-red-500">*</span>:</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editData.name"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Кратко име <span class="text-red-500">*</span>:</label>
+                <input
+                  type="text"
+                  [(ngModel)]="editData.shortName"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Мин. възраст <span class="text-red-500">*</span>:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.minAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Макс. възраст <span class="text-red-500">*</span>:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.maxAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Рулеви мин. възраст:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.coxMinAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Рулеви макс. възраст:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.coxMaxAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Макс. дисциплини <span class="text-red-500">*</span>:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.maxDisciplinesPerAthlete"
+                  min="1"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Статус <span class="text-red-500">*</span>:</label>
+                <app-searchable-select-dropdown
+                  [options]="statusOptions"
+                  [placeholder]="'Изберете статус'"
+                  [ngModel]="editData.isActive ? 'true' : 'false'"
+                  (ngModelChange)="onStatusChange($event)"
+                  [disabled]="saving">
+                </app-searchable-select-dropdown>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Right column -->
+        <div class="space-y-2">
+          @if (!isEditing) {
+            <!-- Transfer info (view) -->
+            <div class="space-y-4">
+              <div>
+                <div class="space-y-1">
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Група за трансфер:</span>
+                    @if (group.transferFromGroupId) {
+                      <button
+                        type="button"
+                        class="text-sm font-medium text-bfg-blue hover:underline cursor-pointer"
+                        (click)="openTransferGroupDialog()"
+                      >
+                        {{ getGroupName(group.transferFromGroupId) }}
+                      </button>
+                    } @else {
+                      <span class="text-sm font-medium break-all min-w-0">-</span>
+                    }
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. екипаж:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.minCrewForTransfer != null ? group.minCrewForTransfer : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Коефициент:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferRatio != null ? group.transferRatio : "-" }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Закръгляне:</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ getRoundingLabel(group.transferRounding) }}</span>
+                  </div>
+                  <div class="flex items-baseline">
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисц. (трансф.):</span>
+                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerAthlete != null ? group.transferredMaxDisciplinesPerAthlete : "-" }}</span>
+                  </div>
+                </div>
+              </div>
+              @if (hasTransferData) {
+                <button
+                  type="button"
+                  class="mt-2 text-xs text-bfg-blue hover:underline"
+                  (click)="showTransferSchemaDialog = true"
+                >
+                  Преглед на схема за трансфер
+                </button>
+              }
+            </div>
+          } @else {
+            <!-- Transfer info (edit) -->
+            <div class="space-y-1.5">
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Група за трансфер:</label>
+                <app-searchable-select-dropdown
+                  [staticSearch]="groupSearch"
+                  [(ngModel)]="editData.transferFromGroupId"
+                  placeholder="Изберете група..."
+                ></app-searchable-select-dropdown>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Мин. екипаж за трансфер:</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.minCrewForTransfer"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Коефициент на трансфер:</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  [(ngModel)]="editData.transferRatio"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Закръгляне:</label>
+                <app-searchable-select-dropdown
+                  [options]="roundingOptions"
+                  [placeholder]="'Изберете закръгляне'"
+                  [ngModel]="editData.transferRounding"
+                  (ngModelChange)="onRoundingChange($event)"
+                  [disabled]="saving">
+                </app-searchable-select-dropdown>
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Макс. дисц. (трансф.):</label>
+                <input
+                  type="number"
+                  [(ngModel)]="editData.transferredMaxDisciplinesPerAthlete"
+                  min="1"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Лек макс. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.maleTeamLightMaxWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви мин. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.maleTeamCoxMinWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви изискв. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.maleTeamCoxRequiredWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Лек макс. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.femaleTeamLightMaxWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви мин. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.femaleTeamCoxMinWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+              <div>
+                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви изискв. тегло (кг):</label>
+                <input
+                  type="number"
+                  step="0.1"
+                  [(ngModel)]="editData.femaleTeamCoxRequiredWeightKg"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
+                />
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+
+      </div>
+      <!-- Footer -->
+      <div class="shrink-0 bg-white flex flex-col gap-2 mt-4 pt-4 border-t border-gray-200">
+        @if (error) {
+          <div class="w-full px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
+            <p class="text-sm text-red-700">{{ error }}</p>
+            <button type="button" class="text-red-400 hover:text-red-600 flex-shrink-0" (click)="error = null">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+              </svg>
+            </button>
+          </div>
+        }
+        <div class="flex items-center justify-center gap-2">
+        @if (!isEditing) {
+          @if (canEdit) {
+            <app-button
+              variant="outline"
+              size="md"
+              text="Редактирай"
+              (click)="startEditing()"
+            >
+            </app-button>
+            <app-button
+              variant="outline"
+              size="md"
+              text="Изтриване"
+              [disabled]="deleting"
+              (click)="confirmDelete()"
+            >
+            </app-button>
+          }
+          <app-button
+            variant="primary"
+            size="md"
+            text="Затвори"
+            (click)="close()"
+          >
+          </app-button>
+        } @else {
+          <app-button
+            variant="outline"
+            size="md"
+            text="Отказ"
+            [disabled]="saving"
+            (click)="cancelEditing()"
+          >
+          </app-button>
+          <app-button
+            variant="primary"
+            size="md"
+            text="Запази"
+            [disabled]="saving"
+            (click)="save()"
+          >
+          </app-button>
+        }
+        </div>
+      </div>
+    </div>
+  }
+</app-dialog>
+
+
+<app-dialog
+  [isOpen]="showEditingWarningDialog"
+  title="Незапазени промени"
+  (closed)="showEditingWarningDialog = false"
+>
+  <div class="py-4">
+    <p class="text-gray-700 mb-6">
+      Имате незапазени промени. Моля, използвайте бутоните
+      <span class="font-medium">"Запази"</span> или
+      <span class="font-medium">"Отказ"</span>, за да излезете от редакция.
+    </p>
+    <div class="flex justify-center">
+      <app-button
+        variant="primary"
+        size="md"
+        text="Разбрах"
+        (click)="showEditingWarningDialog = false"
+      >
+      </app-button>
+    </div>
+  </div>
+</app-dialog>
+
+
+<app-delete-confirm-dialog
+  [isOpen]="showDeleteConfirmDialog"
+  [itemName]="group?.name || ''"
+  [error]="deleteError"
+  (closed)="closeDeleteConfirm()"
+  (confirmed)="deleteGroup()"
+  (errorDismissed)="deleteError = null"
+/>
+
+<!-- Transfer Schema Dialog -->
+<app-dialog
+  [isOpen]="showTransferSchemaDialog"
+  title="Схема за трансфер"
+  size="sm"
+  (closed)="showTransferSchemaDialog = false"
+>
+  <div class="flex flex-col max-h-[60vh]">
+    <div class="flex-1 overflow-y-auto">
+      <table class="w-full text-sm">
+        <thead class="sticky top-0 bg-white">
+          <tr class="border-b border-gray-200">
+            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">Размер на екипажа</th>
+            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">Брой трансферирани</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of transferSchemaRows; track row.crewSize) {
+            <tr class="border-b border-gray-100 hover:bg-gray-50">
+              <td class="py-1.5 px-3">{{ row.crewSize }}</td>
+              <td class="py-1.5 px-3 font-medium" [class.text-gray-400]="row.transferCount === 0">{{ row.transferCount }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <div class="flex justify-center pt-4 flex-shrink-0">
+      <app-button variant="outline" size="md" text="Затвори" (click)="showTransferSchemaDialog = false"></app-button>
+    </div>
+  </div>
+</app-dialog>
+
+<!-- Transfer Group Preview Dialog (read-only) -->
+<app-dialog
+  [isOpen]="showTransferGroupDialog"
+  [title]="transferGroup?.name || 'Състезателна група'"
+  size="lg"
+  (closed)="closeTransferGroupDialog()"
+>
+  @if (transferGroupPermalinkRoute) {
+    <a
+      slot="header-extra"
+      [routerLink]="transferGroupPermalinkRoute"
+      (click)="onTransferGroupPermalinkClick()"
+      class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
+      title="Отвори страницата"
+    >
+      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+      </svg>
+    </a>
+  }
+  @if (transferGroup) {
+    <div class="space-y-4 py-2">
+      <div class="space-y-1">
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Име:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.name || "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.shortName || "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.minAge != null ? transferGroup.minAge : "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
+          <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.maxAge != null ? transferGroup.maxAge : "-" }}</span>
+        </div>
+        <div class="flex items-baseline">
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
+          <span class="text-sm font-medium break-all min-w-0" [class]="transferGroup.isActive ? 'text-green-600' : 'text-red-600'">
+            {{ transferGroup.isActive ? "Активен" : "Неактивен" }}
+          </span>
+        </div>
+      </div>
+      <div class="flex justify-center pt-2">
+        <app-button variant="primary" size="md" text="Затвори" (click)="closeTransferGroupDialog()"></app-button>
+      </div>
+    </div>
+  }
+</app-dialog>

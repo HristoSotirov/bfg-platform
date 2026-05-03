@@ -9,15 +9,15 @@ import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.security.AuthorizationService;
-import com.bfg.platform.common.security.ScopeAccessPolicy;
 import com.bfg.platform.common.security.ScopeAccessValidator;
 import com.bfg.platform.common.security.SecurityContextHelper;
 import com.bfg.platform.gen.model.AthleteBatchMedicalUpdateRequest;
 import com.bfg.platform.gen.model.AthleteDto;
 import com.bfg.platform.gen.model.AthleteUpdateRequest;
-import com.bfg.platform.gen.model.ScopeType;
+import com.bfg.platform.gen.model.SystemRole;
 import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -41,7 +41,6 @@ public class AthleteServiceImpl implements AthleteService {
     private final SecurityContextHelper securityContextHelper;
     private final AuthorizationService authorizationService;
     private final ScopeAccessValidator scopeAccessValidator;
-    private final ScopeAccessPolicy scopeAccessPolicy;
 
     @Override
     public Page<AthleteDto> getAllAthletes(
@@ -54,14 +53,12 @@ public class AthleteServiceImpl implements AthleteService {
     ) {
         // Validate scope filter - throws 403 if invalid
         scopeAccessValidator.validateFilterScope(filter);
-        
-        // Athletes don't have direct clubId - they are accessed via accreditations
-        // Club restriction is enforced at the accreditations endpoint
+        ExpandQueryParser.parse(expand, Athlete.class);
 
-        // No implicit filter override - use only user-provided filter
         Specification<Athlete> filterSpec = AthleteQueryAdapter.parseFilter(filter);
         Specification<Athlete> searchSpec = AthleteQueryAdapter.parseSearch(search);
-        Specification<Athlete> spec = Specification.where(filterSpec).and(searchSpec);
+        Specification<Athlete> scopeSpec = buildAthleteScopeRestriction();
+        Specification<Athlete> spec = Specification.where(filterSpec).and(searchSpec).and(scopeSpec);
         Pageable pageable = OffsetBasedPageRequest.of(skip, top, AthleteQueryAdapter.parseSort(orderBy));
 
         Page<Athlete> athletePage = athleteRepository.findAll(spec, pageable);
@@ -70,6 +67,7 @@ public class AthleteServiceImpl implements AthleteService {
 
     @Override
     public Optional<AthleteDto> getAthleteDtoByUuid(UUID uuid, List<String> expand) {
+        ExpandQueryParser.parse(expand, Athlete.class);
         return athleteRepository.findById(uuid)
                 .map(athlete -> {
                     validateAthleteAccess(athlete);
@@ -92,35 +90,21 @@ public class AthleteServiceImpl implements AthleteService {
     /**
      * Validates that the current user has access to the athlete.
      * Athletes are special - they don't have a direct clubId, so we check via accreditations.
+     * For CLUB_ADMIN/COACH, we verify access via accreditations (club link).
      */
     private void validateAthleteAccess(Athlete athlete) {
-        ScopeType userScope = securityContextHelper.getScopeType();
         var userRole = securityContextHelper.getUserRole();
-        
-        // First check scope access
-        if (!scopeAccessPolicy.getAllowedScopes(userRole, userScope).contains(athlete.getScopeType())) {
+
+        // APP_ADMIN and FEDERATION_ADMIN can see all athletes
+        if (userRole == SystemRole.APP_ADMIN || userRole == SystemRole.FEDERATION_ADMIN) {
+            return;
+        }
+
+        // For CLUB_ADMIN/COACH, check access via accreditations
+        UUID myClubId = authorizationService.requireCurrentUserClubId();
+        if (accreditationRepository.findFirstByAthleteIdAndClubIdOrderByYearDescCreatedAtDesc(athlete.getId(), myClubId).isEmpty()) {
             throw new ForbiddenException("You do not have access to this athlete");
         }
-        
-        // For EXTERNAL/NATIONAL CLUB_ADMIN/COACH, check access via accreditations
-        // (Athletes don't have direct clubId - they are linked via accreditations)
-        if (requiresAthleteClubRestriction(userRole, userScope)) {
-            UUID myClubId = authorizationService.requireCurrentUserClubId();
-            if (accreditationRepository.findFirstByAthleteIdAndClubIdOrderByYearDescCreatedAtDesc(athlete.getId(), myClubId).isEmpty()) {
-                throw new ForbiddenException("You do not have access to this athlete");
-            }
-        }
-    }
-    
-    /**
-     * Determines if the user needs club-based access restriction for individual athlete access.
-     */
-    private boolean requiresAthleteClubRestriction(com.bfg.platform.gen.model.SystemRole role, ScopeType scope) {
-        if (role == com.bfg.platform.gen.model.SystemRole.APP_ADMIN || 
-            role == com.bfg.platform.gen.model.SystemRole.FEDERATION_ADMIN) {
-            return false;
-        }
-        return scope != ScopeType.INTERNAL;
     }
 
     @Override
@@ -130,17 +114,17 @@ public class AthleteServiceImpl implements AthleteService {
         LocalDate insuranceTo = request.getInsuranceTo();
         LocalDate medicalExaminationStartDate = request.getMedicalExaminationStartDate();
         Integer medicalExaminationDurationMonths = request.getMedicalExaminationDurationMonths();
-        
+
         boolean hasInsurance = insuranceFrom != null && insuranceTo != null;
         boolean hasMedical = medicalExaminationStartDate != null && medicalExaminationDurationMonths != null;
-        
+
         if (!hasInsurance && !hasMedical) {
             throw new IllegalArgumentException(
                 "At least one pair must be provided: either insurance (insuranceFrom and insuranceTo) " +
                 "or medical examination (medicalExaminationStartDate and medicalExaminationDurationMonths)"
             );
         }
-        
+
         if (insuranceFrom != null && insuranceTo == null) {
             throw new IllegalArgumentException("insuranceTo is required when insuranceFrom is provided");
         }
@@ -153,33 +137,33 @@ public class AthleteServiceImpl implements AthleteService {
         if (medicalExaminationDurationMonths != null && medicalExaminationStartDate == null) {
             throw new IllegalArgumentException("medicalExaminationStartDate is required when medicalExaminationDurationMonths is provided");
         }
-        
+
         List<AthleteDto> updated = new ArrayList<>();
-        
+
         LocalDate medicalExaminationDue = null;
         if (hasMedical) {
             medicalExaminationDue = medicalExaminationStartDate.plusMonths(medicalExaminationDurationMonths);
         }
-        
+
         for (UUID athleteId : request.getAthleteIds()) {
             Optional<Athlete> athleteOpt = athleteRepository.findById(athleteId);
             if (athleteOpt.isPresent()) {
                 Athlete athlete = athleteOpt.get();
-                
+
                 if (hasInsurance) {
                     athlete.setInsuranceFrom(insuranceFrom);
                     athlete.setInsuranceTo(insuranceTo);
                 }
-                
+
                 if (hasMedical) {
                     athlete.setMedicalExaminationDue(medicalExaminationDue);
                 }
-                
+
                 Athlete saved = athleteRepository.save(athlete);
                 updated.add(AthleteMapper.toDto(saved));
             }
         }
-        
+
         return updated;
     }
 
@@ -200,5 +184,35 @@ public class AthleteServiceImpl implements AthleteService {
             throw new ConflictException(message);
         }
     }
-}
 
+    private Specification<Athlete> buildAthleteScopeRestriction() {
+        var allowedScopes = scopeAccessValidator.resolveAllowedScopes();
+
+        if (allowedScopes.isEmpty()) {
+            return (root, query, cb) -> cb.disjunction();
+        }
+        if (allowedScopes.size() == 3) {
+            return Specification.where(null);
+        }
+
+        // Check if club restriction applies (EXTERNAL/NATIONAL users see only own club's athletes)
+        Optional<UUID> userClubId = authorizationService.findCurrentUserClubId();
+        com.bfg.platform.gen.model.ScopeType clubType = userClubId.isPresent()
+                ? authorizationService.getCurrentUserClubType() : null;
+        boolean restrictToClub = clubType != null && clubType != com.bfg.platform.gen.model.ScopeType.INTERNAL;
+
+        return (root, query, cb) -> {
+            var subquery = query.subquery(UUID.class);
+            var accreditation = subquery.from(com.bfg.platform.athlete.entity.Accreditation.class);
+
+            if (restrictToClub && userClubId.isPresent()) {
+                subquery.select(accreditation.get("athleteId"))
+                        .where(cb.equal(accreditation.get("clubId"), userClubId.get()));
+            } else {
+                subquery.select(accreditation.get("athleteId"))
+                        .where(accreditation.join("club").get("type").in(allowedScopes));
+            }
+            return root.get("id").in(subquery);
+        };
+    }
+}

@@ -1,0 +1,96 @@
+databaseChangeLog:
+  - changeSet:
+      id: 008-discipline-definitions
+      author: bfg
+      changes:
+        - createTable:
+            tableName: discipline_definitions
+            columns:
+              - column:
+                  name: id
+                  type: UUID
+                  constraints:
+                    primaryKey: true
+                    nullable: false
+                  defaultValueComputed: gen_random_uuid()
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+                  constraints:
+                    nullable: false
+                    unique: true
+              - column:
+                  name: short_name
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: competition_group_id
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: gender
+                  type: VARCHAR(10)
+                  constraints:
+                    nullable: false
+                  remarks: "MALE, FEMALE, or MIXED"
+              - column:
+                  name: boat_class
+                  type: VARCHAR(20)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: crew_size
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_crew_from_transfer
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: has_coxswain
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_lightweight
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: distance_meters
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: is_active
+                  type: BOOLEAN
+                  constraints:
+                    nullable: false
+              - column:
+                  name: max_boats_per_club
+                  type: INTEGER
+                  constraints:
+                    nullable: false
+              - column:
+                  name: created_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+              - column:
+                  name: modified_at
+                  type: TIMESTAMPTZ
+                  constraints:
+                    nullable: false
+                  defaultValueComputed: CURRENT_TIMESTAMP
+        - addForeignKeyConstraint:
+            baseTableName: discipline_definitions
+            baseColumnNames: competition_group_id
+            referencedTableName: competition_group_definitions
+            referencedColumnNames: id
+            constraintName: fk_discipline_comp_group
+            onDelete: RESTRICT

@@ -37,9 +37,9 @@ ClubDto:
       format: uuid
       description: UUID of the club administrator user
       example: "550e8400-e29b-41d4-a716-446655440001"
-    scopeType:
+    type:
       $ref: "../common/schemas.yaml#/ScopeType"
-      description: Scope type of the club (internal, external, national)
+      description: Type of the club (internal, external, national)
     clubAdminUser:
       $ref: "../users/schemas.yaml#/UserDto"
       description: Full club administrator user details (available when expand=clubAdminUser)
@@ -71,8 +71,7 @@ ClubCreateRequest:
     - name
     - shortName
     - clubEmail
-    - clubAdminId
-    - scopeType
+    - type
   properties:
     name:
       type: string
@@ -105,12 +104,11 @@ ClubCreateRequest:
       type: string
       format: uuid
       description: UUID of the club administrator user
-      x-field-extra-annotation: '@NotNull(message = "{club.admin.required}")'
       example: "550e8400-e29b-41d4-a716-446655440001"
-    scopeType:
+    type:
       $ref: "../common/schemas.yaml#/ScopeType"
-      description: Scope type of the club (required when creating)
-      x-field-extra-annotation: '@NotNull(message = "{club.scopeType.required}")'
+      description: Type of the club (required when creating)
+      x-field-extra-annotation: '@NotNull(message = "{club.type.required}")'
 
 ClubUpdateRequest:
   type: object
@@ -131,9 +129,9 @@ ClubUpdateRequest:
       format: uuid
       description: UUID of the club administrator user
       example: "550e8400-e29b-41d4-a716-446655440001"
-    scopeType:
+    type:
       $ref: "../common/schemas.yaml#/ScopeType"
-      description: Scope type of the club
+      description: Type of the club
 
 ClubBatchCreateRequestItem:
   type: object
@@ -143,7 +141,6 @@ ClubBatchCreateRequestItem:
     - shortName
     - cardPrefix
     - clubEmail
-    - adminEmail
   properties:
     name:
       type: string
@@ -176,11 +173,8 @@ ClubBatchCreateRequestItem:
     adminEmail:
       type: string
       format: email
-      minLength: 1
       description: Email address of the club administrator user
-      x-field-extra-annotation: |-
-        @NotBlank(message = "{club.adminEmail.required}")
-        @Email(message = "{club.adminEmail.invalid}")
+      x-field-extra-annotation: '@Email(message = "{club.adminEmail.invalid}")'
       example: "admin@bfg-platform.bg"
 
 ClubBatchCreateRequest:
@@ -198,17 +192,7 @@ ClubBatchCreateRequest:
       items:
         $ref: "#/ClubBatchCreateRequestItem"
       x-field-extra-annotation: '@NotEmpty(message = "{club.batchClubs.required}") @Size(max = 100, message = "{club.batchClubs.maxSize}")'
-      example:
-        - name: "Rowing Club Sofia"
-          shortName: "RC Sofia"
-          cardPrefix: "01"
-          clubEmail: "club@bfg-platform.bg"
-          adminEmail: "admin@bfg-platform.bg"
-        - name: "Rowing Club Plovdiv"
-          shortName: "RC Plovdiv"
-          cardPrefix: "02"
-          clubEmail: "club2@bfg-platform.bg"
-          adminEmail: "admin2@bfg-platform.bg"
+
 
 ClubBatchCreateResponse:
   type: object

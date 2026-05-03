@@ -1,0 +1,6 @@
+.tab-nav {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}

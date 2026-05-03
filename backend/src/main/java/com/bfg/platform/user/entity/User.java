@@ -1,6 +1,5 @@
 package com.bfg.platform.user.entity;
 
-import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.gen.model.SystemRole;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -62,10 +61,6 @@ public class User {
     @Column(name = "role")
     @Enumerated(EnumType.STRING)
     private SystemRole role;
-
-    @Column(name = "scope_type")
-    @Enumerated(EnumType.STRING)
-    private ScopeType scopeType;
 
     public String getPasswordHash() {
         return password;

@@ -24,6 +24,7 @@ import {
   UsersService,
   UserDto,
   ClubCoachCreateRequest,
+  ScopeType,
 } from '../../../../core/services/api';
 import {
   takeUntil,
@@ -36,9 +37,12 @@ import {
   tap,
   throwError,
   scan,
+  Observable,
+  map,
 } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 import { SystemRole } from '../../../../core/models/navigation.model';
+import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 
 @Component({
   selector: 'app-club-details-dialog',
@@ -81,7 +85,27 @@ export class ClubDetailsDialogComponent implements OnChanges {
 
   adminOptions: SearchableSelectOption[] = [];
   assignedAdminIds: Set<string> = new Set();
-  loadingAdmins = false;
+
+  adminSearch = (query: string): Observable<SearchableSelectOption[]> =>
+    forkJoin({
+      admins: this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", query || undefined, undefined, 100, 0) as any,
+      clubs: fetchAllPages((skip, top) =>
+        this.clubsService.getAllClubs(undefined, undefined, undefined, top, skip, undefined) as any
+      ),
+    }).pipe(
+      map(({ admins, clubs }: any) => {
+        const assigned = new Set<string>();
+        (clubs as ClubDto[]).forEach((club: ClubDto) => {
+          if (club.clubAdminId && club.uuid !== this.club?.uuid) assigned.add(club.clubAdminId);
+        });
+        this.assignedAdminIds = assigned;
+        return (admins.content || []).map((admin: UserDto) => ({
+          value: admin.uuid || '',
+          label: this.getAdminDisplayName(admin),
+          disabled: admin.uuid ? assigned.has(admin.uuid) : false,
+        }));
+      }),
+    );
 
   readonly statusOptions: SearchableSelectOption[] = [
     { value: 'true', label: 'Активен' },
@@ -93,7 +117,29 @@ export class ClubDetailsDialogComponent implements OnChanges {
   coachOptions: SearchableSelectOption[] = [];
   selectedCoachId = '';
   addingCoach = false;
-  loadingCoachesForAdd = false;
+
+  coachSearch = (query: string): Observable<SearchableSelectOption[]> =>
+    forkJoin({
+      coaches: this.usersService.getAllUsers("role eq 'COACH'", query || undefined, undefined, 100, 0) as any,
+      allClubs: fetchAllPages((skip, top) =>
+        this.clubsService.getAllClubs("scopeType eq 'INTERNAL'", undefined, undefined, top, skip, undefined) as any
+      ),
+    }).pipe(
+      map(({ coaches, allClubs }: any) => {
+        const coachList: UserDto[] = coaches.content || [];
+        const clubs: ClubDto[] = allClubs as ClubDto[];
+        // Build assigned set from clubs (async — just use coaches already in this club)
+        const alreadyAssignedIds = new Set<string>(
+          this.coaches.map((c) => c.userId).filter(Boolean) as string[]
+        );
+        this.availableCoaches = coachList;
+        return coachList.map((coach) => ({
+          value: coach.uuid || '',
+          label: this.getCoachDisplayName(coach),
+          disabled: coach.uuid ? alreadyAssignedIds.has(coach.uuid) : false,
+        }));
+      }),
+    );
 
   showRemoveCoachConfirm = false;
   coachToRemove: ClubCoachDto | null = null;
@@ -125,7 +171,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
 
   get canUploadLogo(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
   }
 
@@ -150,9 +196,9 @@ export class ClubDetailsDialogComponent implements OnChanges {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      INTERNAL: 'Вътрешен',
-      EXTERNAL: 'Външен',
-      NATIONAL: 'Национален',
+      [ScopeType.Internal]: 'Вътрешен',
+      [ScopeType.External]: 'Външен',
+      [ScopeType.National]: 'Национален',
     };
     return labels[scopeType] ?? scopeType;
   }
@@ -258,7 +304,6 @@ export class ClubDetailsDialogComponent implements OnChanges {
 
   openAddCoachForm(): void {
     this.showAddCoachForm = true;
-    this.loadAvailableCoaches();
     this.cdr.markForCheck();
   }
 
@@ -267,118 +312,6 @@ export class ClubDetailsDialogComponent implements OnChanges {
     this.selectedCoachId = '';
     this.availableCoaches = [];
     this.coachOptions = [];
-    this.cdr.markForCheck();
-  }
-
-  private loadAvailableCoaches(): void {
-    this.loadingCoachesForAdd = true;
-    this.cdr.markForCheck();
-
-    forkJoin({
-      coaches: this.usersService.getAllUsers("role eq 'COACH'", undefined, undefined, 1000, 0),
-      // Only load INTERNAL clubs since coaches can only be assigned to internal clubs
-      allClubs: this.clubsService.getAllClubs("scopeType eq 'INTERNAL'", undefined, undefined, 1000, 0, undefined)
-    }).pipe(
-      retryWhen((errors) =>
-        errors.pipe(
-          scan((retryCount, error: HttpErrorResponse) => {
-            if (
-              error.status === 401 ||
-              error.status === 403 ||
-              error.status === 404
-            ) {
-              throw error;
-            }
-            if (retryCount >= 2) {
-              throw error;
-            }
-            return retryCount + 1;
-          }, 0),
-          delay(1000),
-        ),
-      ),
-      catchError((error: HttpErrorResponse) => {
-        if (error.status === 401) {
-          this.error = 'Сесията ви е изтекла. Моля, опитайте отново.';
-        } else if (error.status === 403) {
-          this.error = 'Нямате права за достъп до тази информация.';
-        }
-        return of({ coaches: { content: [] }, allClubs: { content: [] } });
-      }),
-      takeUntil(this.destroy$),
-    )
-    .subscribe({
-      next: ({ coaches, allClubs }) => {
-        const availableCoaches = coaches.content || [];
-        const clubs = allClubs.content || [];
-        
-        const clubCoachRequests = clubs
-          .filter((club: ClubDto) => club.uuid)
-          .map((club: ClubDto) => 
-            this.clubCoachesService.getClubCoaches(club.uuid!, undefined, undefined, 1000, 0, undefined).pipe(
-              catchError(() => of({ content: [] })),
-            )
-          );
-        
-        if (clubCoachRequests.length === 0) {
-          this.processCoachOptions(availableCoaches);
-          return;
-        }
-        
-        forkJoin(clubCoachRequests).pipe(
-          catchError(() => of([])),
-          takeUntil(this.destroy$),
-        ).subscribe({
-          next: (clubCoachesResponses) => {
-            const assignedCoachIds = new Set<string>();
-            clubCoachesResponses.forEach((response: any) => {
-              (response.content || []).forEach((clubCoach: ClubCoachDto) => {
-                if (clubCoach.userId) {
-                  assignedCoachIds.add(clubCoach.userId);
-                }
-              });
-            });
-            
-            this.coachOptions = availableCoaches.map(coach => ({
-              value: coach.uuid || '',
-              label: this.getCoachDisplayName(coach),
-              disabled: coach.uuid ? assignedCoachIds.has(coach.uuid) : false
-            }));
-
-            this.availableCoaches = availableCoaches;
-            this.loadingCoachesForAdd = false;
-            this.cdr.markForCheck();
-          },
-          error: () => {
-            this.processCoachOptions(availableCoaches);
-          }
-        });
-      },
-      error: () => {
-        this.availableCoaches = [];
-        this.coachOptions = [];
-        this.loadingCoachesForAdd = false;
-        this.cdr.markForCheck();
-      },
-    });
-  }
-
-  private processCoachOptions(availableCoaches: UserDto[]): void {
-    const assignedCoachIds = new Set<string>();
-    this.coaches.forEach((c) => {
-      if (c.userId) {
-        assignedCoachIds.add(c.userId);
-      }
-    });
-    
-    this.coachOptions = availableCoaches.map(coach => ({
-      value: coach.uuid || '',
-      label: this.getCoachDisplayName(coach),
-      disabled: coach.uuid ? assignedCoachIds.has(coach.uuid) : false
-    }));
-
-    this.availableCoaches = availableCoaches;
-    this.loadingCoachesForAdd = false;
     this.cdr.markForCheck();
   }
 
@@ -531,49 +464,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
       clubAdminId: this.club.clubAdminId || '',
     };
     this.isEditing = true;
-    this.loadAdminsForEdit();
     this.cdr.markForCheck();
-  }
-
-  private loadAdminsForEdit(): void {
-    this.loadingAdmins = true;
-    this.cdr.markForCheck();
-
-    forkJoin({
-      admins: this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", undefined, undefined, 1000, 0),
-      clubs: this.clubsService.getAllClubs(undefined, undefined, undefined, 1000, 0, undefined)
-    }).pipe(
-      catchError(() => {
-        return of({ admins: { content: [] }, clubs: { content: [] } });
-      }),
-      takeUntil(this.destroy$),
-    ).subscribe({
-      next: ({ admins, clubs }) => {
-        const availableAdmins = admins.content || [];
-        
-        this.assignedAdminIds = new Set();
-        (clubs.content || []).forEach((club: ClubDto) => {
-          if (club.clubAdminId && club.uuid !== this.club?.uuid) {
-            this.assignedAdminIds.add(club.clubAdminId);
-          }
-        });
-
-        this.adminOptions = availableAdmins.map(admin => ({
-          value: admin.uuid || '',
-          label: this.getAdminDisplayName(admin),
-          disabled: admin.uuid ? this.assignedAdminIds.has(admin.uuid) : false
-        }));
-
-        this.loadingAdmins = false;
-        this.cdr.markForCheck();
-      },
-      error: () => {
-        this.adminOptions = [];
-        this.assignedAdminIds = new Set();
-        this.loadingAdmins = false;
-        this.cdr.markForCheck();
-      }
-    });
   }
 
   getAdminDisplayName(admin: UserDto): string {
@@ -784,10 +675,8 @@ export class ClubDetailsDialogComponent implements OnChanges {
     this.selectedCoachId = '';
     this.adminOptions = [];
     this.assignedAdminIds = new Set();
-    this.loadingAdmins = false;
     this.showRemoveCoachConfirm = false;
     this.coachToRemove = null;
-    this.loadingCoachesForAdd = false;
     this.uploadingLogo = false;
     this.logoError = null;
     this.showCropDialog = false;

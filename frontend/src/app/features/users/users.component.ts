@@ -6,20 +6,18 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
-import { ScopeVisibilityService } from '../../core/services/scope-visibility.service';
 import {
   UsersService,
   UserDto,
   SystemRole,
-  ScopeType,
 } from '../../core/services/api';
 import { UsersTableComponent } from './components/users-table/users-table.component';
 import { UsersFiltersComponent } from './components/users-filters/users-filters.component';
-import { UserDetailsDialogComponent } from './components/user-details-dialog/user-details-dialog.component';
 import { AddUserDialogComponent } from './components/add-user-dialog/add-user-dialog.component';
 import { UserSettingsDialogComponent } from './components/user-settings-dialog/user-settings-dialog.component';
 import { ButtonComponent } from '../../shared/components/button/button.component';
@@ -45,7 +43,6 @@ export interface UserFilters {
   search: string;
   roles: string[]; // SystemRole values
   statuses: string[]; // 'true' for active, 'false' for inactive
-  scopeTypes: string[]; // INTERNAL, EXTERNAL, NATIONAL – only for APP_ADMIN/FED_ADMIN, from cache only
 }
 
 @Component({
@@ -57,7 +54,6 @@ export interface UserFilters {
     HeaderComponent,
     UsersTableComponent,
     UsersFiltersComponent,
-    UserDetailsDialogComponent,
     AddUserDialogComponent,
     UserSettingsDialogComponent,
     ButtonComponent,
@@ -81,7 +77,6 @@ export class UsersComponent implements OnInit, OnDestroy {
     search: '',
     roles: [],
     statuses: [],
-    scopeTypes: [],
   };
   orderBy: string[] = ['firstName_asc'];
 
@@ -97,7 +92,6 @@ export class UsersComponent implements OnInit, OnDestroy {
     { id: 'email', label: 'Имейл', visible: true },
     { id: 'isActive', label: 'Статус', visible: true },
     { id: 'role', label: 'Роля', visible: true },
-    { id: 'scopeType', label: 'Тип', visible: true },
     { id: 'createdAt', label: 'Създаден на', visible: true },
     { id: 'updatedAt', label: 'Променен на', visible: true },
   ];
@@ -105,14 +99,10 @@ export class UsersComponent implements OnInit, OnDestroy {
   filterConfigs: UserFilterConfig[] = [
     { id: 'role', label: 'Роля', visible: true },
     { id: 'status', label: 'Статус', visible: true },
-    // Note: 'scopeType' filter is added dynamically based on user permissions
   ];
 
-  isDetailsDialogOpen = false;
   isAddDialogOpen = false;
   isSettingsDialogOpen = false;
-
-  selectedUser: UserDto | null = null;
 
   exporting = false;
   mobileMenuOpen = false;
@@ -139,7 +129,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
-    private scopeVisibility: ScopeVisibilityService,
+    private router: Router,
     private cdr: ChangeDetectorRef,
   ) {}
 
@@ -154,58 +144,26 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   get canAddUser(): boolean {
-    // Only INTERNAL scope users can create new users
-    if (!this.scopeVisibility.isInternalScope()) {
-      return false;
-    }
     return (
-      this.userRole === 'APP_ADMIN' ||
-      this.userRole === 'FEDERATION_ADMIN' ||
-      this.userRole === 'CLUB_ADMIN'
+      this.userRole === SystemRole.AppAdmin ||
+      this.userRole === SystemRole.FederationAdmin
     );
   }
 
   get canEditUser(): boolean {
     return (
-      this.userRole === 'APP_ADMIN' || this.userRole === 'FEDERATION_ADMIN'
+      this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
-  }
-
-  /** Scope filter/column and scope in details only for APP_ADMIN and FEDERATION_ADMIN */
-  get showScopeFeatures(): boolean {
-    return this.scopeVisibility.canViewScopeField();
-  }
-
-  private applyRoleBasedVisibility(): void {
-    if (this.showScopeFeatures) {
-      if (!this.filterConfigs.find((f) => f.id === 'scopeType')) {
-        this.filterConfigs = [
-          ...this.filterConfigs,
-          { id: 'scopeType', label: 'Тип', visible: true },
-        ];
-      }
-      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
-      if (scopeCol) scopeCol.visible = true;
-    } else {
-      this.filterConfigs = this.filterConfigs.filter(
-        (f) => f.id !== 'scopeType',
-      );
-      const scopeCol = this.columns.find((c) => c.id === 'scopeType');
-      if (scopeCol) scopeCol.visible = false;
-      this.filters.scopeTypes = [];
-    }
   }
 
   private initializeUserContext(): void {
     const user = this.authService.currentUser;
     if (!user || user.roles.length === 0) {
-      this.applyRoleBasedVisibility();
       this.loadUsers();
       return;
     }
 
     this.userRole = user.roles[0] as SystemRole;
-    this.applyRoleBasedVisibility();
     this.loadUsers();
   }
 
@@ -223,7 +181,6 @@ export class UsersComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
 
     const filterParts: string[] = [];
-    const defaults = this.scopeVisibility.buildDefaultFilter();
 
     if (this.filters.roles.length > 0 && this.isFilterVisible('role')) {
       if (this.filters.roles.length === 1) {
@@ -245,26 +202,6 @@ export class UsersComponent implements OnInit, OnDestroy {
           .join(' or ');
         filterParts.push(`(${statusConditions})`);
       }
-    }
-
-    // Scope filter - use user's selection if visible, otherwise use default
-    if (this.showScopeFeatures) {
-      if (
-        this.filters.scopeTypes?.length > 0 &&
-        this.isFilterVisible('scopeType')
-      ) {
-        if (this.filters.scopeTypes.length === 1) {
-          filterParts.push(`scopeType eq '${this.filters.scopeTypes[0]}'`);
-        } else {
-          const scopeConditions = this.filters.scopeTypes
-            .map((s) => `scopeType eq '${s}'`)
-            .join(' or ');
-          filterParts.push(`(${scopeConditions})`);
-        }
-      }
-    } else if (defaults.scopeType) {
-      // User can't see scope filter - always filter by their scope
-      filterParts.push(`scopeType eq '${defaults.scopeType}'`);
     }
 
     const filterString =
@@ -333,15 +270,7 @@ export class UsersComponent implements OnInit, OnDestroy {
   }
 
   openDetailsDialog(user: UserDto): void {
-    this.selectedUser = user;
-    this.isDetailsDialogOpen = true;
-    this.cdr.markForCheck();
-  }
-
-  closeDetailsDialog(): void {
-    this.isDetailsDialogOpen = false;
-    this.selectedUser = null;
-    this.cdr.markForCheck();
+    this.router.navigate(['/users', user.uuid]);
   }
 
   openAddDialog(): void {
@@ -376,14 +305,12 @@ export class UsersComponent implements OnInit, OnDestroy {
       if (oldFilter && oldFilter.visible && !newFilter.visible) {
         if (newFilter.id === 'role') this.filters.roles = [];
         if (newFilter.id === 'status') this.filters.statuses = [];
-        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
       } else if (
         (oldFilter && !oldFilter.visible && newFilter.visible) ||
         (!oldFilter && newFilter.visible)
       ) {
         if (newFilter.id === 'role') this.filters.roles = [];
         if (newFilter.id === 'status') this.filters.statuses = [];
-        if (newFilter.id === 'scopeType') this.filters.scopeTypes = [];
       }
     });
 
@@ -460,23 +387,9 @@ export class UsersComponent implements OnInit, OnDestroy {
           search: parsed.search || '',
           roles: parsed.roles || [],
           statuses: parsed.statuses || [],
-          scopeTypes: parsed.scopeTypes || [],
         };
       } catch (e) {
         console.error('Error loading filter values:', e);
-      }
-    }
-
-    // Also check legacy key for backwards compatibility
-    const legacyScopeTypes = localStorage.getItem('users_scope_types');
-    if (legacyScopeTypes && !savedFilters) {
-      try {
-        const parsed = JSON.parse(legacyScopeTypes);
-        if (Array.isArray(parsed)) {
-          this.filters.scopeTypes = parsed;
-        }
-      } catch (e) {
-        // ignore
       }
     }
 
@@ -491,11 +404,6 @@ export class UsersComponent implements OnInit, OnDestroy {
         // ignore
       }
     }
-  }
-
-  onUserSaved(): void {
-    this.loadUsers();
-    this.closeDetailsDialog();
   }
 
   onUserAdded(): void {
@@ -574,38 +482,25 @@ export class UsersComponent implements OnInit, OnDestroy {
       }
     }
 
-    if (
-      this.filters.scopeTypes?.length > 0 &&
-      this.isFilterVisible('scopeType')
-    ) {
-      if (this.filters.scopeTypes.length === 1) {
-        filterParts.push(`scopeType eq '${this.filters.scopeTypes[0]}'`);
-      } else {
-        const scopeConditions = this.filters.scopeTypes
-          .map((s) => `scopeType eq '${s}'`)
-          .join(' or ');
-        filterParts.push(`(${scopeConditions})`);
-      }
-    }
-
     const filterString =
       filterParts.length > 0 ? filterParts.join(' and ') : undefined;
 
-    this.usersService
-      .getAllUsers(
+    fetchAllPages((skip, top) =>
+      this.usersService.getAllUsers(
         filterString,
         this.filters.search || undefined,
         this.orderBy as any,
-        1000, // Maximum allowed by backend
-        0,
+        top,
+        skip,
         undefined,
-      )
+      ) as any
+    )
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (response) => {
+        next: (users: any[]) => {
           const visibleColumns = this.columns.filter((col) => col.visible);
 
-          const data = (response.content || []).map((u) => {
+          const data = users.map((u) => {
             const row: any = {};
 
             visibleColumns.forEach((col) => {
@@ -624,15 +519,6 @@ export class UsersComponent implements OnInit, OnDestroy {
                   break;
                 case 'email':
                   row[col.label] = u.email || '';
-                  break;
-                case 'scopeType':
-                  row[col.label] = u.scopeType
-                    ? ({
-                        INTERNAL: 'Вътрешен',
-                        EXTERNAL: 'Външен',
-                        NATIONAL: 'Национален',
-                      }[u.scopeType] ?? u.scopeType)
-                    : '';
                   break;
                 case 'isActive':
                   row[col.label] = u.isActive ? 'Активен' : 'Неактивен';
@@ -725,10 +611,10 @@ export class UsersComponent implements OnInit, OnDestroy {
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
     const roleLabels: Record<SystemRole, string> = {
-      APP_ADMIN: 'Администратор',
-      FEDERATION_ADMIN: 'Администратор на федерацията',
-      CLUB_ADMIN: 'Администратор на клуб',
-      COACH: 'Треньор',
+      [SystemRole.AppAdmin]: 'Администратор',
+      [SystemRole.FederationAdmin]: 'Администратор на федерацията',
+      [SystemRole.ClubAdmin]: 'Администратор на клуб',
+      [SystemRole.Coach]: 'Треньор',
     };
     return roleLabels[role] || role;
   }

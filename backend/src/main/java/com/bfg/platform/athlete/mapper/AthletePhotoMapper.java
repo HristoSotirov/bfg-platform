@@ -2,6 +2,7 @@ package com.bfg.platform.athlete.mapper;
 
 import com.bfg.platform.athlete.entity.AthletePhotoHistory;
 import com.bfg.platform.club.mapper.ClubMapper;
+import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.gen.model.AthletePhotoDto;
 
 import java.time.OffsetDateTime;
@@ -35,7 +36,8 @@ public class AthletePhotoMapper {
         boolean expandUploadedByClub = expand != null && expand.contains("uploadedByClub");
         
         if (expandUploadedByClub && photoHistory.getUploadedByClub() != null) {
-            dto.setUploadedBy(ClubMapper.toDto(photoHistory.getUploadedByClub(), expand));
+            java.util.Set<String> clubExpand = ExpandQueryParser.subExpand(expand, "uploadedByClub");
+            dto.setUploadedBy(ClubMapper.toDto(photoHistory.getUploadedByClub(), clubExpand));
         }
         
         return dto;

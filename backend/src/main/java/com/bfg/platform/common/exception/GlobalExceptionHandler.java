@@ -13,6 +13,9 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import io.jsonwebtoken.JwtException;
 
+import java.util.List;
+import java.util.Map;
+
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,6 +28,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ValidationException.class)
     public ResponseEntity<ErrorResponse> handleValidation(ValidationException ex) {
         return buildErrorResponse(HttpStatus.BAD_REQUEST, ex.getMessage());
+    }
+
+    @ExceptionHandler(ValidationErrorsException.class)
+    public ResponseEntity<Map<String, List<String>>> handleValidationErrors(ValidationErrorsException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(Map.of("errors", ex.getErrors()));
     }
 
     @ExceptionHandler(ConflictException.class)

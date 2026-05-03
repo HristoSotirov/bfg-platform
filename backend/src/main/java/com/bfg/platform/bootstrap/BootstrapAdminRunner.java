@@ -1,6 +1,5 @@
 package com.bfg.platform.bootstrap;
 
-import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.gen.model.SystemRole;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.repository.UserRepository;
@@ -74,12 +73,6 @@ public class BootstrapAdminRunner implements CommandLineRunner {
         );
         LocalDate dateOfBirth = parseDateOfBirth(dobRaw);
 
-        ScopeType scopeType = parseScopeType(getOptionalProperty(
-            "bfg.bootstrap.admin.scope-type",
-            "BOOTSTRAP_ADMIN_SCOPE_TYPE",
-            "INTERNAL"
-        ));
-
         User admin = User.builder()
                 .firstName(firstName)
                 .lastName(lastName)
@@ -89,7 +82,6 @@ public class BootstrapAdminRunner implements CommandLineRunner {
                 .password(passwordEncoder.encode(password))
                 .isActive(true)
                 .role(ROLE_APP_ADMIN)
-                .scopeType(scopeType)
                 .build();
 
         entityManager.persist(admin);
@@ -144,17 +136,6 @@ public class BootstrapAdminRunner implements CommandLineRunner {
         }
     }
 
-    private ScopeType parseScopeType(String rawValue) {
-        if (rawValue == null || rawValue.isBlank()) {
-            return ScopeType.INTERNAL;
-        }
-        return switch (rawValue.toUpperCase()) {
-            case "NATIONAL" -> ScopeType.NATIONAL;
-            case "EXTERNAL" -> ScopeType.EXTERNAL;
-            default -> ScopeType.INTERNAL;
-        };
-    }
-
     private static String firstNonBlank(String a, String b) {
         if (a != null && !a.isBlank()) {
             return a;
@@ -165,5 +146,3 @@ public class BootstrapAdminRunner implements CommandLineRunner {
         return null;
     }
 }
-
-
