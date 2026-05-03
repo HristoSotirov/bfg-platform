@@ -372,9 +372,9 @@ public class AccreditationServiceImpl implements AccreditationService {
 
     private AthleteDto migrateSingleAthlete(AthleteBatchMigrationRequestItem item, Integer year, int currentYear) {
         String newCardNumber = parseAndConvertCardNumber(item.getOldCardNumber());
-        Club club = clubRepository.findByCardPrefix(newCardNumber.substring(0, 2))
+        Club club = clubRepository.findByCardPrefixAndType(newCardNumber.substring(0, 2), com.bfg.platform.gen.model.ScopeType.INTERNAL)
                 .orElseThrow(() -> new ValidationException(
-                "No club found with card prefix: " + newCardNumber.substring(0, 2)
+                "No internal club found with card prefix: " + newCardNumber.substring(0, 2)
         ));
 
         Optional<Athlete> existingAthlete = athleteRepository.findByFirstNameAndMiddleNameAndLastNameAndDateOfBirth(

@@ -45,7 +45,6 @@ databaseChangeLog:
                   type: VARCHAR(2)
                   constraints:
                     nullable: false
-                    unique: true
               - column:
                   name: type
                   type: VARCHAR(20)
@@ -76,3 +75,7 @@ databaseChangeLog:
             referencedColumnNames: id
             constraintName: fk_clubs_club_admin
             deleteRestrict: true
+        - addUniqueConstraint:
+            tableName: clubs
+            columnNames: card_prefix, type
+            constraintName: uk_clubs_card_prefix_type

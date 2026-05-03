@@ -36,6 +36,7 @@ import com.bfg.platform.gen.model.ClubBatchCreateResponseSkippedInner;
 import com.bfg.platform.gen.model.ClubCreateRequest;
 import com.bfg.platform.gen.model.ClubDto;
 import com.bfg.platform.gen.model.ClubUpdateRequest;
+import com.bfg.platform.gen.model.ScopeType;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.repository.UserRepository;
 import lombok.AllArgsConstructor;
@@ -176,7 +177,7 @@ public class ClubServiceImpl implements ClubService {
             validateClubAdmin(request.getClubAdminId());
         }
 
-        String cardPrefix = findNextCardPrefix();
+        String cardPrefix = findNextCardPrefix(request.getType());
 
         Club club = ClubMapper.fromCreateRequest(request, cardPrefix);
 
@@ -437,14 +438,14 @@ public class ClubServiceImpl implements ClubService {
     }
 
     @Transactional
-    private String findNextCardPrefix() {
-        String prefix = clubRepository.findNextCardPrefix();
+    private String findNextCardPrefix(ScopeType type) {
+        String prefix = clubRepository.findNextCardPrefix(type.name());
         if (prefix == null) {
             return "01";
         }
         int prefixNum = Integer.parseInt(prefix);
         if (prefixNum > 99) {
-            throw new ValidationException("All card prefixes (01-99) are already in use.");
+            throw new ValidationException("All card prefixes (01-99) are already in use for type " + type);
         }
         return prefix;
     }
