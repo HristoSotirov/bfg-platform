@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -52,6 +53,7 @@ export interface UserFilters {
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     UsersTableComponent,
     UsersFiltersComponent,
@@ -86,22 +88,9 @@ export class UsersComponent implements OnInit, OnDestroy {
   currentSkip = 0;
   hasMore = true;
 
-  columns: UserColumnConfig[] = [
-    { id: 'firstName', label: 'Име', visible: true },
-    { id: 'lastName', label: 'Фамилия', visible: true },
-    { id: 'dateOfBirth', label: 'Дата на раждане', visible: true },
-    { id: 'username', label: 'Потребителско име', visible: true },
-    { id: 'email', label: 'Имейл', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'role', label: 'Роля', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'updatedAt', label: 'Променен на', visible: true },
-  ];
+  columns: UserColumnConfig[] = [];
 
-  filterConfigs: UserFilterConfig[] = [
-    { id: 'role', label: 'Роля', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  filterConfigs: UserFilterConfig[] = [];
 
   isAddDialogOpen = false;
   isSettingsDialogOpen = false;
@@ -113,17 +102,17 @@ export class UsersComponent implements OnInit, OnDestroy {
   get mobileMenuItems(): MobileActionMenuItem[] {
     return [
       {
-        label: 'Добавяне на потребител',
+        label: this.translateService.instant('users.addButton'),
         action: () => this.openAddDialog(),
         visible: this.canAddUser,
       },
       {
-        label: 'Мигриране',
+        label: this.translateService.instant('common.migration'),
         action: () => this.openMigrationDialog(),
         visible: this.canAddUser,
       },
       {
-        label: 'Експорт в Excel',
+        label: this.translateService.instant('common.exportExcel'),
         action: () => this.exportToExcel(),
         disabled: this.exporting || this.totalElements === 0,
       },
@@ -139,11 +128,20 @@ export class UsersComponent implements OnInit, OnDestroy {
     private usersService: UsersService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initColumns();
+    this.initFilterConfigs();
     this.loadSettings();
     this.initializeUserContext();
+
+    this.translateService.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.initColumns();
+      this.initFilterConfigs();
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
@@ -162,6 +160,45 @@ export class UsersComponent implements OnInit, OnDestroy {
     return (
       this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
+  }
+
+  private initColumns(): void {
+    const t = (key: string) => this.translateService.instant(key);
+    const savedColumns = this.columns;
+    this.columns = [
+      { id: 'firstName', label: t('users.table.columns.firstName'), visible: true },
+      { id: 'lastName', label: t('users.table.columns.lastName'), visible: true },
+      { id: 'dateOfBirth', label: t('users.table.columns.dateOfBirth'), visible: true },
+      { id: 'username', label: t('users.table.columns.username'), visible: true },
+      { id: 'email', label: t('users.table.columns.email'), visible: true },
+      { id: 'isActive', label: t('users.table.columns.isActive'), visible: true },
+      { id: 'role', label: t('users.table.columns.role'), visible: true },
+      { id: 'createdAt', label: t('users.table.columns.createdAt'), visible: true },
+      { id: 'updatedAt', label: t('users.table.columns.updatedAt'), visible: true },
+    ];
+    // Preserve visibility from saved state
+    if (savedColumns.length > 0) {
+      this.columns = this.columns.map((col) => {
+        const saved = savedColumns.find((s) => s.id === col.id);
+        return saved ? { ...col, visible: saved.visible } : col;
+      });
+    }
+  }
+
+  private initFilterConfigs(): void {
+    const t = (key: string) => this.translateService.instant(key);
+    const savedConfigs = this.filterConfigs;
+    this.filterConfigs = [
+      { id: 'role', label: t('users.filterConfigs.role'), visible: true },
+      { id: 'status', label: t('users.filterConfigs.status'), visible: true },
+    ];
+    // Preserve visibility from saved state
+    if (savedConfigs.length > 0) {
+      this.filterConfigs = this.filterConfigs.map((f) => {
+        const saved = savedConfigs.find((s) => s.id === f.id);
+        return saved ? { ...f, visible: saved.visible } : f;
+      });
+    }
   }
 
   private initializeUserContext(): void {
@@ -227,7 +264,7 @@ export class UsersComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translateService.instant('common.errorLoading');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -246,7 +283,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translateService.instant('common.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -544,7 +581,7 @@ export class UsersComponent implements OnInit, OnDestroy {
                   row[col.label] = u.email || '';
                   break;
                 case 'isActive':
-                  row[col.label] = u.isActive ? 'Активен' : 'Неактивен';
+                  row[col.label] = u.isActive ? this.translateService.instant('common.status.active') : this.translateService.instant('common.status.inactive');
                   break;
                 case 'role':
                   row[col.label] = this.getRoleLabel(u.role);
@@ -616,7 +653,7 @@ export class UsersComponent implements OnInit, OnDestroy {
           }
 
           const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'Потребители');
+          XLSX.utils.book_append_sheet(wb, ws, this.translateService.instant('users.title'));
           const now = new Date();
           const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
           XLSX.writeFile(wb, `users_${dateStr}.xlsx`);
@@ -633,14 +670,14 @@ export class UsersComponent implements OnInit, OnDestroy {
 
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
-    const roleLabels: Record<SystemRole, string> = {
-      [SystemRole.AppAdmin]: 'Администратор',
-      [SystemRole.FederationAdmin]: 'Администратор на федерацията',
-      [SystemRole.ClubAdmin]: 'Администратор на клуб',
-      [SystemRole.Coach]: 'Треньор',
-      [SystemRole.Umpire]: 'Съдия',
+    const roleKeys: Record<SystemRole, string> = {
+      [SystemRole.AppAdmin]: 'common.roles.APP_ADMIN',
+      [SystemRole.FederationAdmin]: 'common.roles.FEDERATION_ADMIN',
+      [SystemRole.ClubAdmin]: 'common.roles.CLUB_ADMIN',
+      [SystemRole.Coach]: 'common.roles.COACH',
+      [SystemRole.Umpire]: 'common.roles.UMPIRE',
     };
-    return roleLabels[role] || role;
+    return this.translateService.instant(roleKeys[role]) || role;
   }
 
   private isFilterVisible(filterId: string): boolean {

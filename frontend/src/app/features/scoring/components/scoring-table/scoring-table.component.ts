@@ -7,13 +7,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ScoringSchemeDto } from '../../../../core/services/api';
 import { ScoringColumnConfig } from '../../scoring.component';
 
 @Component({
   selector: 'app-scoring-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './scoring-table.component.html',
   styleUrl: './scoring-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +31,8 @@ export class ScoringTableComponent implements OnInit {
   @Output() loadMore = new EventEmitter<void>();
 
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
+
+  constructor(private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -82,7 +85,7 @@ export class ScoringTableComponent implements OnInit {
       case 'scoringType':
         return this.getScoringTypeLabel(scheme.scoringType);
       case 'isActive':
-        return scheme.isActive ? 'Активен' : 'Неактивен';
+        return scheme.isActive ? this.translate.instant('common.status.active') : this.translate.instant('common.status.inactive');
       case 'createdAt':
         return this.formatDateTime(scheme.createdAt);
       case 'modifiedAt':

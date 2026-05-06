@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { UserColumnConfig, UserFilterConfig } from '../../users.component';
@@ -16,7 +17,7 @@ import { UserColumnConfig, UserFilterConfig } from '../../users.component';
 @Component({
   selector: 'app-user-settings-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent],
   templateUrl: './user-settings-dialog.component.html',
   styleUrl: './user-settings-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

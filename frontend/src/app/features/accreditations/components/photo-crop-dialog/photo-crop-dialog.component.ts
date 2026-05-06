@@ -14,11 +14,12 @@ import { CommonModule } from '@angular/common';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { WheelZoomDirective } from '../../../../shared/directives/wheel-zoom.directive';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-photo-crop-dialog',
   standalone: true,
-  imports: [CommonModule, DialogComponent, ButtonComponent, WheelZoomDirective],
+  imports: [CommonModule, DialogComponent, ButtonComponent, WheelZoomDirective, TranslateModule],
   templateUrl: './photo-crop-dialog.component.html',
   styleUrl: './photo-crop-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -57,7 +58,7 @@ export class PhotoCropDialogComponent implements OnChanges {
   readonly scaleStep = 0.1;
   readonly wheelScaleStep = 0.08;
 
-  constructor(private cdr: ChangeDetectorRef) {}
+  constructor(private cdr: ChangeDetectorRef, private translateService: TranslateService) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['sourceFile'] || changes['isOpen']) {
@@ -106,7 +107,7 @@ export class PhotoCropDialogComponent implements OnChanges {
     this.naturalHeight = img.naturalHeight;
 
     if (this.naturalWidth <= 0 || this.naturalHeight <= 0) {
-      this.cropError = 'Неуспешно зареждане на изображението.';
+      this.cropError = this.translateService.instant('accreditations.photoCropDialog.errors.loadFailed');
       this.cdr.markForCheck();
       return;
     }
@@ -195,7 +196,7 @@ export class PhotoCropDialogComponent implements OnChanges {
   }
 
   onLoadImageFailed(): void {
-    this.cropError = 'Неуспешно зареждане на изображението.';
+    this.cropError = this.translateService.instant('accreditations.photoCropDialog.errors.loadFailed');
     this.cdr.markForCheck();
   }
 
@@ -243,7 +244,7 @@ export class PhotoCropDialogComponent implements OnChanges {
 
   async confirm(): Promise<void> {
     if (!this.previewUrl || !this.naturalWidth || !this.naturalHeight) {
-      this.cropError = 'Изображението не е заредено. Опитайте отново.';
+      this.cropError = this.translateService.instant('accreditations.photoCropDialog.errors.notLoaded');
       this.cdr.markForCheck();
       return;
     }
@@ -256,10 +257,10 @@ export class PhotoCropDialogComponent implements OnChanges {
         this.cropped.emit(blob);
         this.closed.emit();
       } else {
-        this.cropError = 'Неуспешно изрязване. Опитайте отново.';
+        this.cropError = this.translateService.instant('accreditations.photoCropDialog.errors.cropFailed');
       }
     } catch {
-      this.cropError = 'Неуспешно изрязване. Опитайте отново.';
+      this.cropError = this.translateService.instant('accreditations.photoCropDialog.errors.cropFailed');
     } finally {
       this.confirming = false;
       this.cdr.markForCheck();

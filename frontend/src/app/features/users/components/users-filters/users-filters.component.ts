@@ -4,10 +4,13 @@ import {
   Output,
   EventEmitter,
   OnInit,
+  OnDestroy,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Subject, takeUntil } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UserFilters, UserFilterConfig } from '../../users.component';
 import {
   MultiSelectDropdownComponent,
@@ -23,6 +26,7 @@ import { SystemRole } from '../../../../core/services/api';
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     MultiSelectDropdownComponent,
     SearchBarComponent,
     FilterToggleButtonComponent,
@@ -31,7 +35,7 @@ import { SystemRole } from '../../../../core/services/api';
   styleUrl: './users-filters.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class UsersFiltersComponent implements OnInit {
+export class UsersFiltersComponent implements OnInit, OnDestroy {
   @Input() filters: UserFilters = {
     search: '',
     roles: [],
@@ -42,24 +46,41 @@ export class UsersFiltersComponent implements OnInit {
   @Output() filtersChange = new EventEmitter<UserFilters>();
   @Output() searchChange = new EventEmitter<string>();
 
+  private destroy$ = new Subject<void>();
+
   searchValue = '';
   filtersExpanded = false; // Start collapsed on mobile
 
-  readonly roleOptions: DropdownOption[] = [
-    { value: SystemRole.AppAdmin, label: 'Администратор' },
-    { value: SystemRole.FederationAdmin, label: 'Администратор на федерацията' },
-    { value: SystemRole.ClubAdmin, label: 'Администратор на клуб' },
-    { value: SystemRole.Coach, label: 'Треньор' },
-    { value: SystemRole.Umpire, label: 'Съдия' },
-  ];
+  roleOptions: DropdownOption[] = [];
+  statusOptions: DropdownOption[] = [];
 
-  readonly statusOptions: DropdownOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
-  ];
+  constructor(private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.searchValue = this.filters.search || '';
+    this.initOptions();
+    this.translateService.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.initOptions();
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private initOptions(): void {
+    this.roleOptions = [
+      { value: SystemRole.AppAdmin, label: this.translateService.instant('common.roles.APP_ADMIN') },
+      { value: SystemRole.FederationAdmin, label: this.translateService.instant('common.roles.FEDERATION_ADMIN') },
+      { value: SystemRole.ClubAdmin, label: this.translateService.instant('common.roles.CLUB_ADMIN') },
+      { value: SystemRole.Coach, label: this.translateService.instant('common.roles.COACH') },
+      { value: SystemRole.Umpire, label: this.translateService.instant('common.roles.UMPIRE') },
+    ];
+    this.statusOptions = [
+      { value: 'true', label: this.translateService.instant('common.status.active') },
+      { value: 'false', label: this.translateService.instant('common.status.inactive') },
+    ];
   }
 
   isFilterVisible(filterId: string): boolean {

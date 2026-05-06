@@ -21,12 +21,12 @@ export function computeCompetitionStatus(comp: {
 }
 
 export const STATUS_LABELS: Record<ComputedCompetitionStatus, string> = {
-  TEMPLATE: 'Шаблон',
-  PLANNED: 'Планирано',
-  REGISTRATION_OPEN: 'Регистрация',
-  REGISTRATION_CLOSED: 'Затворена регистрация',
-  IN_PROGRESS: 'В ход',
-  COMPLETED: 'Приключило',
+  TEMPLATE: 'competitions.statusLabels.template',
+  PLANNED: 'competitions.statusLabels.planned',
+  REGISTRATION_OPEN: 'competitions.statusLabels.registrationOpen',
+  REGISTRATION_CLOSED: 'competitions.statusLabels.registrationClosed',
+  IN_PROGRESS: 'competitions.statusLabels.inProgress',
+  COMPLETED: 'competitions.statusLabels.completed',
 };
 
 export const STATUS_CLASSES: Record<ComputedCompetitionStatus, string> = {

@@ -6,6 +6,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActuatorService } from '../../services/actuator.service';
 
 interface ThreadInfo {
@@ -25,7 +26,7 @@ interface ThreadGroup {
 @Component({
   selector: 'app-thread-dump-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './thread-dump-card.component.html',
   styleUrl: './thread-dump-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -43,6 +44,7 @@ export class ThreadDumpCardComponent implements OnDestroy {
   constructor(
     private actuatorService: ActuatorService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnDestroy(): void {
@@ -64,7 +66,7 @@ export class ThreadDumpCardComponent implements OnDestroy {
   private loadThreadDump(): void {
     this.actuatorService.getThreadDump().pipe(
       catchError(() => {
-        this.error = 'Грешка при зареждане на thread dump';
+        this.error = this.translateService.instant('system.threadDumpCard.errorLoading');
         this.loading = false;
         this.cdr.markForCheck();
         return of(null);

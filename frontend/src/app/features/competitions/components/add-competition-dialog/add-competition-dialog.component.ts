@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import {
@@ -38,6 +39,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     DialogComponent,
     ButtonComponent,
     SearchableSelectDropdownComponent,
@@ -108,7 +110,10 @@ export class AddCompetitionDialogComponent implements OnChanges {
       this.cachedTemplates = items;
       return items.map((t: any) => {
         const duration = this.computeDuration(t.startDate, t.endDate);
-        const durationStr = duration ? ` · ${duration} ${duration === 1 ? 'ден' : 'дни'}` : '';
+        const dayLabel = duration === 1
+          ? this.translate.instant('competitions.addCompetitionDialog.duration.day')
+          : this.translate.instant('competitions.addCompetitionDialog.duration.days');
+        const durationStr = duration ? ` · ${duration} ${dayLabel}` : '';
         return {
           value: t.uuid || '',
           label: `${t.shortName || t.name || ''}${durationStr}`,
@@ -116,11 +121,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
       });
     }));
 
-  readonly competitionTypeOptions: SearchableSelectOption[] = [
-    { value: CompetitionType.NationalErgo, label: 'Национално (ерго)' },
-    { value: CompetitionType.NationalWater, label: 'Национално (вода)' },
-    { value: CompetitionType.Balkan, label: 'Балкански' },
-  ];
+  readonly competitionTypeOptions: SearchableSelectOption[] = [];
 
   saving = false;
   error: string | null = null;
@@ -135,7 +136,14 @@ export class AddCompetitionDialogComponent implements OnChanges {
     private qualificationSchemesService: QualificationSchemesService,
     private timetableEventsService: CompetitionTimetableEventsService,
     private cdr: ChangeDetectorRef,
-  ) {}
+    private translate: TranslateService,
+  ) {
+    this.competitionTypeOptions = [
+      { value: CompetitionType.NationalErgo, label: this.translate.instant('competitions.competitionType.nationalErgo') },
+      { value: CompetitionType.NationalWater, label: this.translate.instant('competitions.competitionType.nationalWater') },
+      { value: CompetitionType.Balkan, label: this.translate.instant('competitions.competitionType.balkan') },
+    ];
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen) {
@@ -252,7 +260,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.saving = false;
-          this.error = err?.error?.message || 'Грешка при създаване на състезание';
+          this.error = err?.error?.message || this.translate.instant('competitions.addCompetitionDialog.errors.createFailed');
           this.cdr.markForCheck();
         },
       });
@@ -324,7 +332,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
 
               if (eventsFailed > 0) {
                 const errorDetail = timetableErrors.length > 0 ? ` (${timetableErrors[0]})` : '';
-                this.copyPartialError = `Разписание: ${eventsOk}/${mappedEvents.length} ОК${errorDetail} — провалените могат да се добавят ръчно.`;
+                this.copyPartialError = this.translate.instant('competitions.addCompetitionDialog.errors.copyPartial', { ok: eventsOk, total: mappedEvents.length, errorDetail });
                 this.cdr.markForCheck();
               } else {
                 this.added.emit();
@@ -333,7 +341,7 @@ export class AddCompetitionDialogComponent implements OnChanges {
         },
         error: () => {
           this.saving = false;
-          this.copyPartialError = 'Разписанието не успя да се копира — може да се добави ръчно.';
+          this.copyPartialError = this.translate.instant('competitions.addCompetitionDialog.errors.copyFailed');
           this.cdr.markForCheck();
         },
       });

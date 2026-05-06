@@ -10,6 +10,7 @@ import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.PhotoUploadException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
+import com.bfg.platform.common.i18n.MessageResolver;
 import com.bfg.platform.common.security.ResourceType;
 import com.bfg.platform.common.security.ScopeAccessValidator;
 import com.bfg.platform.common.query.EnhancedFilterExpressionParser;
@@ -70,6 +71,7 @@ public class ClubServiceImpl implements ClubService {
     private final PlatformTransactionManager transactionManager;
     private final ScopeAccessValidator scopeAccessValidator;
     private final com.bfg.platform.common.security.SecurityContextHelper securityContextHelper;
+    private final MessageResolver messageResolver;
 
     @Override
     @Transactional(readOnly = true)
@@ -232,7 +234,7 @@ public class ClubServiceImpl implements ClubService {
                         clubCoachRepository.deleteByClubId(club.getId());
                         club.setClubAdmin(null);
                     } else if (!club.isActive() && request.getClubAdminId() != null) {
-                        throw new ValidationException("Не може да се назначава администратор към неактивен клуб");
+                        throw new ValidationException(messageResolver.resolve("club.cannotAssignAdminToInactive"));
                     }
                     ClubMapper.updateClubFromRequest(club, request);
                     if (deactivating) {
@@ -284,9 +286,9 @@ public class ClubServiceImpl implements ClubService {
                     } catch (PhotoUploadException e) {
                         throw e;
                     } catch (IOException e) {
-                        throw new PhotoUploadException("Failed to read file: " + e.getMessage());
+                        throw new PhotoUploadException(messageResolver.resolve("club.logoUploadFailed"));
                     } catch (Exception e) {
-                        throw new PhotoUploadException("Failed to upload club logo: " + e.getMessage());
+                        throw new PhotoUploadException(messageResolver.resolve("club.logoUploadFailed"));
                     }
                 });
     }
@@ -418,7 +420,7 @@ public class ClubServiceImpl implements ClubService {
 
     private void validateClubAdmin(UUID clubAdminId) {
         if (!userRepository.isClubAdmin(clubAdminId)) {
-            throw new ValidationException("User is not assigned the CLUB_ADMIN role оr does not exist");
+            throw new ValidationException(messageResolver.resolve("club.userNotClubAdmin"));
         }
     }
 
@@ -434,7 +436,7 @@ public class ClubServiceImpl implements ClubService {
                 return;
             }
         }
-        throw new com.bfg.platform.common.exception.ForbiddenException("You are not allowed to modify this club");
+        throw new com.bfg.platform.common.exception.ForbiddenException(messageResolver.resolve("club.modifyForbidden"));
     }
 
     @Transactional
@@ -445,7 +447,7 @@ public class ClubServiceImpl implements ClubService {
         }
         int prefixNum = Integer.parseInt(prefix);
         if (prefixNum > 99) {
-            throw new ValidationException("All card prefixes (01-99) are already in use for type " + type);
+            throw new ValidationException(messageResolver.resolve("club.allPrefixesUsed", type));
         }
         return prefix;
     }

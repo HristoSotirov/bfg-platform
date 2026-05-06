@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -29,7 +30,7 @@ interface MigrationResult {
 @Component({
   selector: 'app-club-migration-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './club-migration-dialog.component.html',
   styleUrl: './club-migration-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -52,18 +53,18 @@ export class ClubMigrationDialogComponent implements OnChanges {
   parsedClubs: ClubBatchCreateRequestItem[] = [];
 
   readonly dataFields = [
-    { value: 'name', label: 'Пълно име' },
-    { value: 'shortName', label: 'Кратко име' },
-    { value: 'cardPrefix', label: 'Номер (2 цифри)' },
-    { value: 'clubEmail', label: 'Имейл на клуб' },
-    { value: 'adminEmail', label: 'Имейл на администратор' }
+    { value: 'name', label: 'clubs.migration.fields.name' },
+    { value: 'shortName', label: 'clubs.migration.fields.shortName' },
+    { value: 'cardPrefix', label: 'clubs.migration.fields.cardPrefix' },
+    { value: 'clubEmail', label: 'clubs.migration.fields.clubEmail' },
+    { value: 'adminEmail', label: 'clubs.migration.fields.adminEmail' }
   ];
 
   private readonly requiredFields = ['name', 'shortName', 'cardPrefix', 'clubEmail'];
 
   getExcelOptionsForField(field: FieldMapping): SearchableSelectOption[] {
     return [
-      { value: '', label: 'Не импортирай' },
+      { value: '', label: this.translateService.instant('clubs.migration.doNotImport') },
       ...this.excelColumns.map(col => ({
         value: col,
         label: col,
@@ -80,7 +81,8 @@ export class ClubMigrationDialogComponent implements OnChanges {
 
   constructor(
     private clubsService: ClubsService,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -142,7 +144,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
 
           this.fieldMappings = this.dataFields.map(f => ({
             dataField: f.value,
-            label: f.label,
+            label: this.translateService.instant(f.label),
             excelColumn: '',
             required: this.requiredFields.includes(f.value),
           }));
@@ -151,7 +153,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
           this.cdr.markForCheck();
         }
       } catch (err) {
-        this.error = 'Грешка при четене на файла';
+        this.error = this.translateService.instant('clubs.migration.fileReadError');
         this.cdr.markForCheck();
       }
     };
@@ -202,7 +204,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
         this.error = null;
         this.cdr.markForCheck();
       } catch (err) {
-        this.error = 'Грешка при четене на файла';
+        this.error = this.translateService.instant('clubs.migration.fileReadError');
         this.cdr.markForCheck();
       }
     };
@@ -250,7 +252,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
 
   migrate(): void {
     if (this.parsedClubs.length === 0) {
-      this.error = 'Няма валидни клубове за миграция (само редове с номер от 2 цифри).';
+      this.error = this.translateService.instant('clubs.migration.noValidClubs');
       this.cdr.markForCheck();
       return;
     }
@@ -266,7 +268,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
     }
     const totalChunks = chunks.length;
 
-    this.migrationProgress = `Изпращане на ${this.parsedClubs.length} клуба в ${totalChunks} заявки...`;
+    this.migrationProgress = this.translateService.instant('clubs.migration.progress', { count: this.parsedClubs.length, chunks: totalChunks });
     this.cdr.markForCheck();
 
     const requests = chunks.map((chunk) => this.migrateChunkWithRetry(chunk));
@@ -312,7 +314,7 @@ export class ClubMigrationDialogComponent implements OnChanges {
         error: (err) => {
           this.migrating = false;
           this.migrationProgress = '';
-          this.error = err?.error?.message ?? 'Грешка при миграция';
+          this.error = err?.error?.message ?? this.translateService.instant('clubs.migration.migrationError');
           this.cdr.markForCheck();
         }
       });

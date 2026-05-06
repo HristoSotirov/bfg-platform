@@ -4,7 +4,7 @@
       <app-search-bar
         [searchValue]="searchValue"
         (searchValueChange)="onSearchChange($event)"
-        placeholder="Потърси..."
+        [placeholder]="'common.search' | translate"
         [showIcon]="true"
         [showClearButton]="false"
         inputClasses="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
@@ -16,11 +16,11 @@
         [class.hidden]="!filtersExpanded"
         class="sm:block w-full sm:w-[220px]"
       >
-        <label class="block text-xs font-medium text-gray-500 mb-1">Състезателна група:</label>
+        <label class="block text-xs font-medium text-gray-500 mb-1">{{ 'disciplines.filters.competitionGroupLabel' | translate }}</label>
         <app-multi-select-dropdown
           [options]="groupOptions"
           [multiple]="true"
-          placeholder="Всички групи"
+          [placeholder]="'disciplines.filters.competitionGroupAll' | translate"
           [ngModel]="filters.competitionGroupIds || []"
           (selectionChange)="onGroupsChange($event)"
         >
@@ -34,12 +34,12 @@
         class="sm:block w-full sm:w-[180px]"
       >
         <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Клас лодка:</label
+          >{{ 'disciplines.filters.boatClassLabel' | translate }}</label
         >
         <app-multi-select-dropdown
           [options]="boatClassOptions"
           [multiple]="true"
-          placeholder="Всички класове"
+          [placeholder]="'disciplines.filters.boatClassAll' | translate"
           [ngModel]="filters.boatClasses || []"
           (selectionChange)="onBoatClassesChange($event)"
         >
@@ -53,12 +53,12 @@
         class="sm:block w-full sm:w-[180px]"
       >
         <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Статус:</label
+          >{{ 'disciplines.filters.statusLabel' | translate }}</label
         >
         <app-multi-select-dropdown
           [options]="statusOptions"
           [multiple]="true"
-          placeholder="Всички статуси"
+          [placeholder]="'disciplines.filters.statusAll' | translate"
           [ngModel]="filters.statuses || []"
           (selectionChange)="onStatusesChange($event)"
         >

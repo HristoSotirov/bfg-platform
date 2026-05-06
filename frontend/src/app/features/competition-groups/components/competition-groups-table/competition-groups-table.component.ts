@@ -7,6 +7,7 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
   CompetitionGroupDefinitionDto,
 } from '../../../../core/services/api';
@@ -15,7 +16,7 @@ import { ColumnConfig } from '../../competition-groups.component';
 @Component({
   selector: 'app-competition-groups-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './competition-groups-table.component.html',
   styleUrl: './competition-groups-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -33,6 +34,8 @@ export class CompetitionGroupsTableComponent implements OnInit {
   @Output() loadMore = new EventEmitter<void>();
 
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
+
+  constructor(private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -119,7 +122,7 @@ export class CompetitionGroupsTableComponent implements OnInit {
       case 'femaleTeamLightMaxWeightKg':
         return group.femaleTeamLightMaxWeightKg != null ? String(group.femaleTeamLightMaxWeightKg) : '-';
       case 'isActive':
-        return group.isActive ? 'Активен' : 'Неактивен';
+        return group.isActive ? this.translate.instant('common.status.active') : this.translate.instant('common.status.inactive');
       case 'createdAt':
         return this.formatDateTime(group.createdAt);
       case 'modifiedAt':
@@ -142,9 +145,9 @@ export class CompetitionGroupsTableComponent implements OnInit {
   getRoundingLabel(rounding: string | undefined): string {
     if (!rounding) return '-';
     const labels: Record<string, string> = {
-      FLOOR: 'Надолу',
-      CEIL: 'Нагоре',
-      ROUND: 'Закръгляне',
+      FLOOR: this.translate.instant('competitionGroups.rounding.down'),
+      CEIL: this.translate.instant('competitionGroups.rounding.up'),
+      ROUND: this.translate.instant('competitionGroups.rounding.round'),
     };
     return labels[rounding] ?? rounding;
   }

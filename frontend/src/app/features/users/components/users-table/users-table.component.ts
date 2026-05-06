@@ -7,13 +7,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { UserDto, SystemRole } from '../../../../core/services/api';
 import { UserColumnConfig } from '../../users.component';
 
 @Component({
   selector: 'app-users-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './users-table.component.html',
   styleUrl: './users-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,13 +32,7 @@ export class UsersTableComponent implements OnInit {
 
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
 
-  private roleLabels: Record<SystemRole, string> = {
-    [SystemRole.AppAdmin]: 'Администратор',
-    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
-    [SystemRole.ClubAdmin]: 'Администратор на клуб',
-    [SystemRole.Coach]: 'Треньор',
-    [SystemRole.Umpire]: 'Съдия',
-  };
+  constructor(private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -110,7 +105,7 @@ export class UsersTableComponent implements OnInit {
       case 'email':
         return user.email || '-';
       case 'isActive':
-        return user.isActive ? 'Активен' : 'Неактивен';
+        return user.isActive ? this.translateService.instant('common.status.active') : this.translateService.instant('common.status.inactive');
       case 'role':
         return this.getRoleLabel(user.role);
       case 'createdAt':
@@ -148,7 +143,14 @@ export class UsersTableComponent implements OnInit {
 
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
-    return this.roleLabels[role] || role;
+    const roleKeys: Record<SystemRole, string> = {
+      [SystemRole.AppAdmin]: 'common.roles.APP_ADMIN',
+      [SystemRole.FederationAdmin]: 'common.roles.FEDERATION_ADMIN',
+      [SystemRole.ClubAdmin]: 'common.roles.CLUB_ADMIN',
+      [SystemRole.Coach]: 'common.roles.COACH',
+      [SystemRole.Umpire]: 'common.roles.UMPIRE',
+    };
+    return this.translateService.instant(roleKeys[role]) || role;
   }
 
   onScroll(event: Event): void {

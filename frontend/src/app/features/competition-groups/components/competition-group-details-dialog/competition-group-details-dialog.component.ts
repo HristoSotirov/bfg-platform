@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -28,7 +29,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-competition-group-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DeleteConfirmDialogComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DeleteConfirmDialogComponent],
   templateUrl: './competition-group-details-dialog.component.html',
   styleUrl: './competition-group-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -145,8 +146,8 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   };
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   readonly roundingOptions: SearchableSelectOption[] = [
@@ -159,6 +160,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
   constructor(
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -366,7 +368,7 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.saving = false;
-          this.error = err?.message || 'Грешка при запазване';
+          this.error = err?.message || this.translate.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });

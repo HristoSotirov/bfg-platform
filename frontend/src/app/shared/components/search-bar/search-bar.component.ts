@@ -1,12 +1,13 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
 
 @Component({
   selector: 'app-search-bar',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, TranslateModule],
   template: `
     <div class="relative w-full" [class]="containerClasses">
       @if (showIcon) {
@@ -30,7 +31,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
         [ngModel]="searchValue"
         (ngModelChange)="onValueChange($event)"
         (keydown)="onSearchKeydown($event)"
-        [placeholder]="placeholder"
+        [placeholder]="placeholder || ('common.search' | translate)"
         [class]="inputClasses"
         [class.pl-10]="showIcon"
         [class.pr-10]="showIcon && showClearButton && searchValue"
@@ -62,7 +63,7 @@ import { Subject, debounceTime, distinctUntilChanged } from 'rxjs';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SearchBarComponent implements OnInit, OnDestroy {
-  @Input() placeholder = 'Търсене...';
+  @Input() placeholder = '';
   @Input() searchValue = '';
   @Input() showIcon = true;
   @Input() showClearButton = false;

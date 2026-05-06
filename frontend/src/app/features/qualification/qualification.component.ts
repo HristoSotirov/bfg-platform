@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -43,6 +44,7 @@ export interface QualificationFilters {
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     QualificationTableComponent,
     QualificationDetailsDialogComponent,
@@ -75,17 +77,9 @@ export class QualificationComponent implements OnInit, OnDestroy {
   currentSkip = 0;
   hasMore = true;
 
-  columns: QualificationColumnConfig[] = [
-    { id: 'name', label: 'Име', visible: true },
-    { id: 'laneCount', label: 'Коридори', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  columns: QualificationColumnConfig[] = [];
 
-  filterConfigs: QualificationFilterConfig[] = [
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  filterConfigs: QualificationFilterConfig[] = [];
 
   isDetailsDialogOpen = false;
   isAddDialogOpen = false;
@@ -97,9 +91,15 @@ export class QualificationComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private schemesService: QualificationSchemesService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initTranslatedLabels();
+    this.translate.onLangChange.subscribe(() => {
+      this.initTranslatedLabels();
+      this.cdr.markForCheck();
+    });
     this.loadSettings();
     this.initializeUserContext();
   }
@@ -169,7 +169,7 @@ export class QualificationComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -188,7 +188,7 @@ export class QualificationComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -268,6 +268,20 @@ export class QualificationComponent implements OnInit, OnDestroy {
 
   onSchemeSaved(): void {
     this.loadSchemes();
+  }
+
+  private initTranslatedLabels(): void {
+    this.columns = [
+      { id: 'name', label: this.translate.instant('qualification.table.columns.name'), visible: true },
+      { id: 'laneCount', label: this.translate.instant('qualification.table.columns.laneCount'), visible: true },
+      { id: 'isActive', label: this.translate.instant('qualification.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('qualification.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('qualification.table.columns.modifiedAt'), visible: true },
+    ];
+    this.filterConfigs = [
+      { id: 'status', label: this.translate.instant('qualification.filterConfigs.status'), visible: true },
+    ];
+    this.loadSettings();
   }
 
   private saveSettings(): void {

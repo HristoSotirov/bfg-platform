@@ -9,11 +9,12 @@ import {
 import { CommonModule } from '@angular/common';
 import { AthleteDto, Gender } from '../../../../core/services/api';
 import { ColumnConfig } from '../../accreditations.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-athletes-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './athletes-table.component.html',
   styleUrl: './athletes-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +31,8 @@ export class AthletesTableComponent implements OnInit {
   @Output() loadMore = new EventEmitter<void>();
 
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
+
+  constructor(private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -98,7 +101,7 @@ export class AthletesTableComponent implements OnInit {
       case 'dateOfBirth':
         return this.formatDate(athlete.dateOfBirth);
       case 'gender':
-        return athlete.gender === Gender.MALE ? 'Мъж' : athlete.gender === Gender.FEMALE ? 'Жена' : '-';
+        return athlete.gender === Gender.MALE ? this.translateService.instant('accreditations.gender.male') : athlete.gender === Gender.FEMALE ? this.translateService.instant('accreditations.gender.female') : '-';
       case 'medicalExaminationDue':
         return this.formatDate(athlete.medicalExaminationDue);
       case 'insurance':

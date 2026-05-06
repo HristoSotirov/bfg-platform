@@ -1,5 +1,5 @@
 <div class="bg-white rounded-lg border border-gray-200 p-5">
-  <h3 class="text-lg font-semibold text-gray-900 mb-4">Логери</h3>
+  <h3 class="text-lg font-semibold text-gray-900 mb-4">{{ 'system.loggersCard.title' | translate }}</h3>
 
   <div *ngIf="loading" class="flex items-center justify-center py-8">
     <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
@@ -31,13 +31,13 @@
           [ngModel]="getEffectiveLevel(logger)"
           (selectionChange)="onLevelChange(logger, $event)"
           [noScroll]="true"
-          placeholder="Ниво"
+          [placeholder]="'system.loggersCard.placeholder' | translate"
         ></app-searchable-select-dropdown>
       </div>
     </div>
 
     <div *ngIf="loggers.length === 0" class="text-center py-4">
-      <p class="text-gray-500 text-sm">Няма налични логери</p>
+      <p class="text-gray-500 text-sm">{{ 'system.loggersCard.empty' | translate }}</p>
     </div>
   </div>
 </div>

@@ -11,6 +11,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { AuthService as AuthApiService } from '../../../core/services/api';
@@ -19,7 +20,7 @@ import { HttpErrorResponse } from '@angular/common/http';
 @Component({
   selector: 'app-forgot-password-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent],
   templateUrl: './forgot-password-dialog.component.html',
   styleUrl: './forgot-password-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,6 +39,7 @@ export class ForgotPasswordDialogComponent implements OnChanges, OnDestroy {
 
   constructor(
     private authApiService: AuthApiService,
+    private translateService: TranslateService,
     public cdr: ChangeDetectorRef,
   ) {}
 
@@ -83,7 +85,7 @@ export class ForgotPasswordDialogComponent implements OnChanges, OnDestroy {
       },
       error: (err: HttpErrorResponse) => {
         this.sending = false;
-        this.error = err?.error?.message || 'Възникна грешка. Моля, опитайте отново.';
+        this.error = err?.error?.message || this.translateService.instant('auth.forgotPassword.error');
         this.cdr.markForCheck();
       },
     });

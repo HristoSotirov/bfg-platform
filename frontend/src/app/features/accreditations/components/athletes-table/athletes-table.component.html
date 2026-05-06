@@ -47,7 +47,7 @@
             [attr.colspan]="visibleColumns.length || 1"
             class="px-4 py-8 text-center text-gray-500"
           >
-            Няма намерени атлети
+            {{ 'accreditations.athletesTable.empty' | translate }}
           </td>
         </tr>
       }
@@ -55,6 +55,6 @@
   </table>
 
   @if (loading && athletes.length > 0) {
-    <div class="py-4 text-center text-gray-500 border-t">Зареждане...</div>
+    <div class="py-4 text-center text-gray-500 border-t">{{ 'accreditations.athletesTable.loading' | translate }}</div>
   }
 </div>

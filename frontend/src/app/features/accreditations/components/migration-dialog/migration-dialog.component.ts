@@ -21,6 +21,7 @@ import {
   Gender,
 } from '../../../../core/services/api';
 import { takeUntil, Subject, forkJoin, of, catchError, delay, retryWhen, scan, map, EMPTY } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import * as XLSX from 'xlsx';
 
@@ -47,7 +48,7 @@ interface MigrationResult {
 @Component({
   selector: 'app-migration-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, TranslateModule],
   templateUrl: './migration-dialog.component.html',
   styleUrl: './migration-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -68,12 +69,12 @@ export class MigrationDialogComponent implements OnChanges {
   parsedAthletes: AthleteBatchMigrationRequestItem[] = [];
 
   readonly dataFields = [
-    { value: 'oldCardNumber', label: 'Картотечен номер' },
-    { value: 'firstName', label: 'Име' },
-    { value: 'middleName', label: 'Презиме' },
-    { value: 'lastName', label: 'Фамилия' },
-    { value: 'gender', label: 'Пол' },
-    { value: 'dateOfBirth', label: 'Дата на раждане' },
+    { value: 'oldCardNumber', label: this.translateService.instant('accreditations.migrationDialog.dataFields.oldCardNumber') },
+    { value: 'firstName', label: this.translateService.instant('accreditations.migrationDialog.dataFields.firstName') },
+    { value: 'middleName', label: this.translateService.instant('accreditations.migrationDialog.dataFields.middleName') },
+    { value: 'lastName', label: this.translateService.instant('accreditations.migrationDialog.dataFields.lastName') },
+    { value: 'gender', label: this.translateService.instant('accreditations.migrationDialog.dataFields.gender') },
+    { value: 'dateOfBirth', label: this.translateService.instant('accreditations.migrationDialog.dataFields.dateOfBirth') },
   ];
 
   private readonly requiredFields = ['oldCardNumber', 'firstName', 'middleName', 'lastName', 'gender', 'dateOfBirth'];
@@ -89,6 +90,7 @@ export class MigrationDialogComponent implements OnChanges {
   constructor(
     private accreditationsService: AccreditationsService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -148,7 +150,7 @@ export class MigrationDialogComponent implements OnChanges {
           this.cdr.markForCheck();
         }
       } catch {
-        this.error = 'Грешка при четене на файла.';
+        this.error = this.translateService.instant('accreditations.migrationDialog.fileReadError');
         this.cdr.markForCheck();
       }
     };
@@ -157,7 +159,7 @@ export class MigrationDialogComponent implements OnChanges {
 
   getExcelOptionsForField(field: FieldMapping): SearchableSelectOption[] {
     return [
-      { value: '', label: 'Не импортирай' },
+      { value: '', label: this.translateService.instant('accreditations.migrationDialog.mapping.placeholder') },
       ...this.excelColumns.map(col => ({
         value: col,
         label: col,
@@ -195,8 +197,8 @@ export class MigrationDialogComponent implements OnChanges {
   }
 
   genderLabel(gender: string): string {
-    if (gender === Gender.MALE) return 'Мъж';
-    if (gender === Gender.FEMALE) return 'Жена';
+    if (gender === Gender.MALE) return this.translateService.instant('accreditations.gender.male');
+    if (gender === Gender.FEMALE) return this.translateService.instant('accreditations.gender.female');
     return gender ?? '';
   }
 
@@ -259,7 +261,7 @@ export class MigrationDialogComponent implements OnChanges {
         this.error = null;
         this.cdr.markForCheck();
       } catch {
-        this.error = 'Грешка при четене на файла.';
+        this.error = this.translateService.instant('accreditations.migrationDialog.fileReadError');
         this.cdr.markForCheck();
       }
     };
@@ -292,7 +294,7 @@ export class MigrationDialogComponent implements OnChanges {
 
   migrate(): void {
     if (this.parsedAthletes.length === 0) {
-      this.error = 'Няма валидни записи за миграция (картотечен номер 4–6 цифри, пол Мъж/Жена и всички полета).';
+      this.error = this.translateService.instant('accreditations.migrationDialog.noValidRecords');
       this.cdr.markForCheck();
       return;
     }
@@ -304,7 +306,7 @@ export class MigrationDialogComponent implements OnChanges {
       chunks.push(this.parsedAthletes.slice(i, i + BATCH_SIZE));
     }
     const totalChunks = chunks.length;
-    this.migrationProgress = `Изпращане на ${this.parsedAthletes.length} записа в ${totalChunks} заявки...`;
+    this.migrationProgress = this.translateService.instant('accreditations.migrationDialog.progress', { count: this.parsedAthletes.length, chunks: totalChunks });
     this.cdr.markForCheck();
 
     const requests = chunks.map((chunk) => this.migrateChunkWithRetry(chunk));

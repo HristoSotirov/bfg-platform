@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
 import {
@@ -44,6 +45,7 @@ export interface CompetitionFilters {
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     CompetitionsTableComponent,
     AddCompetitionDialogComponent,
@@ -75,16 +77,7 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
   currentSkip = 0;
   hasMore = true;
 
-  columns: CompetitionColumnConfig[] = [
-    { id: 'shortName', label: 'Кратко име', visible: true },
-    { id: 'name', label: 'Име', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
-    { id: 'startDate', label: 'Начална дата', visible: true },
-    { id: 'endDate', label: 'Крайна дата', visible: false },
-    { id: 'location', label: 'Място', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: false },
-    { id: 'modifiedAt', label: 'Променен на', visible: false },
-  ];
+  columns: CompetitionColumnConfig[] = [];
 
   filterConfigs: CompetitionFilterConfig[] = [];
 
@@ -96,11 +89,17 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
     private competitionsService: CompetitionsService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initColumns();
     this.loadSettings();
     this.initializeUserContext();
+    this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.initColumns();
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
@@ -112,6 +111,29 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
     return (
       this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin
     );
+  }
+
+  private initColumns(): void {
+    const t = (key: string) => this.translate.instant(key);
+    const defaultColumns: CompetitionColumnConfig[] = [
+      { id: 'shortName', label: t('competitions.columns.shortName'), visible: true },
+      { id: 'name', label: t('competitions.columns.name'), visible: true },
+      { id: 'status', label: t('competitions.columns.status'), visible: true },
+      { id: 'startDate', label: t('competitions.columns.startDate'), visible: true },
+      { id: 'endDate', label: t('competitions.columns.endDate'), visible: false },
+      { id: 'location', label: t('competitions.columns.location'), visible: true },
+      { id: 'createdAt', label: t('competitions.columns.createdAt'), visible: false },
+      { id: 'modifiedAt', label: t('competitions.columns.modifiedAt'), visible: false },
+    ];
+    // Preserve visibility settings
+    if (this.columns.length > 0) {
+      this.columns = defaultColumns.map((col) => {
+        const existing = this.columns.find((c) => c.id === col.id);
+        return existing ? { ...col, visible: existing.visible } : col;
+      });
+    } else {
+      this.columns = defaultColumns;
+    }
   }
 
   private initializeUserContext(): void {
@@ -151,7 +173,7 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('competitions.page.loadError');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -170,7 +192,7 @@ export class CompetitionsComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('competitions.page.loadError');
           this.loading = false;
           this.cdr.markForCheck();
         },

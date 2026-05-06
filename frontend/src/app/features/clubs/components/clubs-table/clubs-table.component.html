@@ -64,7 +64,7 @@
             [attr.colspan]="visibleColumns.length"
             class="px-4 py-8 text-center text-gray-500"
           >
-            Няма намерени клубове
+            {{ 'clubs.table.empty' | translate }}
           </td>
         </tr>
       }
@@ -72,6 +72,6 @@
   </table>
 
   @if (loading && clubs.length > 0) {
-    <div class="py-4 text-center text-gray-500 border-t">Зареждане...</div>
+    <div class="py-4 text-center text-gray-500 border-t">{{ 'common.loading' | translate }}</div>
   }
 </div>

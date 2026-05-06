@@ -1,6 +1,6 @@
 <div class="bg-white rounded-lg border border-gray-200 p-5">
   <div class="flex items-center justify-between mb-4">
-    <h3 class="text-lg font-semibold text-gray-900">Нишки (Thread Dump)</h3>
+    <h3 class="text-lg font-semibold text-gray-900">{{ 'system.threadDumpCard.title' | translate }}</h3>
     <div class="flex items-center gap-2">
       <button
         *ngIf="loaded"
@@ -23,13 +23,13 @@
 
   <!-- Initial load button -->
   <div *ngIf="!loaded && !loading && !error" class="text-center py-8">
-    <p class="text-gray-500 text-sm mb-3">Thread dump е тежка операция и не се зарежда автоматично.</p>
+    <p class="text-gray-500 text-sm mb-3">{{ 'system.threadDumpCard.loadMessage' | translate }}</p>
     <button
       type="button"
       class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition-colors"
       (click)="load()"
     >
-      Зареди
+      {{ 'system.threadDumpCard.loadButton' | translate }}
     </button>
   </div>
 
@@ -47,7 +47,7 @@
   <div *ngIf="loaded && !loading && !error" class="space-y-4">
     <!-- Summary -->
     <div class="flex flex-wrap items-center gap-2 pb-3 border-b border-gray-100">
-      <span class="text-sm text-gray-600">Общо нишки:</span>
+      <span class="text-sm text-gray-600">{{ 'system.threadDumpCard.totalThreads' | translate }}</span>
       <span class="text-sm font-semibold text-gray-900">{{ totalThreads }}</span>
       <span class="mx-1 text-gray-300">|</span>
       <span
@@ -118,7 +118,7 @@
           </div>
 
           <div *ngIf="thread.expanded && thread.stackTrace.length === 0" class="mt-2 ml-5">
-            <span class="text-xs text-gray-400 italic">Няма stack trace</span>
+            <span class="text-xs text-gray-400 italic">{{ 'system.threadDumpCard.noStackTrace' | translate }}</span>
           </div>
         </div>
       </div>

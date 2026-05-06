@@ -1,6 +1,6 @@
 <div class="bg-white rounded-lg border border-gray-200 p-5">
   <div class="flex items-center justify-between mb-4">
-    <h3 class="text-lg font-semibold text-gray-900">Здравен статус</h3>
+    <h3 class="text-lg font-semibold text-gray-900">{{ 'system.healthCard.title' | translate }}</h3>
     <div class="flex items-center gap-3">
       <div class="flex items-center gap-2" *ngIf="!loading && !error">
         <span
@@ -11,7 +11,7 @@
           class="text-sm font-medium"
           [ngClass]="isUp ? 'text-green-700' : 'text-red-700'"
         >
-          {{ isUp ? 'РАБОТИ' : 'ПРОБЛЕМ' }}
+          {{ isUp ? ('system.healthCard.statusUp' | translate) : ('system.healthCard.statusDown' | translate) }}
         </span>
       </div>
       <button

@@ -21,88 +21,126 @@
     </div>
 
     <div class="hidden sm:flex items-center gap-3 flex-shrink-0">
-      <div class="w-[140px]">
-        <app-searchable-select-dropdown
-          [options]="languageOptions"
-          [placeholder]="'Език'"
-          [dropdownWidth]="'140px'"
-          [noScroll]="true"
-          [ngModel]="currentLanguage"
-          (ngModelChange)="setLanguage($event)"
-        ></app-searchable-select-dropdown>
+      <div class="inline-flex items-center gap-1 rounded-full bg-gray-100 p-1">
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm transition-colors"
+          [class.bg-white]="currentLanguage === 'bg'"
+          [class.shadow-sm]="currentLanguage === 'bg'"
+          [class.text-gray-900]="currentLanguage === 'bg'"
+          [class.font-medium]="currentLanguage === 'bg'"
+          [class.text-gray-500]="currentLanguage !== 'bg'"
+          (click)="setLanguage('bg')"
+        >
+          <span class="text-base leading-none">🇧🇬</span>
+          <span>BG</span>
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm transition-colors"
+          [class.bg-white]="currentLanguage === 'en'"
+          [class.shadow-sm]="currentLanguage === 'en'"
+          [class.text-gray-900]="currentLanguage === 'en'"
+          [class.font-medium]="currentLanguage === 'en'"
+          [class.text-gray-500]="currentLanguage !== 'en'"
+          (click)="setLanguage('en')"
+        >
+          <span class="text-base leading-none">🇺🇸</span>
+          <span>EN</span>
+        </button>
       </div>
       <app-button
         variant="outline"
         size="md"
-        text="Моят профил"
+        [text]="'header.myProfile' | translate"
         (click)="openProfileDialog()"
       >
       </app-button>
       <app-button
         variant="primary"
         size="md"
-        text="Изход"
+        [text]="'header.logout' | translate"
         (click)="confirmLogout()"
       >
       </app-button>
     </div>
 
-    <div class="sm:hidden relative">
-      <button
-        type="button"
-        class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
-        (click)="toggleMobileMenu()"
-      >
-        <svg
-          class="w-6 h-6"
-          fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
+    <div class="sm:hidden flex items-center gap-2">
+      <div class="inline-flex items-center gap-1 rounded-full bg-gray-100 p-1">
+        <button
+          type="button"
+          class="flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors"
+          [class.bg-white]="currentLanguage === 'bg'"
+          [class.shadow-sm]="currentLanguage === 'bg'"
+          [class.text-gray-900]="currentLanguage === 'bg'"
+          [class.font-medium]="currentLanguage === 'bg'"
+          [class.text-gray-500]="currentLanguage !== 'bg'"
+          (click)="setLanguage('bg')"
         >
-          <path
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            stroke-width="2"
-            d="M4 6h16M4 12h16M4 18h16"
-          ></path>
-        </svg>
-      </button>
+          <span class="text-sm leading-none">🇧🇬</span>
+          <span>BG</span>
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-1 px-2 py-1 rounded-full text-xs transition-colors"
+          [class.bg-white]="currentLanguage === 'en'"
+          [class.shadow-sm]="currentLanguage === 'en'"
+          [class.text-gray-900]="currentLanguage === 'en'"
+          [class.font-medium]="currentLanguage === 'en'"
+          [class.text-gray-500]="currentLanguage !== 'en'"
+          (click)="setLanguage('en')"
+        >
+          <span class="text-sm leading-none">🇺🇸</span>
+          <span>EN</span>
+        </button>
+      </div>
 
-      <div
-        *ngIf="isMobileMenuOpen"
-        class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
-      >
-        <div class="px-4 pb-2">
-          <label class="block text-xs text-gray-500 mb-1">Език</label>
-          <app-searchable-select-dropdown
-            [options]="languageOptions"
-            [placeholder]="'Език'"
-            [dropdownWidth]="'100%'"
-            [noScroll]="true"
-            [ngModel]="currentLanguage"
-            (ngModelChange)="setLanguage($event)"
-          ></app-searchable-select-dropdown>
+      <div class="relative">
+        <button
+          type="button"
+          class="p-2 text-gray-600 hover:text-gray-900 transition-colors"
+          (click)="toggleMobileMenu()"
+        >
+          <svg
+            class="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            ></path>
+          </svg>
+        </button>
+
+        <div
+          *ngIf="isMobileMenuOpen"
+          class="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-2 z-50"
+        >
+          <button
+            type="button"
+            class="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
+            (click)="openProfileDialog(); closeMobileMenu()"
+          >
+            {{ 'header.myProfile' | translate }}
+          </button>
+          <button
+            type="button"
+            class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors font-medium"
+            (click)="confirmLogout(); closeMobileMenu()"
+          >
+            {{ 'header.logout' | translate }}
+          </button>
         </div>
-        <button
-          type="button"
-          class="w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100 transition-colors"
-          (click)="openProfileDialog(); closeMobileMenu()"
-        >
-          Моят профил
-        </button>
-        <button
-          type="button"
-          class="w-full px-4 py-2 text-left text-red-600 hover:bg-red-50 transition-colors font-medium"
-          (click)="confirmLogout(); closeMobileMenu()"
-        >
-          Изход
-        </button>
       </div>
     </div>
 
     <app-dialog
       [isOpen]="isProfileDialogOpen"
-      title="Моят профил"
+      [title]="'header.myProfile' | translate"
       (closed)="closeProfileDialog()"
     >
       <div
@@ -125,7 +163,7 @@
         <div>
           <div class="space-y-1">
             <div class="flex items-baseline">
-              <span class="text-xs text-gray-500 w-36 flex-shrink-0">Име:</span>
+              <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'header.labels.name' | translate }}</span>
               <span class="text-sm font-medium"
                 >{{ profileData.user.firstName }}
                 {{ profileData.user.lastName }}</span
@@ -133,7 +171,7 @@
             </div>
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Потребителско име:</span
+                >{{ 'header.labels.username' | translate }}</span
               >
               <span class="text-sm font-medium">{{
                 profileData.user.username || "-"
@@ -141,7 +179,7 @@
             </div>
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Имейл:</span
+                >{{ 'header.labels.email' | translate }}</span
               >
               <span class="text-sm font-medium">{{
                 profileData.user.email || "-"
@@ -149,7 +187,7 @@
             </div>
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Роля:</span
+                >{{ 'header.labels.role' | translate }}</span
               >
               <span class="text-sm font-medium">{{
                 getRoleLabel(profileData.user.role)
@@ -157,7 +195,7 @@
             </div>
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Статус:</span
+                >{{ 'header.labels.status' | translate }}</span
               >
               <span
                 class="text-sm font-medium"
@@ -165,7 +203,7 @@
                   profileData.user.isActive ? 'text-green-600' : 'text-red-600'
                 "
               >
-                {{ profileData.user.isActive ? "Активен" : "Неактивен" }}
+                {{ profileData.user.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
               </span>
             </div>
           </div>
@@ -175,7 +213,7 @@
           <div class="space-y-1">
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Дата на раждане:</span
+                >{{ 'header.labels.dateOfBirth' | translate }}</span
               >
               <span class="text-sm font-medium">{{
                 formatDate(profileData.user.dateOfBirth)
@@ -191,7 +229,7 @@
           <div class="space-y-1">
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Клуб:</span
+                >{{ 'header.labels.club' | translate }}</span
               >
               <span class="text-sm font-medium">
                 {{ profileData.club?.shortName || "-" }}
@@ -204,7 +242,7 @@
           <div class="space-y-1">
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Създаден на:</span
+                >{{ 'header.labels.createdAt' | translate }}</span
               >
               <span class="text-sm font-medium">{{
                 formatDateTime(profileData.user.createdAt)
@@ -212,7 +250,7 @@
             </div>
             <div class="flex items-baseline">
               <span class="text-xs text-gray-500 w-36 flex-shrink-0"
-                >Променен на:</span
+                >{{ 'header.labels.updatedAt' | translate }}</span
               >
               <span class="text-sm font-medium">{{
                 formatDateTime(profileData.user.updatedAt)
@@ -225,23 +263,23 @@
 
     <app-dialog
       [isOpen]="isLogoutConfirmOpen"
-      title="Потвърждение за изход"
+      [title]="'header.logoutConfirmTitle' | translate"
       (closed)="closeLogoutConfirm()"
     >
       <div class="py-4">
-        <p class="text-gray-700 mb-6">Сигурни ли сте, че искате да излезете?</p>
+        <p class="text-gray-700 mb-6">{{ 'header.logoutConfirmMessage' | translate }}</p>
         <div class="flex gap-3 justify-center">
           <app-button
             variant="outline"
             size="md"
-            text="Отказ"
+            [text]="'common.cancel' | translate"
             (click)="closeLogoutConfirm()"
           >
           </app-button>
           <app-button
             variant="danger"
             size="md"
-            text="Изход"
+            [text]="'header.logout' | translate"
             (click)="logout()"
           >
           </app-button>
@@ -258,22 +296,40 @@
         class="h-10 w-10 object-contain flex-shrink-0"
       />
       <span class="text-2xl font-bold text-gray-900 truncate">
-        Българска федерация по гребане
+        {{ 'header.orgName' | translate }}
       </span>
     </div>
 
     <div class="flex items-center gap-3 flex-shrink-0">
-      <div class="w-[140px]">
-        <app-searchable-select-dropdown
-          [options]="languageOptions"
-          [placeholder]="'Език'"
-          [dropdownWidth]="'140px'"
-          [noScroll]="true"
-          [ngModel]="currentLanguage"
-          (ngModelChange)="setLanguage($event)"
-        ></app-searchable-select-dropdown>
+      <div class="inline-flex items-center gap-1 rounded-full bg-gray-100 p-1">
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm transition-colors"
+          [class.bg-white]="currentLanguage === 'bg'"
+          [class.shadow-sm]="currentLanguage === 'bg'"
+          [class.text-gray-900]="currentLanguage === 'bg'"
+          [class.font-medium]="currentLanguage === 'bg'"
+          [class.text-gray-500]="currentLanguage !== 'bg'"
+          (click)="setLanguage('bg')"
+        >
+          <span class="text-base leading-none">🇧🇬</span>
+          <span>BG</span>
+        </button>
+        <button
+          type="button"
+          class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm transition-colors"
+          [class.bg-white]="currentLanguage === 'en'"
+          [class.shadow-sm]="currentLanguage === 'en'"
+          [class.text-gray-900]="currentLanguage === 'en'"
+          [class.font-medium]="currentLanguage === 'en'"
+          [class.text-gray-500]="currentLanguage !== 'en'"
+          (click)="setLanguage('en')"
+        >
+          <span class="text-base leading-none">🇺🇸</span>
+          <span>EN</span>
+        </button>
       </div>
-      <app-button variant="primary" size="md" text="Вход" routerLink="/login">
+      <app-button variant="primary" size="md" [text]="'header.login' | translate" routerLink="/login">
       </app-button>
     </div>
   </ng-template>

@@ -11,6 +11,7 @@ import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
 import com.bfg.platform.common.exception.ValidationException;
+import com.bfg.platform.common.i18n.MessageResolver;
 import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.repository.DynamicEntityGraph;
@@ -53,6 +54,7 @@ public class ClubCoachServiceImpl implements ClubCoachService {
     private final EntityManager entityManager;
     private final SecurityContextHelper securityContextHelper;
     private final AuthorizationService authorizationService;
+    private final MessageResolver messageResolver;
 
     @Override
     public Page<ClubCoachDto> getCoachesByClubId(UUID clubId, String filter, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
@@ -97,7 +99,7 @@ public class ClubCoachServiceImpl implements ClubCoachService {
                 .orElseThrow(() -> new ResourceNotFoundException("Club", request.getClubId()));
 
         if (!club.isActive()) {
-            throw new ValidationException("Не може да се назначават треньори към неактивен клуб");
+            throw new ValidationException(messageResolver.resolve("club.cannotAssignCoachToInactive"));
         }
 
         validateCoachRole(request.getCoachId());
@@ -119,13 +121,13 @@ public class ClubCoachServiceImpl implements ClubCoachService {
         try {
             clubCoachRepository.delete(clubCoach);
         } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("Failed to remove coach from club");
+            throw new ConflictException(messageResolver.resolve("club.coachRemoveFailed"));
         }
     }
 
     private void validateCoachRole(UUID coachId) {
         if (!userRepository.isCoach(coachId)) {
-            throw new ValidationException("User is not assigned the COACH role оr does not exist");
+            throw new ValidationException(messageResolver.resolve("club.userNotCoach"));
         }
     }
 
@@ -133,7 +135,7 @@ public class ClubCoachServiceImpl implements ClubCoachService {
     private void validateAssignPermissions(ClubCoachCreateRequest request) {
         SystemRole currentRole = securityContextHelper.getUserRole();
         if (currentRole == null) {
-            throw new ForbiddenException("Current user role is not available");
+            throw new ForbiddenException(messageResolver.resolve("user.roleNotAvailable"));
         }
 
         switch (currentRole) {
@@ -143,19 +145,19 @@ public class ClubCoachServiceImpl implements ClubCoachService {
             case CLUB_ADMIN -> {
                 UUID currentUserId = securityContextHelper.getUserId();
                 Club club = clubRepository.findByClubAdmin(currentUserId)
-                        .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
+                        .orElseThrow(() -> new ForbiddenException(messageResolver.resolve("permission.clubAdminNotAssociated")));
                 if (!request.getClubId().equals(club.getId())) {
-                    throw new ForbiddenException("Club admins can only assign coaches to their own club");
+                    throw new ForbiddenException(messageResolver.resolve("permission.clubAdminOwnClubOnly"));
                 }
             }
-            default -> throw new ForbiddenException("You are not allowed to assign coaches");
+            default -> throw new ForbiddenException(messageResolver.resolve("permission.coachAssignForbidden"));
         }
     }
 
     private void validateRemovePermissions(ClubCoach clubCoach) {
         SystemRole currentRole = securityContextHelper.getUserRole();
         if (currentRole == null) {
-            throw new ForbiddenException("Current user role is not available");
+            throw new ForbiddenException(messageResolver.resolve("user.roleNotAvailable"));
         }
 
         switch (currentRole) {
@@ -165,12 +167,12 @@ public class ClubCoachServiceImpl implements ClubCoachService {
             case CLUB_ADMIN -> {
                 UUID currentUserId = securityContextHelper.getUserId();
                 Club club = clubRepository.findByClubAdmin(currentUserId)
-                        .orElseThrow(() -> new ForbiddenException("Club admin is not associated with any club"));
+                        .orElseThrow(() -> new ForbiddenException(messageResolver.resolve("permission.clubAdminNotAssociated")));
                 if (!clubCoach.getClubId().equals(club.getId())) {
-                    throw new ForbiddenException("Club admins can only remove coaches from their own club");
+                    throw new ForbiddenException(messageResolver.resolve("permission.clubAdminOwnClubOnly"));
                 }
             }
-            default -> throw new ForbiddenException("You are not allowed to remove coaches");
+            default -> throw new ForbiddenException(messageResolver.resolve("permission.coachRemoveForbidden"));
         }
     }
 

@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -46,7 +47,7 @@ interface MigrationResult {
 @Component({
   selector: 'app-user-migration-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './user-migration-dialog.component.html',
   styleUrl: './user-migration-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -66,23 +67,11 @@ export class UserMigrationDialogComponent implements OnChanges {
 
   parsedUsers: UserBatchMigrationRequestItem[] = [];
 
-  readonly dataFields = [
-    { value: 'firstName', label: 'Име' },
-    { value: 'lastName', label: 'Фамилия' },
-    { value: 'dateOfBirth', label: 'Дата на раждане' },
-    { value: 'email', label: 'Имейл' },
-    { value: 'role', label: 'Роля' },
-  ];
+  readonly dataFields: { value: string; label: string }[] = [];
 
   private readonly requiredFields = ['firstName', 'lastName', 'dateOfBirth', 'email', 'role'];
 
-  readonly roleOptions: SearchableSelectOption[] = [
-    { value: '', label: 'Не задавай' },
-    { value: SystemRole.FederationAdmin, label: 'Администратор на федерацията' },
-    { value: SystemRole.ClubAdmin, label: 'Администратор на клуб' },
-    { value: SystemRole.Coach, label: 'Треньор' },
-    { value: SystemRole.Umpire, label: 'Съдия' },
-  ];
+  roleOptions: SearchableSelectOption[] = [];
 
   defaultRole: SystemRole | '' = '';
 
@@ -95,7 +84,23 @@ export class UserMigrationDialogComponent implements OnChanges {
   constructor(
     private usersService: UsersService,
     private cdr: ChangeDetectorRef,
-  ) {}
+    private translateService: TranslateService,
+  ) {
+    this.dataFields = [
+      { value: 'firstName', label: this.translateService.instant('users.migration.fields.firstName') },
+      { value: 'lastName', label: this.translateService.instant('users.migration.fields.lastName') },
+      { value: 'dateOfBirth', label: this.translateService.instant('users.migration.fields.dateOfBirth') },
+      { value: 'email', label: this.translateService.instant('users.migration.fields.email') },
+      { value: 'role', label: this.translateService.instant('users.migration.fields.role') },
+    ];
+    this.roleOptions = [
+      { value: '', label: this.translateService.instant('users.migration.defaultRolePlaceholder') },
+      { value: SystemRole.FederationAdmin, label: this.translateService.instant('common.roles.FEDERATION_ADMIN') },
+      { value: SystemRole.ClubAdmin, label: this.translateService.instant('common.roles.CLUB_ADMIN') },
+      { value: SystemRole.Coach, label: this.translateService.instant('common.roles.COACH') },
+      { value: SystemRole.Umpire, label: this.translateService.instant('common.roles.UMPIRE') },
+    ];
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen) {
@@ -155,7 +160,7 @@ export class UserMigrationDialogComponent implements OnChanges {
           this.cdr.markForCheck();
         }
       } catch {
-        this.error = 'Грешка при четене на файла.';
+        this.error = this.translateService.instant('users.migration.fileReadError');
         this.cdr.markForCheck();
       }
     };
@@ -164,7 +169,7 @@ export class UserMigrationDialogComponent implements OnChanges {
 
   getExcelOptionsForField(field: FieldMapping): SearchableSelectOption[] {
     return [
-      { value: '', label: 'Не импортирай' },
+      { value: '', label: this.translateService.instant('users.migration.doNotImport') },
       ...this.excelColumns.map(col => ({
         value: col,
         label: col,
@@ -220,14 +225,15 @@ export class UserMigrationDialogComponent implements OnChanges {
   }
 
   roleLabel(role: string): string {
-    switch (role) {
-      case SystemRole.AppAdmin: return 'Администратор';
-      case SystemRole.FederationAdmin: return 'Админ. на фед.';
-      case SystemRole.ClubAdmin: return 'Админ. на клуб';
-      case SystemRole.Coach: return 'Треньор';
-      case SystemRole.Umpire: return 'Съдия';
-      default: return role ?? '';
-    }
+    const roleKeys: Record<string, string> = {
+      [SystemRole.AppAdmin]: 'common.roles.APP_ADMIN',
+      [SystemRole.FederationAdmin]: 'common.roles.FEDERATION_ADMIN',
+      [SystemRole.ClubAdmin]: 'common.roles.CLUB_ADMIN',
+      [SystemRole.Coach]: 'common.roles.COACH',
+      [SystemRole.Umpire]: 'common.roles.UMPIRE',
+    };
+    const key = roleKeys[role];
+    return key ? this.translateService.instant(key) : (role ?? '');
   }
 
   private rowToUser(row: any[]): UserBatchMigrationRequestItem | null {
@@ -274,7 +280,7 @@ export class UserMigrationDialogComponent implements OnChanges {
         this.error = null;
         this.cdr.markForCheck();
       } catch {
-        this.error = 'Грешка при четене на файла.';
+        this.error = this.translateService.instant('users.migration.fileReadError');
         this.cdr.markForCheck();
       }
     };
@@ -307,7 +313,7 @@ export class UserMigrationDialogComponent implements OnChanges {
 
   migrate(): void {
     if (this.parsedUsers.length === 0) {
-      this.error = 'Няма валидни записи за миграция.';
+      this.error = this.translateService.instant('users.migration.noValidRecords');
       this.cdr.markForCheck();
       return;
     }
@@ -319,7 +325,7 @@ export class UserMigrationDialogComponent implements OnChanges {
       chunks.push(this.parsedUsers.slice(i, i + BATCH_SIZE));
     }
     const totalChunks = chunks.length;
-    this.migrationProgress = `Изпращане на ${this.parsedUsers.length} записа в ${totalChunks} заявки...`;
+    this.migrationProgress = this.translateService.instant('users.migration.progress', { count: this.parsedUsers.length, chunks: totalChunks });
     this.cdr.markForCheck();
 
     const requests = chunks.map((chunk) => this.migrateChunkWithRetry(chunk));

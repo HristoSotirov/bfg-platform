@@ -9,6 +9,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { CompetitionColumnConfig, CompetitionFilterConfig } from '../../competitions.component';
@@ -16,7 +17,7 @@ import { CompetitionColumnConfig, CompetitionFilterConfig } from '../../competit
 @Component({
   selector: 'app-competition-settings-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent],
   templateUrl: './competition-settings-dialog.component.html',
   styleUrl: './competition-settings-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

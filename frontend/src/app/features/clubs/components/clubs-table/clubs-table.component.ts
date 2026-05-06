@@ -7,13 +7,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ClubDto, ScopeType } from '../../../../core/services/api';
 import { ClubColumnConfig } from '../../clubs.component';
 
 @Component({
   selector: 'app-clubs-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './clubs-table.component.html',
   styleUrl: './clubs-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +31,8 @@ export class ClubsTableComponent implements OnInit {
   @Output() loadMore = new EventEmitter<void>();
 
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
+
+  constructor(private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -107,7 +110,7 @@ export class ClubsTableComponent implements OnInit {
       case 'type':
         return this.getScopeTypeLabel(club.type);
       case 'isActive':
-        return club.isActive ? 'Активен' : 'Неактивен';
+        return club.isActive ? this.translateService.instant('common.active') : this.translateService.instant('common.inactive');
       case 'createdAt':
         return this.formatDateTime((club as any).createdAt);
       case 'updatedAt':
@@ -134,9 +137,9 @@ export class ClubsTableComponent implements OnInit {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
+      [ScopeType.Internal]: this.translateService.instant('clubs.scopeTypes.internal'),
+      [ScopeType.External]: this.translateService.instant('clubs.scopeTypes.external'),
+      [ScopeType.National]: this.translateService.instant('clubs.scopeTypes.national'),
     };
     return labels[scopeType] ?? scopeType;
   }

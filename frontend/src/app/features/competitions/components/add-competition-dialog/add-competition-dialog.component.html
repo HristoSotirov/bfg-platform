@@ -1,23 +1,23 @@
-<app-dialog [isOpen]="isOpen" title="Добавяне на състезание" size="lg" [tall]="true" (closed)="close()">
+<app-dialog [isOpen]="isOpen" [title]="'competitions.addCompetitionDialog.title' | translate" size="lg" [tall]="true" (closed)="close()">
   <div class="flex flex-col h-full min-h-0">
   <div class="space-y-3 flex-1 min-h-0 overflow-y-auto pb-4">
 
     <!-- 1. Type toggle: Реално / Шаблон -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Тип <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'competitions.addCompetitionDialog.labels.type' | translate }} <span class="text-red-500">*</span>:</label>
       <div class="flex rounded-lg border border-gray-300 overflow-hidden">
         <button
           type="button"
           class="flex-1 px-4 py-2 text-sm font-medium transition-colors"
           [class]="!formData.isTemplate ? 'bg-bfg-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
           (click)="onTemplateToggle(false)"
-        >Реално</button>
+        >{{ 'competitions.addCompetitionDialog.typeToggle.real' | translate }}</button>
         <button
           type="button"
           class="flex-1 px-4 py-2 text-sm font-medium transition-colors border-l border-gray-300"
           [class]="formData.isTemplate ? 'bg-bfg-blue text-white' : 'bg-white text-gray-700 hover:bg-gray-50'"
           (click)="onTemplateToggle(true)"
-        >Шаблон</button>
+        >{{ 'competitions.addCompetitionDialog.typeToggle.template' | translate }}</button>
       </div>
     </div>
 
@@ -29,11 +29,11 @@
           class="text-sm text-bfg-blue hover:underline"
           (click)="showTemplatePicker = !showTemplatePicker"
         >
-          Използвай шаблон
+          {{ 'competitions.addCompetitionDialog.templatePicker.useTemplate' | translate }}
         </button>
         @if (selectedTemplateId) {
           <span class="text-xs bg-blue-50 text-blue-700 border border-blue-200 rounded px-2 py-0.5">
-            {{ selectedTemplateName }}@if (selectedTemplateDuration) { · {{ selectedTemplateDuration }} {{ selectedTemplateDuration === 1 ? 'ден' : 'дни' }}}</span>
+            {{ selectedTemplateName }}@if (selectedTemplateDuration) { · {{ selectedTemplateDuration }} {{ selectedTemplateDuration === 1 ? ('competitions.addCompetitionDialog.duration.day' | translate) : ('competitions.addCompetitionDialog.duration.days' | translate) }}}</span>
           <button
             type="button"
             class="text-xs text-red-400 hover:text-red-600"
@@ -46,18 +46,18 @@
           [staticSearch]="templateSearch"
           [ngModel]="selectedTemplateId"
           (selectionChange)="onUseTemplate($event)"
-          placeholder="Изберете шаблон..."
+          [placeholder]="'competitions.addCompetitionDialog.templatePicker.selectTemplate' | translate"
         ></app-searchable-select-dropdown>
       }
     }
 
     <!-- 4. Short name -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Кратко име <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'competitions.addCompetitionDialog.labels.shortName' | translate }} <span class="text-red-500">*</span>:</label>
       <input
         type="text"
         [(ngModel)]="formData.shortName"
-        placeholder="Кратко наименование"
+        [placeholder]="'competitions.addCompetitionDialog.placeholders.shortName' | translate"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
         [class.border-red-500]="touched['shortName'] && !formData.shortName.trim()"
         (blur)="touched['shortName'] = true"
@@ -66,11 +66,11 @@
 
     <!-- 4b. Name -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Пълно име <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'competitions.addCompetitionDialog.labels.fullName' | translate }} <span class="text-red-500">*</span>:</label>
       <input
         type="text"
         [(ngModel)]="formData.name"
-        placeholder="Пълно наименование"
+        [placeholder]="'competitions.addCompetitionDialog.placeholders.fullName' | translate"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
         [class.border-red-500]="touched['name'] && !formData.name.trim()"
         (blur)="touched['name'] = true"
@@ -79,11 +79,11 @@
 
     <!-- 5. Location (all competitions) -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Място <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'competitions.addCompetitionDialog.labels.location' | translate }} <span class="text-red-500">*</span>:</label>
       <input
         type="text"
         [(ngModel)]="formData.location"
-        placeholder="Гр., обект"
+        [placeholder]="'competitions.addCompetitionDialog.placeholders.location' | translate"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
         [class.border-red-500]="touched['location'] && !formData.location.trim()"
         (blur)="touched['location'] = true"
@@ -92,27 +92,27 @@
 
     <!-- 5c. Competition type -->
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Формат <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'competitions.addCompetitionDialog.labels.format' | translate }} <span class="text-red-500">*</span>:</label>
       <app-searchable-select-dropdown
         [options]="competitionTypeOptions"
         [(ngModel)]="formData.competitionType"
-        placeholder="Изберете формат..."
+        [placeholder]="'competitions.addCompetitionDialog.placeholders.selectFormat' | translate"
       ></app-searchable-select-dropdown>
     </div>
 
     <!-- 6. Start date | End date (all competitions) -->
     <div class="grid grid-cols-2 gap-3">
       <app-date-picker
-        label="Начална дата"
+        [label]="'competitions.addCompetitionDialog.labels.startDate' | translate"
         [required]="true"
         [(ngModel)]="formData.startDate"
-        placeholder="Изберете дата..."
+        [placeholder]="'competitions.addCompetitionDialog.placeholders.selectDate' | translate"
       ></app-date-picker>
       <app-date-picker
-        label="Крайна дата"
+        [label]="'competitions.addCompetitionDialog.labels.endDate' | translate"
         [required]="true"
         [(ngModel)]="formData.endDate"
-        placeholder="Изберете дата..."
+        [placeholder]="'competitions.addCompetitionDialog.placeholders.selectDate' | translate"
       ></app-date-picker>
     </div>
 
@@ -120,59 +120,59 @@
       <!-- 7. Submissions open | Submissions closed -->
       <div class="grid grid-cols-2 gap-3">
         <app-datetime-picker
-          label="Отваряне на записвания"
+          [label]="'competitions.addCompetitionDialog.labels.entrySubmissionsOpen' | translate"
           [required]="true"
           [(ngModel)]="formData.entrySubmissionsOpenAt"
-          placeholder="Изберете дата и час..."
+          [placeholder]="'competitions.addCompetitionDialog.placeholders.selectDateTime' | translate"
         ></app-datetime-picker>
         <app-datetime-picker
-          label="Затваряне на записвания"
+          [label]="'competitions.addCompetitionDialog.labels.entrySubmissionsClosed' | translate"
           [required]="true"
           [(ngModel)]="formData.entrySubmissionsClosedAt"
-          placeholder="Изберете дата и час..."
+          [placeholder]="'competitions.addCompetitionDialog.placeholders.selectDateTime' | translate"
         ></app-datetime-picker>
       </div>
 
       <!-- 8. Last changes before TM | Technical meeting -->
       <div class="grid grid-cols-2 gap-3">
         <app-datetime-picker
-          label="Последни промени преди ТС"
+          [label]="'competitions.addCompetitionDialog.labels.lastChangesBeforeTs' | translate"
           [required]="true"
           [(ngModel)]="formData.lastChangesBeforeTmAt"
-          placeholder="Изберете дата и час..."
+          [placeholder]="'competitions.addCompetitionDialog.placeholders.selectDateTime' | translate"
         ></app-datetime-picker>
         <app-datetime-picker
-          label="Техническо съвещание"
+          [label]="'competitions.addCompetitionDialog.labels.technicalMeeting' | translate"
           [required]="true"
           [(ngModel)]="formData.technicalMeetingAt"
-          placeholder="Изберете дата и час..."
+          [placeholder]="'competitions.addCompetitionDialog.placeholders.selectDateTime' | translate"
         ></app-datetime-picker>
       </div>
 
       <!-- 9. Awarding ceremony -->
       <app-datetime-picker
-        label="Награждаване"
+        [label]="'competitions.addCompetitionDialog.labels.awards' | translate"
         [(ngModel)]="formData.awardingCeremonyAt"
-        placeholder="Изберете дата и час..."
+        [placeholder]="'competitions.addCompetitionDialog.placeholders.selectDateTime' | translate"
       ></app-datetime-picker>
     }
 
     <!-- 10. Scoring scheme | Qualification scheme -->
     <div class="grid grid-cols-2 gap-3">
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Схема за точкуване <span class="text-red-500">*</span>:</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'competitions.addCompetitionDialog.labels.scoringScheme' | translate }} <span class="text-red-500">*</span>:</label>
         <app-searchable-select-dropdown
           [staticSearch]="scoringSchemeSearch"
           [(ngModel)]="formData.scoringSchemeId"
-          placeholder="Изберете схема..."
+          [placeholder]="'competitions.addCompetitionDialog.placeholders.selectScheme' | translate"
         ></app-searchable-select-dropdown>
       </div>
       <div>
-        <label class="block text-sm font-medium text-gray-700 mb-1">Квалификационна схема <span class="text-red-500">*</span>:</label>
+        <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'competitions.addCompetitionDialog.labels.qualificationScheme' | translate }} <span class="text-red-500">*</span>:</label>
         <app-searchable-select-dropdown
           [staticSearch]="qualificationSchemeSearch"
           [(ngModel)]="formData.qualificationSchemeId"
-          placeholder="Изберете схема..."
+          [placeholder]="'competitions.addCompetitionDialog.placeholders.selectScheme' | translate"
         ></app-searchable-select-dropdown>
       </div>
     </div>
@@ -194,9 +194,9 @@
         </div>
       }
       <div class="flex justify-center gap-3">
-        <app-button variant="outline" size="md" text="Затвори" [disabled]="saving" (click)="close()"></app-button>
+        <app-button variant="outline" size="md" [text]="'competitions.addCompetitionDialog.buttons.close' | translate" [disabled]="saving" (click)="close()"></app-button>
         @if (!copyPartialError) {
-          <app-button variant="primary" size="md" text="Запази" [disabled]="!isFormValid || saving" (click)="save()"></app-button>
+          <app-button variant="primary" size="md" [text]="'competitions.addCompetitionDialog.buttons.save' | translate" [disabled]="!isFormValid || saving" (click)="save()"></app-button>
         }
       </div>
     </div>

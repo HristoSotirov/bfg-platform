@@ -1,8 +1,10 @@
 package com.bfg.platform.common.exception;
 
+import com.bfg.platform.common.i18n.MessageResolver;
 import com.bfg.platform.gen.model.ErrorResponse;
 import jakarta.persistence.PersistenceException;
 import jakarta.validation.ConstraintViolationException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -18,7 +20,10 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class GlobalExceptionHandler {
+
+    private final MessageResolver messageResolver;
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(ResourceNotFoundException ex) {
@@ -55,7 +60,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleJwtException(JwtException ex) {
         log.debug("JWT validation failed", ex);
         return buildErrorResponse(HttpStatus.UNAUTHORIZED,
-                "Token invalid or expired. Please log in again.");
+                messageResolver.resolve("error.jwtInvalid"));
     }
 
     @ExceptionHandler(ResourceCreationException.class)
@@ -157,7 +162,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleUnexpected(Exception ex) {
         log.error("Unhandled exception", ex);
         return buildErrorResponse(HttpStatus.INTERNAL_SERVER_ERROR,
-                "Internal server error. Please try again later.");
+                messageResolver.resolve("error.internal"));
     }
 
     private ResponseEntity<ErrorResponse> buildErrorResponse(HttpStatus status, String message) {

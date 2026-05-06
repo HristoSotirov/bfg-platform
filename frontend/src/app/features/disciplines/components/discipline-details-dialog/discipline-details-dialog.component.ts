@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -43,7 +44,7 @@ import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
 @Component({
   selector: 'app-discipline-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DeleteConfirmDialogComponent, CompetitionGroupDetailsDialogComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DeleteConfirmDialogComponent, CompetitionGroupDetailsDialogComponent],
   templateUrl: './discipline-details-dialog.component.html',
   styleUrl: './discipline-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,14 +110,14 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
   ];
 
   readonly genderOptions: SearchableSelectOption[] = [
-    { value: DisciplineGender.Male, label: 'Мъже' },
-    { value: DisciplineGender.Female, label: 'Жени' },
-    { value: DisciplineGender.Mixed, label: 'Смесени' },
+    { value: DisciplineGender.Male, label: this.translate.instant('common.gender.male') },
+    { value: DisciplineGender.Female, label: this.translate.instant('common.gender.female') },
+    { value: DisciplineGender.Mixed, label: this.translate.instant('common.gender.mixed') },
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   readonly booleanOptions: SearchableSelectOption[] = [
@@ -128,6 +129,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
     private disciplineDefinitionsService: DisciplineDefinitionsService,
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -322,7 +324,7 @@ export class DisciplineDetailsDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.saving = false;
-          this.error = err?.message || 'Грешка при запазване';
+          this.error = err?.message || this.translate.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });

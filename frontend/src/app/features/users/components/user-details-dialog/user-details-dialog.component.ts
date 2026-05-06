@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -28,7 +29,7 @@ import { takeUntil, Subject, catchError, of } from 'rxjs';
 @Component({
   selector: 'app-user-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DatePickerComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DatePickerComponent],
   templateUrl: './user-details-dialog.component.html',
   styleUrl: './user-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,25 +63,20 @@ export class UserDetailsDialogComponent implements OnChanges {
     isActive: true,
   };
 
-  readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
-  ];
-
-  private roleLabels: Record<SystemRole, string> = {
-    [SystemRole.AppAdmin]: 'Администратор',
-    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
-    [SystemRole.ClubAdmin]: 'Администратор на клуб',
-    [SystemRole.Coach]: 'Треньор',
-    [SystemRole.Umpire]: 'Съдия',
-  };
+  readonly statusOptions: SearchableSelectOption[] = [];
 
   constructor(
     private usersService: UsersService,
     private clubsService: ClubsService,
     private clubCoachesService: ClubCoachesService,
     private cdr: ChangeDetectorRef,
-  ) {}
+    private translateService: TranslateService,
+  ) {
+    this.statusOptions = [
+      { value: 'true', label: this.translateService.instant('common.status.active') },
+      { value: 'false', label: this.translateService.instant('common.status.inactive') },
+    ];
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen && this.user) {
@@ -93,9 +89,9 @@ export class UserDetailsDialogComponent implements OnChanges {
   }
 
   get fullName(): string {
-    if (!this.userData) return 'Потребител';
+    if (!this.userData) return this.translateService.instant('users.details.defaultTitle');
     const name = `${this.userData.firstName || ''} ${this.userData.lastName || ''}`.trim();
-    return name || 'Потребител';
+    return name || this.translateService.instant('users.details.defaultTitle');
   }
 
   close(): void {
@@ -135,7 +131,7 @@ export class UserDetailsDialogComponent implements OnChanges {
       .getUserByUuid(this.user.uuid)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на потребителя';
+          this.error = err?.error?.message || this.translateService.instant('common.errorLoading');
           this.loading = false;
           return of(null);
         }),
@@ -248,7 +244,7 @@ export class UserDetailsDialogComponent implements OnChanges {
       .updateUserByUuid(this.userData.uuid, updateRequest)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при запазване на промените';
+          this.error = err?.error?.message || this.translateService.instant('common.errorSaving');
           this.saving = false;
           this.cdr.markForCheck();
           return of(null);
@@ -297,7 +293,14 @@ export class UserDetailsDialogComponent implements OnChanges {
 
   getRoleLabel(role: SystemRole | undefined): string {
     if (!role) return '-';
-    return this.roleLabels[role] || role;
+    const roleKeys: Record<SystemRole, string> = {
+      [SystemRole.AppAdmin]: 'common.roles.APP_ADMIN',
+      [SystemRole.FederationAdmin]: 'common.roles.FEDERATION_ADMIN',
+      [SystemRole.ClubAdmin]: 'common.roles.CLUB_ADMIN',
+      [SystemRole.Coach]: 'common.roles.COACH',
+      [SystemRole.Umpire]: 'common.roles.UMPIRE',
+    };
+    return this.translateService.instant(roleKeys[role]) || role;
   }
 
 }

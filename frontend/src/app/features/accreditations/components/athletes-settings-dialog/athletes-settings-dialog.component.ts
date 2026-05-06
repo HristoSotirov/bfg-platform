@@ -11,16 +11,17 @@ import { CommonModule } from '@angular/common';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ColumnConfig, AthleteFilterConfig } from '../../accreditations.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-athletes-settings-dialog',
   standalone: true,
-  imports: [CommonModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, DialogComponent, ButtonComponent, TranslateModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <app-dialog
       [isOpen]="isOpen"
-      title="Настройки на таблицата"
+      [title]="'accreditations.settingsDialog.title' | translate"
       size="md"
       (closed)="close()"
     >
@@ -35,7 +36,7 @@ import { ColumnConfig, AthleteFilterConfig } from '../../accreditations.componen
             [class.text-gray-500]="activeTab !== 'columns'"
             (click)="activeTab = 'columns'"
           >
-            Колони
+            {{ 'accreditations.settingsDialog.tabs.columns' | translate }}
           </button>
           <button
             type="button"
@@ -46,18 +47,18 @@ import { ColumnConfig, AthleteFilterConfig } from '../../accreditations.componen
             [class.text-gray-500]="activeTab !== 'filters'"
             (click)="activeTab = 'filters'"
           >
-            Филтри
+            {{ 'accreditations.settingsDialog.tabs.filters' | translate }}
           </button>
         </div>
 
         <div class="min-h-[320px]">
           @if (activeTab === 'columns') {
             <div class="space-y-3">
-              <p class="text-sm text-gray-600">Изберете кои колони да се показват в таблицата.</p>
+              <p class="text-sm text-gray-600">{{ 'accreditations.settingsDialog.columnsDescription' | translate }}</p>
               <div class="flex gap-2 mb-2">
-                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="selectAllColumns()">Избери всички</button>
+                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="selectAllColumns()">{{ 'accreditations.settingsDialog.selectAll' | translate }}</button>
                 <span class="text-gray-300">|</span>
-                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="deselectAllColumns()">Премахни всички</button>
+                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="deselectAllColumns()">{{ 'accreditations.settingsDialog.deselectAll' | translate }}</button>
               </div>
               <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
                 @for (column of localColumns; track column.id) {
@@ -77,11 +78,11 @@ import { ColumnConfig, AthleteFilterConfig } from '../../accreditations.componen
 
           @if (activeTab === 'filters') {
             <div class="space-y-3">
-              <p class="text-sm text-gray-600">Изберете кои филтри да се показват. При скриване на филтър стойността му се изчиства.</p>
+              <p class="text-sm text-gray-600">{{ 'accreditations.settingsDialog.filtersDescription' | translate }}</p>
               <div class="flex gap-2 mb-2">
-                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="selectAllFilters()">Избери всички</button>
+                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="selectAllFilters()">{{ 'accreditations.settingsDialog.selectAll' | translate }}</button>
                 <span class="text-gray-300">|</span>
-                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="deselectAllFilters()">Премахни всички</button>
+                <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="deselectAllFilters()">{{ 'accreditations.settingsDialog.deselectAll' | translate }}</button>
               </div>
               <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
                 @for (filter of localFilterConfigs; track filter.id) {
@@ -101,8 +102,8 @@ import { ColumnConfig, AthleteFilterConfig } from '../../accreditations.componen
         </div>
 
         <div class="flex justify-center gap-3 pt-4 border-t">
-          <app-button variant="outline" size="md" text="Отказ" (click)="close()"></app-button>
-          <app-button variant="primary" size="md" text="Запази" (click)="save()"></app-button>
+          <app-button variant="outline" size="md" [text]="'common.cancel' | translate" (click)="close()"></app-button>
+          <app-button variant="primary" size="md" [text]="'common.save' | translate" (click)="save()"></app-button>
         </div>
       </div>
     </app-dialog>

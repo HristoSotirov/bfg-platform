@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -55,6 +56,7 @@ export interface ClubFilters {
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     ClubsTableComponent,
     ClubsFiltersComponent,
@@ -90,22 +92,9 @@ export class ClubsComponent implements OnInit, OnDestroy {
   currentSkip = 0;
   hasMore = true;
 
-  columns: ClubColumnConfig[] = [
-    { id: 'shortName', label: 'Кратко име', visible: true },
-    { id: 'name', label: 'Пълно име', visible: true },
-    { id: 'cardPrefix', label: 'Номер', visible: true },
-    { id: 'clubEmail', label: 'Имейл', visible: true },
-    { id: 'clubAdminName', label: 'Администратор', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'type', label: 'Тип', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'updatedAt', label: 'Променен на', visible: true },
-  ];
+  columns: ClubColumnConfig[] = [];
 
-  filterConfigs: ClubFilterConfig[] = [
-    { id: 'status', label: 'Статус', visible: true },
-    // Note: 'type' filter is added dynamically based on user permissions
-  ];
+  filterConfigs: ClubFilterConfig[] = [];
 
   isAddDialogOpen = false;
   isMigrationDialogOpen = false;
@@ -117,17 +106,17 @@ export class ClubsComponent implements OnInit, OnDestroy {
   get mobileMenuItems(): MobileActionMenuItem[] {
     return [
       {
-        label: 'Добавяне на клуб',
+        label: this.translateService.instant('clubs.addButton'),
         action: () => this.openAddDialog(),
         visible: this.canAddClub,
       },
       {
-        label: 'Миграция',
+        label: this.translateService.instant('common.migration'),
         action: () => this.openMigrationDialog(),
         visible: this.canMigrate,
       },
       {
-        label: 'Експорт в Excel',
+        label: this.translateService.instant('common.exportExcel'),
         action: () => this.exportToExcel(),
         disabled: this.exporting || this.totalElements === 0,
       },
@@ -145,16 +134,63 @@ export class ClubsComponent implements OnInit, OnDestroy {
     private scopeVisibility: ScopeVisibilityService,
     private router: Router,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initColumns();
+    this.initFilterConfigs();
     this.loadSettings();
     this.initializeUserContext();
+
+    this.translateService.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.initColumns();
+      this.initFilterConfigs();
+      this.cdr.markForCheck();
+    });
   }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  private initColumns(): void {
+    const t = (key: string) => this.translateService.instant(key);
+    const savedColumns = this.columns;
+    this.columns = [
+      { id: 'shortName', label: t('clubs.table.columns.shortName'), visible: true },
+      { id: 'name', label: t('clubs.table.columns.name'), visible: true },
+      { id: 'cardPrefix', label: t('clubs.table.columns.cardPrefix'), visible: true },
+      { id: 'clubEmail', label: t('clubs.table.columns.clubEmail'), visible: true },
+      { id: 'clubAdminName', label: t('clubs.table.columns.clubAdminName'), visible: true },
+      { id: 'isActive', label: t('clubs.table.columns.isActive'), visible: true },
+      { id: 'type', label: t('clubs.table.columns.type'), visible: true },
+      { id: 'createdAt', label: t('clubs.table.columns.createdAt'), visible: true },
+      { id: 'updatedAt', label: t('clubs.table.columns.updatedAt'), visible: true },
+    ];
+    // Preserve visibility from previous state
+    if (savedColumns.length > 0) {
+      this.columns = this.columns.map((col) => {
+        const prev = savedColumns.find((c) => c.id === col.id);
+        return prev ? { ...col, visible: prev.visible } : col;
+      });
+    }
+  }
+
+  private initFilterConfigs(): void {
+    const t = (key: string) => this.translateService.instant(key);
+    const savedConfigs = this.filterConfigs;
+    this.filterConfigs = [
+      { id: 'status', label: t('clubs.filterConfigs.status'), visible: true },
+    ];
+    // Preserve visibility from previous state
+    if (savedConfigs.length > 0) {
+      this.filterConfigs = this.filterConfigs.map((f) => {
+        const prev = savedConfigs.find((c) => c.id === f.id);
+        return prev ? { ...f, visible: prev.visible } : f;
+      });
+    }
   }
 
   get canAddClub(): boolean {
@@ -191,7 +227,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
       if (!this.filterConfigs.find((f) => f.id === 'type')) {
         this.filterConfigs = [
           ...this.filterConfigs,
-          { id: 'type', label: 'Тип', visible: true },
+          { id: 'type', label: this.translateService.instant('clubs.filterConfigs.type'), visible: true },
         ];
       }
       const scopeCol = this.columns.find((c) => c.id === 'type');
@@ -315,7 +351,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translateService.instant('common.errorLoading');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -334,7 +370,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translateService.instant('common.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -638,9 +674,9 @@ export class ClubsComponent implements OnInit, OnDestroy {
                 case 'type':
                   row[col.label] = c.type
                     ? ({
-                        [ScopeType.Internal]: 'Вътрешен',
-                        [ScopeType.External]: 'Външен',
-                        [ScopeType.National]: 'Национален',
+                        [ScopeType.Internal]: this.translateService.instant('clubs.scopeTypes.internal'),
+                        [ScopeType.External]: this.translateService.instant('clubs.scopeTypes.external'),
+                        [ScopeType.National]: this.translateService.instant('clubs.scopeTypes.national'),
                       } as Record<string, string>)[c.type] ?? c.type
                     : '';
                   break;
@@ -657,7 +693,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
                       : '') || '';
                   break;
                 case 'isActive':
-                  row[col.label] = c.isActive ? 'Активен' : 'Неактивен';
+                  row[col.label] = c.isActive ? this.translateService.instant('common.active') : this.translateService.instant('common.inactive');
                   break;
                 case 'createdAt':
                   row[col.label] = this.formatDateForExcel(c.createdAt);
@@ -726,7 +762,7 @@ export class ClubsComponent implements OnInit, OnDestroy {
           }
 
           const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, 'Клубове');
+          XLSX.utils.book_append_sheet(wb, ws, this.translateService.instant('clubs.export.sheetName'));
           const now = new Date();
           const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
           XLSX.writeFile(wb, `clubs_${dateStr}.xlsx`);

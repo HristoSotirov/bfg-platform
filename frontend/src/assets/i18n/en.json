@@ -1,0 +1,2040 @@
+{
+  "common": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save",
+    "saving": "Saving...",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "edit": "Edit",
+    "add": "Add",
+    "confirm": "Confirm",
+    "done": "Done",
+    "back": "Back",
+    "search": "Search...",
+    "loading": "Loading...",
+    "filters": "Filters",
+    "exportExcel": "Export to Excel",
+    "migration": "Migration",
+    "settings": "Table settings",
+    "columns": "Columns",
+    "selectAll": "Select all",
+    "deselectAll": "Deselect all",
+    "required": "Required field",
+    "noData": "No data",
+    "yes": "Yes",
+    "no": "No",
+    "active": "Active",
+    "inactive": "Inactive",
+    "error": "Error",
+    "errorGeneric": "An error occurred. Please try again.",
+    "errorLoading": "Error loading data",
+    "errorSaving": "Error saving",
+    "errorDeleting": "Error deleting",
+    "errorSessionExpired": "Your session has expired. Please try again.",
+    "errorNoPermission": "You don't have permission for this operation.",
+    "errorNotFound": "Resource not found.",
+    "errorConflict": "Save conflict. Please refresh the page.",
+    "settingsDialog": {
+      "title": "Table settings",
+      "tabColumns": "Columns",
+      "tabFilters": "Filters",
+      "columnsDescription": "Choose which columns to display in the table.",
+      "filtersDescription": "Choose which filters to display. Hiding a filter clears its value."
+    },
+    "deleteConfirm": {
+      "title": "Delete Confirmation",
+      "message": "Are you sure you want to delete",
+      "irreversible": "This action is irreversible."
+    },
+    "unsavedChanges": {
+      "title": "Unsaved changes",
+      "message": "You have unsaved changes. Please use the buttons",
+      "saveButton": "\"Save\"",
+      "cancelButton": "\"Cancel\"",
+      "messageSuffix": " to exit editing.",
+      "confirmButton": "Got it"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female",
+      "mixed": "Mixed"
+    },
+    "roles": {
+      "APP_ADMIN": "Administrator",
+      "FEDERATION_ADMIN": "Federation Administrator",
+      "CLUB_ADMIN": "Club Administrator",
+      "COACH": "Coach",
+      "UMPIRE": "Umpire"
+    },
+    "openPage": "Open page",
+    "or": "or",
+    "tabDetails": "Details"
+  },
+  "nav": {
+    "accreditations": "Registrations",
+    "clubs": "Clubs",
+    "users": "Users",
+    "rules": "Regulations",
+    "competitions": "Competitions",
+    "results": "Results",
+    "system": "System"
+  },
+  "header": {
+    "orgName": "Bulgarian Rowing Federation",
+    "language": "Language",
+    "myProfile": "My Profile",
+    "logout": "Logout",
+    "login": "Login",
+    "logoutConfirmTitle": "Logout Confirmation",
+    "logoutConfirmMessage": "Are you sure you want to log out?",
+    "profileError": "Error loading profile",
+    "labels": {
+      "name": "Name:",
+      "username": "Username:",
+      "email": "Email:",
+      "role": "Role:",
+      "status": "Status:",
+      "dateOfBirth": "Date of birth:",
+      "club": "Club:",
+      "createdAt": "Created at:",
+      "updatedAt": "Modified at:"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Bulgarian Rowing\nFederation",
+      "usernameLabel": "Username:",
+      "usernamePlaceholder": "Enter username!",
+      "passwordLabel": "Password:",
+      "passwordPlaceholder": "Enter password!",
+      "forgotPassword": "Forgot password?",
+      "submitButton": "Login",
+      "continueAsGuest": "Continue as guest",
+      "guestLogin": "Continue as guest",
+      "password": "Password:",
+      "submit": "Login",
+      "title1": "Bulgarian Rowing",
+      "title2": "Federation",
+      "username": "Username:"
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "description": "Enter your username to receive a password reset link via email.",
+      "usernameLabel": "Username:",
+      "usernamePlaceholder": "Enter username",
+      "fieldRequired": "This field is required",
+      "sendEmail": "Send email",
+      "sending": "Sending...",
+      "sendAgain": "Send again",
+      "sendAgainCooldown": "Send again ({{seconds}}s)",
+      "successMessage": "If a user with that name exists, you will receive an email with a password reset link.",
+      "successHint": "The email may take a few minutes to arrive. Check your Spam folder if you don't see it.",
+      "emailDelay": "The email may take a few minutes to arrive. Check your Spam folder if you don't see it.",
+      "error": "An error occurred. Please try again.",
+      "instruction": "Enter your username to receive a password reset link via email.",
+      "resend": "Resend",
+      "seconds": "s)",
+      "username": "Username:"
+    },
+    "resetPassword": {
+      "title": "Reset Password",
+      "description": "Enter a new password for your account.",
+      "newPasswordLabel": "New password:",
+      "newPasswordPlaceholder": "Enter new password",
+      "confirmPasswordLabel": "Confirm password:",
+      "confirmPasswordPlaceholder": "Repeat new password",
+      "passwordsDoNotMatch": "Passwords don't match",
+      "requirementMinLength": "Minimum 8 characters",
+      "requirementUppercase": "At least 1 uppercase letter",
+      "requirementLowercase": "At least 1 lowercase letter",
+      "requirementDigit": "At least 1 digit",
+      "requirementSpecial": "At least 1 special character (!@#$%^&*)",
+      "saveButton": "Save new password",
+      "successMessage": "Password reset successfully. You can now log in with your new password.",
+      "confirmPassword": "Confirm password:",
+      "digit": "At least 1 digit",
+      "error": "An error occurred. Please try again.",
+      "instruction": "Enter a new password for your account.",
+      "lowercase": "At least 1 lowercase letter",
+      "minLength": "Minimum 8 characters",
+      "mismatch": "Passwords don't match",
+      "newPassword": "New password:",
+      "saving": "Saving...",
+      "special": "At least 1 special character (!@#$%^&*)",
+      "submit": "Save new password",
+      "uppercase": "At least 1 uppercase letter"
+    }
+  },
+  "home": {},
+  "clubs": {
+    "title": "Clubs",
+    "count": "Number of clubs:",
+    "addButton": "Add club",
+    "noClubMessage": "Not assigned to a club",
+    "noClubDescription": "To access clubs, you need to be assigned as a club administrator or coach.",
+    "table": {
+      "empty": "No clubs found",
+      "columns": {
+        "shortName": "Short name",
+        "name": "Full name",
+        "cardPrefix": "Number",
+        "clubEmail": "Email",
+        "clubAdminName": "Administrator",
+        "isActive": "Status",
+        "type": "Type",
+        "createdAt": "Created at",
+        "updatedAt": "Modified at"
+      }
+    },
+    "filters": {
+      "search": "Search...",
+      "statusLabel": "Status:",
+      "statusAll": "All statuses",
+      "typeLabel": "Type:",
+      "typeAll": "All types"
+    },
+    "scopeTypes": {
+      "internal": "Internal",
+      "external": "External",
+      "national": "National"
+    },
+    "form": {
+      "title": "Add new club",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter name",
+      "fullNameLabel": "Full name",
+      "fullNamePlaceholder": "Enter full name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter email",
+      "typeLabel": "Type",
+      "typePlaceholder": "Select type",
+      "adminLabel": "Administrator",
+      "adminPlaceholder": "Select administrator",
+      "createError": "Error creating club"
+    },
+    "details": {
+      "defaultTitle": "Club",
+      "labels": {
+        "name": "Name:",
+        "fullName": "Full name:",
+        "cardPrefix": "Number:",
+        "email": "Email:",
+        "type": "Type:",
+        "status": "Status:",
+        "admin": "Administrator:",
+        "createdAt": "Created at:",
+        "updatedAt": "Modified at:"
+      },
+      "logo": {
+        "altClubLogo": "Club logo",
+        "altDefaultLogo": "Default logo",
+        "uploading": "Uploading...",
+        "uploadNew": "Upload new logo",
+        "onlyJpegPng": "Only JPEG and PNG files are allowed.",
+        "maxSize": "File must not exceed 10 MB.",
+        "adminOnly": "Logo upload is only allowed for federation and application administrators.",
+        "uploadError": "Error uploading logo"
+      },
+      "coaches": {
+        "title": "Coaches",
+        "columns": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "status": "Status",
+          "date": "Date"
+        },
+        "empty": "No coaches",
+        "addTitle": "Add coach",
+        "selectPlaceholder": "Select coach",
+        "addButton": "Add",
+        "removeTitle": "Removal confirmation",
+        "removeMessage": "Are you sure you want to remove this coach from the club?",
+        "removeButton": "Remove",
+        "addError": "Error adding coach",
+        "alreadyAssigned": "Coach is already added to the club.",
+        "removeError": "Error removing coach",
+        "createCoach": "Create coach",
+        "removeTooltip": "Remove"
+      },
+      "tabDetails": "Details"
+    },
+    "migration": {
+      "title": "Club migration",
+      "selectFile": "Select Excel file",
+      "mappingTitle": "Column mapping",
+      "mappingDescription": "Choose which file column to use for each field.",
+      "doNotImport": "Don't import",
+      "fields": {
+        "name": "Full name",
+        "shortName": "Short name",
+        "cardPrefix": "Number (2 digits)",
+        "clubEmail": "Club email",
+        "adminEmail": "Administrator email"
+      },
+      "previewTitle": "Data preview",
+      "validCount": "Clubs with valid number (2 digits):",
+      "migrateButton": "Migrate",
+      "migrating": "Migrating...",
+      "resultsTitle": "Migration result",
+      "created": "Created:",
+      "skipped": "Skipped:",
+      "skippedClubs": "Skipped clubs:",
+      "progress": "Sending {{count}} clubs in {{chunks}} requests...",
+      "noValidClubs": "No valid clubs for migration (only rows with 2-digit number).",
+      "fileReadError": "Error reading file",
+      "migrationError": "Migration error",
+      "reason": "Reason"
+    },
+    "filterConfigs": {
+      "status": "Status",
+      "type": "Type"
+    },
+    "export": {
+      "sheetName": "Clubs"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "count": "Number of users:",
+    "addButton": "Add user",
+    "table": {
+      "empty": "No users found",
+      "columns": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "dateOfBirth": "Date of birth",
+        "username": "Username",
+        "email": "Email",
+        "isActive": "Status",
+        "role": "Role",
+        "createdAt": "Created at",
+        "updatedAt": "Modified at"
+      }
+    },
+    "filters": {
+      "search": "Search...",
+      "roleLabel": "Role:",
+      "roleAll": "All roles",
+      "statusLabel": "Status:",
+      "statusAll": "All statuses"
+    },
+    "form": {
+      "title": "Add user",
+      "firstNameLabel": "First name",
+      "firstNamePlaceholder": "Enter first name",
+      "lastNameLabel": "Last name",
+      "lastNamePlaceholder": "Enter last name",
+      "dateOfBirthLabel": "Date of birth",
+      "dateOfBirthPlaceholder": "Select date of birth",
+      "emailLabel": "Email",
+      "emailPlaceholder": "Enter email",
+      "usernameLabel": "Username",
+      "usernamePlaceholder": "Will be filled automatically",
+      "usernameLockedClubAdmin": "Username is automatic and cannot be changed",
+      "usernameLockedNoEmail": "Enter email to unlock this field",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select role",
+      "roleClubAdminHint": "You can only create users with the Coach role",
+      "requiredFields": "Please fill in all required fields",
+      "createError": "Error creating user"
+    },
+    "details": {
+      "defaultTitle": "User",
+      "labels": {
+        "name": "Name:",
+        "username": "Username:",
+        "email": "Email:",
+        "role": "Role:",
+        "status": "Status:",
+        "dateOfBirth": "Date of birth:",
+        "club": "Club:",
+        "createdAt": "Created at:",
+        "updatedAt": "Modified at:"
+      },
+      "edit": {
+        "firstNameLabel": "First name",
+        "lastNameLabel": "Last name",
+        "dateOfBirthLabel": "Date of birth",
+        "dateOfBirthPlaceholder": "Select date of birth",
+        "usernameLabel": "Username",
+        "statusLabel": "Status",
+        "statusPlaceholder": "Select status"
+      }
+    },
+    "migration": {
+      "title": "User migration",
+      "selectFile": "Select Excel file",
+      "mappingTitle": "Column mapping",
+      "mappingDescription": "Choose which file column to use for each field.",
+      "doNotImport": "Don't import",
+      "defaultRoleLabel": "Default role (if not in column):",
+      "defaultRolePlaceholder": "Don't assign",
+      "fields": {
+        "firstName": "First name",
+        "lastName": "Last name",
+        "dateOfBirth": "Date of birth",
+        "email": "Email",
+        "role": "Role"
+      },
+      "previewTitle": "Data preview",
+      "validCount": "Valid records:",
+      "migrateButton": "Migrate",
+      "migrating": "Migrating...",
+      "resultsTitle": "Migration result",
+      "created": "Created:",
+      "skipped": "Skipped:",
+      "skippedRecords": "Skipped records:",
+      "progress": "Sending {{count}} records in {{chunks}} requests...",
+      "noValidRecords": "No valid records for migration.",
+      "fileReadError": "Error reading file.",
+      "migrationError": "Migration error"
+    },
+    "filterConfigs": {
+      "role": "Role",
+      "status": "Status"
+    }
+  },
+  "accreditations": {
+    "page": {
+      "title": "Registrations",
+      "tabs": {
+        "accreditations": "Registrations",
+        "athletes": "Athletes"
+      },
+      "count": "Count:",
+      "noClubMessage": "You are not assigned to a club. Contact an administrator.",
+      "loading": "Loading...",
+      "mobileMenu": {
+        "renew": "Renew",
+        "add": "Add",
+        "medicalData": "Medical data",
+        "migration": "Migration",
+        "export": "Export"
+      },
+      "selection": {
+        "maxSelectionMessage": "Only the first {{max}} accreditations are selected."
+      },
+      "export": {
+        "sheetName": "Accreditations",
+        "noDataError": "No data to export",
+        "exportError": "Error exporting data"
+      },
+      "loadError": "Error loading data",
+      "selectAllError": "Error selecting all"
+    },
+    "columns": {
+      "firstName": "First name",
+      "middleName": "Middle name",
+      "lastName": "Last name",
+      "gender": "Gender",
+      "dateOfBirth": "Date of birth",
+      "club": "Club",
+      "number": "Number",
+      "year": "Year",
+      "status": "Status",
+      "medicalExamDue": "Medical exam due",
+      "insurance": "Insurance",
+      "insuranceFrom": "Insurance from",
+      "insuranceTo": "Insurance to",
+      "createdAt": "Created",
+      "modifiedAt": "Modified",
+      "registeredAt": "Registered on",
+      "modifiedOn": "Modified on"
+    },
+    "filters": {
+      "search": "Search...",
+      "gender": "Gender:",
+      "birthYear": "Birth year:",
+      "birthYearFull": "Year of birth:",
+      "club": "Club:",
+      "year": "Year:",
+      "status": "Status:",
+      "allGenders": "All",
+      "allYears": "All years",
+      "allClubs": "All clubs",
+      "allStatuses": "All statuses"
+    },
+    "status": {
+      "active": "Active",
+      "requested": "Pending validation",
+      "pendingValidation": "Pending validation",
+      "pendingPhoto": "Pending photo validation",
+      "newPhoto": "New photo required",
+      "expired": "Expired",
+      "suspended": "Suspended"
+    },
+    "gender": {
+      "male": "Male",
+      "female": "Female"
+    },
+    "scopeType": {
+      "internal": "Internal",
+      "external": "External",
+      "national": "National"
+    },
+    "table": {
+      "selectAllLoading": "Selecting all...",
+      "empty": "No records found",
+      "loadingMore": "Loading..."
+    },
+    "athletesTable": {
+      "empty": "No athletes found",
+      "loading": "Loading..."
+    },
+    "addAthleteDialog": {
+      "title": "Add new athlete",
+      "importantNotice": "Important: By submitting this request, you declare that the athlete is medically fit for sport and has obtained written consent from a parent/guardian (for individuals under 18).",
+      "labels": {
+        "club": "Club:",
+        "firstName": "First name:",
+        "middleName": "Middle name:",
+        "lastName": "Last name:",
+        "dateOfBirth": "Date of birth",
+        "gender": "Gender:"
+      },
+      "placeholders": {
+        "firstName": "Enter first name",
+        "middleName": "Enter middle name",
+        "lastName": "Enter last name",
+        "dateOfBirth": "Select date of birth",
+        "gender": "Select gender"
+      },
+      "buttons": {
+        "close": "Close",
+        "save": "Save"
+      },
+      "confirm": {
+        "title": "Confirmation",
+        "text": "By confirming these conditions you agree to:",
+        "items": [
+          "Provide accurate information about the athlete",
+          "Take responsibility for medical fitness",
+          "Comply with federation rules"
+        ],
+        "cancel": "Cancel",
+        "confirm": "Confirm"
+      },
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "middleNameRequired": "Middle name is required",
+        "lastNameRequired": "Last name is required",
+        "dateOfBirthRequired": "Date of birth is required",
+        "genderRequired": "Gender is required"
+      },
+      "errors": {
+        "createFailed": "Error creating athlete"
+      }
+    },
+    "athleteDetailsDialog": {
+      "photoAlt": "Athlete photo",
+      "defaultPhotoAlt": "Default photo",
+      "uploadButton": "Upload new photo",
+      "uploading": "Uploading...",
+      "labels": {
+        "firstName": "First name:",
+        "middleName": "Middle name:",
+        "lastName": "Last name:",
+        "gender": "Gender:",
+        "dateOfBirth": "Date of birth:",
+        "competitionGroup": "Competition group:",
+        "medicalExamDue": "Medical exam due:",
+        "insurance": "Insurance:",
+        "registeredAt": "Registered on:",
+        "modifiedAt": "Modified on:",
+        "type": "Type:",
+        "medicalStartDate": "Medical exam – start date:",
+        "medicalDuration": "Duration (months):",
+        "insuranceFrom": "Insurance from:",
+        "insuranceTo": "Insurance to:"
+      },
+      "history": {
+        "title": "Accreditation history",
+        "columns": {
+          "club": "Club",
+          "number": "Number",
+          "year": "Year",
+          "status": "Status",
+          "createdAt": "Created",
+          "modifiedAt": "Modified"
+        },
+        "warnings": {
+          "firstAccreditation": "Note: This is a new athlete with a first accreditation",
+          "previousClub": "Note: The athlete was previously accredited at another club"
+        },
+        "loading": "Loading history...",
+        "loadingMore": "Loading more records...",
+        "empty": "No history"
+      },
+      "buttons": {
+        "edit": "Edit",
+        "close": "Close",
+        "cancel": "Cancel",
+        "save": "Save"
+      },
+      "unsavedChanges": {
+        "title": "Unsaved changes",
+        "message": "You have unsaved changes. Are you sure you want to close?",
+        "confirm": "Got it"
+      },
+      "placeholders": {
+        "selectStatus": "Select status",
+        "selectGender": "Select gender",
+        "selectDate": "Select date"
+      },
+      "photoErrors": {
+        "onlyJpegPng": "Only JPEG and PNG files are allowed.",
+        "maxFileSize": "File must not exceed 10 MB.",
+        "noAthleteData": "Missing athlete data.",
+        "uploadNotAllowed": "Upload not allowed: accreditation status is \"{{status}}\" — expected \"Pending photo\" or \"Active\"."
+      },
+      "errors": {
+        "saveFailed": "Error saving",
+        "uploadFailed": "Error uploading photo."
+      }
+    },
+    "batchMedicalDialog": {
+      "title": "Batch update medical data and insurance",
+      "description": "{{count}} selected athletes will be updated.",
+      "instruction": "Fill in only the fields you want to update. Empty fields will not be changed.",
+      "sections": {
+        "medical": "Medical exam (optional)",
+        "insurance": "Insurance (optional)"
+      },
+      "labels": {
+        "startDate": "Start date",
+        "duration": "Duration (months)",
+        "insuranceFrom": "Insurance from",
+        "insuranceTo": "Insurance to"
+      },
+      "placeholders": {
+        "selectDate": "Select date",
+        "durationExample": "E.g. 12"
+      },
+      "validation": {
+        "required": "Required field",
+        "noSelection": "No athletes selected.",
+        "fillMedicalStart": "Fill in medical exam start date.",
+        "fillMedicalDuration": "Fill in medical exam duration.",
+        "fillInsuranceFrom": "Fill in insurance start date.",
+        "fillInsuranceTo": "Fill in insurance end date.",
+        "fillAtLeastOne": "Fill at least one field"
+      },
+      "buttons": {
+        "cancel": "Cancel",
+        "saving": "Saving...",
+        "apply": "Apply"
+      },
+      "errors": {
+        "updateFailed": "Error updating",
+        "partialFailed": "One or more requests failed.",
+        "saveFailed": "Error saving"
+      }
+    },
+    "migrationDialog": {
+      "title": "Athlete migration",
+      "uploadButton": "Select Excel file",
+      "fileReadError": "Error reading file.",
+      "mapping": {
+        "title": "Column mapping",
+        "instruction": "Choose which file column to use for each field.",
+        "placeholder": "Don't import",
+        "yearLabel": "Accreditation year:",
+        "yearError": "Cannot accredit for a future year"
+      },
+      "dataFields": {
+        "oldCardNumber": "Card number",
+        "firstName": "First name",
+        "middleName": "Middle name",
+        "lastName": "Last name",
+        "gender": "Gender",
+        "dateOfBirth": "Date of birth"
+      },
+      "preview": {
+        "title": "Data preview",
+        "validRecords": "Records with valid card number (4–6 digits):",
+        "columns": {
+          "cardNumber": "Card",
+          "firstName": "First name",
+          "middleName": "Middle name",
+          "lastName": "Last name",
+          "gender": "Gender",
+          "dateOfBirth": "Date of birth"
+        }
+      },
+      "progress": "Sending {{count}} records in {{chunks}} requests...",
+      "noValidRecords": "No valid records for migration (card number 4–6 digits, gender Male/Female and all fields).",
+      "results": {
+        "title": "Migration result",
+        "migrated": "Migrated:",
+        "skipped": "Skipped:",
+        "failedChunks": "{{failed}} of {{total}} requests failed.",
+        "failedColumns": {
+          "chunk": "Request",
+          "reason": "Reason"
+        },
+        "skippedTitle": "Skipped records:",
+        "skippedColumns": {
+          "cardNumber": "Card",
+          "name": "First name",
+          "lastName": "Last name",
+          "reason": "Reason"
+        }
+      },
+      "buttons": {
+        "back": "Back",
+        "preview": "Preview",
+        "migrating": "Migrating...",
+        "migrate": "Migrate",
+        "done": "Done"
+      }
+    },
+    "renewDialog": {
+      "title": "Accreditation renewal",
+      "description": "The accreditation of the following athletes will be renewed for {{year}}:",
+      "columns": {
+        "name": "Name",
+        "dateOfBirth": "Date of birth"
+      },
+      "buttons": {
+        "close": "Close",
+        "renew": "Renew"
+      },
+      "results": {
+        "success": "Successfully renewed:",
+        "failed": "Failed:",
+        "columns": {
+          "athleteId": "Athlete ID",
+          "error": "Error"
+        },
+        "renewError": "Renewal error"
+      },
+      "errors": {
+        "renewFailed": "Error renewing",
+        "unknown": "Unknown error"
+      }
+    },
+    "settingsDialog": {
+      "title": "Table settings",
+      "tabs": {
+        "columns": "Columns",
+        "filters": "Filters"
+      },
+      "columnsDescription": "Choose which columns to display in the table.",
+      "filtersDescription": "Choose which filters to display. Hiding a filter clears its value.",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save"
+      }
+    },
+    "photoCropDialog": {
+      "title": "Crop photo",
+      "instruction": "Drag the photo to position it. Use the buttons to zoom.",
+      "imageAlt": "Photo to crop",
+      "zoomOut": "Zoom out",
+      "zoomIn": "Zoom in",
+      "buttons": {
+        "cancel": "Cancel",
+        "processing": "Processing...",
+        "confirm": "Confirm"
+      },
+      "errors": {
+        "loadFailed": "Failed to load image.",
+        "notLoaded": "Image is not loaded. Try again.",
+        "cropFailed": "Failed to crop. Try again."
+      }
+    },
+    "photoViewDialog": {
+      "title": "Athlete photo",
+      "photoAlt": "Athlete photo",
+      "defaultPhotoAlt": "Default photo"
+    },
+    "detailPage": {
+      "tabs": {
+        "details": "Details",
+        "history": "History"
+      },
+      "labels": {
+        "lastAccreditation": "Last accreditation",
+        "club": "Club:",
+        "number": "Number:",
+        "status": "Status:",
+        "year": "Year:"
+      },
+      "viewFullHistory": "View full history →",
+      "noData": "No data",
+      "buttons": {
+        "edit": "Edit",
+        "delete": "Delete",
+        "cancel": "Cancel",
+        "cancelStatus": "Cancel",
+        "save": "Save",
+        "saveStatus": "Save"
+      },
+      "errors": {
+        "loadFailed": "Error loading accreditation",
+        "notFound": "Accreditation not found.",
+        "deleteFailed": "Error deleting accreditation",
+        "uploadNotAllowed": "Upload not allowed"
+      },
+      "defaultName": "Accreditation",
+      "defaultPhotoAlt": "Default photo",
+      "loading": "Loading...",
+      "photoAlt": "Athlete photo",
+      "unsavedChanges": {
+        "cancelButton": "Cancel",
+        "confirm": "Got it",
+        "message": "You have unsaved changes. Please use the",
+        "saveButton": "Save",
+        "suffix": "buttons to exit editing.",
+        "title": "Unsaved changes"
+      }
+    },
+    "athleteDetailPage": {
+      "tabs": {
+        "details": "Details",
+        "accreditationHistory": "Accreditation history"
+      },
+      "photoAlt": "Athlete photo",
+      "defaultPhotoAlt": "Default photo",
+      "defaultName": "Athlete",
+      "buttons": {
+        "edit": "Edit",
+        "deleteAthlete": "Delete athlete",
+        "save": "Save",
+        "cancel": "Cancel",
+        "editStatus": "Edit status",
+        "deleteAccreditation": "Delete accreditation",
+        "cancelStatus": "Cancel",
+        "saveStatus": "Save"
+      },
+      "errors": {
+        "loadFailed": "Error loading athlete",
+        "notFound": "Athlete not found.",
+        "deleteAccreditationFailed": "Error deleting accreditation",
+        "deleteAthleteFailed": "Error deleting athlete",
+        "statusSaveFailed": "Error saving status"
+      },
+      "deletingAccreditationName": "accreditation {{number}}",
+      "labels": {
+        "club": "Club:",
+        "lastAccreditation": "Last accreditation:",
+        "number": "Number:",
+        "status": "Status:",
+        "year": "Year:"
+      },
+      "loading": "Loading...",
+      "noData": "No data",
+      "unsavedChanges": {
+        "cancelButton": "Cancel",
+        "confirm": "Got it",
+        "message": "You have unsaved changes. Please use the",
+        "saveButton": "Save",
+        "suffix": "buttons to exit editing.",
+        "title": "Unsaved changes"
+      },
+      "viewFullHistory": "View full history"
+    }
+  },
+  "competitions": {
+    "page": {
+      "title": "Competitions",
+      "count": "Count:",
+      "addButton": "Add",
+      "settingsTitle": "Table settings",
+      "loading": "Loading...",
+      "loadError": "Error loading data"
+    },
+    "columns": {
+      "shortName": "Short name",
+      "name": "Name",
+      "status": "Status",
+      "startDate": "Start date",
+      "endDate": "End date",
+      "location": "Location",
+      "createdAt": "Created at",
+      "modifiedAt": "Modified at"
+    },
+    "filters": {
+      "search": "Search...",
+      "status": "Status:",
+      "allStatuses": "All statuses"
+    },
+    "table": {
+      "empty": "No competitions found",
+      "loading": "Loading..."
+    },
+    "status": {
+      "template": "Template",
+      "planned": "Planned",
+      "registrationOpen": "Registration",
+      "registrationClosed": "Registration closed",
+      "inProgress": "In progress",
+      "completed": "Completed"
+    },
+    "eventType": {
+      "heat": "Heat",
+      "semifinal": "Semifinal",
+      "finalB": "Final B",
+      "finalA": "Final A"
+    },
+    "eventStatus": {
+      "scheduled": "Scheduled",
+      "inProgress": "In progress",
+      "unofficialResults": "Unofficial",
+      "officialResults": "Official",
+      "cancelled": "Cancelled",
+      "planiranoFull": "Planned",
+      "inProgressFull": "In progress",
+      "unofficialResultsFull": "Unofficial results",
+      "officialResultsFull": "Official results",
+      "cancelledFull": "Cancelled"
+    },
+    "competitionType": {
+      "nationalErgo": "National (ergo)",
+      "nationalWater": "National (water)",
+      "balkan": "Balkan"
+    },
+    "addCompetitionDialog": {
+      "title": "Add competition",
+      "typeToggle": {
+        "real": "Real",
+        "template": "Template"
+      },
+      "templatePicker": {
+        "useTemplate": "Use template",
+        "selectTemplate": "Select template..."
+      },
+      "labels": {
+        "type": "Type",
+        "shortName": "Short name",
+        "fullName": "Full name",
+        "location": "Location",
+        "format": "Format",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "entrySubmissionsOpen": "Entry submissions open",
+        "entrySubmissionsClosed": "Entry submissions closed",
+        "lastChangesBeforeTs": "Last changes before TS",
+        "technicalMeeting": "Technical meeting",
+        "awards": "Awards",
+        "scoringScheme": "Scoring scheme",
+        "qualificationScheme": "Qualification scheme"
+      },
+      "placeholders": {
+        "shortName": "Short name",
+        "fullName": "Full name",
+        "location": "City, venue",
+        "selectFormat": "Select format...",
+        "selectDate": "Select date...",
+        "selectDateTime": "Select date and time...",
+        "selectScheme": "Select scheme..."
+      },
+      "duration": {
+        "day": "day",
+        "days": "days"
+      },
+      "buttons": {
+        "close": "Close",
+        "save": "Save"
+      },
+      "errors": {
+        "createFailed": "Error creating competition",
+        "copyFailed": "Error copying competition",
+        "copyPartial": "Competition copied partially"
+      }
+    },
+    "detailsPage": {
+      "loading": "Loading...",
+      "tabs": {
+        "details": "Details",
+        "disciplines": "Disciplines",
+        "timetable": "Timetable",
+        "entries": "Entries",
+        "progression": "Start list",
+        "weighIn": "Weigh-in",
+        "results": "Results",
+        "complexStandings": "Team standings"
+      },
+      "details": {
+        "sectionTitle": "General information",
+        "labels": {
+          "shortName": "Short name:",
+          "fullName": "Full name:",
+          "location": "Location:",
+          "format": "Format:",
+          "startDate": "Start date:",
+          "endDate": "End date:",
+          "entrySubmissionsOpen": "Entries open:",
+          "entrySubmissionsClosed": "Entries closed:",
+          "lastChangesBeforeTs": "Last changes before TS:",
+          "technicalMeeting": "Technical meeting:",
+          "awards": "Awards:",
+          "createdAt": "Created at:",
+          "modifiedAt": "Modified at:"
+        },
+        "scoring": {
+          "title": "Scoring scheme",
+          "nameLabel": "Name:",
+          "statusLabel": "Status:",
+          "active": "Active",
+          "inactive": "Inactive",
+          "notSet": "No scoring scheme set"
+        },
+        "qualification": {
+          "title": "Qualification scheme",
+          "nameLabel": "Name:",
+          "laneCountLabel": "Number of lanes:",
+          "statusLabel": "Status:",
+          "active": "Active",
+          "inactive": "Inactive",
+          "notSet": "No qualification scheme set"
+        },
+        "buttons": {
+          "edit": "Edit",
+          "delete": "Delete",
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "placeholders": {
+          "selectFormat": "Select format...",
+          "selectDate": "Select date...",
+          "selectDateTime": "Select date and time...",
+          "selectScheme": "Select scheme..."
+        }
+      },
+      "disciplines": {
+        "description": "Disciplines are derived from the event timetable.",
+        "loading": "Loading...",
+        "empty": "No disciplines (add events to the timetable)",
+        "noGroup": "No group",
+        "columns": {
+          "shortName": "Short name",
+          "fullName": "Full name"
+        }
+      },
+      "timetable": {
+        "addEvent": "+ Add event",
+        "newEvent": "New event",
+        "labels": {
+          "discipline": "Discipline",
+          "type": "Type",
+          "scheduled": "Scheduled"
+        },
+        "placeholders": {
+          "selectDiscipline": "Select discipline...",
+          "selectType": "Select...",
+          "selectDateTime": "Select date and time...",
+          "disciplinePlaceholder": "Discipline...",
+          "typePlaceholder": "Type...",
+          "statusPlaceholder": "Status..."
+        },
+        "columns": {
+          "number": "#",
+          "discipline": "Discipline",
+          "type": "Type",
+          "date": "Date",
+          "time": "Time",
+          "status": "Status"
+        },
+        "loading": "Loading...",
+        "empty": "No events added to the timetable",
+        "buttons": {
+          "cancel": "Cancel",
+          "save": "Save"
+        },
+        "editButton": "Edit",
+        "deleteButton": "Delete"
+      },
+      "entries": {
+        "loading": "Loading...",
+        "clubCount": "{{count}} club",
+        "clubCountPlural": "{{count}} clubs",
+        "entryCount": "{{count}} entry",
+        "entryCountPlural": "{{count}} entries",
+        "submitButton": "Submit / edit entries",
+        "submissionClosed": "The entry submission period has ended. All entries are visible.",
+        "submissionNotOpen": "The entry submission period has not yet opened.",
+        "empty": "No entries submitted",
+        "clubSubmissionsTitle": "Submitted entries by club",
+        "columns": {
+          "club": "Club",
+          "entries": "Entries",
+          "team": "Team"
+        },
+        "viewButton": "View",
+        "noClubEntries": "No entries from this club"
+      },
+      "progression": {
+        "generateButton": "Generate next stage",
+        "generating": "Generating...",
+        "loading": "Loading...",
+        "empty": "No start lists generated",
+        "noParticipants": "No participants",
+        "lanesButton": "Lanes",
+        "resultsButton": "Results",
+        "refreshButton": "Refresh",
+        "columns": {
+          "place": "Place",
+          "lane": "Lane",
+          "club": "Club",
+          "crew": "Crew",
+          "time": "Time"
+        },
+        "statusLabels": {
+          "notStarted": "Not started",
+          "inProgress": "In progress",
+          "finished": "Finished"
+        },
+        "errors": {
+          "loadFailed": "Error loading progression",
+          "generateFailed": "Error generating progression"
+        }
+      },
+      "results": {
+        "loading": "Loading...",
+        "empty": "No disciplines",
+        "noStandings": "No standings",
+        "generateButton": "Generate standings",
+        "generating": "Generating...",
+        "recalculate": "Recalculate",
+        "generate": "Generate",
+        "deleteButton": "Delete",
+        "columns": {
+          "place": "Place",
+          "club": "Club",
+          "crew": "Crew",
+          "time": "Time",
+          "points": "Points"
+        }
+      },
+      "complexStandings": {
+        "loading": "Loading...",
+        "empty": "No complex standings. Generate final standings for disciplines from the \"Results\" tab.",
+        "viewButtons": {
+          "label": "View:",
+          "total": "Total",
+          "byDisciplines": "By disciplines",
+          "medals": "Medals"
+        },
+        "genderButtons": {
+          "label": "Gender:",
+          "all": "All",
+          "male": "Male",
+          "female": "Female"
+        },
+        "groupButton": {
+          "label": "Group:",
+          "all": "All"
+        },
+        "columns": {
+          "place": "Place",
+          "club": "Club",
+          "points": "Points",
+          "total": "Total"
+        },
+        "summaryTitles": {
+          "maleSummary": "Male — Summary",
+          "femaleSummary": "Female — Summary",
+          "allSummary": "All — Summary"
+        }
+      },
+      "weighIn": {
+        "loading": "Loading...",
+        "empty": "No athletes to weigh for the selected day",
+        "todayWarning": "Measurements can only be recorded for today.",
+        "columns": {
+          "athlete": "Athlete",
+          "cardNumber": "Card",
+          "role": "Role",
+          "limit": "Limit",
+          "weight": "Weight",
+          "comment": "Comment"
+        },
+        "weightUnit": "kg",
+        "editPlaceholder": "Weight (kg)",
+        "saveButton": "Save",
+        "photoAlt": "Photo"
+      },
+      "editingWarning": {
+        "title": "Unsaved changes",
+        "message": "You have unsaved changes. Please use the \"Save\" or \"Cancel\" buttons to exit editing.",
+        "confirm": "Got it"
+      },
+      "clubSelect": {
+        "title": "Select club",
+        "label": "Club:",
+        "placeholder": "Search for a club...",
+        "closeButton": "Close"
+      },
+      "clubDetail": {
+        "titlePrefix": "Entry —",
+        "loading": "Loading...",
+        "empty": "No entries from this club",
+        "maleTeam": "Male team",
+        "femaleTeam": "Female team",
+        "athleteCountLabel": "athletes",
+        "inGroup": "in group",
+        "transfer": "transfer",
+        "coxswain": "coxswain",
+        "viewTransferSchema": "View transfer schema",
+        "columns": {
+          "number": "#",
+          "name": "Name",
+          "birthYear": "Birth year",
+          "disciplines": "Disc.",
+          "medical": "Med.",
+          "insurance": "Ins.",
+          "status": "Status"
+        },
+        "activeStatus": "Active",
+        "closeButton": "Close",
+        "coxBadge": "[C]",
+        "disciplineColumns": {
+          "crew": "Crew",
+          "discipline": "Discipline",
+          "team": "Team"
+        },
+        "femaleDisciplines": "Female disciplines",
+        "maleDisciplines": "Male disciplines",
+        "mixedDisciplines": "Mixed disciplines",
+        "noDisciplineEntries": "No discipline entries",
+        "transferBadge": "[T]"
+      },
+      "errors": {
+        "loadFailed": "Error loading data"
+      },
+      "transferSchema": {
+        "closeButton": "Close",
+        "columns": {
+          "maxTransfer": "Max transfer",
+          "totalCrew": "Total crew"
+        },
+        "current": "Current",
+        "description": "Transfer schema description",
+        "overLimit": "Over limit",
+        "titlePrefix": "Transfer schema",
+        "withinLimit": "Within limit"
+      }
+    },
+    "settingsDialog": {
+      "title": "Table settings",
+      "tabs": {
+        "columns": "Columns",
+        "filters": "Filters"
+      },
+      "columnsDescription": "Choose which columns to display in the table.",
+      "filtersDescription": "Choose which filters to display. Hiding a filter clears its value.",
+      "selectAll": "Select all",
+      "deselectAll": "Deselect all",
+      "buttons": {
+        "cancel": "Cancel",
+        "save": "Save"
+      }
+    },
+    "chronometer": {
+      "titlePrefix": {
+        "start": "Chronometer —",
+        "finish": "Finish —",
+        "assign": "Assignment —"
+      },
+      "start": {
+        "spaceToStart": "Press SPACE to start",
+        "running": "Chronometer is running",
+        "backToResults": "Back to results",
+        "restart": "Restart"
+      },
+      "finish": {
+        "spaceToCapture": "Press SPACE to capture time",
+        "minSplits": "Minimum {{count}} times to stop (captured: {{captured}})",
+        "stopButton": "Stop chronometer"
+      },
+      "assign": {
+        "totalTime": "Total time:",
+        "capturedSplits": "Captured times:",
+        "selected": "Selected:",
+        "laneOrderLabel": "Finish order — {{count}} lanes (separated by space)",
+        "laneOrderPlaceholder": "e.g. 7 4 3 1",
+        "availableLanes": "Available lanes:",
+        "buttons": {
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "errors": {
+          "selectAtLeastOne": "Select at least one time",
+          "enterLanes": "Please enter the finish lanes",
+          "exactLanes": "Enter exactly {{expected}} lanes (entered: {{entered}})",
+          "invalidLane": "\"{{value}}\" is not a valid lane number",
+          "laneNotExist": "Lane {{lane}} does not exist in this event (available: {{available}})",
+          "duplicateLane": "Lane {{lane}} is entered more than once",
+          "maxSplits": "Maximum {{max}} times (equal to lanes)"
+        }
+      },
+      "restartConfirm": {
+        "startMessage": "Are you sure? The chronometer will be reset.",
+        "finishMessage": "Are you sure? All captured times will be deleted.",
+        "no": "No",
+        "yesRestart": "Yes, restart"
+      }
+    },
+    "submitEntriesDialog": {
+      "title": "Submit entries",
+      "loadingAthletes": "Loading athletes...",
+      "eligible": "eligible",
+      "transferLabel": "transfer (selected {{count}})",
+      "maxDisciplinesPerAthlete": "max {{max}} disc./athlete",
+      "maxDisciplinesPerTransfer": "max {{max}} disc./transfer",
+      "selectedAthletes": "Selected athletes:",
+      "transferInParens": "({{count}} transfer)",
+      "transferLimitExceeded": "Transfer limit exceeded!",
+      "disciplines": "Disciplines",
+      "removeButton": "Remove",
+      "teamLabel": "Team {{number}}",
+      "filledCount": "{{filled}}/{{total}}",
+      "ownLabel": "own",
+      "duplicateError": "duplicate!",
+      "genderImbalanceError": "50/50 M/F!",
+      "deleteTeam": "Delete",
+      "addTeam": "+ Add team",
+      "selectDisciplinesHint": "Select disciplines from the buttons above",
+      "noDisciplines": "No disciplines in the timetable",
+      "validationErrors": "Validation errors:",
+      "placeholders": {
+        "selectAthleteFirst": "First select athletes",
+        "selectAthlete": "Select athlete"
+      },
+      "maxCrewFromTransfer": "max {{max}} transfer/team",
+      "buttons": {
+        "cancel": "Cancel",
+        "submit": "Submit entries"
+      },
+      "errors": {
+        "saveFailed": "Error saving entries"
+      },
+      "athletePool": {
+        "titlePrefix": "Athlete selection —",
+        "searchPlaceholder": "Search by name, year, card...",
+        "ownSection": "Own",
+        "transferSection": "Transfer from {{group}}",
+        "noResults": "No athletes found",
+        "footerAthletes": "athletes",
+        "transferExceeded": "Limit exceeded!",
+        "schemaButton": "Schema",
+        "doneButton": "Done",
+        "transferSummary": "Transfer: {{used}}/{{max}}",
+        "transferSummaryWithMax": "Transfer: {{used}}/{{max}} (max {{limit}})"
+      },
+      "transferSchema": {
+        "titlePrefix": "Transfer schema —",
+        "description": "Up to {{ratio}}% of starting athletes may be from {{group}}.",
+        "columns": {
+          "totalCrew": "Total crew size",
+          "maxTransfer": "Max transfer"
+        },
+        "current": "(current)",
+        "overLimit": "Selected {{count}} transfer from {{total}} total — limit exceeded (max {{max}}).",
+        "withinLimit": "Selected {{count}} transfer from {{total}} total — within limit (max {{max}}).",
+        "closeButton": "Close"
+      },
+      "genderLabels": {
+        "male": "Male",
+        "female": "Female",
+        "mixed": "Mixed"
+      },
+      "coxAbbrev": "cox.",
+      "coxBadge": "[C]",
+      "coxShortAbbrev": "c",
+      "discAbbrev": "disc.",
+      "transferAbbrev": "tr.",
+      "transferBadge": "[T]",
+      "yearAbbrev": "y."
+    },
+    "laneRearrange": {
+      "titleSuffix": "Lanes"
+    },
+    "resultsEntry": {
+      "statusOptions": {
+        "unofficialResults": "Unofficial results",
+        "officialResults": "Official results"
+      },
+      "finishStatusOptions": {
+        "finished": "FINISHED",
+        "dns": "DNS",
+        "dnf": "DNF",
+        "dsq": "DSQ"
+      },
+      "chronoRunning": "Chronometer running",
+      "closeButton": "Close",
+      "columns": {
+        "status": "Status",
+        "time": "Time"
+      },
+      "eventStatusLabel": "Event status:",
+      "noParticipants": "No participants",
+      "processFinish": "Finish",
+      "processStart": "Start",
+      "resultsWarning": "Results warning",
+      "saveButton": "Save",
+      "savingButton": "Saving...",
+      "titlePrefix": "Results —"
+    },
+    "accreditationStatusLabels": {
+      "ACTIVE": "Active",
+      "EXPIRED": "Expired",
+      "NEW_PHOTO_REQUIRED": "New photo required",
+      "PENDING_PHOTO_VALIDATION": "Pending photo validation",
+      "PENDING_VALIDATION": "Pending validation",
+      "SUSPENDED": "Suspended"
+    },
+    "chartLabels": {
+      "firstPlace": "1st place",
+      "medals": "Medals",
+      "medalsAxis": "Medals",
+      "points": "Points",
+      "pointsAxis": "Points",
+      "secondPlace": "2nd place",
+      "thirdPlace": "3rd place",
+      "totalPoints": "Total points"
+    },
+    "chronoWarning": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "message": "Are you sure you want to continue?",
+      "title": "Warning"
+    },
+    "crewVerify": {
+      "empty": "No athletes",
+      "indexLabel": "#",
+      "markChecked": "Mark as checked",
+      "markUnchecked": "Mark as unchecked",
+      "notMeasured": "Not measured",
+      "photoAlt": "Athlete photo",
+      "weightUnit": "kg"
+    },
+    "crewVerifyErrors": {
+      "statusFailed": "Error updating status"
+    },
+    "deleteErrors": {
+      "competitionFailed": "Error deleting competition"
+    },
+    "editErrors": {
+      "saveFailed": "Error saving competition"
+    },
+    "eventStatusMap": {
+      "CANCELLED": "Cancelled",
+      "IN_PROGRESS": "In progress",
+      "OFFICIAL_RESULTS": "Official results",
+      "SCHEDULED": "Scheduled",
+      "UNOFFICIAL_RESULTS": "Unofficial results"
+    },
+    "eventTypeMap": {
+      "FA": "FA",
+      "FB": "FB",
+      "H": "H",
+      "SF": "SF"
+    },
+    "genderAbbrev": {
+      "female": "W",
+      "male": "M"
+    },
+    "generateProgressionDialog": {
+      "closeButton": "Close",
+      "entriesCount": "entries",
+      "selectAll": "All disciplines",
+      "title": "Generate next stage"
+    },
+    "generateResultsDialog": {
+      "closeButton": "Close",
+      "columns": {
+        "fromStage": "From stage",
+        "reason": "Reason",
+        "toStage": "To stage"
+      },
+      "empty": "No results",
+      "title": "Generate results"
+    },
+    "generateStandingsDialog": {
+      "closeButton": "Close",
+      "selectAll": "Select all",
+      "title": "Generate standings"
+    },
+    "generationStatusLabels": {
+      "error": "Error",
+      "skipped": "Skipped",
+      "success": "Success"
+    },
+    "laneRearrangeErrors": {
+      "saveFailed": "Error saving lane arrangement"
+    },
+    "pdf": {
+      "results": {
+        "club": "Club",
+        "crew": "Crew",
+        "filenameSuffix": "results",
+        "points": "Points",
+        "rank": "Rank",
+        "subtitle": "Results",
+        "time": "Time"
+      },
+      "startList": {
+        "club": "Club",
+        "crew": "Crew",
+        "lane": "Lane"
+      },
+      "weighIn": {
+        "athlete": "Athlete",
+        "card": "Card",
+        "comment": "Comment",
+        "filenameSuffix": "weigh-in",
+        "limit": "Limit",
+        "role": "Role",
+        "subtitle": "Weigh-in",
+        "weight": "Weight",
+        "weightUnit": "kg"
+      }
+    },
+    "progressionDialog": {
+      "closeButton": "Close",
+      "columns": {
+        "lane": "Lane",
+        "series": "Heat",
+        "status": "Status"
+      },
+      "editLanesButton": "Edit lanes",
+      "empty": "No entries",
+      "laneEditing": "Lane editing",
+      "saveResultsButton": "Save results",
+      "titlePrefix": "Progression —"
+    },
+    "resultsErrors": {
+      "invalidTime": "Invalid time format",
+      "lanesSaveFailed": "Error saving lanes",
+      "saveFailed": "Error saving results"
+    },
+    "roleLabels": {
+      "cox": "Coxswain",
+      "rower": "Rower"
+    },
+    "standingsErrors": {
+      "clubRankingsFailed": "Error loading club rankings",
+      "deleteFailed": "Error deleting standings",
+      "generateFailed": "Error generating standings",
+      "generateSingleFailed": "Error generating single standing",
+      "loadFailed": "Error loading standings"
+    },
+    "standingsResultsDialog": {
+      "closeButton": "Close",
+      "columns": {
+        "reason": "Reason"
+      },
+      "empty": "No results",
+      "title": "Standing results"
+    },
+    "statusLabels": {
+      "completed": "Completed",
+      "inProgress": "In progress",
+      "planned": "Planned",
+      "registrationClosed": "Registration closed",
+      "registrationOpen": "Registration open",
+      "template": "Template"
+    },
+    "timetableErrors": {
+      "deleteFailed": "Error deleting timetable entry",
+      "saveFailed": "Error saving timetable"
+    },
+    "weighInComments": {
+      "aboveLimit": "Above limit (max {{max}} kg)",
+      "belowMinimum": "Below minimum (min {{min}} kg)",
+      "compensation": "Compensation (required {{required}} kg)"
+    },
+    "weighInErrors": {
+      "saveFailed": "Error saving weigh-in"
+    },
+    "weighInWarnings": {
+      "lessThanOneHour": "Less than 1 hour to race",
+      "moreThanTwoHours": "More than 2 hours to race"
+    },
+    "seatLabels": {
+      "BOW": "B",
+      "TWO": "2",
+      "THREE": "3",
+      "FOUR": "4",
+      "FIVE": "5",
+      "SIX": "6",
+      "SEVEN": "7",
+      "STROKE": "S",
+      "COX": "C"
+    }
+  },
+  "competitionGroups": {
+    "title": "Competition Groups",
+    "count": "Number of groups:",
+    "addButton": "Add group",
+    "table": {
+      "empty": "No competition groups found",
+      "columns": {
+        "name": "Name",
+        "shortName": "Short name",
+        "minAge": "Min age",
+        "maxAge": "Max age",
+        "coxMinAge": "Cox min age",
+        "coxMaxAge": "Cox max age",
+        "maxDisciplinesPerAthlete": "Max disciplines",
+        "transferFromGroupId": "Transfer from group",
+        "minCrewForTransfer": "Min crew",
+        "transferRatio": "Ratio",
+        "transferRounding": "Rounding",
+        "transferredMaxDisciplinesPerAthlete": "Max disc. (transf.)",
+        "isActive": "Status",
+        "createdAt": "Created at",
+        "modifiedAt": "Modified at",
+        "femaleTeamCoxMinWeightKg": "W. cox min weight",
+        "femaleTeamCoxRequiredWeightKg": "W. cox req. weight",
+        "femaleTeamLightMaxWeightKg": "W. lwt max weight",
+        "maleTeamCoxMinWeightKg": "M. cox min weight",
+        "maleTeamCoxRequiredWeightKg": "M. cox req. weight",
+        "maleTeamLightMaxWeightKg": "M. lwt max weight"
+      }
+    },
+    "filters": {
+      "search": "Search...",
+      "statusLabel": "Status:",
+      "statusAll": "All statuses"
+    },
+    "rounding": {
+      "down": "Down",
+      "up": "Up",
+      "round": "Round"
+    },
+    "form": {
+      "title": "Add competition group",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter name",
+      "shortNameLabel": "Short name",
+      "shortNamePlaceholder": "Enter short name",
+      "minAgeLabel": "Min age",
+      "maxAgeLabel": "Max age",
+      "coxMinAgeLabel": "Coxswain min age",
+      "coxMaxAgeLabel": "Coxswain max age",
+      "maxDisciplinesLabel": "Max disciplines per athlete",
+      "transferFromGroupLabel": "Transfer from group",
+      "minCrewForTransferLabel": "Min crew for transfer",
+      "transferRatioLabel": "Transfer ratio (%)",
+      "transferRoundingLabel": "Transfer rounding",
+      "transferredMaxDisciplinesLabel": "Max disciplines for transferred",
+      "statusLabel": "Status",
+      "createError": "Error creating competition group",
+      "femaleTeamCoxMinWeightLabel": "Women — coxswain min weight (kg)",
+      "femaleTeamCoxRequiredWeightLabel": "Women — coxswain required weight (kg)",
+      "femaleTeamLightMaxWeightLabel": "Women — lightweight max weight (kg)",
+      "maleTeamCoxMinWeightLabel": "Men — coxswain min weight (kg)",
+      "maleTeamCoxRequiredWeightLabel": "Men — coxswain required weight (kg)",
+      "maleTeamLightMaxWeightLabel": "Men — lightweight max weight (kg)"
+    },
+    "details": {
+      "defaultTitle": "Competition Group",
+      "labels": {
+        "name": "Name:",
+        "shortName": "Short name:",
+        "minAge": "Min age:",
+        "maxAge": "Max age:",
+        "coxMinAge": "Coxswain min age:",
+        "coxMaxAge": "Coxswain max age:",
+        "maxDisciplines": "Max disciplines:",
+        "transferFromGroup": "Transfer from group:",
+        "minCrewForTransfer": "Min crew for transfer:",
+        "transferRatio": "Transfer ratio:",
+        "transferRounding": "Transfer rounding:",
+        "transferredMaxDisciplines": "Max disciplines (transf.):",
+        "status": "Status:",
+        "createdAt": "Created at:",
+        "modifiedAt": "Modified at:",
+        "femaleTeamCoxMinWeight": "Women — cox min weight (kg):",
+        "femaleTeamCoxRequiredWeight": "Women — cox req. weight (kg):",
+        "femaleTeamLightMaxWeight": "Women — lwt max weight (kg):",
+        "maleTeamCoxMinWeight": "Men — cox min weight (kg):",
+        "maleTeamCoxRequiredWeight": "Men — cox req. weight (kg):",
+        "maleTeamLightMaxWeight": "Men — lwt max weight (kg):"
+      },
+      "transferSchema": {
+        "title": "Transfer schema",
+        "viewLink": "View transfer schema",
+        "crewSize": "Crew size",
+        "transferCount": "Allowed transfers"
+      },
+      "disciplineTable": {
+        "boatClass": "Boat class",
+        "crewSize": "Crew size",
+        "distance": "Distance",
+        "empty": "No disciplines",
+        "gender": "Gender",
+        "hasCoxswain": "Coxswain",
+        "isLightweight": "Lightweight",
+        "maxTransfer": "Max transfer",
+        "name": "Name",
+        "placeholderBoatClass": "Select boat class",
+        "placeholderGender": "Select gender",
+        "shortName": "Short name",
+        "status": "Status"
+      },
+      "tabDetails": "Details",
+      "tabDisciplines": "Disciplines"
+    },
+    "filterConfigs": {
+      "status": "Status"
+    },
+    "placeholders": {
+      "selectGroup": "Select group",
+      "selectRounding": "Select rounding",
+      "selectStatus": "Select status"
+    }
+  },
+  "disciplines": {
+    "title": "Disciplines",
+    "count": "Number of disciplines:",
+    "addButton": "Add discipline",
+    "table": {
+      "empty": "No disciplines found",
+      "columns": {
+        "name": "Name",
+        "shortName": "Short name",
+        "gender": "Gender",
+        "competitionGroup": "Competition group",
+        "boatClass": "Boat class",
+        "crewSize": "Crew size",
+        "maxCrewFromTransfer": "Max transferred",
+        "hasCoxswain": "Coxed",
+        "isLightweight": "Lightweight",
+        "distanceMeters": "Distance (m)",
+        "isActive": "Status",
+        "createdAt": "Created at",
+        "modifiedAt": "Modified at"
+      }
+    },
+    "filters": {
+      "search": "Search...",
+      "competitionGroupLabel": "Competition group:",
+      "competitionGroupAll": "All groups",
+      "boatClassLabel": "Boat class:",
+      "boatClassAll": "All classes",
+      "statusLabel": "Status:",
+      "statusAll": "All statuses"
+    },
+    "form": {
+      "title": "Add new discipline",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter name",
+      "shortNameLabel": "Short name",
+      "shortNamePlaceholder": "Enter short name",
+      "genderLabel": "Gender",
+      "genderPlaceholder": "Select gender",
+      "competitionGroupLabel": "Competition group",
+      "competitionGroupPlaceholder": "Select competition group",
+      "boatClassLabel": "Boat class",
+      "boatClassPlaceholder": "Select boat class",
+      "maxCrewFromTransferLabel": "Max transferred",
+      "maxCrewFromTransferPlaceholder": "Enter max transferred",
+      "isLightweightLabel": "Lightweight",
+      "isLightweightPlaceholder": "Select",
+      "distanceLabel": "Distance (m)",
+      "distancePlaceholder": "Enter distance in meters",
+      "maxBoatsLabel": "Max teams per club",
+      "maxBoatsPlaceholder": "Enter maximum number of teams",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Select status",
+      "createError": "Error creating discipline"
+    },
+    "details": {
+      "defaultTitle": "Discipline",
+      "labels": {
+        "name": "Name:",
+        "shortName": "Short name:",
+        "gender": "Gender:",
+        "competitionGroup": "Competition group:",
+        "boatClass": "Boat class:",
+        "crewSize": "Crew size:",
+        "maxCrewFromTransfer": "Max transferred:",
+        "hasCoxswain": "Coxed:",
+        "isLightweight": "Lightweight:",
+        "distance": "Distance (m):",
+        "maxBoats": "Max teams per club:",
+        "status": "Status:",
+        "createdAt": "Created at:",
+        "modifiedAt": "Modified at:"
+      },
+      "tabDetails": "Details"
+    },
+    "filterConfigs": {
+      "competitionGroup": "Competition group",
+      "boatClass": "Boat class",
+      "status": "Status"
+    },
+    "placeholders": {
+      "select": "Select",
+      "selectBoatClass": "Select boat class",
+      "selectGender": "Select gender",
+      "selectGroup": "Select group",
+      "selectStatus": "Select status"
+    }
+  },
+  "scoring": {
+    "title": "Scoring",
+    "count": "Number of schemes:",
+    "addButton": "Add scheme",
+    "scoringType": {
+      "fixed": "Fixed",
+      "offsetFromEnd": "From end"
+    },
+    "table": {
+      "empty": "No scoring schemes found",
+      "columns": {
+        "name": "Name",
+        "scoringType": "Type",
+        "isActive": "Status",
+        "createdAt": "Created at",
+        "modifiedAt": "Modified at"
+      }
+    },
+    "filters": {
+      "search": "Search...",
+      "typeLabel": "Type:",
+      "typeAll": "All types",
+      "statusLabel": "Status:",
+      "statusAll": "All statuses"
+    },
+    "form": {
+      "title": "Add scoring scheme",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter name",
+      "typeLabel": "Type",
+      "typePlaceholder": "Select type...",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Select status...",
+      "createError": "Error creating scoring scheme"
+    },
+    "details": {
+      "defaultTitle": "Scoring Scheme",
+      "labels": {
+        "name": "Name:",
+        "type": "Type:",
+        "status": "Status:",
+        "createdAt": "Created at:",
+        "modifiedAt": "Modified at:"
+      },
+      "rules": {
+        "title": "Rules",
+        "addButton": "Add rule",
+        "empty": "No rules",
+        "placement": "Place",
+        "basePoints": "Base points",
+        "placementPrefix": "Place"
+      },
+      "coefficients": {
+        "title": "Coefficients",
+        "addButton": "Add coefficient",
+        "empty": "No coefficients",
+        "boatClass": "Boat class",
+        "coefficient": "Coefficient"
+      },
+      "tabDetails": "Details"
+    },
+    "addRule": {
+      "title": "Add rule",
+      "placementLabel": "Place",
+      "placementPlaceholder": "Enter place",
+      "basePointsLabel": "Base points",
+      "basePointsPlaceholder": "Enter points",
+      "createError": "Error creating rule"
+    },
+    "addCoefficient": {
+      "title": "Add coefficient",
+      "boatClassLabel": "Boat class",
+      "boatClassPlaceholder": "Select boat class...",
+      "coefficientLabel": "Coefficient",
+      "coefficientPlaceholder": "Enter coefficient",
+      "createError": "Error creating coefficient"
+    },
+    "filterConfigs": {
+      "scoringType": "Type",
+      "status": "Status"
+    },
+    "placeholders": {
+      "selectBoatClass": "Select boat class",
+      "selectStatus": "Select status",
+      "selectType": "Select type"
+    }
+  },
+  "qualification": {
+    "title": "Qualification Schemes",
+    "count": "Number of schemes:",
+    "addButton": "Add scheme",
+    "table": {
+      "empty": "No qualification schemes found",
+      "columns": {
+        "name": "Name",
+        "laneCount": "Lanes",
+        "isActive": "Status",
+        "createdAt": "Created at",
+        "modifiedAt": "Modified at"
+      }
+    },
+    "filters": {
+      "search": "Search...",
+      "statusLabel": "Status:",
+      "statusAll": "All statuses"
+    },
+    "form": {
+      "title": "Add qualification scheme",
+      "nameLabel": "Name",
+      "namePlaceholder": "Enter name",
+      "laneCountLabel": "Number of lanes",
+      "laneCountPlaceholder": "Enter number of lanes",
+      "createError": "Error creating scheme"
+    },
+    "details": {
+      "defaultTitle": "Qualification Scheme",
+      "labels": {
+        "name": "Name:",
+        "laneCount": "Number of lanes:",
+        "status": "Status:",
+        "createdAt": "Created at:",
+        "modifiedAt": "Modified at:"
+      },
+      "tiers": {
+        "title": "Tiers",
+        "addButton": "Add tier",
+        "empty": "No tiers",
+        "boats": "Boats",
+        "heats": "H",
+        "semiFinals": "SF",
+        "finalB": "FB",
+        "finalA": "FA",
+        "description": "Description"
+      },
+      "progressions": {
+        "title": "Progression rules",
+        "addButton": "+ Add rule",
+        "empty": "No rules",
+        "from": "From",
+        "to": "To",
+        "byPosition": "By position",
+        "byTime": "By time (fastest losers)"
+      },
+      "eventTypes": {
+        "heats": "Heats",
+        "semiFinals": "Semi-finals",
+        "finalB": "Final B",
+        "finalA": "Final A"
+      },
+      "sources": {
+        "heats": "Heats (H)",
+        "semiFinals": "Semi-finals (SF)"
+      },
+      "destinations": {
+        "semiFinals": "Semi-finals (SF)",
+        "finalA": "Final A (FA)",
+        "finalB": "Final B (FB)"
+      },
+      "addTier": {
+        "title": "Add tier",
+        "boatCountMin": "Min boats",
+        "boatCountMax": "Max boats",
+        "heatCount": "Heats",
+        "semiFinalCount": "Semi-finals",
+        "finalBCount": "Final B",
+        "finalACount": "Final A"
+      },
+      "tabDetails": "Details"
+    },
+    "filterConfigs": {
+      "status": "Status"
+    },
+    "placeholders": {
+      "selectStatus": "Select status"
+    }
+  },
+  "rules": {
+    "title": "Regulations",
+    "tabs": {
+      "groups": "Competition Groups",
+      "disciplines": "Disciplines",
+      "scoring": "Scoring Schemes",
+      "qualification": "Qualification Schemes"
+    }
+  },
+  "system": {
+    "title": "System Information",
+    "infoBanner": {
+      "applicationLabel": "Application:",
+      "versionLabel": "Version:",
+      "buildTimeLabel": "Build time:"
+    },
+    "healthCard": {
+      "title": "Health Status",
+      "statusUp": "UP",
+      "statusDown": "DOWN",
+      "errorLoading": "Error loading health status",
+      "components": {
+        "db": "Database",
+        "diskSpace": "Disk space",
+        "brevo": "Brevo (email)",
+        "minio": "MinIO (files)",
+        "ping": "Ping",
+        "livenessState": "Liveness",
+        "readinessState": "Readiness"
+      }
+    },
+    "metricsCard": {
+      "title": "Metrics",
+      "errorLoading": "Error loading metrics",
+      "empty": "No metrics available",
+      "groups": {
+        "server": "Server",
+        "jvmMemory": "JVM memory",
+        "gc": "Garbage Collector",
+        "threads": "Threads",
+        "dbPool": "DB Connection Pool",
+        "httpRequests": "HTTP requests"
+      },
+      "metrics": {
+        "uptime": "Uptime",
+        "startedAt": "Started at",
+        "cpuCores": "CPU cores",
+        "cpuProcess": "CPU (process)",
+        "heapUsed": "Heap used",
+        "heapCommitted": "Heap allocated",
+        "gcPauses": "GC pauses",
+        "gcMemoryAllocated": "GC memory allocated",
+        "activeThreads": "Active threads",
+        "daemonThreads": "Daemon threads",
+        "activeConnections": "Active connections",
+        "idleConnections": "Idle connections",
+        "pendingConnections": "Pending",
+        "totalRequests": "Total requests",
+        "avgResponseTime": "Average time"
+      }
+    },
+    "loggersCard": {
+      "title": "Loggers",
+      "errorLoading": "Error loading loggers",
+      "empty": "No loggers available",
+      "placeholder": "Level",
+      "levelChanged": "Level of {{logger}} changed to {{level}}",
+      "levelChangeError": "Error changing level for {{logger}}"
+    },
+    "threadDumpCard": {
+      "title": "Threads (Thread Dump)",
+      "loadMessage": "Thread dump is a heavy operation and does not load automatically.",
+      "loadButton": "Load",
+      "errorLoading": "Error loading thread dump",
+      "totalThreads": "Total threads:",
+      "noStackTrace": "No stack trace"
+    }
+  }
+}

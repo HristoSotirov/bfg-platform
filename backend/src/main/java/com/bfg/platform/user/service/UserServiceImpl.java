@@ -5,6 +5,7 @@ import com.bfg.platform.common.exception.ConflictException;
 import com.bfg.platform.common.exception.ConstraintViolationMessageExtractor;
 import com.bfg.platform.common.exception.ForbiddenException;
 import com.bfg.platform.common.exception.ResourceNotFoundException;
+import com.bfg.platform.common.i18n.MessageResolver;
 import com.bfg.platform.common.query.ExpandQueryParser;
 import com.bfg.platform.common.query.OffsetBasedPageRequest;
 import com.bfg.platform.common.security.SecurityContextHelper;
@@ -45,6 +46,7 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final SecurityContextHelper securityContextHelper;
     private final ScopeAccessValidator scopeAccessValidator;
+    private final MessageResolver messageResolver;
 
     @Override
     public Page<UserDto> getAllUsers(String filter, String search, List<String> orderBy, Integer top, Integer skip, List<String> expand) {
@@ -218,19 +220,19 @@ public class UserServiceImpl implements UserService {
         SystemRole targetRole = request.getRole();
 
         if (currentRole == null) {
-            throw new ForbiddenException("Current user role is not available");
+            throw new ForbiddenException(messageResolver.resolve("user.roleNotAvailable"));
         }
 
         // Role hierarchy validation
         switch (currentRole) {
             case CLUB_ADMIN -> {
                 if (targetRole != SystemRole.COACH) {
-                    throw new ForbiddenException("Club admins can only create coaches");
+                    throw new ForbiddenException(messageResolver.resolve("user.clubAdminOnlyCoaches"));
                 }
             }
             case FEDERATION_ADMIN -> {
                 if (targetRole != SystemRole.CLUB_ADMIN && targetRole != SystemRole.COACH) {
-                    throw new ForbiddenException("Federation admins can only create club admins or coaches");
+                    throw new ForbiddenException(messageResolver.resolve("user.fedAdminOnlyClubAdminsOrCoaches"));
                 }
             }
             case APP_ADMIN -> {
@@ -246,7 +248,7 @@ public class UserServiceImpl implements UserService {
         SystemRole currentRole = securityContextHelper.getUserRole();
         SystemRole targetRole = user.getRole();
         if (currentRole == null) {
-            throw new ForbiddenException("Current user role is not available");
+            throw new ForbiddenException(messageResolver.resolve("user.roleNotAvailable"));
         }
         switch (currentRole) {
             case FEDERATION_ADMIN -> {
@@ -264,7 +266,7 @@ public class UserServiceImpl implements UserService {
         SystemRole currentRole = securityContextHelper.getUserRole();
         SystemRole targetRole = user.getRole();
         if (currentRole == null) {
-            throw new ForbiddenException("Current user role is not available");
+            throw new ForbiddenException(messageResolver.resolve("user.roleNotAvailable"));
         }
         switch (currentRole) {
             case FEDERATION_ADMIN -> {

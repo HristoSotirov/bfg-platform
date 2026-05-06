@@ -4,7 +4,7 @@
       <app-search-bar
         [searchValue]="searchValue"
         (searchValueChange)="onSearchChange($event)"
-        placeholder="Потърси..."
+        [placeholder]="'accreditations.filters.search' | translate"
         [showIcon]="true"
         [showClearButton]="false"
         inputClasses="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
@@ -13,11 +13,11 @@
 
     @if (hasVisibleFilters() && isFilterVisible('gender')) {
       <div [class.hidden]="!filtersExpanded" class="sm:block w-full sm:w-[180px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Пол:</label>
+        <label class="block text-xs font-medium text-gray-500 mb-1">{{ 'accreditations.filters.gender' | translate }}</label>
         <app-multi-select-dropdown
           [options]="genderOptions"
           [multiple]="true"
-          placeholder="Всички"
+          [placeholder]="'accreditations.filters.allGenders' | translate"
           [ngModel]="filters.genders || []"
           (selectionChange)="onGendersChange($event)"
         ></app-multi-select-dropdown>
@@ -26,11 +26,11 @@
 
     @if (hasVisibleFilters() && isFilterVisible('birthYear')) {
       <div [class.hidden]="!filtersExpanded" class="sm:block w-full sm:w-[180px]">
-        <label class="block text-xs font-medium text-gray-500 mb-1">Година на раждане:</label>
+        <label class="block text-xs font-medium text-gray-500 mb-1">{{ 'accreditations.filters.birthYearFull' | translate }}</label>
         <app-multi-select-dropdown
           [options]="birthYearOptions"
           [multiple]="true"
-          placeholder="Всички години"
+          [placeholder]="'accreditations.filters.allYears' | translate"
           [ngModel]="selectedBirthYearsCache"
           (selectionChange)="onBirthYearsChange($event)"
         ></app-multi-select-dropdown>

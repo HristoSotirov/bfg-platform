@@ -7,7 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { AuthService } from '../../core/services/auth.service';
 import {
   LanguageService,
@@ -16,10 +16,6 @@ import {
 import { User } from '../../core/models/user.model';
 import { ButtonComponent } from '../../shared/components/button/button.component';
 import { DialogComponent } from '../../shared/components/dialog/dialog.component';
-import {
-  SearchableSelectDropdownComponent,
-  SearchableSelectOption,
-} from '../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
 import { Observable, forkJoin, of, catchError } from 'rxjs';
 import {
   UsersService,
@@ -43,10 +39,9 @@ interface ProfileData {
   imports: [
     CommonModule,
     RouterModule,
-    FormsModule,
+    TranslateModule,
     ButtonComponent,
     DialogComponent,
-    SearchableSelectDropdownComponent,
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
@@ -66,18 +61,7 @@ export class HeaderComponent {
     error: null,
   };
 
-  readonly languageOptions: SearchableSelectOption[] = [
-    { value: 'bg', label: 'Български' },
-    { value: 'en', label: 'English' },
-  ];
-
-  private roleLabels: Record<string, string> = {
-    [SystemRole.AppAdmin]: 'Администратор',
-    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
-    [SystemRole.ClubAdmin]: 'Администратор на клуб',
-    [SystemRole.Coach]: 'Треньор',
-    [SystemRole.Umpire]: 'Съдия',
-  };
+  private roleLabels: Record<string, string> = {};
 
   constructor(
     private authService: AuthService,
@@ -87,8 +71,15 @@ export class HeaderComponent {
     private cdr: ChangeDetectorRef,
     private elementRef: ElementRef,
     private languageService: LanguageService,
+    private translateService: TranslateService,
   ) {
     this.currentUser$ = this.authService.currentUser$;
+    this.updateRoleLabels();
+
+    this.translateService.onLangChange.subscribe(() => {
+      this.updateRoleLabels();
+      this.cdr.markForCheck();
+    });
 
     // Load current user details when user is available
     this.currentUser$.subscribe((user) => {
@@ -99,6 +90,16 @@ export class HeaderComponent {
         this.cdr.markForCheck();
       }
     });
+  }
+
+  private updateRoleLabels(): void {
+    this.roleLabels = {
+      [SystemRole.AppAdmin]: this.translateService.instant('common.roles.APP_ADMIN'),
+      [SystemRole.FederationAdmin]: this.translateService.instant('common.roles.FEDERATION_ADMIN'),
+      [SystemRole.ClubAdmin]: this.translateService.instant('common.roles.CLUB_ADMIN'),
+      [SystemRole.Coach]: this.translateService.instant('common.roles.COACH'),
+      [SystemRole.Umpire]: this.translateService.instant('common.roles.UMPIRE'),
+    };
   }
 
   get currentLanguage(): AppLanguage {
@@ -196,7 +197,7 @@ export class HeaderComponent {
       },
       error: (err) => {
         this.profileData.loading = false;
-        this.profileData.error = 'Грешка при зареждане на профила';
+        this.profileData.error = this.translateService.instant('header.profileError');
         this.cdr.markForCheck();
       },
     });

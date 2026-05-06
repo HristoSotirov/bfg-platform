@@ -7,13 +7,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DisciplineDefinitionDto, DisciplineGender } from '../../../../core/services/api';
 import { DisciplineColumnConfig } from '../../disciplines.component';
 
 @Component({
   selector: 'app-disciplines-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './disciplines-table.component.html',
   styleUrl: './disciplines-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -31,6 +32,8 @@ export class DisciplinesTableComponent implements OnInit {
   @Output() loadMore = new EventEmitter<void>();
 
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
+
+  constructor(private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -113,7 +116,7 @@ export class DisciplinesTableComponent implements OnInit {
       case 'distanceMeters':
         return discipline.distanceMeters != null ? String(discipline.distanceMeters) : '-';
       case 'isActive':
-        return discipline.isActive ? 'Активен' : 'Неактивен';
+        return discipline.isActive ? this.translate.instant('common.status.active') : this.translate.instant('common.status.inactive');
       case 'createdAt':
         return this.formatDateTime(discipline.createdAt);
       case 'modifiedAt':

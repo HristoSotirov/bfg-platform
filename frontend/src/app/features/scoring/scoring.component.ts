@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -46,6 +47,7 @@ export interface ScoringFilters {
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     ScoringTableComponent,
     ScoringDetailsDialogComponent,
@@ -79,18 +81,9 @@ export class ScoringComponent implements OnInit, OnDestroy {
   currentSkip = 0;
   hasMore = true;
 
-  columns: ScoringColumnConfig[] = [
-    { id: 'name', label: 'Име', visible: true },
-    { id: 'scoringType', label: 'Тип', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  columns: ScoringColumnConfig[] = [];
 
-  filterConfigs: ScoringFilterConfig[] = [
-    { id: 'scoringType', label: 'Тип', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  filterConfigs: ScoringFilterConfig[] = [];
 
   isDetailsDialogOpen = false;
   isAddDialogOpen = false;
@@ -102,9 +95,15 @@ export class ScoringComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private scoringSchemesService: ScoringSchemesService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initTranslatedLabels();
+    this.translate.onLangChange.subscribe(() => {
+      this.initTranslatedLabels();
+      this.cdr.markForCheck();
+    });
     this.loadSettings();
     this.initializeUserContext();
   }
@@ -185,7 +184,7 @@ export class ScoringComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -204,7 +203,7 @@ export class ScoringComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -295,6 +294,21 @@ export class ScoringComponent implements OnInit, OnDestroy {
         });
     }
     this.loadSchemes();
+  }
+
+  private initTranslatedLabels(): void {
+    this.columns = [
+      { id: 'name', label: this.translate.instant('scoring.table.columns.name'), visible: true },
+      { id: 'scoringType', label: this.translate.instant('scoring.table.columns.scoringType'), visible: true },
+      { id: 'isActive', label: this.translate.instant('scoring.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('scoring.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('scoring.table.columns.modifiedAt'), visible: true },
+    ];
+    this.filterConfigs = [
+      { id: 'scoringType', label: this.translate.instant('scoring.filterConfigs.scoringType'), visible: true },
+      { id: 'status', label: this.translate.instant('scoring.filterConfigs.status'), visible: true },
+    ];
+    this.loadSettings();
   }
 
   private saveSettings(): void {

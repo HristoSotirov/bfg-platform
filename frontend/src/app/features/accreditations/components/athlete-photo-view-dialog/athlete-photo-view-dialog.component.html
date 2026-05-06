@@ -1,58 +1,73 @@
 <app-dialog
   [isOpen]="isOpen"
-  title="Снимка на състезател"
-  size="lg"
+  [title]="'accreditations.photoViewDialog.title' | translate"
+  size="fullscreen"
   [noScroll]="true"
   (closed)="close()"
 >
-  <div class="flex flex-col items-center gap-4">
-    
-    @if (canPrev || canNext) {
-      <div class="w-full max-w-sm flex items-center justify-center gap-3">
+  <div class="flex flex-col h-full">
+
+    <div class="flex-1 min-h-0 flex items-center justify-center gap-3">
+      @if (canPrev || canNext) {
         <button
           type="button"
-          class="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default"
+          class="hidden lg:flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
           (click)="onPrev()"
           [disabled]="!canPrev"
         >
           ‹
         </button>
-        <div class="flex-1 aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-          <img
-            [src]="photoUrl || 'assets/images/default-user.png'"
-            [alt]="photoUrl ? 'Снимка на състезател' : 'Снимка по подразбиране'"
-            class="w-full h-full object-cover"
-          />
-        </div>
+      }
+      <div class="aspect-square max-h-full rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
+        <img
+          [src]="photoUrl || 'assets/images/default-user.png'"
+          [alt]="photoUrl ? ('accreditations.photoViewDialog.photoAlt' | translate) : ('accreditations.photoViewDialog.defaultPhotoAlt' | translate)"
+          class="w-full h-full object-cover"
+        />
+      </div>
+      @if (canPrev || canNext) {
         <button
           type="button"
-          class="h-8 w-8 flex items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default"
+          class="hidden lg:flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full border border-gray-300 bg-white/70 text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
+          (click)="onNext()"
+          [disabled]="!canNext"
+        >
+          ›
+        </button>
+      }
+    </div>
+
+    @if (canPrev || canNext) {
+      <div class="flex lg:hidden justify-center gap-6 pt-3">
+        <button
+          type="button"
+          class="h-9 w-9 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
+          (click)="onPrev()"
+          [disabled]="!canPrev"
+        >
+          ‹
+        </button>
+        <button
+          type="button"
+          class="h-9 w-9 flex items-center justify-center rounded-full border border-gray-300 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-30 disabled:cursor-default text-lg"
           (click)="onNext()"
           [disabled]="!canNext"
         >
           ›
         </button>
       </div>
-      @if (photoUploadedAt || photoUploadedByName) {
-        <div class="w-full max-w-sm text-center text-xs text-gray-600">
-          @if (photoUploadedAt) { {{ photoUploadedAt }} }
-          @if (photoUploadedAt && photoUploadedByName) { · }
-          @if (photoUploadedByName) { {{ photoUploadedByName }} }
-        </div>
-      }
-    } @else {
-      
-      <div class="w-full max-w-sm aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
-        <img
-          [src]="photoUrl || 'assets/images/default-user.png'"
-          [alt]="photoUrl ? 'Снимка на състезател' : 'Снимка по подразбиране'"
-          class="w-full h-full object-cover"
-        />
+    }
+
+    @if (photoUploadedAt || photoUploadedByName) {
+      <div class="shrink-0 text-center text-xs text-gray-500 pt-4 mt-4 border-t border-gray-200">
+        @if (photoUploadedAt) { {{ photoUploadedAt }} }
+        @if (photoUploadedAt && photoUploadedByName) { · }
+        @if (photoUploadedByName) { {{ photoUploadedByName }} }
       </div>
     }
-    
+
     @if (athleteInfo) {
-      <div class="w-full text-center space-y-1 text-sm border-t border-gray-200 pt-4">
+      <div class="shrink-0 text-center space-y-1 text-sm pt-4 mt-4 border-t border-gray-200">
         <p class="font-medium text-gray-900">
           {{ athleteInfo.firstName }} {{ athleteInfo.middleName }} {{ athleteInfo.lastName }}
         </p>
@@ -60,12 +75,10 @@
           {{ athleteInfo.dateOfBirth }}
         </p>
         <p class="text-gray-600">
-          {{ athleteInfo.raceGroup }}
-        </p>
-        <p class="text-gray-600">
-          {{ athleteInfo.lastAccreditationClub }} · {{ athleteInfo.lastAccreditationYear }} · {{ athleteInfo.lastAccreditationNumber }} · {{ athleteInfo.lastAccreditationStatus }}
+          {{ athleteInfo.lastAccreditationClub }} · {{ athleteInfo.lastAccreditationYear }} · {{ athleteInfo.lastAccreditationNumber }} · <span [class]="athleteInfo.lastAccreditationStatusClass">{{ athleteInfo.lastAccreditationStatus }}</span>
         </p>
       </div>
     }
+
   </div>
 </app-dialog>

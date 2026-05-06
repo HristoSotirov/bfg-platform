@@ -11,6 +11,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, map, forkJoin, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -39,13 +40,18 @@ const SEAT_ORDER: SeatPosition[] = [
   SeatPosition.Five, SeatPosition.Six, SeatPosition.Seven, SeatPosition.Stroke, SeatPosition.Cox,
 ];
 
-const SEAT_LABELS: Record<string, string> = {
-  BOW: 'B', TWO: '2', THREE: '3', FOUR: '4',
-  FIVE: '5', SIX: '6', SEVEN: '7', STROKE: 'S', COX: 'C',
+const SEAT_LABEL_KEYS: Record<string, string> = {
+  BOW: 'competitions.seatLabels.BOW', TWO: 'competitions.seatLabels.TWO',
+  THREE: 'competitions.seatLabels.THREE', FOUR: 'competitions.seatLabels.FOUR',
+  FIVE: 'competitions.seatLabels.FIVE', SIX: 'competitions.seatLabels.SIX',
+  SEVEN: 'competitions.seatLabels.SEVEN', STROKE: 'competitions.seatLabels.STROKE',
+  COX: 'competitions.seatLabels.COX',
 };
 
 const GENDER_LABELS: Record<string, string> = {
-  MALE: 'Мъже', FEMALE: 'Жени', MIXED: 'Смесена',
+  MALE: 'competitions.submitEntriesDialog.genderLabels.male',
+  FEMALE: 'competitions.submitEntriesDialog.genderLabels.female',
+  MIXED: 'competitions.submitEntriesDialog.genderLabels.mixed',
 };
 
 function getSeatPositions(crewSize: number, hasCoxswain: boolean): SeatPosition[] {
@@ -110,7 +116,7 @@ export interface GroupEntry {
 @Component({
   selector: 'app-submit-entries-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DisciplineDetailsDialogComponent, CompetitionGroupDetailsDialogComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DisciplineDetailsDialogComponent, CompetitionGroupDetailsDialogComponent],
   templateUrl: './submit-entries-dialog.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -140,7 +146,7 @@ export class SubmitEntriesDialogComponent implements OnChanges {
   /** Transfer source groups loaded by UUID */
   private transferGroupCache = new Map<string, CompetitionGroupDefinitionDto>();
 
-  readonly getSeatLabel = (seat: SeatPosition) => SEAT_LABELS[seat] ?? seat;
+  readonly getSeatLabel = (seat: SeatPosition) => this.translate.instant(SEAT_LABEL_KEYS[seat] ?? seat);
   readonly getBoatClassLabel = getBoatClassLabel;
 
   constructor(
@@ -148,6 +154,7 @@ export class SubmitEntriesDialogComponent implements OnChanges {
     private accreditationsService: AccreditationsService,
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -325,7 +332,7 @@ export class SubmitEntriesDialogComponent implements OnChanges {
         const nameStr = nameParts.join(' ') || athlete.uuid!;
         const cardNumber = acc.accreditationNumber || '';
         const labelParts = [nameStr];
-        if (birthYear != null) labelParts.push(`(${birthYear}, ${age} г.)`);
+        if (birthYear != null) labelParts.push(`(${birthYear}, ${age} ${this.translate.instant('competitions.submitEntriesDialog.yearAbbrev')})`);
         if (cardNumber) labelParts.push(`- ${cardNumber}`);
 
         return { accreditationId: acc.uuid!, athleteId: athlete.uuid!, label: labelParts.join(' '), birthYear, age, cardNumber, isTransfer, gender: athlete.gender ?? null };
@@ -385,7 +392,7 @@ export class SubmitEntriesDialogComponent implements OnChanges {
                     const nameStr = nameParts.join(' ') || athlete.uuid!;
                     const cardNumber = acc.accreditationNumber || '';
                     const labelParts = [nameStr];
-                    if (birthYear != null) labelParts.push(`(${birthYear}, ${age} г.)`);
+                    if (birthYear != null) labelParts.push(`(${birthYear}, ${age} ${this.translate.instant('competitions.submitEntriesDialog.yearAbbrev')})`);
                     if (cardNumber) labelParts.push(`- ${cardNumber}`);
                     ge.ownAthletes.push({
                       accreditationId, athleteId: athlete.uuid!, label: labelParts.join(' '),
@@ -413,7 +420,7 @@ export class SubmitEntriesDialogComponent implements OnChanges {
       .filter(a => ge.selectedAthleteIds.has(a.accreditationId))
       .map(a => ({
         value: a.accreditationId,
-        label: a.isTransfer ? `[Т] ${a.label}` : a.label,
+        label: a.isTransfer ? `${this.translate.instant('competitions.submitEntriesDialog.transferBadge')} ${a.label}` : a.label,
       }));
   }
 
@@ -441,7 +448,7 @@ export class SubmitEntriesDialogComponent implements OnChanges {
         const nameStr = nameParts.join(' ') || athlete.uuid!;
         const cardNumber = acc.accreditationNumber || '';
         const labelParts = [nameStr];
-        if (birthYear != null) labelParts.push(`(${birthYear}, ${age} г.)`);
+        if (birthYear != null) labelParts.push(`(${birthYear}, ${age} ${this.translate.instant('competitions.submitEntriesDialog.yearAbbrev')})`);
         if (cardNumber) labelParts.push(`- ${cardNumber}`);
         return { value: acc.uuid!, label: labelParts.join(' ') };
       });
@@ -821,7 +828,7 @@ export class SubmitEntriesDialogComponent implements OnChanges {
           if (err?.status === 422 && err?.error?.errors) {
             this.errors = err.error.errors as string[];
           } else {
-            this.saveError = err?.error?.message || 'Грешка при запазване на заявките';
+            this.saveError = err?.error?.message || this.translate.instant('competitions.submitEntriesDialog.errors.saveFailed');
           }
           this.cdr.markForCheck();
         },

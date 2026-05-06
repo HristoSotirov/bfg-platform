@@ -6,6 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, throwError } from 'rxjs';
@@ -38,6 +39,7 @@ import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     FormsModule,
     RouterModule,
     HeaderComponent,
@@ -80,8 +82,8 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   isAddRuleDialogOpen = false;
@@ -125,6 +127,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
     private scoringSchemeBoatCoefficientsService: ScoringSchemeBoatCoefficientsService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -162,7 +165,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
       .subscribe((scheme) => {
         this.scheme = scheme;
         this.loading = false;
-        if (!scheme) { this.error = 'Схемата не е намерена.'; this.cdr.markForCheck(); return; }
+        if (!scheme) { this.error = this.translate.instant('common.errorNotFound'); this.cdr.markForCheck(); return; }
         this.loadRules();
         this.loadCoefficients();
         this.cdr.markForCheck();
@@ -253,7 +256,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
 
     this.scoringSchemesService.updateScoringSchemeByUuid(this.scheme.uuid, request)
       .pipe(
-        catchError((err) => throwError(() => ({ message: err?.error?.message || 'Грешка при запазване' }))),
+        catchError((err) => throwError(() => ({ message: err?.error?.message || this.translate.instant('common.errorSaving') }))),
         takeUntil(this.destroy$),
       )
       .subscribe({
@@ -266,7 +269,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.saving = false;
-          this.saveError = err?.message || 'Грешка при запазване';
+          this.saveError = err?.message || this.translate.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });
@@ -295,7 +298,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
     const uuid = this.ruleToDelete.uuid;
     this.deleteRuleError = null;
     this.scoringRulesService.deleteScoringRuleByUuid(uuid)
-      .pipe(catchError((err) => { this.deleteRuleError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .pipe(catchError((err) => { this.deleteRuleError = err?.error?.message || this.translate.instant('common.errorDeleting'); this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
       .subscribe((result) => { if (result !== null) { this.closeDeleteRuleConfirm(); this.loadRules(); } });
   }
 
@@ -340,7 +343,7 @@ export class ScoringDetailPageComponent implements OnInit, OnDestroy {
     const uuid = this.coefficientToDelete.uuid;
     this.deleteCoefficientError = null;
     this.scoringSchemeBoatCoefficientsService.deleteScoringSchemeBoatCoefficientByUuid(uuid)
-      .pipe(catchError((err) => { this.deleteCoefficientError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .pipe(catchError((err) => { this.deleteCoefficientError = err?.error?.message || this.translate.instant('common.errorDeleting'); this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
       .subscribe((result) => { if (result !== null) { this.closeDeleteCoefficientConfirm(); this.loadCoefficients(); } });
   }
 

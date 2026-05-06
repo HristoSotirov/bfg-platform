@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -68,6 +69,7 @@ type RulesTab = 'groups' | 'disciplines' | 'scoring' | 'qualification';
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     ButtonComponent,
     // Groups
@@ -116,33 +118,9 @@ export class RulesComponent implements OnInit, OnDestroy {
   groupFilters: CompetitionGroupFilters = { search: '', statuses: [] };
   groupOrderBy: string[] = ['name_asc'];
 
-  groupColumns: ColumnConfig[] = [
-    { id: 'name', label: 'Име', visible: true },
-    { id: 'shortName', label: 'Кратко име', visible: true },
-    { id: 'minAge', label: 'Мин. възраст', visible: true },
-    { id: 'maxAge', label: 'Макс. възраст', visible: true },
-    { id: 'coxMinAge', label: 'Рулеви мин. възраст', visible: false },
-    { id: 'coxMaxAge', label: 'Рулеви макс. възраст', visible: false },
-    { id: 'maxDisciplinesPerAthlete', label: 'Макс. дисциплини', visible: true },
-    { id: 'transferFromGroupId', label: 'Трансфер от група', visible: true },
-    { id: 'minCrewForTransfer', label: 'Мин. екипаж', visible: true },
-    { id: 'transferRatio', label: 'Съотношение', visible: true },
-    { id: 'transferRounding', label: 'Закръгляне', visible: true },
-    { id: 'transferredMaxDisciplinesPerAthlete', label: 'Макс. дисц. (трансф.)', visible: true },
-    { id: 'maleTeamCoxRequiredWeightKg', label: 'М. рулеви изискв. тегло', visible: true },
-    { id: 'maleTeamCoxMinWeightKg', label: 'М. рулеви мин. тегло', visible: true },
-    { id: 'maleTeamLightMaxWeightKg', label: 'М. лек макс. тегло', visible: true },
-    { id: 'femaleTeamCoxRequiredWeightKg', label: 'Ж. рулеви изискв. тегло', visible: true },
-    { id: 'femaleTeamCoxMinWeightKg', label: 'Ж. рулеви мин. тегло', visible: true },
-    { id: 'femaleTeamLightMaxWeightKg', label: 'Ж. лек макс. тегло', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  groupColumns: ColumnConfig[] = [];
 
-  groupFilterConfigs: FilterConfig[] = [
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  groupFilterConfigs: FilterConfig[] = [];
 
   isGroupAddOpen = false;
   isGroupSettingsOpen = false;
@@ -159,26 +137,9 @@ export class RulesComponent implements OnInit, OnDestroy {
   disciplineFilters: DisciplineFilters = { search: '', boatClasses: [], statuses: [], competitionGroupIds: [] };
   disciplineOrderBy: string[] = ['name_asc'];
 
-  disciplineColumns: DisciplineColumnConfig[] = [
-    { id: 'name', label: 'Ime', visible: true },
-    { id: 'shortName', label: 'Кратко ime', visible: true },
-    { id: 'competitionGroup', label: 'Състезателна група', visible: true },
-    { id: 'boatClass', label: 'Клас лодка', visible: true },
-    { id: 'crewSize', label: 'Размер екипаж', visible: true },
-    { id: 'maxCrewFromTransfer', label: 'Макс. прехвърлени', visible: true },
-    { id: 'hasCoxswain', label: 'Кокс', visible: true },
-    { id: 'isLightweight', label: 'Лековес', visible: true },
-    { id: 'distanceMeters', label: 'Дистанция (м)', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  disciplineColumns: DisciplineColumnConfig[] = [];
 
-  disciplineFilterConfigs: DisciplineFilterConfig[] = [
-    { id: 'competitionGroup', label: 'Състезателна група', visible: true },
-    { id: 'boatClass', label: 'Клас лодка', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  disciplineFilterConfigs: DisciplineFilterConfig[] = [];
 
   disciplineGroupOptions: DropdownOption[] = [];
 
@@ -197,18 +158,9 @@ export class RulesComponent implements OnInit, OnDestroy {
   scoringFilters: ScoringFilters = { search: '', scoringTypes: [], statuses: [] };
   scoringOrderBy: string[] = ['name_asc'];
 
-  scoringColumns: ScoringColumnConfig[] = [
-    { id: 'name', label: 'Ime', visible: true },
-    { id: 'scoringType', label: 'Тип', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  scoringColumns: ScoringColumnConfig[] = [];
 
-  scoringFilterConfigs: ScoringFilterConfig[] = [
-    { id: 'scoringType', label: 'Тип', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  scoringFilterConfigs: ScoringFilterConfig[] = [];
 
   isScoringAddOpen = false;
   isScoringSettingsOpen = false;
@@ -225,17 +177,9 @@ export class RulesComponent implements OnInit, OnDestroy {
   qualificationFilters: QualificationFilters = { search: '', statuses: [] };
   qualificationOrderBy: string[] = ['name_asc'];
 
-  qualificationColumns: QualificationColumnConfig[] = [
-    { id: 'name', label: 'Ime', visible: true },
-    { id: 'laneCount', label: 'Коридори', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  qualificationColumns: QualificationColumnConfig[] = [];
 
-  qualificationFilterConfigs: QualificationFilterConfig[] = [
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  qualificationFilterConfigs: QualificationFilterConfig[] = [];
 
   isQualificationAddOpen = false;
   isQualificationSettingsOpen = false;
@@ -249,6 +193,7 @@ export class RulesComponent implements OnInit, OnDestroy {
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
     private router: Router,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -256,6 +201,12 @@ export class RulesComponent implements OnInit, OnDestroy {
     if (user && user.roles.length > 0) {
       this.userRole = user.roles[0] as SystemRole;
     }
+
+    this.initTranslatedLabels();
+    this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.initTranslatedLabels();
+      this.cdr.markForCheck();
+    });
 
     this.loadSettings();
 
@@ -284,11 +235,94 @@ export class RulesComponent implements OnInit, OnDestroy {
   }
 
   readonly tabs: { id: RulesTab; label: string }[] = [
-    { id: 'groups', label: 'Състезателни групи' },
-    { id: 'disciplines', label: 'Дисциплини' },
-    { id: 'scoring', label: 'Схеми за точкуване' },
-    { id: 'qualification', label: 'Квалификационни схеми' },
+    { id: 'groups', label: '' },
+    { id: 'disciplines', label: '' },
+    { id: 'scoring', label: '' },
+    { id: 'qualification', label: '' },
   ];
+
+  private initTranslatedLabels(): void {
+    this.tabs[0].label = this.translate.instant('rules.tabs.groups');
+    this.tabs[1].label = this.translate.instant('rules.tabs.disciplines');
+    this.tabs[2].label = this.translate.instant('rules.tabs.scoring');
+    this.tabs[3].label = this.translate.instant('rules.tabs.qualification');
+
+    this.groupColumns = [
+      { id: 'name', label: this.translate.instant('competitionGroups.table.columns.name'), visible: true },
+      { id: 'shortName', label: this.translate.instant('competitionGroups.table.columns.shortName'), visible: true },
+      { id: 'minAge', label: this.translate.instant('competitionGroups.table.columns.minAge'), visible: true },
+      { id: 'maxAge', label: this.translate.instant('competitionGroups.table.columns.maxAge'), visible: true },
+      { id: 'coxMinAge', label: this.translate.instant('competitionGroups.table.columns.coxMinAge'), visible: false },
+      { id: 'coxMaxAge', label: this.translate.instant('competitionGroups.table.columns.coxMaxAge'), visible: false },
+      { id: 'maxDisciplinesPerAthlete', label: this.translate.instant('competitionGroups.table.columns.maxDisciplinesPerAthlete'), visible: true },
+      { id: 'transferFromGroupId', label: this.translate.instant('competitionGroups.table.columns.transferFromGroupId'), visible: true },
+      { id: 'minCrewForTransfer', label: this.translate.instant('competitionGroups.table.columns.minCrewForTransfer'), visible: true },
+      { id: 'transferRatio', label: this.translate.instant('competitionGroups.table.columns.transferRatio'), visible: true },
+      { id: 'transferRounding', label: this.translate.instant('competitionGroups.table.columns.transferRounding'), visible: true },
+      { id: 'transferredMaxDisciplinesPerAthlete', label: this.translate.instant('competitionGroups.table.columns.transferredMaxDisciplinesPerAthlete'), visible: true },
+      { id: 'maleTeamCoxRequiredWeightKg', label: this.translate.instant('competitionGroups.table.columns.maleTeamCoxRequiredWeightKg'), visible: true },
+      { id: 'maleTeamCoxMinWeightKg', label: this.translate.instant('competitionGroups.table.columns.maleTeamCoxMinWeightKg'), visible: true },
+      { id: 'maleTeamLightMaxWeightKg', label: this.translate.instant('competitionGroups.table.columns.maleTeamLightMaxWeightKg'), visible: true },
+      { id: 'femaleTeamCoxRequiredWeightKg', label: this.translate.instant('competitionGroups.table.columns.femaleTeamCoxRequiredWeightKg'), visible: true },
+      { id: 'femaleTeamCoxMinWeightKg', label: this.translate.instant('competitionGroups.table.columns.femaleTeamCoxMinWeightKg'), visible: true },
+      { id: 'femaleTeamLightMaxWeightKg', label: this.translate.instant('competitionGroups.table.columns.femaleTeamLightMaxWeightKg'), visible: true },
+      { id: 'isActive', label: this.translate.instant('competitionGroups.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('competitionGroups.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('competitionGroups.table.columns.modifiedAt'), visible: true },
+    ];
+
+    this.groupFilterConfigs = [
+      { id: 'status', label: this.translate.instant('competitionGroups.filterConfigs.status'), visible: true },
+    ];
+
+    this.disciplineColumns = [
+      { id: 'name', label: this.translate.instant('disciplines.table.columns.name'), visible: true },
+      { id: 'shortName', label: this.translate.instant('disciplines.table.columns.shortName'), visible: true },
+      { id: 'competitionGroup', label: this.translate.instant('disciplines.table.columns.competitionGroup'), visible: true },
+      { id: 'boatClass', label: this.translate.instant('disciplines.table.columns.boatClass'), visible: true },
+      { id: 'crewSize', label: this.translate.instant('disciplines.table.columns.crewSize'), visible: true },
+      { id: 'maxCrewFromTransfer', label: this.translate.instant('disciplines.table.columns.maxCrewFromTransfer'), visible: true },
+      { id: 'hasCoxswain', label: this.translate.instant('disciplines.table.columns.hasCoxswain'), visible: true },
+      { id: 'isLightweight', label: this.translate.instant('disciplines.table.columns.isLightweight'), visible: true },
+      { id: 'distanceMeters', label: this.translate.instant('disciplines.table.columns.distanceMeters'), visible: true },
+      { id: 'isActive', label: this.translate.instant('disciplines.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('disciplines.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('disciplines.table.columns.modifiedAt'), visible: true },
+    ];
+
+    this.disciplineFilterConfigs = [
+      { id: 'competitionGroup', label: this.translate.instant('disciplines.filterConfigs.competitionGroup'), visible: true },
+      { id: 'boatClass', label: this.translate.instant('disciplines.filterConfigs.boatClass'), visible: true },
+      { id: 'status', label: this.translate.instant('disciplines.filterConfigs.status'), visible: true },
+    ];
+
+    this.scoringColumns = [
+      { id: 'name', label: this.translate.instant('scoring.table.columns.name'), visible: true },
+      { id: 'scoringType', label: this.translate.instant('scoring.table.columns.scoringType'), visible: true },
+      { id: 'isActive', label: this.translate.instant('scoring.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('scoring.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('scoring.table.columns.modifiedAt'), visible: true },
+    ];
+
+    this.scoringFilterConfigs = [
+      { id: 'scoringType', label: this.translate.instant('scoring.filterConfigs.scoringType'), visible: true },
+      { id: 'status', label: this.translate.instant('scoring.filterConfigs.status'), visible: true },
+    ];
+
+    this.qualificationColumns = [
+      { id: 'name', label: this.translate.instant('qualification.table.columns.name'), visible: true },
+      { id: 'laneCount', label: this.translate.instant('qualification.table.columns.laneCount'), visible: true },
+      { id: 'isActive', label: this.translate.instant('qualification.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('qualification.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('qualification.table.columns.modifiedAt'), visible: true },
+    ];
+
+    this.qualificationFilterConfigs = [
+      { id: 'status', label: this.translate.instant('qualification.filterConfigs.status'), visible: true },
+    ];
+
+    this.loadSettings();
+  }
 
   setTab(tab: RulesTab): void {
     if (tab === this.activeTab) return;
@@ -358,7 +392,7 @@ export class RulesComponent implements OnInit, OnDestroy {
     ).pipe(
       timeout(30000),
       catchError((err) => {
-        this.groupsError = err?.error?.message || 'Грешка при зареждане';
+        this.groupsError = err?.error?.message || this.translate.instant('common.errorLoading');
         this.groupsLoading = false;
         this.cdr.markForCheck();
         return of({ content: [], totalElements: 0 });
@@ -436,7 +470,7 @@ export class RulesComponent implements OnInit, OnDestroy {
     ).pipe(
       timeout(30000),
       catchError((err) => {
-        this.disciplinesError = err?.error?.message || 'Грешка при зареждане';
+        this.disciplinesError = err?.error?.message || this.translate.instant('common.errorLoading');
         this.disciplinesLoading = false;
         this.cdr.markForCheck();
         return of({ content: [], totalElements: 0 });
@@ -509,7 +543,7 @@ export class RulesComponent implements OnInit, OnDestroy {
     ).pipe(
       timeout(30000),
       catchError((err) => {
-        this.scoringError = err?.error?.message || 'Грешка при зареждане';
+        this.scoringError = err?.error?.message || this.translate.instant('common.errorLoading');
         this.scoringLoading = false;
         this.cdr.markForCheck();
         return of({ content: [], totalElements: 0 });
@@ -577,7 +611,7 @@ export class RulesComponent implements OnInit, OnDestroy {
     ).pipe(
       timeout(30000),
       catchError((err) => {
-        this.qualificationError = err?.error?.message || 'Грешка при зареждане';
+        this.qualificationError = err?.error?.message || this.translate.instant('common.errorLoading');
         this.qualificationLoading = false;
         this.cdr.markForCheck();
         return of({ content: [], totalElements: 0 });

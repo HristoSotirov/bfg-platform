@@ -1,13 +1,13 @@
-<app-dialog [isOpen]="isOpen" title="Добавяне на схема за точкуване" (closed)="close()">
+<app-dialog [isOpen]="isOpen" [title]="'scoring.form.title' | translate" (closed)="close()">
   <div class="flex flex-col h-full min-h-0">
   <div class="space-y-4 flex-1 min-h-0 overflow-y-auto">
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Име <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'scoring.form.nameLabel' | translate }} <span class="text-red-500">*</span>:</label>
       <input
         type="text"
         [(ngModel)]="formData.name"
-        placeholder="Въведете име"
+        [placeholder]="'scoring.form.namePlaceholder' | translate"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
         [class.border-red-500]="touched['name'] && !formData.name.trim()"
         (blur)="touched['name'] = true"
@@ -15,21 +15,21 @@
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Тип <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'scoring.form.typeLabel' | translate }} <span class="text-red-500">*</span>:</label>
       <app-searchable-select-dropdown
         [options]="scoringTypeOptions"
         [(ngModel)]="formData.scoringType"
-        placeholder="Изберете тип..."
+        [placeholder]="'scoring.placeholders.selectType' | translate"
       ></app-searchable-select-dropdown>
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Статус <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'scoring.form.statusLabel' | translate }} <span class="text-red-500">*</span>:</label>
       <app-searchable-select-dropdown
         [options]="statusOptions"
         [ngModel]="formData.isActive ? 'true' : 'false'"
         (ngModelChange)="formData.isActive = $event === 'true'"
-        placeholder="Изберете статус..."
+        [placeholder]="'scoring.placeholders.selectStatus' | translate"
       ></app-searchable-select-dropdown>
     </div>
 
@@ -49,7 +49,7 @@
         <app-button
           variant="outline"
           size="md"
-          text="Затвори"
+          [text]="'common.close' | translate"
           [disabled]="saving"
           (click)="close()"
         >
@@ -57,7 +57,7 @@
         <app-button
           variant="primary"
           size="md"
-          text="Запази"
+          [text]="'common.save' | translate"
           [disabled]="!isFormValid || saving"
           (click)="save()"
         >

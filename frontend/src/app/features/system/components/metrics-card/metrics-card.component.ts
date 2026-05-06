@@ -7,6 +7,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, forkJoin, takeUntil, catchError, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActuatorService, MetricDetailResponse } from '../../services/actuator.service';
 
 interface MetricGroup {
@@ -17,7 +18,7 @@ interface MetricGroup {
 @Component({
   selector: 'app-metrics-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './metrics-card.component.html',
   styleUrl: './metrics-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -32,6 +33,7 @@ export class MetricsCardComponent implements OnInit, OnDestroy {
   constructor(
     private actuatorService: ActuatorService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -79,7 +81,7 @@ export class MetricsCardComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: () => {
-          this.error = 'Грешка при зареждане на метриките';
+          this.error = this.translateService.instant('system.metricsCard.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -93,22 +95,22 @@ export class MetricsCardComponent implements OnInit, OnDestroy {
     const serverMetrics: { label: string; value: string; sublabel?: string }[] = [];
     const uptime = this.val(r['uptime'], 'VALUE');
     if (uptime !== null) {
-      serverMetrics.push({ label: 'Uptime', value: this.formatUptime(uptime) });
+      serverMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.uptime'), value: this.formatUptime(uptime) });
     }
     const startTime = this.val(r['startTime'], 'VALUE');
     if (startTime !== null) {
-      serverMetrics.push({ label: 'Стартиран на', value: new Date(startTime * 1000).toLocaleString('bg-BG') });
+      serverMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.startedAt'), value: new Date(startTime * 1000).toLocaleString('bg-BG') });
     }
     const cpus = this.val(r['cpus'], 'VALUE');
     if (cpus !== null) {
-      serverMetrics.push({ label: 'CPU ядра', value: `${cpus}` });
+      serverMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.cpuCores'), value: `${cpus}` });
     }
     const cpuUsage = this.val(r['cpuUsage'], 'VALUE');
     const systemCpu = this.val(r['systemCpuUsage'], 'VALUE');
     if (cpuUsage !== null) {
-      serverMetrics.push({ label: 'CPU (процес)', value: `${(cpuUsage * 100).toFixed(1)}%`, sublabel: systemCpu !== null ? `Система: ${(systemCpu * 100).toFixed(1)}%` : undefined });
+      serverMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.cpuProcess'), value: `${(cpuUsage * 100).toFixed(1)}%`, sublabel: systemCpu !== null ? `Система: ${(systemCpu * 100).toFixed(1)}%` : undefined });
     }
-    if (serverMetrics.length) groups.push({ title: 'Сървър', metrics: serverMetrics });
+    if (serverMetrics.length) groups.push({ title: this.translateService.instant('system.metricsCard.groups.server'), metrics: serverMetrics });
 
     // JVM Memory
     const memMetrics: { label: string; value: string; sublabel?: string }[] = [];
@@ -119,25 +121,25 @@ export class MetricsCardComponent implements OnInit, OnDestroy {
       const usedMB = (heapUsed / 1024 / 1024).toFixed(1);
       const maxMB = heapMax ? (heapMax / 1024 / 1024).toFixed(0) : '?';
       const pct = heapMax ? `${((heapUsed / heapMax) * 100).toFixed(0)}%` : '';
-      memMetrics.push({ label: 'Heap използвана', value: `${usedMB} MB / ${maxMB} MB`, sublabel: pct ? `${pct} използвана` : undefined });
+      memMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.heapUsed'), value: `${usedMB} MB / ${maxMB} MB`, sublabel: pct ? `${pct} използвана` : undefined });
     }
     if (heapCommitted !== null) {
-      memMetrics.push({ label: 'Heap заделена', value: `${(heapCommitted / 1024 / 1024).toFixed(0)} MB` });
+      memMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.heapCommitted'), value: `${(heapCommitted / 1024 / 1024).toFixed(0)} MB` });
     }
-    if (memMetrics.length) groups.push({ title: 'JVM памет', metrics: memMetrics });
+    if (memMetrics.length) groups.push({ title: this.translateService.instant('system.metricsCard.groups.jvmMemory'), metrics: memMetrics });
 
     // GC
     const gcMetrics: { label: string; value: string; sublabel?: string }[] = [];
     const gcCount = this.val(r['gcPauseCount'], 'COUNT');
     const gcTotalTime = this.val(r['gcPauseCount'], 'TOTAL_TIME');
     if (gcCount !== null) {
-      gcMetrics.push({ label: 'GC паузи', value: `${gcCount}`, sublabel: gcTotalTime !== null ? `Общо време: ${(gcTotalTime * 1000).toFixed(0)} ms` : undefined });
+      gcMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.gcPauses'), value: `${gcCount}`, sublabel: gcTotalTime !== null ? `Общо време: ${(gcTotalTime * 1000).toFixed(0)} ms` : undefined });
     }
     const gcAllocated = this.val(r['gcMemoryAllocated'], 'COUNT');
     if (gcAllocated !== null) {
-      gcMetrics.push({ label: 'GC памет алокирана', value: `${(gcAllocated / 1024 / 1024).toFixed(0)} MB` });
+      gcMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.gcMemoryAllocated'), value: `${(gcAllocated / 1024 / 1024).toFixed(0)} MB` });
     }
-    if (gcMetrics.length) groups.push({ title: 'Garbage Collector', metrics: gcMetrics });
+    if (gcMetrics.length) groups.push({ title: this.translateService.instant('system.metricsCard.groups.gc'), metrics: gcMetrics });
 
     // Threads
     const threadMetrics: { label: string; value: string; sublabel?: string }[] = [];
@@ -145,12 +147,12 @@ export class MetricsCardComponent implements OnInit, OnDestroy {
     const threadsPeak = this.val(r['threadsPeak'], 'VALUE');
     const threadsDaemon = this.val(r['threadsDaemon'], 'VALUE');
     if (threadsLive !== null) {
-      threadMetrics.push({ label: 'Активни нишки', value: `${threadsLive}`, sublabel: threadsPeak !== null ? `Пик: ${threadsPeak}` : undefined });
+      threadMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.activeThreads'), value: `${threadsLive}`, sublabel: threadsPeak !== null ? `Пик: ${threadsPeak}` : undefined });
     }
     if (threadsDaemon !== null) {
-      threadMetrics.push({ label: 'Daemon нишки', value: `${threadsDaemon}` });
+      threadMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.daemonThreads'), value: `${threadsDaemon}` });
     }
-    if (threadMetrics.length) groups.push({ title: 'Нишки', metrics: threadMetrics });
+    if (threadMetrics.length) groups.push({ title: this.translateService.instant('system.metricsCard.groups.threads'), metrics: threadMetrics });
 
     // DB Pool
     const dbMetrics: { label: string; value: string; sublabel?: string }[] = [];
@@ -159,27 +161,27 @@ export class MetricsCardComponent implements OnInit, OnDestroy {
     const pending = this.val(r['hikariPending'], 'VALUE');
     const max = this.val(r['hikariMax'], 'VALUE');
     if (active !== null) {
-      dbMetrics.push({ label: 'Активни връзки', value: `${active}`, sublabel: max !== null ? `Макс: ${max}` : undefined });
+      dbMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.activeConnections'), value: `${active}`, sublabel: max !== null ? `Макс: ${max}` : undefined });
     }
     if (idle !== null) {
-      dbMetrics.push({ label: 'Idle връзки', value: `${idle}` });
+      dbMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.idleConnections'), value: `${idle}` });
     }
     if (pending !== null) {
-      dbMetrics.push({ label: 'Чакащи', value: `${pending}` });
+      dbMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.pendingConnections'), value: `${pending}` });
     }
-    if (dbMetrics.length) groups.push({ title: 'DB Connection Pool', metrics: dbMetrics });
+    if (dbMetrics.length) groups.push({ title: this.translateService.instant('system.metricsCard.groups.dbPool'), metrics: dbMetrics });
 
     // HTTP
     const httpMetrics: { label: string; value: string; sublabel?: string }[] = [];
     const totalReqs = this.val(r['httpRequests'], 'COUNT');
     const totalTime = this.val(r['httpRequests'], 'TOTAL_TIME');
     if (totalReqs !== null) {
-      httpMetrics.push({ label: 'Общо заявки', value: `${totalReqs}` });
+      httpMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.totalRequests'), value: `${totalReqs}` });
     }
     if (totalReqs !== null && totalTime !== null && totalReqs > 0) {
-      httpMetrics.push({ label: 'Средно време', value: `${((totalTime / totalReqs) * 1000).toFixed(1)} ms` });
+      httpMetrics.push({ label: this.translateService.instant('system.metricsCard.metrics.avgResponseTime'), value: `${((totalTime / totalReqs) * 1000).toFixed(1)} ms` });
     }
-    if (httpMetrics.length) groups.push({ title: 'HTTP заявки', metrics: httpMetrics });
+    if (httpMetrics.length) groups.push({ title: this.translateService.instant('system.metricsCard.groups.httpRequests'), metrics: httpMetrics });
 
     return groups;
   }

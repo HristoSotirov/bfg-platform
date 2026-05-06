@@ -22,7 +22,7 @@
           ></path>
         </svg>
       </a>
-      <h1 class="text-2xl font-bold text-gray-900">Системна информация</h1>
+      <h1 class="text-2xl font-bold text-gray-900">{{ 'system.title' | translate }}</h1>
     </div>
 
     <!-- Info banner -->
@@ -32,15 +32,15 @@
     >
       <div class="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm">
         <div>
-          <span class="text-gray-500">Приложение:</span>
+          <span class="text-gray-500">{{ 'system.infoBanner.applicationLabel' | translate }}</span>
           <span class="ml-1 font-medium text-gray-900">{{ appName }}</span>
         </div>
         <div>
-          <span class="text-gray-500">Версия:</span>
+          <span class="text-gray-500">{{ 'system.infoBanner.versionLabel' | translate }}</span>
           <span class="ml-1 font-medium text-gray-900">{{ appVersion }}</span>
         </div>
         <div>
-          <span class="text-gray-500">Време на билд:</span>
+          <span class="text-gray-500">{{ 'system.infoBanner.buildTimeLabel' | translate }}</span>
           <span class="ml-1 font-medium text-gray-900">{{ buildTime }}</span>
         </div>
       </div>

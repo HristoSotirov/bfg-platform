@@ -4,7 +4,7 @@
       <app-search-bar
         [searchValue]="searchValue"
         (searchValueChange)="onSearchChange($event)"
-        placeholder="Потърси..."
+        [placeholder]="'users.filters.search' | translate"
         [showIcon]="true"
         [showClearButton]="false"
         inputClasses="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
@@ -17,12 +17,12 @@
         class="sm:block w-full sm:w-[180px]"
       >
         <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Роля:</label
+          >{{ 'users.filters.roleLabel' | translate }}</label
         >
         <app-multi-select-dropdown
           [options]="roleOptions"
           [multiple]="true"
-          placeholder="Всички роли"
+          [placeholder]="'users.filters.roleAll' | translate"
           [ngModel]="filters.roles || []"
           (selectionChange)="onRolesChange($event)"
         >
@@ -36,12 +36,12 @@
         class="sm:block w-full sm:w-[180px]"
       >
         <label class="block text-xs font-medium text-gray-500 mb-1"
-          >Статус:</label
+          >{{ 'users.filters.statusLabel' | translate }}</label
         >
         <app-multi-select-dropdown
           [options]="statusOptions"
           [multiple]="true"
-          placeholder="Всички статуси"
+          [placeholder]="'users.filters.statusAll' | translate"
           [ngModel]="filters.statuses || []"
           (selectionChange)="onStatusesChange($event)"
         >

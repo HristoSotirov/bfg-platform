@@ -6,6 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, throwError } from 'rxjs';
@@ -40,6 +41,7 @@ interface TierWithProgressions {
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     FormsModule,
     RouterModule,
     HeaderComponent,
@@ -112,8 +114,8 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
   private readonly eventOrder: Record<string, number> = { H: 1, SF: 2, FB: 3, FA: 4 };
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   constructor(
@@ -125,6 +127,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
     private progressionsService: QualificationProgressionsService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -182,7 +185,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
       .subscribe((scheme) => {
         this.scheme = scheme;
         this.loading = false;
-        if (!scheme) { this.error = 'Схемата не е намерена.'; this.cdr.markForCheck(); return; }
+        if (!scheme) { this.error = this.translate.instant('common.errorNotFound'); this.cdr.markForCheck(); return; }
         this.loadTiers();
         this.cdr.markForCheck();
       });
@@ -313,10 +316,10 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
     this.cdr.markForCheck();
     const request: QualificationSchemeRequest = { name: this.editData.name.trim(), laneCount: this.editData.laneCount, isActive: this.editData.isActive };
     this.schemesService.updateQualificationSchemeByUuid(this.scheme.uuid, request)
-      .pipe(catchError((err) => throwError(() => ({ message: err?.error?.message || 'Грешка при запазване' }))), takeUntil(this.destroy$))
+      .pipe(catchError((err) => throwError(() => ({ message: err?.error?.message || this.translate.instant('common.errorSaving') }))), takeUntil(this.destroy$))
       .subscribe({
         next: (updated) => { if (updated) this.scheme = updated; this.saving = false; this.isEditing = false; this.saveError = null; this.cdr.markForCheck(); },
-        error: (err) => { this.saving = false; this.saveError = err?.message || 'Грешка при запазване'; this.cdr.markForCheck(); },
+        error: (err) => { this.saving = false; this.saveError = err?.message || this.translate.instant('common.errorSaving'); this.cdr.markForCheck(); },
       });
   }
 
@@ -357,7 +360,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
     if (!this.tierToDelete?.uuid) return;
     this.deleteTierError = null;
     this.tiersService.deleteQualificationTierByUuid(this.tierToDelete.uuid)
-      .pipe(catchError((err) => { this.deleteTierError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .pipe(catchError((err) => { this.deleteTierError = err?.error?.message || this.translate.instant('common.errorDeleting'); this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
       .subscribe((result) => { if (result !== null) { this.closeDeleteTierConfirm(); this.loadTiers(); this.cdr.markForCheck(); } });
   }
 
@@ -410,7 +413,7 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
     if (!this.progressionToDelete?.uuid) return;
     this.deleteProgressionError = null;
     this.progressionsService.deleteQualificationProgressionByUuid(this.progressionToDelete.uuid)
-      .pipe(catchError((err) => { this.deleteProgressionError = err?.error?.message || 'Грешка при изтриване'; this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
+      .pipe(catchError((err) => { this.deleteProgressionError = err?.error?.message || this.translate.instant('common.errorDeleting'); this.cdr.markForCheck(); return of(null); }), takeUntil(this.destroy$))
       .subscribe((result) => { if (result !== null) { this.closeDeleteProgressionConfirm(); this.loadTiers(); this.cdr.markForCheck(); } });
   }
 

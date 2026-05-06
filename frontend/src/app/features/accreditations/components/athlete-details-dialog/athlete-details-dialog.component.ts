@@ -35,6 +35,7 @@ import {
   ScopeType,
 } from '../../../../core/services/api';
 import { forkJoin, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ScopeVisibilityService } from '../../../../core/services/scope-visibility.service';
 
 const DEFAULT_MEDICAL_DURATION_MONTHS = 12;
@@ -64,6 +65,7 @@ interface AccreditationHistoryItem {
     PhotoCropDialogComponent,
     AthletePhotoViewDialogComponent,
     DatePickerComponent,
+    TranslateModule,
   ],
   templateUrl: './athlete-details-dialog.component.html',
   styleUrl: './athlete-details-dialog.component.scss',
@@ -121,21 +123,21 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   statusChanges: Map<string, AccreditationStatus> = new Map();
 
   private statusLabels: Record<string, string> = {
-    [AccreditationStatus.Active]: 'Активна',
-    [AccreditationStatus.PendingValidation]: 'Заявена',
-    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
-    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
-    [AccreditationStatus.Expired]: 'Изтекла',
-    [AccreditationStatus.Suspended]: 'Спряна',
+    [AccreditationStatus.Active]: this.translateService.instant('accreditations.status.active'),
+    [AccreditationStatus.PendingValidation]: this.translateService.instant('accreditations.status.requested'),
+    [AccreditationStatus.PendingPhotoValidation]: this.translateService.instant('accreditations.status.pendingPhoto'),
+    [AccreditationStatus.NewPhotoRequired]: this.translateService.instant('accreditations.status.newPhoto'),
+    [AccreditationStatus.Expired]: this.translateService.instant('accreditations.status.expired'),
+    [AccreditationStatus.Suspended]: this.translateService.instant('accreditations.status.suspended'),
   };
 
   readonly statusOptions: { value: AccreditationStatus; label: string }[] = [
-    { value: AccreditationStatus.Active, label: 'Активна' },
-    { value: AccreditationStatus.PendingValidation, label: 'Заявена' },
-    { value: AccreditationStatus.PendingPhotoValidation, label: 'Чакаща снимка' },
-    { value: AccreditationStatus.NewPhotoRequired, label: 'Нова снимка' },
-    { value: AccreditationStatus.Expired, label: 'Изтекла' },
-    { value: AccreditationStatus.Suspended, label: 'Спряна' },
+    { value: AccreditationStatus.Active, label: this.translateService.instant('accreditations.status.active') },
+    { value: AccreditationStatus.PendingValidation, label: this.translateService.instant('accreditations.status.requested') },
+    { value: AccreditationStatus.PendingPhotoValidation, label: this.translateService.instant('accreditations.status.pendingPhoto') },
+    { value: AccreditationStatus.NewPhotoRequired, label: this.translateService.instant('accreditations.status.newPhoto') },
+    { value: AccreditationStatus.Expired, label: this.translateService.instant('accreditations.status.expired') },
+    { value: AccreditationStatus.Suspended, label: this.translateService.instant('accreditations.status.suspended') },
   ];
 
   get statusSelectOptions(): SearchableSelectOption[] {
@@ -146,8 +148,8 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   }
 
   readonly genderOptions = [
-    { value: Gender.MALE, label: 'Мъж' },
-    { value: Gender.FEMALE, label: 'Жена' },
+    { value: Gender.MALE, label: this.translateService.instant('accreditations.gender.male') },
+    { value: Gender.FEMALE, label: this.translateService.instant('accreditations.gender.female') },
   ];
 
   get genderSelectOptions(): SearchableSelectOption[] {
@@ -163,6 +165,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     private athletePhotosService: AthletePhotosService,
     private scopeVisibility: ScopeVisibilityService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -219,7 +222,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   }
 
   get fullName(): string {
-    if (!this.athlete) return 'Състезател';
+    if (!this.athlete) return this.translateService.instant('accreditations.detailPage.defaultName');
     const name = [
       this.athlete.firstName,
       this.athlete.middleName,
@@ -227,7 +230,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     ]
       .filter(Boolean)
       .join(' ');
-    return name || 'Състезател';
+    return name || this.translateService.instant('accreditations.detailPage.defaultName');
   }
 
   isDateExpired(dateStr: string | undefined): boolean {
@@ -294,15 +297,15 @@ export class AthleteDetailsDialogComponent implements OnChanges {
 
   getGenderLabel(gender: string | undefined): string {
     if (!gender) return '-';
-    return gender === Gender.MALE ? 'Мъж' : gender === Gender.FEMALE ? 'Жена' : gender;
+    return gender === Gender.MALE ? this.translateService.instant('accreditations.gender.male') : gender === Gender.FEMALE ? this.translateService.instant('accreditations.gender.female') : gender;
   }
 
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
+      [ScopeType.Internal]: this.translateService.instant('accreditations.scopeType.internal'),
+      [ScopeType.External]: this.translateService.instant('accreditations.scopeType.external'),
+      [ScopeType.National]: this.translateService.instant('accreditations.scopeType.national'),
     };
     return labels[scopeType] ?? scopeType;
   }
@@ -323,11 +326,11 @@ export class AthleteDetailsDialogComponent implements OnChanges {
       middleName: this.athlete.middleName ?? '',
       lastName: this.athlete.lastName ?? '',
       dateOfBirth: this.formatDate(this.athlete.dateOfBirth),
-      raceGroup: this.getRaceGroup(),
       lastAccreditationClub: lastAcc?.club?.shortName ?? '-',
       lastAccreditationYear: lastAcc?.year ?? 0,
       lastAccreditationNumber: lastAcc?.accreditationNumber ?? '-',
       lastAccreditationStatus: this.getStatusLabel(lastAcc?.status),
+      lastAccreditationStatusClass: this.getStatusClass(lastAcc?.status),
     };
   }
 
@@ -659,7 +662,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
       },
       error: (err: any) => {
         this.saving = false;
-        this.error = err?.error?.message || 'Грешка при запазване';
+        this.error = err?.error?.message || this.translateService.instant('accreditations.athleteDetailsDialog.errors.saveFailed');
         this.cdr.markForCheck();
       },
     });
@@ -809,12 +812,12 @@ export class AthleteDetailsDialogComponent implements OnChanges {
     const file = input?.files?.[0];
     if (!file) return;
     if (!this.allowedPhotoTypes.includes(file.type)) {
-      this.photoError = 'Разрешени са само JPEG и PNG файлове.';
+      this.photoError = this.translateService.instant('accreditations.athleteDetailsDialog.photoErrors.onlyJpegPng');
       this.cdr.markForCheck();
       return;
     }
     if (file.size > this.maxPhotoSizeBytes) {
-      this.photoError = 'Файлът не трябва да надвишава 10 MB.';
+      this.photoError = this.translateService.instant('accreditations.athleteDetailsDialog.photoErrors.maxFileSize');
       this.cdr.markForCheck();
       return;
     }
@@ -852,13 +855,13 @@ export class AthleteDetailsDialogComponent implements OnChanges {
   uploadPhoto(file: File): void {
     const athleteId = this.athlete?.uuid;
     if (!athleteId) {
-      this.photoError = 'Липсва данни за състезател.';
+      this.photoError = this.translateService.instant('accreditations.athleteDetailsDialog.photoErrors.noAthleteData');
       this.cdr.markForCheck();
       return;
     }
     if (!this.canUploadPhoto) {
       this.photoError =
-        'Качването не е позволено: състезателят трябва да има акредитация за тази година със статус "Нова снимка изискана" за вашия клуб.';
+        this.translateService.instant('accreditations.athleteDetailsDialog.photoErrors.uploadNotAllowed');
       this.cdr.markForCheck();
       return;
     }
@@ -877,7 +880,7 @@ export class AthleteDetailsDialogComponent implements OnChanges {
         this.photoError =
           err?.error?.message ||
           err?.message ||
-          'Грешка при качване на снимката.';
+          this.translateService.instant('accreditations.athleteDetailsDialog.errors.uploadFailed');
         this.cdr.markForCheck();
       },
     });

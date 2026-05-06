@@ -7,7 +7,7 @@
             @if (selectingAll) {
               <span
                 class="inline-block h-4 w-4 animate-spin rounded-full border-2 border-bfg-blue border-t-transparent"
-                title="Избиране на всички..."
+                [title]="'accreditations.table.selectAllLoading' | translate"
               ></span>
             } @else {
               <input
@@ -87,7 +87,7 @@
             [attr.colspan]="visibleColumns.length + (canSelect ? 1 : 0)"
             class="px-4 py-8 text-center text-gray-500"
           >
-            Няма намерени записи
+            {{ 'accreditations.table.empty' | translate }}
           </td>
         </tr>
       }
@@ -95,6 +95,6 @@
   </table>
 
   @if (loading && accreditations.length > 0) {
-    <div class="py-4 text-center text-gray-500 border-t">Зареждане...</div>
+    <div class="py-4 text-center text-gray-500 border-t">{{ 'accreditations.table.loadingMore' | translate }}</div>
   }
 </div>

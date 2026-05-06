@@ -22,6 +22,7 @@ import {
 import { SearchBarComponent } from '../../../../shared/components/search-bar/search-bar.component';
 import { FilterToggleButtonComponent } from '../../../../shared/components/filter-toggle-button/filter-toggle-button.component';
 import { ClubDto } from '../../../../core/services/api';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-accreditations-filters',
@@ -32,6 +33,7 @@ import { ClubDto } from '../../../../core/services/api';
     MultiSelectDropdownComponent,
     SearchBarComponent,
     FilterToggleButtonComponent,
+    TranslateModule,
   ],
   templateUrl: './accreditations-filters.component.html',
   styleUrl: './accreditations-filters.component.scss',
@@ -59,21 +61,23 @@ export class AccreditationsFiltersComponent implements OnInit, OnChanges {
   selectedYearsCache: string[] = [];
   selectedBirthYearsCache: string[] = [];
 
-  readonly statusOptions: DropdownOption[] = [
-    { value: AccreditationStatus.Active, label: 'Активна' },
-    { value: AccreditationStatus.PendingValidation, label: 'Чакаща валидация' },
-    { value: AccreditationStatus.PendingPhotoValidation, label: 'Чакаща снимка' },
-    { value: AccreditationStatus.NewPhotoRequired, label: 'Нова снимка' },
-    { value: AccreditationStatus.Expired, label: 'Изтекла' },
-    { value: AccreditationStatus.Suspended, label: 'Спряна' },
+  statusOptions: DropdownOption[] = [
+    { value: AccreditationStatus.Active, label: this.translateService.instant('accreditations.status.active') },
+    { value: AccreditationStatus.PendingValidation, label: this.translateService.instant('accreditations.status.pendingValidation') },
+    { value: AccreditationStatus.PendingPhotoValidation, label: this.translateService.instant('accreditations.status.pendingPhoto') },
+    { value: AccreditationStatus.NewPhotoRequired, label: this.translateService.instant('accreditations.status.newPhoto') },
+    { value: AccreditationStatus.Expired, label: this.translateService.instant('accreditations.status.expired') },
+    { value: AccreditationStatus.Suspended, label: this.translateService.instant('accreditations.status.suspended') },
   ];
 
-  readonly genderOptions: DropdownOption[] = [
-    { value: Gender.MALE, label: 'Мъж' },
-    { value: Gender.FEMALE, label: 'Жена' },
+  genderOptions: DropdownOption[] = [
+    { value: Gender.MALE, label: this.translateService.instant('accreditations.gender.male') },
+    { value: Gender.FEMALE, label: this.translateService.instant('accreditations.gender.female') },
   ];
 
   yearOptions: DropdownOption[] = [];
+
+  constructor(private translateService: TranslateService) {}
   clubOptions: DropdownOption[] = [];
 
   get birthYearOptions(): DropdownOption[] {

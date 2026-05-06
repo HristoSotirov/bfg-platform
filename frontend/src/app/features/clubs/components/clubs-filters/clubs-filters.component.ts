@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ClubFilters, ClubFilterConfig } from '../../clubs.component';
 import { ScopeType } from '../../../../core/services/api';
 import {
@@ -23,6 +24,7 @@ import { FilterToggleButtonComponent } from '../../../../shared/components/filte
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     MultiSelectDropdownComponent,
     SearchBarComponent,
     FilterToggleButtonComponent,
@@ -45,19 +47,27 @@ export class ClubsFiltersComponent implements OnInit {
   searchValue = '';
   filtersExpanded = false; // Start collapsed on mobile
 
-  readonly statusOptions: DropdownOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
-  ];
+  statusOptions: DropdownOption[] = [];
+  scopeTypeOptions: DropdownOption[] = [];
 
-  readonly scopeTypeOptions: DropdownOption[] = [
-    { value: ScopeType.Internal, label: 'Вътрешен' },
-    { value: ScopeType.External, label: 'Външен' },
-    { value: ScopeType.National, label: 'Национален' },
-  ];
+  constructor(private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.searchValue = this.filters.search || '';
+    this.initOptions();
+    this.translateService.onLangChange.subscribe(() => this.initOptions());
+  }
+
+  private initOptions(): void {
+    this.statusOptions = [
+      { value: 'true', label: this.translateService.instant('common.active') },
+      { value: 'false', label: this.translateService.instant('common.inactive') },
+    ];
+    this.scopeTypeOptions = [
+      { value: ScopeType.Internal, label: this.translateService.instant('clubs.scopeTypes.internal') },
+      { value: ScopeType.External, label: this.translateService.instant('clubs.scopeTypes.external') },
+      { value: ScopeType.National, label: this.translateService.instant('clubs.scopeTypes.national') },
+    ];
   }
 
   isFilterVisible(filterId: string): boolean {

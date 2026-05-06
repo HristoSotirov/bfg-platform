@@ -1,0 +1,2021 @@
+{
+  "common": {
+    "cancel": "Отказ",
+    "close": "Затвори",
+    "save": "Запази",
+    "saving": "Запазване...",
+    "delete": "Изтрий",
+    "deleting": "Изтриване...",
+    "edit": "Редактирай",
+    "add": "Добави",
+    "confirm": "Потвърди",
+    "done": "Готово",
+    "back": "Назад",
+    "search": "Търсене...",
+    "loading": "Зареждане...",
+    "filters": "Филтри",
+    "exportExcel": "Експорт в Excel",
+    "migration": "Миграция",
+    "settings": "Настройки на таблицата",
+    "columns": "Колони",
+    "selectAll": "Избери всички",
+    "deselectAll": "Премахни всички",
+    "required": "Задължително поле",
+    "noData": "Няма данни",
+    "yes": "Да",
+    "no": "Не",
+    "or": "или",
+    "openPage": "Отвори страницата",
+    "tabDetails": "Детайли",
+    "active": "Активен",
+    "inactive": "Неактивен",
+    "error": "Грешка",
+    "errorGeneric": "Възникна грешка. Моля, опитайте отново.",
+    "errorLoading": "Грешка при зареждане на данните",
+    "errorSaving": "Грешка при запазване",
+    "errorDeleting": "Грешка при изтриване",
+    "errorSessionExpired": "Сесията ви е изтекла. Моля, опитайте отново.",
+    "errorNoPermission": "Нямате права за тази операция.",
+    "errorNotFound": "Ресурсът не е намерен.",
+    "errorConflict": "Конфликт при запазване. Моля, опреснете страницата.",
+    "settingsDialog": {
+      "title": "Настройки на таблицата",
+      "tabColumns": "Колони",
+      "tabFilters": "Филтри",
+      "columnsDescription": "Изберете кои колони да се показват в таблицата.",
+      "filtersDescription": "Изберете кои филтри да се показват. При скриване на филтър стойността му се изчиства."
+    },
+    "deleteConfirm": {
+      "title": "Потвърждение за изтриване",
+      "message": "Сигурни ли сте, че искате да изтриете",
+      "irreversible": "Това действие е необратимо."
+    },
+    "unsavedChanges": {
+      "title": "Незапазени промени",
+      "message": "Имате незапазени промени. Моля, използвайте бутоните",
+      "saveButton": "Запази",
+      "cancelButton": "Отказ",
+      "messageSuffix": ", за да излезете от редакция.",
+      "confirmButton": "Разбрах"
+    },
+    "status": {
+      "active": "Активен",
+      "inactive": "Неактивен"
+    },
+    "gender": {
+      "male": "Мъже",
+      "female": "Жени",
+      "mixed": "Смесени"
+    },
+    "roles": {
+      "APP_ADMIN": "Администратор",
+      "FEDERATION_ADMIN": "Администратор на федерацията",
+      "CLUB_ADMIN": "Администратор на клуб",
+      "COACH": "Треньор",
+      "UMPIRE": "Съдия"
+    }
+  },
+  "nav": {
+    "accreditations": "Картотеки",
+    "clubs": "Клубове",
+    "users": "Потребители",
+    "rules": "Правилник",
+    "competitions": "Състезания",
+    "results": "Резултати",
+    "system": "Система"
+  },
+  "header": {
+    "orgName": "Българска федерация по гребане",
+    "language": "Език",
+    "myProfile": "Моят профил",
+    "logout": "Изход",
+    "login": "Вход",
+    "logoutConfirmTitle": "Потвърждение за изход",
+    "logoutConfirmMessage": "Сигурни ли сте, че искате да излезете?",
+    "profileError": "Грешка при зареждане на профила",
+    "labels": {
+      "name": "Име:",
+      "username": "Потребителско име:",
+      "email": "Имейл:",
+      "role": "Роля:",
+      "status": "Статус:",
+      "dateOfBirth": "Дата на раждане:",
+      "club": "Клуб:",
+      "createdAt": "Създаден на:",
+      "updatedAt": "Променен на:"
+    }
+  },
+  "auth": {
+    "login": {
+      "title1": "Българска федерация",
+      "title2": "по гребане",
+      "username": "Потребителско име:",
+      "usernamePlaceholder": "Въведи потребителско име!",
+      "password": "Парола:",
+      "passwordPlaceholder": "Въведи парола!",
+      "forgotPassword": "Забравена парола?",
+      "submit": "Влизане",
+      "guestLogin": "Продължаване като гост"
+    },
+    "forgotPassword": {
+      "title": "Забравена парола",
+      "instruction": "Въведете потребителското си име, за да получите имейл с линк за нулиране на паролата.",
+      "username": "Потребителско име:",
+      "usernamePlaceholder": "Въведете потребителско име",
+      "fieldRequired": "Полето е задължително",
+      "resend": "Изпрати отново",
+      "seconds": "с",
+      "sending": "Изпращане...",
+      "sendEmail": "Изпрати имейл",
+      "successMessage": "Ако потребител с това име съществува, ще получите имейл с линк за нулиране на паролата.",
+      "emailDelay": "Получаването на имейла може да отнеме до няколко минути. Проверете папка Спам, ако не виждате имейла.",
+      "sendAgain": "Изпрати отново",
+      "error": "Възникна грешка. Моля, опитайте отново."
+    },
+    "resetPassword": {
+      "title": "Нулиране на парола",
+      "instruction": "Въведете нова парола за вашия акаунт.",
+      "newPassword": "Нова парола:",
+      "newPasswordPlaceholder": "Въведете нова парола",
+      "confirmPassword": "Потвърдете парола:",
+      "confirmPasswordPlaceholder": "Повторете новата парола",
+      "mismatch": "Паролите не съвпадат",
+      "minLength": "Минимум 8 символа",
+      "uppercase": "Поне 1 главна буква",
+      "lowercase": "Поне 1 малка буква",
+      "digit": "Поне 1 цифра",
+      "special": "Поне 1 специален символ (!@#$%^&*)",
+      "saving": "Запазване...",
+      "submit": "Запази нова парола",
+      "successMessage": "Паролата е нулирана успешно. Вече можете да влезете с новата си парола.",
+      "error": "Възникна грешка. Моля, опитайте отново."
+    }
+  },
+  "home": {},
+  "clubs": {
+    "title": "Клубове",
+    "count": "Брой клубове:",
+    "addButton": "Добавяне на клуб",
+    "noClubMessage": "Не сте назначен към клуб",
+    "noClubDescription": "За достъп до клубове е необходимо да бъдете назначен като администратор или треньор на клуб.",
+    "table": {
+      "empty": "Няма намерени клубове",
+      "columns": {
+        "shortName": "Кратко име",
+        "name": "Пълно име",
+        "cardPrefix": "Номер",
+        "clubEmail": "Имейл",
+        "clubAdminName": "Администратор",
+        "isActive": "Статус",
+        "type": "Тип",
+        "createdAt": "Създаден на",
+        "updatedAt": "Променен на"
+      }
+    },
+    "filters": {
+      "search": "Потърси...",
+      "statusLabel": "Статус:",
+      "statusAll": "Всички статуси",
+      "typeLabel": "Тип:",
+      "typeAll": "Всички типове"
+    },
+    "scopeTypes": {
+      "internal": "Вътрешен",
+      "external": "Външен",
+      "national": "Национален"
+    },
+    "form": {
+      "title": "Добавяне на нов клуб",
+      "nameLabel": "Име",
+      "namePlaceholder": "Въведете име",
+      "fullNameLabel": "Пълно име",
+      "fullNamePlaceholder": "Въведете пълно име",
+      "emailLabel": "Имейл",
+      "emailPlaceholder": "Въведете имейл",
+      "typeLabel": "Тип",
+      "typePlaceholder": "Изберете тип",
+      "adminLabel": "Администратор",
+      "adminPlaceholder": "Изберете администратор",
+      "createError": "Грешка при създаване на клуб"
+    },
+    "details": {
+      "defaultTitle": "Клуб",
+      "tabDetails": "Детайли",
+      "labels": {
+        "name": "Име:",
+        "fullName": "Пълно име:",
+        "cardPrefix": "Номер:",
+        "email": "Имейл:",
+        "type": "Тип:",
+        "status": "Статус:",
+        "admin": "Администратор:",
+        "createdAt": "Създаден на:",
+        "updatedAt": "Променен на:"
+      },
+      "logo": {
+        "altClubLogo": "Лого на клуба",
+        "altDefaultLogo": "Лого по подразбиране",
+        "uploading": "Качване...",
+        "uploadNew": "Качи ново лого",
+        "onlyJpegPng": "Разрешени са само JPEG и PNG файлове.",
+        "maxSize": "Файлът не трябва да надвишава 10 MB.",
+        "adminOnly": "Качването на лого е позволено само за администратори.",
+        "uploadError": "Грешка при качване на логото"
+      },
+      "coaches": {
+        "title": "Треньори",
+        "columns": {
+          "firstName": "Име",
+          "lastName": "Фамилия",
+          "status": "Статус",
+          "date": "Дата"
+        },
+        "empty": "Няма треньори",
+        "addTitle": "Добавяне на треньор",
+        "selectPlaceholder": "Изберете треньор",
+        "addButton": "Добави",
+        "removeTitle": "Потвърждение за премахване",
+        "removeMessage": "Сигурни ли сте, че искате да премахнете този треньор от клуба?",
+        "removeButton": "Премахни",
+        "removeTooltip": "Премахни",
+        "createCoach": "Създай треньор",
+        "addError": "Грешка при добавяне на треньор",
+        "alreadyAssigned": "Треньорът вече е добавен към клуба.",
+        "removeError": "Грешка при премахване на треньор"
+      }
+    },
+    "migration": {
+      "title": "Миграция на клубове",
+      "selectFile": "Избери Excel файл",
+      "mappingTitle": "Съпоставка на колони",
+      "mappingDescription": "Изберете от коя колона на файла да се вземе всяко поле.",
+      "doNotImport": "Не импортирай",
+      "fields": {
+        "name": "Пълно име",
+        "shortName": "Кратко име",
+        "cardPrefix": "Номер (2 цифри)",
+        "clubEmail": "Имейл на клуб",
+        "adminEmail": "Имейл на администратор"
+      },
+      "previewTitle": "Преглед на данните",
+      "validCount": "Клубове с валиден номер (2 цифри):",
+      "migrateButton": "Мигрирай",
+      "migrating": "Мигриране...",
+      "resultsTitle": "Резултат от миграцията",
+      "created": "Създадени:",
+      "skipped": "Пропуснати:",
+      "skippedClubs": "Пропуснати клубове:",
+      "reason": "Причина",
+      "progress": "Изпращане на {{count}} клуба в {{chunks}} заявки...",
+      "noValidClubs": "Няма валидни клубове за миграция.",
+      "fileReadError": "Грешка при четене на файла",
+      "migrationError": "Грешка при миграция"
+    },
+    "filterConfigs": {
+      "status": "Статус",
+      "type": "Тип"
+    },
+    "export": {
+      "sheetName": "Клубове"
+    }
+  },
+  "users": {
+    "title": "Потребители",
+    "count": "Брой потребители:",
+    "addButton": "Добавяне на потребител",
+    "table": {
+      "empty": "Няма намерени потребители",
+      "columns": {
+        "firstName": "Име",
+        "lastName": "Фамилия",
+        "dateOfBirth": "Дата на раждане",
+        "username": "Потребителско име",
+        "email": "Имейл",
+        "isActive": "Статус",
+        "role": "Роля",
+        "createdAt": "Създаден на",
+        "updatedAt": "Променен на"
+      }
+    },
+    "filters": {
+      "search": "Потърси...",
+      "roleLabel": "Роля:",
+      "roleAll": "Всички роли",
+      "statusLabel": "Статус:",
+      "statusAll": "Всички статуси"
+    },
+    "form": {
+      "title": "Добавяне на потребител",
+      "firstNameLabel": "Име",
+      "firstNamePlaceholder": "Въведете име",
+      "lastNameLabel": "Фамилия",
+      "lastNamePlaceholder": "Въведете фамилия",
+      "dateOfBirthLabel": "Дата на раждане",
+      "dateOfBirthPlaceholder": "Изберете дата на раждане",
+      "emailLabel": "Имейл",
+      "emailPlaceholder": "Въведете имейл",
+      "usernameLabel": "Потребителско име",
+      "usernamePlaceholder": "Ще бъде попълнено автоматично",
+      "usernameLockedClubAdmin": "Потребителското име е автоматично и не може да се променя",
+      "usernameLockedNoEmail": "Въведете имейл, за да отключите полето",
+      "roleLabel": "Роля",
+      "rolePlaceholder": "Изберете роля",
+      "roleClubAdminHint": "Можете да създавате само потребители с роля Треньор",
+      "requiredFields": "Моля, попълнете всички задължителни полета",
+      "createError": "Грешка при създаване на потребителя"
+    },
+    "details": {
+      "defaultTitle": "Потребител",
+      "labels": {
+        "name": "Име:",
+        "username": "Потребителско име:",
+        "email": "Имейл:",
+        "role": "Роля:",
+        "status": "Статус:",
+        "dateOfBirth": "Дата на раждане:",
+        "club": "Клуб:",
+        "createdAt": "Създаден на:",
+        "updatedAt": "Променен на:"
+      },
+      "edit": {
+        "firstNameLabel": "Име",
+        "lastNameLabel": "Фамилия",
+        "dateOfBirthLabel": "Дата на раждане",
+        "dateOfBirthPlaceholder": "Изберете дата на раждане",
+        "usernameLabel": "Потребителско име",
+        "statusLabel": "Статус",
+        "statusPlaceholder": "Изберете статус"
+      }
+    },
+    "migration": {
+      "title": "Миграция на потребители",
+      "selectFile": "Избери Excel файл",
+      "mappingTitle": "Съпоставка на колони",
+      "mappingDescription": "Изберете от коя колона на файла да се вземе всяко поле.",
+      "doNotImport": "Не импортирай",
+      "defaultRoleLabel": "Роля по подразбиране (ако не е в колона):",
+      "defaultRolePlaceholder": "Не задавай",
+      "fields": {
+        "firstName": "Име",
+        "lastName": "Фамилия",
+        "dateOfBirth": "Дата на раждане",
+        "email": "Имейл",
+        "role": "Роля"
+      },
+      "previewTitle": "Преглед на данните",
+      "validCount": "Валидни записи:",
+      "migrateButton": "Мигрирай",
+      "migrating": "Мигриране...",
+      "resultsTitle": "Резултат от миграцията",
+      "created": "Създадени:",
+      "skipped": "Пропуснати:",
+      "skippedRecords": "Пропуснати записи:",
+      "progress": "Изпращане на {{count}} записа в {{chunks}} заявки...",
+      "noValidRecords": "Няма валидни записи за миграция.",
+      "fileReadError": "Грешка при четене на файла.",
+      "migrationError": "Грешка при миграция"
+    },
+    "filterConfigs": {
+      "role": "Роля",
+      "status": "Статус"
+    }
+  },
+  "accreditations": {
+    "page": {
+      "title": "Картотеки",
+      "tabs": {
+        "accreditations": "Картотеки",
+        "athletes": "Състезатели"
+      },
+      "count": "Брой:",
+      "noClubMessage": "Нямате присвоен клуб. Свържете се с администратор.",
+      "loading": "Зареждане...",
+      "mobileMenu": {
+        "renew": "Подновяване",
+        "add": "Добавяне",
+        "medicalData": "Мед. данни",
+        "migration": "Миграция",
+        "export": "Експорт"
+      },
+      "selection": {
+        "maxSelectionMessage": "Само първите {{max}} акредитации са избрани."
+      },
+      "export": {
+        "sheetName": "Картотеки",
+        "noDataError": "Няма данни за експорт",
+        "exportError": "Грешка при експорт на данните"
+      },
+      "loadError": "Грешка при зареждане на данните",
+      "selectAllError": "Грешка при избиране на всички"
+    },
+    "columns": {
+      "firstName": "Име",
+      "middleName": "Презиме",
+      "lastName": "Фамилия",
+      "gender": "Пол",
+      "dateOfBirth": "Дата на раждане",
+      "club": "Клуб",
+      "number": "Номер",
+      "year": "Година",
+      "status": "Статус",
+      "medicalExamDue": "Мед. преглед до",
+      "insurance": "Застраховка",
+      "insuranceFrom": "Застраховка от",
+      "insuranceTo": "Застраховка до",
+      "createdAt": "Създадена",
+      "modifiedAt": "Променена",
+      "registeredAt": "Регистриран на",
+      "modifiedOn": "Променен на"
+    },
+    "filters": {
+      "search": "Потърси...",
+      "gender": "Пол:",
+      "birthYear": "Год. на раждане:",
+      "birthYearFull": "Година на раждане:",
+      "club": "Клуб:",
+      "year": "Година:",
+      "status": "Статус:",
+      "allGenders": "Всички",
+      "allYears": "Всички години",
+      "allClubs": "Всички клубове",
+      "allStatuses": "Всички статуси"
+    },
+    "status": {
+      "active": "Активна",
+      "requested": "Изисква валидиране",
+      "pendingValidation": "Изисква валидиране",
+      "pendingPhoto": "Изисква валидиране на снимка",
+      "newPhoto": "Изисква нова снимка",
+      "expired": "Изтекла",
+      "suspended": "Спряна"
+    },
+    "gender": {
+      "male": "Мъж",
+      "female": "Жена"
+    },
+    "scopeType": {
+      "internal": "Вътрешен",
+      "external": "Външен",
+      "national": "Национален"
+    },
+    "table": {
+      "selectAllLoading": "Избиране на всички...",
+      "empty": "Няма намерени записи",
+      "loadingMore": "Зареждане..."
+    },
+    "athletesTable": {
+      "empty": "Няма намерени състезатели",
+      "loading": "Зареждане..."
+    },
+    "addAthleteDialog": {
+      "title": "Добавяне на нов състезател",
+      "importantNotice": "Важно: С подаването на тази заявка декларирате, че състезателят е медицински годен за спорт и е получил писмено съгласие от родител/настойник (за лица под 18 години).",
+      "labels": {
+        "club": "Клуб:",
+        "firstName": "Име:",
+        "middleName": "Презиме:",
+        "lastName": "Фамилия:",
+        "dateOfBirth": "Дата на раждане",
+        "gender": "Пол:"
+      },
+      "placeholders": {
+        "firstName": "Въведете име",
+        "middleName": "Въведете презиме",
+        "lastName": "Въведете фамилия",
+        "dateOfBirth": "Изберете дата на раждане",
+        "gender": "Изберете пол"
+      },
+      "buttons": {
+        "close": "Затвори",
+        "save": "Запази"
+      },
+      "confirm": {
+        "title": "Потвърждение",
+        "text": "С потвърждаването на тези условия се съгласявате да:",
+        "items": [
+          "Съхранявате всички документи на състезателя",
+          "Предоставите съхраняваните документи пред федерацията по тяхното поискване",
+          "Носите наказателна отговорност при невъзможност за представяне на документите"
+        ],
+        "cancel": "Отказ",
+        "confirm": "Потвърди"
+      },
+      "validation": {
+        "firstNameRequired": "Името е задължително",
+        "middleNameRequired": "Презимето е задължително",
+        "lastNameRequired": "Фамилията е задължителна",
+        "dateOfBirthRequired": "Датата на раждане е задължителна",
+        "genderRequired": "Полът е задължителен"
+      },
+      "errors": {
+        "createFailed": "Грешка при създаване на състезател"
+      }
+    },
+    "athleteDetailsDialog": {
+      "photoAlt": "Снимка на състезател",
+      "defaultPhotoAlt": "Снимка по подразбиране",
+      "uploadButton": "Качи нова снимка",
+      "uploading": "Качване...",
+      "labels": {
+        "firstName": "Име:",
+        "middleName": "Презиме:",
+        "lastName": "Фамилия:",
+        "gender": "Пол:",
+        "dateOfBirth": "Дата на раждане:",
+        "competitionGroup": "Състез. група:",
+        "medicalExamDue": "Мед. преглед до:",
+        "insurance": "Застраховка:",
+        "registeredAt": "Регистриран на:",
+        "modifiedAt": "Променен на:",
+        "type": "Тип:",
+        "medicalStartDate": "Мед. преглед – начална дата:",
+        "medicalDuration": "Продължителност (месеци):",
+        "insuranceFrom": "Застраховка от:",
+        "insuranceTo": "Застраховка до:"
+      },
+      "history": {
+        "title": "История на картотекиране",
+        "columns": {
+          "club": "Клуб",
+          "number": "Номер",
+          "year": "Година",
+          "status": "Статус",
+          "createdAt": "Създадена",
+          "modifiedAt": "Променена"
+        },
+        "warnings": {
+          "firstAccreditation": "Внимание: Това е нов състезател с първа картотека",
+          "previousClub": "Внимание: Състезателя е бил картотекиран в друг клуб преди това"
+        },
+        "loading": "Зареждане на история...",
+        "loadingMore": "Зареждане на още записи...",
+        "empty": "Няма история"
+      },
+      "buttons": {
+        "edit": "Редактирай",
+        "close": "Затвори",
+        "cancel": "Отказ",
+        "save": "Запази"
+      },
+      "unsavedChanges": {
+        "title": "Незапазени промени",
+        "message": "Имате незапазени промени. Сигурни ли сте, че искате да затворите?",
+        "confirm": "Разбрах"
+      },
+      "placeholders": {
+        "selectStatus": "Изберете статус",
+        "selectGender": "Изберете пол",
+        "selectDate": "Изберете дата"
+      },
+      "photoErrors": {
+        "onlyJpegPng": "Разрешени са само JPEG и PNG файлове.",
+        "maxFileSize": "Файлът не трябва да надвишава 10 MB.",
+        "noAthleteData": "Липсва данни за състезател.",
+        "uploadNotAllowed": "Качването не е позволено: статусът на картотеката е \"{{status}}\" — очаква се \"Чакаща снимка\" или \"Активна\"."
+      },
+      "errors": {
+        "saveFailed": "Грешка при запазване",
+        "uploadFailed": "Грешка при качване на снимката."
+      }
+    },
+    "batchMedicalDialog": {
+      "title": "Групова промяна на мед. данни и застраховка",
+      "description": "Ще бъдат обновени {{count}} избрани състезатели.",
+      "instruction": "Попълнете само полетата, които искате да обновите. Празните полета няма да бъдат променяни.",
+      "sections": {
+        "medical": "Медицински преглед (опционално)",
+        "insurance": "Застраховка (опционално)"
+      },
+      "labels": {
+        "startDate": "Начална дата",
+        "duration": "Продължителност (месеци)",
+        "insuranceFrom": "Застраховка от",
+        "insuranceTo": "Застраховка до"
+      },
+      "placeholders": {
+        "selectDate": "Изберете дата",
+        "durationExample": "Напр. 12"
+      },
+      "validation": {
+        "required": "Задължително поле",
+        "noSelection": "Няма избрани състезатели.",
+        "fillAtLeastOne": "Попълнете поне една двойка: или застраховка (от/до), или медицински преглед (начална дата/продължителност).",
+        "fillMedicalStart": "Попълнете \"Начална дата\" когато е попълнена \"Продължителност\" на медицинския преглед.",
+        "fillMedicalDuration": "Попълнете \"Продължителност\" когато е попълнена \"Начална дата\" на медицинския преглед.",
+        "fillInsuranceFrom": "Попълнете \"Застраховка от\" когато е попълнено \"Застраховка до\".",
+        "fillInsuranceTo": "Попълнете \"Застраховка до\" когато е попълнено \"Застраховка от\"."
+      },
+      "buttons": {
+        "cancel": "Отказ",
+        "saving": "Запазване...",
+        "apply": "Приложи"
+      },
+      "errors": {
+        "updateFailed": "Грешка при обновяване",
+        "partialFailed": "Една или повече заявки не успяха.",
+        "saveFailed": "Грешка при запазване"
+      }
+    },
+    "migrationDialog": {
+      "title": "Миграция на състезатели",
+      "uploadButton": "Избери Excel файл",
+      "fileReadError": "Грешка при четене на файла.",
+      "mapping": {
+        "title": "Съпоставка на колони",
+        "instruction": "Изберете от коя колона на файла да се вземе всяко поле.",
+        "placeholder": "Не импортирай",
+        "yearLabel": "Година за картотекиране:",
+        "yearError": "Не може да се картотекира за бъдеща година"
+      },
+      "dataFields": {
+        "oldCardNumber": "Картотечен номер",
+        "firstName": "Име",
+        "middleName": "Презиме",
+        "lastName": "Фамилия",
+        "gender": "Пол",
+        "dateOfBirth": "Дата на раждане"
+      },
+      "preview": {
+        "title": "Преглед на данните",
+        "validRecords": "Записи с валиден картотечен номер (4–6 цифри):",
+        "columns": {
+          "cardNumber": "Картотека",
+          "firstName": "Име",
+          "middleName": "Презиме",
+          "lastName": "Фамилия",
+          "gender": "Пол",
+          "dateOfBirth": "Дата раждане"
+        }
+      },
+      "progress": "Изпращане на {{count}} записа в {{chunks}} заявки...",
+      "noValidRecords": "Няма валидни записи за миграция (картотечен номер 4–6 цифри, пол Мъж/Жена и всички полета).",
+      "results": {
+        "title": "Резултат от миграцията",
+        "migrated": "Мигрирани:",
+        "skipped": "Пропуснати:",
+        "failedChunks": "{{failed}} от {{total}} заявки не успяха.",
+        "failedColumns": {
+          "chunk": "Заявка",
+          "reason": "Причина"
+        },
+        "skippedTitle": "Пропуснати записи:",
+        "skippedColumns": {
+          "cardNumber": "Картотека",
+          "name": "Име",
+          "lastName": "Фамилия",
+          "reason": "Причина"
+        }
+      },
+      "buttons": {
+        "back": "Назад",
+        "preview": "Преглед",
+        "migrating": "Мигриране...",
+        "migrate": "Мигрирай",
+        "done": "Готово"
+      }
+    },
+    "renewDialog": {
+      "title": "Подновяване на картотека",
+      "description": "Ще бъдат подновени картотеки за {{count}} уникални състезатели.",
+      "columns": {
+        "name": "Име",
+        "dateOfBirth": "Дата на раждане"
+      },
+      "buttons": {
+        "close": "Затвори",
+        "renew": "Поднови"
+      },
+      "results": {
+        "success": "Успешно подновени:",
+        "failed": "Неуспешни:",
+        "renewError": "Грешка при подновяване",
+        "columns": {
+          "athleteId": "Състезател ID",
+          "error": "Грешка"
+        }
+      },
+      "errors": {
+        "renewFailed": "Грешка при подновяване",
+        "unknown": "Неизвестна грешка"
+      }
+    },
+    "settingsDialog": {
+      "title": "Настройки на таблицата",
+      "tabs": {
+        "columns": "Колони",
+        "filters": "Филтри"
+      },
+      "columnsDescription": "Изберете кои колони да се показват в таблицата.",
+      "filtersDescription": "Изберете кои филтри да се показват. При скриване на филтър стойността му се изчиства.",
+      "selectAll": "Избери всички",
+      "deselectAll": "Премахни всички",
+      "buttons": {
+        "cancel": "Отказ",
+        "save": "Запази"
+      }
+    },
+    "photoCropDialog": {
+      "title": "Изрежи снимката",
+      "instruction": "Плъзнете снимката за позициониране. Използвайте бутоните за мащабиране.",
+      "imageAlt": "Снимка за изрязване",
+      "zoomOut": "Отдалечи",
+      "zoomIn": "Приближи",
+      "buttons": {
+        "cancel": "Отказ",
+        "processing": "Обработка...",
+        "confirm": "Потвърди"
+      },
+      "errors": {
+        "loadFailed": "Неуспешно зареждане на изображението.",
+        "notLoaded": "Изображението не е заредено. Опитайте отново.",
+        "cropFailed": "Неуспешно изрязване. Опитайте отново."
+      }
+    },
+    "photoViewDialog": {
+      "title": "Снимка на състезател",
+      "photoAlt": "Снимка на състезател",
+      "defaultPhotoAlt": "Снимка по подразбиране"
+    },
+    "detailPage": {
+      "tabs": {
+        "details": "Детайли",
+        "history": "История"
+      },
+      "defaultName": "Състезател",
+      "photoAlt": "Снимка на състезател",
+      "defaultPhotoAlt": "Снимка по подразбиране",
+      "loading": "Зареждане...",
+      "labels": {
+        "lastAccreditation": "Последна картотека",
+        "club": "Клуб:",
+        "year": "Година:",
+        "number": "Номер:",
+        "status": "Статус:"
+      },
+      "viewFullHistory": "Виж цялата история →",
+      "noData": "Няма данни",
+      "unsavedChanges": {
+        "title": "Незапазени промени",
+        "message": "Имате незапазени промени. Моля, използвайте бутоните",
+        "saveButton": "Запази",
+        "cancelButton": "Отказ",
+        "suffix": ", за да излезете от редакция.",
+        "confirm": "Разбрах"
+      },
+      "buttons": {
+        "edit": "Редактирай",
+        "delete": "Изтрий",
+        "cancel": "Отказ",
+        "save": "Запази",
+        "saveStatus": "Запази",
+        "cancelStatus": "Отказ"
+      },
+      "errors": {
+        "loadFailed": "Грешка при зареждане на акредитацията",
+        "notFound": "Акредитацията не е намерена.",
+        "deleteFailed": "Грешка при изтриване на картотека",
+        "uploadNotAllowed": "Качването не е позволено: състезателят трябва да има акредитация за тази година със статус \"Нова снимка изискана\" за вашия клуб."
+      }
+    },
+    "athleteDetailPage": {
+      "tabs": {
+        "details": "Детайли",
+        "accreditationHistory": "История на картотеките"
+      },
+      "photoAlt": "Снимка на атлет",
+      "defaultPhotoAlt": "Снимка по подразбиране",
+      "defaultName": "Атлет",
+      "loading": "Зареждане...",
+      "labels": {
+        "lastAccreditation": "Последна картотека",
+        "club": "Клуб:",
+        "year": "Година:",
+        "number": "Номер:",
+        "status": "Статус:"
+      },
+      "viewFullHistory": "Виж цялата история →",
+      "noData": "Няма данни",
+      "unsavedChanges": {
+        "title": "Незапазени промени",
+        "message": "Имате незапазени промени. Моля, използвайте бутоните",
+        "saveButton": "Запази",
+        "cancelButton": "Отказ",
+        "suffix": ", за да излезете от редакция.",
+        "confirm": "Разбрах"
+      },
+      "buttons": {
+        "edit": "Редактирай",
+        "deleteAthlete": "Изтрий атлет",
+        "save": "Запази",
+        "cancel": "Отказ",
+        "editStatus": "Редактирай статус",
+        "deleteAccreditation": "Изтрий картотека",
+        "saveStatus": "Запази",
+        "cancelStatus": "Отказ"
+      },
+      "errors": {
+        "loadFailed": "Грешка при зареждане на атлета",
+        "notFound": "Атлетът не е намерен.",
+        "deleteAccreditationFailed": "Грешка при изтриване на картотека",
+        "deleteAthleteFailed": "Грешка при изтриване на атлет",
+        "statusSaveFailed": "Грешка при запазване на статус"
+      },
+      "deletingAccreditationName": "картотека {{number}}"
+    }
+  },
+  "competitions": {
+    "page": {
+      "title": "Състезания",
+      "count": "Брой:",
+      "addButton": "Добавяне",
+      "settingsTitle": "Настройки на таблицата",
+      "loading": "Зареждане...",
+      "loadError": "Грешка при зареждане на данните"
+    },
+    "columns": {
+      "shortName": "Кратко име",
+      "name": "Име",
+      "status": "Статус",
+      "startDate": "Начална дата",
+      "endDate": "Крайна дата",
+      "location": "Място",
+      "createdAt": "Създаден на",
+      "modifiedAt": "Променен на"
+    },
+    "filters": {
+      "search": "Потърси...",
+      "status": "Статус:",
+      "allStatuses": "Всички статуси"
+    },
+    "table": {
+      "empty": "Няма намерени състезания",
+      "loading": "Зареждане..."
+    },
+    "status": {
+      "template": "Шаблон",
+      "planned": "Планирано",
+      "registrationOpen": "Регистрация",
+      "registrationClosed": "Затворена регистрация",
+      "inProgress": "В ход",
+      "completed": "Приключило"
+    },
+    "eventType": {
+      "heat": "Серия",
+      "semifinal": "Полуфинал",
+      "finalB": "Финал Б",
+      "finalA": "Финал А"
+    },
+    "eventStatus": {
+      "scheduled": "Насрочено",
+      "inProgress": "В ход",
+      "unofficialResults": "Неофициални",
+      "officialResults": "Официални",
+      "cancelled": "Отменено",
+      "planiranoFull": "Планирано",
+      "inProgressFull": "В прогрес",
+      "unofficialResultsFull": "Неофициални резултати",
+      "officialResultsFull": "Официални резултати",
+      "cancelledFull": "Отменено"
+    },
+    "competitionType": {
+      "nationalErgo": "Национално (ерго)",
+      "nationalWater": "Национално (вода)",
+      "balkan": "Балкански"
+    },
+    "addCompetitionDialog": {
+      "title": "Добавяне на състезание",
+      "typeToggle": {
+        "real": "Реално",
+        "template": "Шаблон"
+      },
+      "templatePicker": {
+        "useTemplate": "Използвай шаблон",
+        "selectTemplate": "Изберете шаблон..."
+      },
+      "labels": {
+        "type": "Тип",
+        "shortName": "Кратко име",
+        "fullName": "Пълно име",
+        "location": "Място",
+        "format": "Формат",
+        "startDate": "Начална дата",
+        "endDate": "Крайна дата",
+        "entrySubmissionsOpen": "Отваряне на записвания",
+        "entrySubmissionsClosed": "Затваряне на записвания",
+        "lastChangesBeforeTs": "Последни промени преди ТС",
+        "technicalMeeting": "Техническо съвещание",
+        "awards": "Награждаване",
+        "scoringScheme": "Схема за точкуване",
+        "qualificationScheme": "Квалификационна схема"
+      },
+      "placeholders": {
+        "shortName": "Кратко наименование",
+        "fullName": "Пълно наименование",
+        "location": "Гр., обект",
+        "selectFormat": "Изберете формат...",
+        "selectDate": "Изберете дата...",
+        "selectDateTime": "Изберете дата и час...",
+        "selectScheme": "Изберете схема..."
+      },
+      "duration": {
+        "day": "ден",
+        "days": "дни"
+      },
+      "buttons": {
+        "close": "Затвори",
+        "save": "Запази"
+      },
+      "errors": {
+        "createFailed": "Грешка при създаване на състезание",
+        "copyPartial": "Разписание: {{ok}}/{{total}} ОК{{errorDetail}} — провалените могат да се добавят ръчно.",
+        "copyFailed": "Разписанието не успя да се копира — може да се добави ръчно."
+      }
+    },
+    "detailsPage": {
+      "loading": "Зареждане...",
+      "tabs": {
+        "details": "Детайли",
+        "disciplines": "Дисциплини",
+        "timetable": "Разписание",
+        "entries": "Заявки",
+        "progression": "Стартов лист",
+        "weighIn": "Кантар",
+        "results": "Резултати",
+        "complexStandings": "Отборно класиране"
+      },
+      "details": {
+        "sectionTitle": "Основна информация",
+        "labels": {
+          "shortName": "Кратко наименование:",
+          "fullName": "Пълно наименование:",
+          "location": "Място:",
+          "format": "Формат:",
+          "startDate": "Начална дата:",
+          "endDate": "Крайна дата:",
+          "entrySubmissionsOpen": "Отв. записвания:",
+          "entrySubmissionsClosed": "Затв. записвания:",
+          "lastChangesBeforeTs": "Посл. пром. пр. ТС:",
+          "technicalMeeting": "Техн. съвещание:",
+          "awards": "Награждаване:",
+          "createdAt": "Създадено на:",
+          "modifiedAt": "Променено на:"
+        },
+        "scoring": {
+          "title": "Схема за точкуване",
+          "nameLabel": "Наименование:",
+          "statusLabel": "Статус:",
+          "active": "Активна",
+          "inactive": "Неактивна",
+          "notSet": "Не е зададена схема за точкуване"
+        },
+        "qualification": {
+          "title": "Квалификационна схема",
+          "nameLabel": "Наименование:",
+          "laneCountLabel": "Брой коридори:",
+          "statusLabel": "Статус:",
+          "active": "Активна",
+          "inactive": "Неактивна",
+          "notSet": "Не е зададена квалификационна схема"
+        },
+        "buttons": {
+          "edit": "Редактирай",
+          "delete": "Изтрий",
+          "cancel": "Отказ",
+          "save": "Запази"
+        },
+        "placeholders": {
+          "selectFormat": "Изберете формат...",
+          "selectDate": "Изберете дата...",
+          "selectDateTime": "Изберете дата и час...",
+          "selectScheme": "Изберете схема..."
+        }
+      },
+      "disciplines": {
+        "description": "Дисциплините се извеждат от разписанието на събитията.",
+        "loading": "Зареждане...",
+        "empty": "Няма дисциплини (добавете събития в разписанието)",
+        "noGroup": "Без група",
+        "columns": {
+          "shortName": "Кратко наименование",
+          "fullName": "Пълно наименование"
+        }
+      },
+      "timetable": {
+        "addEvent": "+ Добави събитие",
+        "newEvent": "Ново събитие",
+        "labels": {
+          "discipline": "Дисциплина",
+          "type": "Тип",
+          "scheduled": "Насрочено"
+        },
+        "placeholders": {
+          "selectDiscipline": "Изберете дисциплина...",
+          "selectType": "Изберете...",
+          "selectDateTime": "Изберете дата и час...",
+          "disciplinePlaceholder": "Дисциплина...",
+          "typePlaceholder": "Тип...",
+          "statusPlaceholder": "Статус..."
+        },
+        "columns": {
+          "number": "#",
+          "discipline": "Дисциплина",
+          "type": "Тип",
+          "date": "Дата",
+          "time": "Час",
+          "status": "Статус"
+        },
+        "loading": "Зареждане...",
+        "empty": "Няма добавени събития в разписанието",
+        "buttons": {
+          "cancel": "Отказ",
+          "save": "Запази"
+        },
+        "editButton": "Редактирай",
+        "deleteButton": "Изтрий"
+      },
+      "entries": {
+        "loading": "Зареждане...",
+        "clubCount": "{{count}} клуб",
+        "clubCountPlural": "{{count}} клуба",
+        "entryCount": "{{count}} заявка",
+        "entryCountPlural": "{{count}} заявки",
+        "submitButton": "Подай / редактирай заявки",
+        "submissionClosed": "Периодът за подаване на заявки е приключил. Всички заявки са видими.",
+        "submissionNotOpen": "Периодът за подаване на заявки все още не е отворен.",
+        "empty": "Няма подадени заявки",
+        "clubSubmissionsTitle": "Подадени заявки по клубове",
+        "columns": {
+          "club": "Клуб",
+          "entries": "Заявки",
+          "team": "Отбор"
+        },
+        "viewButton": "Виж",
+        "noClubEntries": "Няма заявки от този клуб"
+      },
+      "progression": {
+        "generateButton": "Генерирай следващ етап",
+        "generating": "Изпълнение...",
+        "loading": "Зареждане...",
+        "empty": "Няма генерирани стартови листи",
+        "noParticipants": "Няма участници",
+        "lanesButton": "Коридори",
+        "resultsButton": "Резултати",
+        "refreshButton": "Обнови",
+        "columns": {
+          "place": "Място",
+          "lane": "Кор.",
+          "club": "Клуб",
+          "crew": "Екипаж",
+          "time": "Време"
+        },
+        "statusLabels": {
+          "notStarted": "Не е стартирано",
+          "inProgress": "В ход",
+          "finished": "Завършено"
+        },
+        "errors": {
+          "loadFailed": "Грешка при зареждане на прогресията",
+          "generateFailed": "Грешка при генериране на прогресията"
+        }
+      },
+      "results": {
+        "loading": "Зареждане...",
+        "empty": "Няма дисциплини",
+        "noStandings": "Няма класиране",
+        "generateButton": "Генерирай класиране",
+        "generating": "Генериране...",
+        "recalculate": "Преизчисли",
+        "generate": "Генерирай",
+        "deleteButton": "Изтрий",
+        "columns": {
+          "place": "Място",
+          "club": "Клуб",
+          "crew": "Екипаж",
+          "time": "Време",
+          "points": "Точки"
+        }
+      },
+      "complexStandings": {
+        "loading": "Зареждане...",
+        "empty": "Няма комплексно класиране. Генерирайте крайно класиране за дисциплините от таб \"Резултати\".",
+        "viewButtons": {
+          "label": "Изглед:",
+          "total": "Общо",
+          "byDisciplines": "По дисциплини",
+          "medals": "Медали"
+        },
+        "genderButtons": {
+          "label": "Пол:",
+          "all": "Всички",
+          "male": "Мъже",
+          "female": "Жени"
+        },
+        "groupButton": {
+          "label": "Група:",
+          "all": "Всички"
+        },
+        "columns": {
+          "place": "Място",
+          "club": "Клуб",
+          "points": "Точки",
+          "total": "Общо"
+        },
+        "summaryTitles": {
+          "maleSummary": "Мъже — Обобщение",
+          "femaleSummary": "Жени — Обобщение",
+          "allSummary": "Всички — Обобщение"
+        }
+      },
+      "weighIn": {
+        "loading": "Зареждане...",
+        "empty": "Няма състезатели за измерване за избрания ден",
+        "todayWarning": "Измервания могат да се записват само за текущия ден.",
+        "columns": {
+          "athlete": "Атлет",
+          "cardNumber": "Карта",
+          "role": "Роля",
+          "limit": "Лимит",
+          "weight": "Тегло",
+          "comment": "Коментар"
+        },
+        "weightUnit": "кг",
+        "editPlaceholder": "Тегло (кг)",
+        "saveButton": "Запази",
+        "photoAlt": "Снимка"
+      },
+      "editingWarning": {
+        "title": "Незапазени промени",
+        "message": "Имате незапазени промени. Моля, използвайте бутоните \"Запази\" или \"Отказ\", за да излезете от редакция.",
+        "confirm": "Разбрах"
+      },
+      "clubSelect": {
+        "title": "Изберете клуб",
+        "label": "Клуб:",
+        "placeholder": "Търсене на клуб...",
+        "closeButton": "Затвори"
+      },
+      "clubDetail": {
+        "titlePrefix": "Заявка —",
+        "loading": "Зареждане...",
+        "empty": "Няма заявки от този клуб",
+        "maleTeam": "Мъжки отбор",
+        "femaleTeam": "Женски отбор",
+        "athleteCountLabel": "спортисти",
+        "inGroup": "в групата",
+        "transfer": "трансфер",
+        "coxswain": "рулеви",
+        "viewTransferSchema": "Виж трансферна схема",
+        "columns": {
+          "number": "№",
+          "name": "Име",
+          "birthYear": "Набор",
+          "disciplines": "Дисц.",
+          "medical": "Мед.",
+          "insurance": "Заст.",
+          "status": "Статус"
+        },
+        "activeStatus": "Активен",
+        "maleDisciplines": "Мъжки дисциплини",
+        "femaleDisciplines": "Женски дисциплини",
+        "mixedDisciplines": "Смесени дисциплини",
+        "disciplineColumns": {
+          "discipline": "Дисциплина",
+          "team": "Отб.",
+          "crew": "Екипаж"
+        },
+        "transferBadge": "[Т]",
+        "coxBadge": "[Р]",
+        "closeButton": "Затвори",
+        "noDisciplineEntries": "Няма заявки за тази дисциплина"
+      },
+      "transferSchema": {
+        "titlePrefix": "Схема за трансфер —",
+        "description": "Допуска се до <strong>{{ratio}}%</strong> от стартиралите състезатели да бъдат трансферирани.",
+        "columns": {
+          "totalCrew": "Общ брой на отбора",
+          "maxTransfer": "Макс. трансфер"
+        },
+        "current": "(текущо)",
+        "overLimit": "Избрани {{count}} трансфер от {{total}} общо — надвишен лимит (макс. {{max}}).",
+        "withinLimit": "Избрани {{count}} трансфер от {{total}} общо — в рамките на лимита (макс. {{max}}).",
+        "closeButton": "Затвори"
+      },
+      "errors": {
+        "loadFailed": "Грешка при зареждане на данните"
+      }
+    },
+    "settingsDialog": {
+      "title": "Настройки на таблицата",
+      "tabs": {
+        "columns": "Колони",
+        "filters": "Филтри"
+      },
+      "columnsDescription": "Изберете кои колони да се показват в таблицата.",
+      "filtersDescription": "Изберете кои филтри да се показват. При скриване на филтър стойността му се изчиства.",
+      "selectAll": "Избери всички",
+      "deselectAll": "Премахни всички",
+      "buttons": {
+        "cancel": "Отказ",
+        "save": "Запази"
+      }
+    },
+    "chronometer": {
+      "titlePrefix": {
+        "start": "Хронометър —",
+        "finish": "Финиш —",
+        "assign": "Разпределение —"
+      },
+      "start": {
+        "spaceToStart": "Натиснете SPACE за старт",
+        "running": "Хронометърът работи",
+        "backToResults": "Назад към резултати",
+        "restart": "Рестарт"
+      },
+      "finish": {
+        "spaceToCapture": "Натиснете SPACE за улавяне на време",
+        "minSplits": "Минимум {{count}} времена за спиране (уловени: {{captured}})",
+        "stopButton": "Стоп хронометър"
+      },
+      "assign": {
+        "totalTime": "Общо време:",
+        "capturedSplits": "Уловени времена:",
+        "selected": "Избрани:",
+        "laneOrderLabel": "Ред на финиширане — {{count}} коридора (разделени с интервал)",
+        "laneOrderPlaceholder": "напр. 7 4 3 1",
+        "availableLanes": "Налични коридори:",
+        "buttons": {
+          "cancel": "Отказ",
+          "confirm": "Потвърди"
+        },
+        "errors": {
+          "selectAtLeastOne": "Изберете поне едно време",
+          "enterLanes": "Моля, въведете коридорите на финиширане",
+          "exactLanes": "Въведете точно {{expected}} коридора (въведени: {{entered}})",
+          "invalidLane": "\"{{value}}\" не е валиден номер на коридор",
+          "laneNotExist": "Коридор {{lane}} не съществува в това събитие (налични: {{available}})",
+          "duplicateLane": "Коридор {{lane}} е въведен повече от веднъж",
+          "maxSplits": "Максимум {{max}} времена (колкото коридори)"
+        }
+      },
+      "restartConfirm": {
+        "startMessage": "Сигурни ли сте? Хронометърът ще бъде нулиран.",
+        "finishMessage": "Сигурни ли сте? Всички уловени времена ще бъдат изтрити.",
+        "no": "Не",
+        "yesRestart": "Да, рестартирай"
+      }
+    },
+    "submitEntriesDialog": {
+      "title": "Подаване на заявки",
+      "loadingAthletes": "Зареждане на спортисти...",
+      "eligible": "допустими",
+      "transferLabel": "трансфер (избрани {{count}})",
+      "maxDisciplinesPerAthlete": "макс. {{max}} дисц./спортист",
+      "maxDisciplinesPerTransfer": "макс. {{max}} дисц./трансфер",
+      "selectedAthletes": "Избрани спортисти:",
+      "transferInParens": "({{count}} трансфер)",
+      "transferLimitExceeded": "Превишен лимит за трансфер!",
+      "disciplines": "Дисциплини",
+      "removeButton": "Премахни",
+      "teamLabel": "Отбор {{number}}",
+      "filledCount": "{{filled}}/{{total}}",
+      "ownLabel": "собств.",
+      "duplicateError": "дубликат!",
+      "genderImbalanceError": "50/50 М/Ж!",
+      "deleteTeam": "Изтрий",
+      "addTeam": "+ Добави отбор",
+      "selectDisciplinesHint": "Изберете дисциплини от бутоните по-горе",
+      "noDisciplines": "Няма дисциплини в разписанието",
+      "validationErrors": "Грешки при валидация:",
+      "placeholders": {
+        "selectAthleteFirst": "Първо изберете спортисти",
+        "selectAthlete": "Изберете спортист"
+      },
+      "maxCrewFromTransfer": "макс. {{max}} трансфер/отбор",
+      "buttons": {
+        "cancel": "Отказ",
+        "submit": "Подай заявки"
+      },
+      "errors": {
+        "saveFailed": "Грешка при запазване на заявките"
+      },
+      "athletePool": {
+        "titlePrefix": "Избор на спортисти —",
+        "searchPlaceholder": "Търси по име, година, картон...",
+        "ownSection": "Собствени",
+        "transferSection": "Трансфер от {{group}}",
+        "noResults": "Няма намерени спортисти",
+        "footerAthletes": "спортисти",
+        "transferExceeded": "Превишен лимит!",
+        "schemaButton": "Схема",
+        "doneButton": "Готово",
+        "transferSummary": "{{count}} трансфер",
+        "transferSummaryWithMax": "{{count}} трансфер / макс. {{max}}"
+      },
+      "transferSchema": {
+        "titlePrefix": "Схема за трансфер —",
+        "description": "Допуска се до {{ratio}}% от стартиралите състезатели да бъдат от {{group}}.",
+        "columns": {
+          "totalCrew": "Общ брой на отбора",
+          "maxTransfer": "Макс. трансфер"
+        },
+        "current": "(текущо)",
+        "overLimit": "Избрани {{count}} трансфер от {{total}} общо — надвишен лимит (макс. {{max}}).",
+        "withinLimit": "Избрани {{count}} трансфер от {{total}} общо — в рамките на лимита (макс. {{max}}).",
+        "closeButton": "Затвори"
+      },
+      "genderLabels": {
+        "male": "Мъже",
+        "female": "Жени",
+        "mixed": "Смесена"
+      },
+      "transferBadge": "[Т]",
+      "coxBadge": "[Р]",
+      "transferAbbrev": "тр.",
+      "discAbbrev": "дисц.",
+      "coxAbbrev": "рул.",
+      "coxShortAbbrev": "р",
+      "yearAbbrev": "г."
+    },
+    "laneRearrange": {
+      "titleSuffix": "Коридори"
+    },
+    "resultsEntry": {
+      "titlePrefix": "Резултати —",
+      "statusOptions": {
+        "unofficialResults": "Неофициални резултати",
+        "officialResults": "Официални резултати"
+      },
+      "finishStatusOptions": {
+        "finished": "FINISHED",
+        "dns": "DNS",
+        "dnf": "DNF",
+        "dsq": "DSQ"
+      },
+      "chronoRunning": "Хронометърът работи",
+      "resultsWarning": "Промяната на резултатите ще изтрие стартовите листи и класирането за всички следващи етапи на тази дисциплина.",
+      "noParticipants": "Няма участници",
+      "columns": {
+        "status": "Статус",
+        "time": "Време (мм:сс.дд)"
+      },
+      "eventStatusLabel": "Статус на събитието:",
+      "processStart": "Стартирай",
+      "processFinish": "Приключи",
+      "saveButton": "Запази",
+      "savingButton": "Запазване...",
+      "closeButton": "Затвори"
+    },
+    "progressionDialog": {
+      "titlePrefix": "Прогресия —",
+      "empty": "Няма генерирани събития за тази дисциплина",
+      "laneEditing": "Редактиране на коридори",
+      "columns": {
+        "series": "Серия",
+        "lane": "Коридор",
+        "status": "Статус"
+      },
+      "editLanesButton": "Промени коридори",
+      "saveResultsButton": "Запиши резултати",
+      "closeButton": "Затвори"
+    },
+    "generateProgressionDialog": {
+      "title": "Генериране на следващ етап",
+      "selectAll": "Всички дисциплини",
+      "entriesCount": "записани",
+      "closeButton": "Затвори"
+    },
+    "generateResultsDialog": {
+      "title": "Резултати от генериране",
+      "empty": "Няма резултати",
+      "columns": {
+        "reason": "Причина",
+        "fromStage": "От етап",
+        "toStage": "Към етап"
+      },
+      "closeButton": "Затвори"
+    },
+    "generateStandingsDialog": {
+      "title": "Изберете дисциплини за класиране",
+      "selectAll": "Всички дисциплини",
+      "closeButton": "Затвори"
+    },
+    "standingsResultsDialog": {
+      "title": "Резултати от генериране на класиране",
+      "empty": "Няма резултати",
+      "columns": {
+        "reason": "Причина"
+      },
+      "closeButton": "Затвори"
+    },
+    "chronoWarning": {
+      "title": "Активен хронометър",
+      "message": "Хронометърът работи. Сигурни ли сте, че искате да затворите диалога? Хронометърът ще бъде спрян.",
+      "cancel": "Не, върни се",
+      "confirm": "Да, затвори"
+    },
+    "crewVerify": {
+      "empty": "Празно",
+      "photoAlt": "Снимка",
+      "weightUnit": "кг",
+      "notMeasured": "Не е измерен",
+      "indexLabel": "{{current}} от {{total}}",
+      "markUnchecked": "Маркирай като непроверен",
+      "markChecked": "Маркирай като проверен"
+    },
+    "genderAbbrev": {
+      "male": "М",
+      "female": "Ж"
+    },
+    "weighInComments": {
+      "belowMinimum": "Под минимума (мин. {{min}} кг)",
+      "compensation": "Компенсация (изисквано {{required}} кг)",
+      "aboveLimit": "Над лимита (макс. {{max}} кг)"
+    },
+    "roleLabels": {
+      "cox": "Рулеви",
+      "rower": "Гребец"
+    },
+    "laneRearrangeErrors": {
+      "saveFailed": "Грешка при записване на коридорите"
+    },
+    "crewVerifyErrors": {
+      "statusFailed": "Грешка при промяна на статуса"
+    },
+    "weighInWarnings": {
+      "lessThanOneHour": "Измерването е по-малко от 1 час преди старта",
+      "moreThanTwoHours": "Измерването е повече от 2 часа преди старта"
+    },
+    "weighInErrors": {
+      "saveFailed": "Грешка при записване на теглото"
+    },
+    "accreditationStatusLabels": {
+      "ACTIVE": "Активна",
+      "PENDING_VALIDATION": "Очаква валидиране",
+      "PENDING_PHOTO_VALIDATION": "Очаква валидиране на снимка",
+      "NEW_PHOTO_REQUIRED": "Необходима нова снимка",
+      "EXPIRED": "Изтекла",
+      "SUSPENDED": "Спряна"
+    },
+    "generationStatusLabels": {
+      "success": "Успешно",
+      "skipped": "Пропуснато",
+      "error": "Грешка"
+    },
+    "resultsErrors": {
+      "invalidTime": "Моля, въведете валидно време за всички участници със статус FINISHED (формат: мм:сс.дд)",
+      "saveFailed": "Грешка при записване на резултатите",
+      "lanesSaveFailed": "Грешка при записване"
+    },
+    "standingsErrors": {
+      "loadFailed": "Грешка при зареждане на класирането",
+      "generateFailed": "Грешка при генериране на класирането",
+      "generateSingleFailed": "Грешка при генериране",
+      "deleteFailed": "Грешка при изтриване на класирането",
+      "clubRankingsFailed": "Грешка при изчисляване на отборното класиране"
+    },
+    "chartLabels": {
+      "medals": "Медали",
+      "points": "Точки",
+      "totalPoints": "Общо точки",
+      "firstPlace": "1-во място",
+      "secondPlace": "2-ро място",
+      "thirdPlace": "3-то място",
+      "medalsAxis": "Брой медали",
+      "pointsAxis": "Точки"
+    },
+    "deleteErrors": {
+      "competitionFailed": "Грешка при изтриване на състезание"
+    },
+    "editErrors": {
+      "saveFailed": "Грешка при записване"
+    },
+    "timetableErrors": {
+      "saveFailed": "Грешка при запис",
+      "deleteFailed": "Грешка при изтриване"
+    },
+    "eventTypeMap": {
+      "H": "С",
+      "SF": "ПФ",
+      "FB": "ФБ",
+      "FA": "ФА"
+    },
+    "eventStatusMap": {
+      "SCHEDULED": "Планирано",
+      "IN_PROGRESS": "В ход",
+      "UNOFFICIAL_RESULTS": "Неофициални резултати",
+      "OFFICIAL_RESULTS": "Официални резултати",
+      "CANCELLED": "Отменено"
+    },
+    "statusLabels": {
+      "template": "Шаблон",
+      "planned": "Планирано",
+      "registrationOpen": "Отворена регистрация",
+      "registrationClosed": "Затворена регистрация",
+      "inProgress": "В ход",
+      "completed": "Завършено"
+    },
+    "pdf": {
+      "startList": {
+        "lane": "Кор.",
+        "club": "Клуб",
+        "crew": "Екипаж"
+      },
+      "results": {
+        "subtitle": "Резултати",
+        "rank": "Място",
+        "club": "Клуб",
+        "crew": "Екипаж",
+        "time": "Време",
+        "points": "Точки",
+        "filenameSuffix": "Резултати"
+      },
+      "weighIn": {
+        "subtitle": "Кантар",
+        "athlete": "Атлет",
+        "card": "Карта",
+        "role": "Роля",
+        "limit": "Лимит",
+        "weight": "Тегло",
+        "comment": "Коментар",
+        "weightUnit": "кг",
+        "filenameSuffix": "Кантар"
+      }
+    },
+    "seatLabels": {
+      "BOW": "Н",
+      "TWO": "2",
+      "THREE": "3",
+      "FOUR": "4",
+      "FIVE": "5",
+      "SIX": "6",
+      "SEVEN": "7",
+      "STROKE": "З",
+      "COX": "Р"
+    }
+  },
+  "competitionGroups": {
+    "title": "Състезателни групи",
+    "count": "Брой групи:",
+    "addButton": "Добавяне на група",
+    "table": {
+      "empty": "Няма намерени състезателни групи",
+      "columns": {
+        "name": "Име",
+        "shortName": "Кратко име",
+        "minAge": "Мін. възраст",
+        "maxAge": "Макс. възраст",
+        "coxMinAge": "Мин. възраст рулеви",
+        "coxMaxAge": "Макс. възраст рулеви",
+        "maxDisciplinesPerAthlete": "Макс. дисциплини",
+        "transferFromGroupId": "Трансфер от група",
+        "minCrewForTransfer": "Мин. екипаж",
+        "transferRatio": "Съотношение",
+        "transferRounding": "Закръгляне",
+        "transferredMaxDisciplinesPerAthlete": "Макс. дисц. (трансф.)",
+        "maleTeamCoxRequiredWeightKg": "М. изискв. тегло рулеви",
+        "maleTeamCoxMinWeightKg": "М. мин. тегло рулеви",
+        "maleTeamLightMaxWeightKg": "М. макс. тегло лека кат.",
+        "femaleTeamCoxRequiredWeightKg": "Ж. изискв. тегло рулеви",
+        "femaleTeamCoxMinWeightKg": "Ж. мин. тегло рулеви",
+        "femaleTeamLightMaxWeightKg": "Ж. макс. тегло лека кат.",
+        "isActive": "Статус",
+        "createdAt": "Създаден на",
+        "modifiedAt": "Променен на"
+      }
+    },
+    "filters": {
+      "search": "Потърси...",
+      "statusLabel": "Статус:",
+      "statusAll": "Всички статуси"
+    },
+    "rounding": {
+      "down": "Надолу",
+      "up": "Нагоре",
+      "round": "Закръгляне"
+    },
+    "form": {
+      "title": "Добавяне на състезателна група",
+      "nameLabel": "Име",
+      "namePlaceholder": "Въведете име",
+      "shortNameLabel": "Кратко име",
+      "shortNamePlaceholder": "Въведете кратко име",
+      "minAgeLabel": "Мін. възраст",
+      "maxAgeLabel": "Макс. възраст",
+      "coxMinAgeLabel": "Мин. възраст на рулевия",
+      "coxMaxAgeLabel": "Макс. възраст на рулевия",
+      "maxDisciplinesLabel": "Макс. дисциплини на атлет",
+      "transferFromGroupLabel": "Трансфер от група",
+      "minCrewForTransferLabel": "Мин. брой за трансфер",
+      "transferRatioLabel": "Процент за трансфер",
+      "transferRoundingLabel": "Закръгляне при трансфер",
+      "transferredMaxDisciplinesLabel": "Макс. дисциплини за трансфериран",
+      "statusLabel": "Статус",
+      "maleTeamLightMaxWeightLabel": "Мъже — макс. тегло лека кат. (кг)",
+      "maleTeamCoxMinWeightLabel": "Мъже — мин. тегло на рулевия (кг)",
+      "maleTeamCoxRequiredWeightLabel": "Мъже — изискв. тегло на рулевия (кг)",
+      "femaleTeamLightMaxWeightLabel": "Жени — макс. тегло лека кат. (кг)",
+      "femaleTeamCoxMinWeightLabel": "Жени — мин. тегло на рулевия (кг)",
+      "femaleTeamCoxRequiredWeightLabel": "Жени — изискв. тегло на рулевия (кг)",
+      "createError": "Грешка при създаване на състезателна група"
+    },
+    "details": {
+      "defaultTitle": "Състезателна група",
+      "labels": {
+        "name": "Име:",
+        "shortName": "Кратко име:",
+        "minAge": "Мін. възраст:",
+        "maxAge": "Макс. възраст:",
+        "coxMinAge": "Мин. възраст на рулевия:",
+        "coxMaxAge": "Макс. възраст на рулевия:",
+        "maxDisciplines": "Макс. дисциплини:",
+        "transferFromGroup": "Група за трансфер:",
+        "minCrewForTransfer": "Мин. брой за трансфер:",
+        "transferRatio": "Процент за трансфер:",
+        "transferRounding": "Закръгляне при трансфер:",
+        "transferredMaxDisciplines": "Макс. дисциплини (трансф.):",
+        "status": "Статус:",
+        "createdAt": "Създаден на:",
+        "modifiedAt": "Променен на:",
+        "maleTeamLightMaxWeight": "Мъже — макс. тегло лека кат. (кг):",
+        "maleTeamCoxMinWeight": "Мъже — мин. тегло рулеви (кг):",
+        "maleTeamCoxRequiredWeight": "Мъже — изискв. тегло рулеви (кг):",
+        "femaleTeamLightMaxWeight": "Жени — макс. тегло лека кат. (кг):",
+        "femaleTeamCoxMinWeight": "Жени — мин. тегло рулеви (кг):",
+        "femaleTeamCoxRequiredWeight": "Жени — изискв. тегло рулеви (кг):"
+      },
+      "transferSchema": {
+        "title": "Схема за трансфер",
+        "viewLink": "Преглед на схема за трансфер",
+        "crewSize": "Брой гребци в екипажа",
+        "transferCount": "Допустими трансферирани"
+      },
+      "tabDetails": "Детайли",
+      "tabDisciplines": "Дисциплини",
+      "disciplineTable": {
+        "name": "Име",
+        "shortName": "Кратко",
+        "gender": "Пол",
+        "boatClass": "Клас",
+        "crewSize": "Екипаж",
+        "maxTransfer": "Прехвърлени",
+        "hasCoxswain": "Рулеви",
+        "isLightweight": "Лека категория",
+        "distance": "Дист. (м)",
+        "status": "Статус",
+        "empty": "Няма дисциплини",
+        "placeholderGender": "Пол...",
+        "placeholderBoatClass": "Клас..."
+      }
+    },
+    "placeholders": {
+      "selectStatus": "Изберете статус",
+      "selectGroup": "Изберете група...",
+      "selectRounding": "Изберете закръгляне"
+    },
+    "filterConfigs": {
+      "status": "Статус"
+    }
+  },
+  "disciplines": {
+    "title": "Дисциплини",
+    "count": "Брой дисциплини:",
+    "addButton": "Добавяне на дисциплина",
+    "table": {
+      "empty": "Няма намерени дисциплини",
+      "columns": {
+        "name": "Име",
+        "shortName": "Кратко име",
+        "gender": "Пол",
+        "competitionGroup": "Състезателна група",
+        "boatClass": "Клас лодка",
+        "crewSize": "Брой гребци",
+        "maxCrewFromTransfer": "Макс. трансферирани",
+        "hasCoxswain": "С рулеви",
+        "isLightweight": "Лека категория",
+        "distanceMeters": "Дистанция (м)",
+        "isActive": "Статус",
+        "createdAt": "Създаден на",
+        "modifiedAt": "Променен на"
+      }
+    },
+    "filters": {
+      "search": "Потърси...",
+      "competitionGroupLabel": "Състезателна група:",
+      "competitionGroupAll": "Всички групи",
+      "boatClassLabel": "Клас лодка:",
+      "boatClassAll": "Всички класове",
+      "statusLabel": "Статус:",
+      "statusAll": "Всички статуси"
+    },
+    "form": {
+      "title": "Добавяне на нова дисциплина",
+      "nameLabel": "Име",
+      "namePlaceholder": "Въведете име",
+      "shortNameLabel": "Кратко име",
+      "shortNamePlaceholder": "Въведете кратко име",
+      "genderLabel": "Пол",
+      "genderPlaceholder": "Изберете пол",
+      "competitionGroupLabel": "Състезателна група",
+      "competitionGroupPlaceholder": "Изберете състезателна група",
+      "boatClassLabel": "Клас лодка",
+      "boatClassPlaceholder": "Изберете клас лодка",
+      "maxCrewFromTransferLabel": "Макс. трансферирани",
+      "maxCrewFromTransferPlaceholder": "Въведете макс. брой трансферирани",
+      "isLightweightLabel": "Лека категория",
+      "isLightweightPlaceholder": "Изберете",
+      "distanceLabel": "Дистанция (м)",
+      "distancePlaceholder": "Въведете дистанция в метри",
+      "maxBoatsLabel": "Макс. отбори от клуб",
+      "maxBoatsPlaceholder": "Въведете максималния брой отбори",
+      "statusLabel": "Статус",
+      "statusPlaceholder": "Изберете статус",
+      "createError": "Грешка при създаване на дисциплина"
+    },
+    "details": {
+      "defaultTitle": "Дисциплина",
+      "labels": {
+        "name": "Име:",
+        "shortName": "Кратко име:",
+        "gender": "Пол:",
+        "competitionGroup": "Състезателна група:",
+        "boatClass": "Клас лодка:",
+        "crewSize": "Брой гребци:",
+        "maxCrewFromTransfer": "Макс. трансферирани:",
+        "hasCoxswain": "С рулеви:",
+        "isLightweight": "Лека категория:",
+        "distance": "Дистанция (м):",
+        "maxBoats": "Макс. отбори от клуб:",
+        "status": "Статус:",
+        "createdAt": "Създаден на:",
+        "modifiedAt": "Променен на:"
+      },
+      "tabDetails": "Детайли"
+    },
+    "placeholders": {
+      "selectGender": "Изберете пол",
+      "selectGroup": "Изберете състезателна група",
+      "selectBoatClass": "Изберете клас лодка",
+      "selectStatus": "Изберете статус",
+      "select": "Изберете"
+    },
+    "filterConfigs": {
+      "competitionGroup": "Състезателна група",
+      "boatClass": "Клас лодка",
+      "status": "Статус"
+    }
+  },
+  "scoring": {
+    "title": "Точкуване",
+    "count": "Брой схеми:",
+    "addButton": "Добавяне на схема",
+    "scoringType": {
+      "fixed": "Фиксирано",
+      "offsetFromEnd": "От края"
+    },
+    "table": {
+      "empty": "Няма намерени схеми за точкуване",
+      "columns": {
+        "name": "Име",
+        "scoringType": "Тип",
+        "isActive": "Статус",
+        "createdAt": "Създаден на",
+        "modifiedAt": "Променен на"
+      }
+    },
+    "filters": {
+      "search": "Потърси...",
+      "typeLabel": "Тип:",
+      "typeAll": "Всички типове",
+      "statusLabel": "Статус:",
+      "statusAll": "Всички статуси"
+    },
+    "form": {
+      "title": "Добавяне на схема за точкуване",
+      "nameLabel": "Име",
+      "namePlaceholder": "Въведете име",
+      "typeLabel": "Тип",
+      "typePlaceholder": "Изберете тип...",
+      "statusLabel": "Статус",
+      "statusPlaceholder": "Изберете статус...",
+      "createError": "Грешка при създаване на схема за точкуване"
+    },
+    "details": {
+      "defaultTitle": "Схема за точкуване",
+      "labels": {
+        "name": "Име:",
+        "type": "Тип:",
+        "status": "Статус:",
+        "createdAt": "Създаден на:",
+        "modifiedAt": "Променен на:"
+      },
+      "rules": {
+        "title": "Правила",
+        "addButton": "Добави правило",
+        "empty": "Няма правила",
+        "placement": "Място",
+        "basePoints": "Базови точки",
+        "placementPrefix": "Място"
+      },
+      "coefficients": {
+        "title": "Коефициенти",
+        "addButton": "Добави коефициент",
+        "empty": "Няма коефициенти",
+        "boatClass": "Клас лодка",
+        "coefficient": "Коефициент"
+      },
+      "tabDetails": "Детайли"
+    },
+    "placeholders": {
+      "selectType": "Изберете тип...",
+      "selectStatus": "Изберете статус...",
+      "selectBoatClass": "Клас..."
+    },
+    "addRule": {
+      "title": "Добавяне на правило",
+      "placementLabel": "Място",
+      "placementPlaceholder": "Въведете място",
+      "basePointsLabel": "Базови точки",
+      "basePointsPlaceholder": "Въведете точки",
+      "createError": "Грешка при създаване на правило"
+    },
+    "addCoefficient": {
+      "title": "Добавяне на коефициент",
+      "boatClassLabel": "Клас лодка",
+      "boatClassPlaceholder": "Изберете клас лодка...",
+      "coefficientLabel": "Коефициент",
+      "coefficientPlaceholder": "Въведете коефициент",
+      "createError": "Грешка при създаване на коефициент"
+    },
+    "filterConfigs": {
+      "scoringType": "Тип",
+      "status": "Статус"
+    }
+  },
+  "qualification": {
+    "title": "Квалификационни схеми",
+    "count": "Брой схеми:",
+    "addButton": "Добавяне на схема",
+    "table": {
+      "empty": "Няма намерени квалификационни схеми",
+      "columns": {
+        "name": "Име",
+        "laneCount": "Коридори",
+        "isActive": "Статус",
+        "createdAt": "Създаден на",
+        "modifiedAt": "Променен на"
+      }
+    },
+    "filters": {
+      "search": "Потърси...",
+      "statusLabel": "Статус:",
+      "statusAll": "Всички статуси"
+    },
+    "form": {
+      "title": "Добавяне на квалификационна схема",
+      "nameLabel": "Име",
+      "namePlaceholder": "Въведете име",
+      "laneCountLabel": "Брой коридори",
+      "laneCountPlaceholder": "Въведете брой коридори",
+      "createError": "Грешка при създаване на схема"
+    },
+    "details": {
+      "defaultTitle": "Квалификационна схема",
+      "labels": {
+        "name": "Име:",
+        "laneCount": "Брой коридори:",
+        "status": "Статус:",
+        "createdAt": "Създадена на:",
+        "modifiedAt": "Променена на:"
+      },
+      "tiers": {
+        "title": "Диапазони",
+        "addButton": "Добави диапазон",
+        "empty": "Няма диапазони",
+        "boats": "Лодки",
+        "heats": "С",
+        "semiFinals": "ПФ",
+        "finalB": "ФБ",
+        "finalA": "ФА",
+        "description": "Описание"
+      },
+      "progressions": {
+        "title": "Правила за класиране",
+        "addButton": "+ Добави правило",
+        "empty": "Няма правила",
+        "from": "От",
+        "to": "Към",
+        "byPosition": "По позиция",
+        "byTime": "По време"
+      },
+      "eventTypes": {
+        "heats": "Серии",
+        "semiFinals": "Полуфинали",
+        "finalB": "Финал Б",
+        "finalA": "Финал А"
+      },
+      "sources": {
+        "heats": "Серии (H)",
+        "semiFinals": "Полуфинали (SF)"
+      },
+      "destinations": {
+        "semiFinals": "Полуфинали (SF)",
+        "finalA": "Финал А (FA)",
+        "finalB": "Финал Б (FB)"
+      },
+      "addTier": {
+        "title": "Добавяне на диапазон",
+        "boatCountMin": "Мин. лодки",
+        "boatCountMax": "Макс. лодки",
+        "heatCount": "Серии",
+        "semiFinalCount": "Полуфинали",
+        "finalBCount": "Финал Б",
+        "finalACount": "Финал А"
+      },
+      "tabDetails": "Детайли"
+    },
+    "placeholders": {
+      "selectStatus": "Изберете статус..."
+    },
+    "filterConfigs": {
+      "status": "Статус"
+    }
+  },
+  "rules": {
+    "title": "Правилник",
+    "tabs": {
+      "groups": "Състезателни групи",
+      "disciplines": "Дисциплини",
+      "scoring": "Схеми за точкуване",
+      "qualification": "Квалификационни схеми"
+    }
+  },
+  "system": {
+    "title": "Системна информация",
+    "infoBanner": {
+      "applicationLabel": "Приложение:",
+      "versionLabel": "Версия:",
+      "buildTimeLabel": "Време на билд:"
+    },
+    "healthCard": {
+      "title": "Здравен статус",
+      "statusUp": "РАБОТИ",
+      "statusDown": "ПРОБЛЕМ",
+      "errorLoading": "Грешка при зареждане на здравния статус",
+      "components": {
+        "db": "База данни",
+        "diskSpace": "Дисково пространство",
+        "brevo": "Brevo (имейл)",
+        "minio": "MinIO (файлове)",
+        "ping": "Ping",
+        "livenessState": "Liveness",
+        "readinessState": "Readiness"
+      }
+    },
+    "metricsCard": {
+      "title": "Метрики",
+      "errorLoading": "Грешка при зареждане на метриките",
+      "empty": "Няма налични метрики",
+      "groups": {
+        "server": "Сървър",
+        "jvmMemory": "JVM памет",
+        "gc": "Garbage Collector",
+        "threads": "Нишки",
+        "dbPool": "DB Connection Pool",
+        "httpRequests": "HTTP заявки"
+      },
+      "metrics": {
+        "uptime": "Uptime",
+        "startedAt": "Стартиран на",
+        "cpuCores": "CPU ядра",
+        "cpuProcess": "CPU (процес)",
+        "heapUsed": "Heap използвана",
+        "heapCommitted": "Heap заделена",
+        "gcPauses": "GC паузи",
+        "gcMemoryAllocated": "GC памет алокирана",
+        "activeThreads": "Активни нишки",
+        "daemonThreads": "Daemon нишки",
+        "activeConnections": "Активни връзки",
+        "idleConnections": "Idle връзки",
+        "pendingConnections": "Чакащи",
+        "totalRequests": "Общо заявки",
+        "avgResponseTime": "Средно време"
+      }
+    },
+    "loggersCard": {
+      "title": "Логери",
+      "errorLoading": "Грешка при зареждане на логерите",
+      "empty": "Няма налични логери",
+      "placeholder": "Ниво",
+      "levelChanged": "Нивото на {{logger}} е променено на {{level}}",
+      "levelChangeError": "Грешка при промяна на нивото за {{logger}}"
+    },
+    "threadDumpCard": {
+      "title": "Нишки (Thread Dump)",
+      "loadMessage": "Thread dump е тежка операция и не се зарежда автоматично.",
+      "loadButton": "Зареди",
+      "errorLoading": "Грешка при зареждане на thread dump",
+      "totalThreads": "Общо нишки:",
+      "noStackTrace": "Няма stack trace"
+    }
+  }
+}

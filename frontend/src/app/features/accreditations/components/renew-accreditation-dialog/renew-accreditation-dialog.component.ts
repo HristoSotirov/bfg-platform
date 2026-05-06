@@ -5,6 +5,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { AccreditationsService } from '../../../../core/services/api';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 interface RenewalResult {
   athleteId: string;
@@ -16,7 +17,7 @@ interface RenewalResult {
 @Component({
   selector: 'app-renew-accreditation-dialog',
   standalone: true,
-  imports: [CommonModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, DialogComponent, ButtonComponent, TranslateModule],
   templateUrl: './renew-accreditation-dialog.component.html',
   styleUrl: './renew-accreditation-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -38,7 +39,8 @@ export class RenewAccreditationDialogComponent implements OnChanges {
   constructor(
     private accreditationsService: AccreditationsService,
     private httpClient: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -107,7 +109,7 @@ export class RenewAccreditationDialogComponent implements OnChanges {
         this.results = uniqueAthleteIds.map(athleteId => ({
           athleteId,
           success: false,
-          error: err?.error?.message || err?.message || 'Грешка при подновяване'
+          error: err?.error?.message || err?.message || this.translateService.instant('accreditations.renewDialog.errors.renewFailed')
         }));
         this.showResults = true;
         this.cdr.markForCheck();
@@ -135,7 +137,7 @@ export class RenewAccreditationDialogComponent implements OnChanges {
         if (response?.failed) {
           response.failed.forEach((failed: any) => {
             if (failed.athleteId) {
-              failedMap.set(failed.athleteId, failed.error || 'Грешка при подновяване');
+              failedMap.set(failed.athleteId, failed.error || this.translateService.instant('accreditations.renewDialog.results.renewError'));
               if (failed.athleteName) {
                 this.athleteNames.set(failed.athleteId, failed.athleteName);
               }
@@ -154,14 +156,14 @@ export class RenewAccreditationDialogComponent implements OnChanges {
             return {
               athleteId,
               success: false,
-              error: failedMap.get(athleteId) || 'Грешка при подновяване',
+              error: failedMap.get(athleteId) || this.translateService.instant('accreditations.renewDialog.errors.renewFailed'),
               athleteName: this.athleteNames.get(athleteId) || athleteId
             };
           } else {
             return {
               athleteId,
               success: false,
-              error: 'Неизвестна грешка',
+              error: this.translateService.instant('accreditations.renewDialog.errors.unknown'),
               athleteName: athleteId
             };
           }
@@ -177,7 +179,7 @@ export class RenewAccreditationDialogComponent implements OnChanges {
         this.results = uniqueAthleteIds.map(athleteId => ({
           athleteId,
           success: false,
-          error: err?.error?.message || err?.message || 'Грешка при подновяване'
+          error: err?.error?.message || err?.message || this.translateService.instant('accreditations.renewDialog.errors.renewFailed')
         }));
         this.showResults = true;
         this.cdr.markForCheck();

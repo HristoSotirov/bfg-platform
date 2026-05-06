@@ -14,12 +14,13 @@ import {
   Gender,
 } from '../../../../core/services/api';
 import { ColumnConfig } from '../../accreditations.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { calculateRaceGroup } from '../../../../shared/utils/race-group.util';
 
 @Component({
   selector: 'app-accreditations-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './accreditations-table.component.html',
   styleUrl: './accreditations-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -45,15 +46,15 @@ export class AccreditationsTableComponent implements OnInit {
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
 
   private statusLabels: Record<string, string> = {
-    [AccreditationStatus.Active]: 'Активна',
-    [AccreditationStatus.PendingValidation]: 'Чакаща валидация',
-    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
-    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
-    [AccreditationStatus.Expired]: 'Изтекла',
-    [AccreditationStatus.Suspended]: 'Спряна',
+    [AccreditationStatus.Active]: 'accreditations.status.active',
+    [AccreditationStatus.PendingValidation]: 'accreditations.status.pendingValidation',
+    [AccreditationStatus.PendingPhotoValidation]: 'accreditations.status.pendingPhoto',
+    [AccreditationStatus.NewPhotoRequired]: 'accreditations.status.newPhoto',
+    [AccreditationStatus.Expired]: 'accreditations.status.expired',
+    [AccreditationStatus.Suspended]: 'accreditations.status.suspended',
   };
 
-  constructor(private elementRef: ElementRef) {}
+  constructor(private elementRef: ElementRef, private translateService: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -216,11 +217,12 @@ export class AccreditationsTableComponent implements OnInit {
 
   private getGenderLabel(gender: string | undefined): string {
     if (!gender) return '-';
-    const genderLabels: Record<string, string> = {
-      MALE: 'Мъж',
-      FEMALE: 'Жена',
+    const genderKeys: Record<string, string> = {
+      MALE: 'accreditations.gender.male',
+      FEMALE: 'accreditations.gender.female',
     };
-    return genderLabels[gender.toUpperCase()] || gender;
+    const key = genderKeys[gender.toUpperCase()];
+    return key ? this.translateService.instant(key) : gender;
   }
 
   getRaceGroup(accreditation: AccreditationDto): string {
@@ -275,7 +277,8 @@ export class AccreditationsTableComponent implements OnInit {
 
   getStatusLabel(status: AccreditationStatus | undefined): string {
     if (!status) return '-';
-    return this.statusLabels[status] || status;
+    const key = this.statusLabels[status];
+    return key ? this.translateService.instant(key) : status;
   }
 
   getStatusClass(status: AccreditationStatus | undefined): string {

@@ -8,6 +8,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -19,7 +20,7 @@ import {
 @Component({
   selector: 'app-scoring-settings-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, DialogComponent, ButtonComponent],
   templateUrl: './scoring-settings-dialog.component.html',
   styleUrl: './scoring-settings-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

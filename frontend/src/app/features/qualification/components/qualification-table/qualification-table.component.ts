@@ -7,13 +7,14 @@ import {
   OnInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { QualificationSchemeDto } from '../../../../core/services/api';
 import { QualificationColumnConfig } from '../../qualification.component';
 
 @Component({
   selector: 'app-qualification-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './qualification-table.component.html',
   styleUrl: './qualification-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -30,6 +31,8 @@ export class QualificationTableComponent implements OnInit {
   @Output() loadMore = new EventEmitter<void>();
 
   currentSort: { column: string; direction: 'asc' | 'desc' } | null = null;
+
+  constructor(private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.updateCurrentSortFromOrderBy();
@@ -83,7 +86,7 @@ export class QualificationTableComponent implements OnInit {
       case 'laneCount':
         return scheme.laneCount?.toString() || '-';
       case 'isActive':
-        return scheme.isActive ? 'Активен' : 'Неактивен';
+        return scheme.isActive ? this.translate.instant('common.status.active') : this.translate.instant('common.status.inactive');
       case 'createdAt':
         return this.formatDateTime(scheme.createdAt);
       case 'modifiedAt':

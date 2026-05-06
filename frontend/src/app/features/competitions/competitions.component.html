@@ -21,7 +21,7 @@
           ></path>
         </svg>
       </a>
-      <h1 class="text-2xl font-bold text-gray-900">Състезания</h1>
+      <h1 class="text-2xl font-bold text-gray-900">{{ 'competitions.page.title' | translate }}</h1>
     </div>
 
     <app-competitions-filters
@@ -34,7 +34,7 @@
 
     <div class="flex items-center justify-between gap-4 mb-4">
       <div class="text-sm text-gray-600 flex-shrink-0">
-        Брой: <span class="font-semibold">{{ totalElements }}</span>
+        {{ 'competitions.page.count' | translate }} <span class="font-semibold">{{ totalElements }}</span>
       </div>
 
       <div class="flex items-center gap-2 ml-auto">
@@ -42,7 +42,7 @@
           <app-button
             variant="white"
             size="md"
-            text="Добавяне"
+            [text]="'competitions.page.addButton' | translate"
             (click)="openAddDialog()"
           >
           </app-button>
@@ -50,7 +50,7 @@
         <button
           type="button"
           class="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-600"
-          title="Настройки на таблицата"
+          title="{{ 'competitions.page.settingsTitle' | translate }}"
           (click)="openSettingsDialog()"
         >
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -68,7 +68,7 @@
     >
       @if (loading && competitions.length === 0) {
         <div class="flex items-center justify-center h-full">
-          <div class="text-gray-500">Зареждане...</div>
+          <div class="text-gray-500">{{ 'competitions.page.loading' | translate }}</div>
         </div>
       } @else if (error) {
         <div class="flex items-center justify-center h-full">

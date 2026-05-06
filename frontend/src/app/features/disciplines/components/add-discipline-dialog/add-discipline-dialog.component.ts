@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -26,7 +27,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-add-discipline-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './add-discipline-dialog.component.html',
   styleUrl: './add-discipline-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -81,8 +82,8 @@ export class AddDisciplineDialogComponent implements OnChanges {
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   saving = false;
@@ -92,6 +93,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
     private disciplineDefinitionsService: DisciplineDefinitionsService,
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   groupSearch = (): Observable<SearchableSelectOption[]> =>
@@ -207,7 +209,7 @@ export class AddDisciplineDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.saving = false;
-          this.error = err?.error?.message || 'Грешка при създаване на дисциплина';
+          this.error = err?.error?.message || this.translate.instant('disciplines.form.createError');
           this.cdr.markForCheck();
         },
       });

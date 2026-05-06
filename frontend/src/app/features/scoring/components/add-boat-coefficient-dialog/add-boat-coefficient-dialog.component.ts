@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -23,7 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-add-boat-coefficient-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './add-boat-coefficient-dialog.component.html',
   styleUrl: './add-boat-coefficient-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,6 +62,7 @@ export class AddBoatCoefficientDialogComponent implements OnChanges {
   constructor(
     private scoringSchemeBoatCoefficientsService: ScoringSchemeBoatCoefficientsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -117,7 +119,7 @@ export class AddBoatCoefficientDialogComponent implements OnChanges {
         error: (err) => {
           this.saving = false;
           this.error =
-            err?.error?.message || 'Грешка при създаване на коефициент';
+            err?.error?.message || this.translate.instant('scoring.addCoefficient.createError');
           this.cdr.markForCheck();
         },
       });

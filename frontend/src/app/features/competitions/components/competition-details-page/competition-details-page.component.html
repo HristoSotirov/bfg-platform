@@ -16,7 +16,7 @@
       </button>
 
       @if (loading) {
-        <div class="text-gray-500">Зареждане...</div>
+        <div class="text-gray-500">{{ 'competitions.detailsPage.loading' | translate }}</div>
       } @else if (competition) {
         <div class="flex-1 min-w-0">
           <div class="flex items-center gap-3">
@@ -65,69 +65,69 @@
             <!-- LEFT: Main info -->
             <div class="bg-white border border-gray-200 rounded-lg p-5">
               <div class="mb-4">
-                <h2 class="text-base font-semibold text-gray-800">Основна информация</h2>
+                <h2 class="text-base font-semibold text-gray-800">{{ 'competitions.detailsPage.details.sectionTitle' | translate }}</h2>
               </div>
 
               @if (!isEditing) {
                 <div class="space-y-2">
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Кратко наименование:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.shortName' | translate }}</span>
                     <span class="text-sm font-medium">{{ competition.shortName || '-' }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Пълно наименование:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.fullName' | translate }}</span>
                     <span class="text-sm font-medium">{{ competition.name || '-' }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Място:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.location' | translate }}</span>
                     <span class="text-sm font-medium">{{ competition.location || '-' }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Формат:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.format' | translate }}</span>
                     <span class="text-sm font-medium">{{ getCompetitionTypeLabel(competition.competitionType) }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Начална дата:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.startDate' | translate }}</span>
                     <span class="text-sm font-medium">{{ formatDate(competition.startDate) }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Крайна дата:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.endDate' | translate }}</span>
                     <span class="text-sm font-medium">{{ formatDate(competition.endDate) }}</span>
                   </div>
                   @if (!competition.isTemplate) {
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Отв. записвания:</span>
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.entrySubmissionsOpen' | translate }}</span>
                       <span class="text-sm font-medium">{{ formatDateTime(competition.entrySubmissionsOpenAt) }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Затв. записвания:</span>
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.entrySubmissionsClosed' | translate }}</span>
                       <span class="text-sm font-medium">{{ formatDateTime(competition.entrySubmissionsClosedAt) }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Посл. пром. пр. ТС:</span>
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.lastChangesBeforeTs' | translate }}</span>
                       <span class="text-sm font-medium">{{ formatDateTime(competition.lastChangesBeforeTmAt) }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Техн. съвещание:</span>
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.technicalMeeting' | translate }}</span>
                       <span class="text-sm font-medium">{{ formatDateTime(competition.technicalMeetingAt) }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">Награждаване:</span>
+                      <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.awards' | translate }}</span>
                       <span class="text-sm font-medium">{{ formatDateTime(competition.awardingCeremonyAt) }}</span>
                     </div>
                   }
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Създадено на:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.createdAt' | translate }}</span>
                     <span class="text-sm">{{ formatDate(competition.createdAt) }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">Променено на:</span>
+                    <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'competitions.detailsPage.details.labels.modifiedAt' | translate }}</span>
                     <span class="text-sm">{{ formatDate(competition.modifiedAt) }}</span>
                   </div>
                   @if (canEdit) {
                     <div class="flex items-center gap-2 pt-3">
-                      <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
-                      <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDeleteCompetition()"></app-button>
+                      <app-button variant="outline" size="md" [text]="'competitions.detailsPage.details.buttons.edit' | translate" (click)="startEditing()"></app-button>
+                      <app-button variant="outline" size="md" [text]="'competitions.detailsPage.details.buttons.delete' | translate" (click)="confirmDeleteCompetition()"></app-button>
                     </div>
                   }
                 </div>
@@ -136,7 +136,7 @@
                 <div class="space-y-3">
                   <!-- Short name -->
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Кратко наименование <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.detailsPage.details.labels.shortName' | translate }} <span class="text-red-500">*</span></label>
                     <input type="text" [(ngModel)]="editData.shortName"
                       [class.border-red-500]="touched['shortName'] && !editData.shortName?.trim()"
                       (blur)="touched['shortName'] = true"
@@ -145,7 +145,7 @@
 
                   <!-- Name -->
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Пълно наименование <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.detailsPage.details.labels.fullName' | translate }} <span class="text-red-500">*</span></label>
                     <input type="text" [(ngModel)]="editData.name"
                       [class.border-red-500]="touched['name'] && !editData.name?.trim()"
                       (blur)="touched['name'] = true"
@@ -153,35 +153,35 @@
                   </div>
 
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Място:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.detailsPage.details.labels.location' | translate }}</label>
                     <input type="text" [(ngModel)]="editData.location"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
 
                   <!-- Competition type -->
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Формат:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.detailsPage.details.labels.format' | translate }}</label>
                     <app-searchable-select-dropdown
                       [options]="competitionTypeOptions"
                       [(ngModel)]="editData.competitionType"
-                      placeholder="Изберете формат..."
+                      [placeholder]="'competitions.detailsPage.details.placeholders.selectFormat' | translate"
                     ></app-searchable-select-dropdown>
                   </div>
 
                   <!-- Start date | End date -->
                   <div class="grid grid-cols-2 gap-3">
                     <app-date-picker
-                      label="Начална дата"
+                      [label]="'competitions.detailsPage.details.labels.startDate' | translate"
                       [ngModel]="editData.startDate"
                       (ngModelChange)="editData.startDate = $event"
-                      placeholder="Изберете дата..."
+                      [placeholder]="'competitions.detailsPage.details.placeholders.selectDate' | translate"
                       size="sm"
                     ></app-date-picker>
                     <app-date-picker
-                      label="Крайна дата"
+                      [label]="'competitions.detailsPage.details.labels.endDate' | translate"
                       [ngModel]="editData.endDate"
                       (ngModelChange)="editData.endDate = $event"
-                      placeholder="Изберете дата..."
+                      [placeholder]="'competitions.detailsPage.details.placeholders.selectDate' | translate"
                       size="sm"
                     ></app-date-picker>
                   </div>
@@ -190,17 +190,17 @@
                     <!-- Submissions open | Submissions closed -->
                     <div class="grid grid-cols-2 gap-3">
                       <app-datetime-picker
-                        label="Отв. записвания"
+                        [label]="'competitions.detailsPage.details.labels.entrySubmissionsOpen' | translate"
                         [ngModel]="editData.entrySubmissionsOpenAt"
                         (ngModelChange)="editData.entrySubmissionsOpenAt = $event"
-                        placeholder="Изберете дата и час..."
+                        [placeholder]="'competitions.detailsPage.details.placeholders.selectDateTime' | translate"
                         size="sm"
                       ></app-datetime-picker>
                       <app-datetime-picker
-                        label="Затв. записвания"
+                        [label]="'competitions.detailsPage.details.labels.entrySubmissionsClosed' | translate"
                         [ngModel]="editData.entrySubmissionsClosedAt"
                         (ngModelChange)="editData.entrySubmissionsClosedAt = $event"
-                        placeholder="Изберете дата и час..."
+                        [placeholder]="'competitions.detailsPage.details.placeholders.selectDateTime' | translate"
                         size="sm"
                       ></app-datetime-picker>
                     </div>
@@ -208,27 +208,27 @@
                     <!-- Last changes TM | Technical meeting -->
                     <div class="grid grid-cols-2 gap-3">
                       <app-datetime-picker
-                        label="Посл. пром. пр. ТС"
+                        [label]="'competitions.detailsPage.details.labels.lastChangesBeforeTs' | translate"
                         [ngModel]="editData.lastChangesBeforeTmAt"
                         (ngModelChange)="editData.lastChangesBeforeTmAt = $event"
-                        placeholder="Изберете дата и час..."
+                        [placeholder]="'competitions.detailsPage.details.placeholders.selectDateTime' | translate"
                         size="sm"
                       ></app-datetime-picker>
                       <app-datetime-picker
-                        label="Техн. съвещание"
+                        [label]="'competitions.detailsPage.details.labels.technicalMeeting' | translate"
                         [ngModel]="editData.technicalMeetingAt"
                         (ngModelChange)="editData.technicalMeetingAt = $event"
-                        placeholder="Изберете дата и час..."
+                        [placeholder]="'competitions.detailsPage.details.placeholders.selectDateTime' | translate"
                         size="sm"
                       ></app-datetime-picker>
                     </div>
 
                     <!-- Awarding ceremony -->
                     <app-datetime-picker
-                      label="Награждаване"
+                      [label]="'competitions.detailsPage.details.labels.awards' | translate"
                       [ngModel]="editData.awardingCeremonyAt"
                       (ngModelChange)="editData.awardingCeremonyAt = $event"
-                      placeholder="Изберете дата и час..."
+                      [placeholder]="'competitions.detailsPage.details.placeholders.selectDateTime' | translate"
                       size="sm"
                     ></app-datetime-picker>
                   }
@@ -236,19 +236,19 @@
                   <!-- Scoring scheme | Qualification scheme -->
                   <div class="grid grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Схема за точкуване:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.addCompetitionDialog.labels.scoringScheme' | translate }}:</label>
                       <app-searchable-select-dropdown
                         [staticSearch]="scoringSchemeSearch"
                         [(ngModel)]="editData.scoringSchemeId"
-                        placeholder="Изберете схема..."
+                        [placeholder]="'competitions.detailsPage.details.placeholders.selectScheme' | translate"
                       ></app-searchable-select-dropdown>
                     </div>
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Квалификационна схема:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.addCompetitionDialog.labels.qualificationScheme' | translate }}:</label>
                       <app-searchable-select-dropdown
                         [staticSearch]="qualificationSchemeSearch"
                         [(ngModel)]="editData.qualificationSchemeId"
-                        placeholder="Изберете схема..."
+                        [placeholder]="'competitions.detailsPage.details.placeholders.selectScheme' | translate"
                       ></app-searchable-select-dropdown>
                     </div>
                   </div>
@@ -264,8 +264,8 @@
                     </div>
                   }
                   <div class="flex gap-3 pt-1">
-                    <app-button variant="outline" size="sm" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
-                    <app-button variant="primary" size="sm" text="Запази" [disabled]="saving || !isEditFormValid" (click)="saveEditing()"></app-button>
+                    <app-button variant="outline" size="sm" [text]="'common.cancel' | translate" [disabled]="saving" (click)="cancelEditing()"></app-button>
+                    <app-button variant="primary" size="sm" [text]="'common.save' | translate" [disabled]="saving || !isEditFormValid" (click)="saveEditing()"></app-button>
                   </div>
                 </div>
               }
@@ -276,55 +276,55 @@
 
               <!-- Scoring Scheme preview -->
               <div class="bg-white border border-gray-200 rounded-lg p-5">
-                <h2 class="text-base font-semibold text-gray-800 mb-3">Схема за точкуване</h2>
+                <h2 class="text-base font-semibold text-gray-800 mb-3">{{ 'competitions.detailsPage.details.scoring.title' | translate }}</h2>
                 @if (loadingScoring) {
-                  <div class="text-sm text-gray-500">Зареждане...</div>
+                  <div class="text-sm text-gray-500">{{ 'competitions.detailsPage.loading' | translate }}</div>
                 } @else if (scoringScheme) {
                   <div class="space-y-1 mb-3">
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">Наименование:</span>
+                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'competitions.detailsPage.details.scoring.nameLabel' | translate }}</span>
                       <button type="button" class="text-sm font-medium text-bfg-blue hover:underline text-left" (click)="openScoringDialog()">
                         {{ scoringScheme.name }}
                       </button>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">Статус:</span>
+                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'competitions.detailsPage.details.scoring.statusLabel' | translate }}</span>
                       <span class="text-sm font-medium" [class]="scoringScheme.isActive ? 'text-green-600' : 'text-red-600'">
-                        {{ scoringScheme.isActive ? 'Активна' : 'Неактивна' }}
+                        {{ scoringScheme.isActive ? ('competitions.detailsPage.details.scoring.active' | translate) : ('competitions.detailsPage.details.scoring.inactive' | translate) }}
                       </span>
                     </div>
                   </div>
                 } @else {
-                  <div class="text-sm text-gray-400">Не е зададена схема за точкуване</div>
+                  <div class="text-sm text-gray-400">{{ 'competitions.detailsPage.details.scoring.notSet' | translate }}</div>
                 }
               </div>
 
               <!-- Qualification Scheme preview -->
               <div class="bg-white border border-gray-200 rounded-lg p-5">
-                <h2 class="text-base font-semibold text-gray-800 mb-3">Квалификационна схема</h2>
+                <h2 class="text-base font-semibold text-gray-800 mb-3">{{ 'competitions.detailsPage.details.qualification.title' | translate }}</h2>
                 @if (loadingQualification) {
-                  <div class="text-sm text-gray-500">Зареждане...</div>
+                  <div class="text-sm text-gray-500">{{ 'competitions.detailsPage.loading' | translate }}</div>
                 } @else if (qualificationScheme) {
                   <div class="space-y-1 mb-3">
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">Наименование:</span>
+                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'competitions.detailsPage.details.scoring.nameLabel' | translate }}</span>
                       <button type="button" class="text-sm font-medium text-bfg-blue hover:underline text-left" (click)="openQualificationDialog()">
                         {{ qualificationScheme.name }}
                       </button>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">Брой коридори:</span>
+                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'competitions.detailsPage.details.qualification.laneCountLabel' | translate }}</span>
                       <span class="text-sm font-medium">{{ qualificationScheme.laneCount ?? '-' }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">Статус:</span>
+                      <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'competitions.detailsPage.details.scoring.statusLabel' | translate }}</span>
                       <span class="text-sm font-medium" [class]="qualificationScheme.isActive ? 'text-green-600' : 'text-red-600'">
-                        {{ qualificationScheme.isActive ? 'Активна' : 'Неактивна' }}
+                        {{ qualificationScheme.isActive ? ('competitions.detailsPage.details.scoring.active' | translate) : ('competitions.detailsPage.details.scoring.inactive' | translate) }}
                       </span>
                     </div>
                   </div>
                 } @else {
-                  <div class="text-sm text-gray-400">Не е зададена квалификационна схема</div>
+                  <div class="text-sm text-gray-400">{{ 'competitions.detailsPage.details.qualification.notSet' | translate }}</div>
                 }
               </div>
 
@@ -336,12 +336,12 @@
         <!-- ===== DISCIPLINES TAB ===== -->
         @if (activeTab === 'disciplines') {
           <div class="max-w-3xl space-y-4">
-            <p class="text-sm text-gray-500">Дисциплините се извеждат от разписанието на събитията.</p>
+            <p class="text-sm text-gray-500">{{ 'competitions.detailsPage.disciplines.description' | translate }}</p>
 
             @if (loadingTimetable) {
-              <div class="text-sm text-gray-500">Зареждане...</div>
+              <div class="text-sm text-gray-500">{{ 'competitions.detailsPage.loading' | translate }}</div>
             } @else if (disciplinesByGroup.length === 0) {
-              <div class="text-sm text-gray-400">Няма дисциплини (добавете събития в разписанието)</div>
+              <div class="text-sm text-gray-400">{{ 'competitions.detailsPage.disciplines.empty' | translate }}</div>
             } @else {
               @for (group of disciplinesByGroup; track group.groupId) {
                 <div class="border border-gray-200 rounded-lg overflow-x-auto">
@@ -357,8 +357,8 @@
                   <table class="min-w-full divide-y divide-gray-100 text-sm">
                     <thead class="bg-white">
                       <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Кратко наименование</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Пълно наименование</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.disciplines.columns.shortName' | translate }}</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.disciplines.columns.fullName' | translate }}</th>
                       </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-100">
@@ -390,33 +390,33 @@
               <!-- Add event form -->
               @if (!showAddTimetableEvent) {
                 <div class="flex justify-end">
-                  <app-button variant="primary" size="sm" text="+ Добави събитие" (click)="openAddTimetableEvent()"></app-button>
+                  <app-button variant="primary" size="sm" [text]="'competitions.detailsPage.timetable.addEvent' | translate" (click)="openAddTimetableEvent()"></app-button>
                 </div>
               } @else {
                 <div class="bg-white border border-gray-200 rounded-lg p-4 space-y-3">
-                  <h3 class="text-sm font-medium text-gray-700">Ново събитие</h3>
+                  <h3 class="text-sm font-medium text-gray-700">{{ 'competitions.detailsPage.timetable.newEvent' | translate }}</h3>
                   <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Дисциплина <span class="text-red-500">*</span>:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.detailsPage.timetable.labels.discipline' | translate }} <span class="text-red-500">*</span>:</label>
                       <app-searchable-select-dropdown
                         [staticSearch]="disciplineSearch"
                         [(ngModel)]="newEvent.disciplineId"
-                        placeholder="Изберете дисциплина..."
+                        [placeholder]="'competitions.detailsPage.timetable.placeholders.selectDiscipline' | translate"
                       ></app-searchable-select-dropdown>
                     </div>
                     <div>
-                      <label class="block text-xs text-gray-500 mb-0.5">Тип <span class="text-red-500">*</span>:</label>
+                      <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.detailsPage.timetable.labels.type' | translate }} <span class="text-red-500">*</span>:</label>
                       <app-searchable-select-dropdown
                         [options]="eventTypeOptions"
                         [(ngModel)]="newEvent.qualificationEventType"
-                        placeholder="Изберете..."
+                        [placeholder]="'competitions.detailsPage.timetable.placeholders.selectType' | translate"
                       ></app-searchable-select-dropdown>
                     </div>
                     <div>
                       <app-datetime-picker
                         size="sm"
-                        label="Насрочено"
-                        placeholder="Изберете дата и час..."
+                        [label]="'competitions.detailsPage.timetable.labels.scheduled' | translate"
+                        [placeholder]="'competitions.detailsPage.timetable.placeholders.selectDateTime' | translate"
                         [required]="true"
                         [(ngModel)]="newEventScheduledAt"
                       ></app-datetime-picker>
@@ -433,8 +433,8 @@
                     </div>
                   }
                   <div class="flex gap-3">
-                    <app-button variant="outline" size="sm" text="Отказ" [disabled]="savingTimetable" (click)="cancelAddTimetableEvent()"></app-button>
-                    <app-button variant="primary" size="sm" text="Запази" [disabled]="!newEvent.disciplineId || !newEvent.qualificationEventType || !newEventScheduledAt || savingTimetable" (click)="saveAddTimetableEvent()"></app-button>
+                    <app-button variant="outline" size="sm" [text]="'common.cancel' | translate" [disabled]="savingTimetable" (click)="cancelAddTimetableEvent()"></app-button>
+                    <app-button variant="primary" size="sm" [text]="'common.save' | translate" [disabled]="!newEvent.disciplineId || !newEvent.qualificationEventType || !newEventScheduledAt || savingTimetable" (click)="saveAddTimetableEvent()"></app-button>
                   </div>
                 </div>
               }
@@ -445,11 +445,11 @@
                 <thead class="bg-gray-50">
                   <tr>
                     <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">#</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Дисциплина</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Тип</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Дата</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Час</th>
-                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">Статус</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.discipline' | translate }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.type' | translate }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.date' | translate }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.time' | translate }}</th>
+                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.status' | translate }}</th>
                     @if (canEdit) {
                       <th class="px-4 py-3 text-left text-xs font-medium text-gray-500"></th>
                     }
@@ -458,7 +458,7 @@
                 <tbody class="bg-white divide-y divide-gray-200">
                   @if (loadingTimetable) {
                     <tr>
-                      <td colspan="7" class="px-4 py-6 text-center text-gray-500">Зареждане...</td>
+                      <td colspan="7" class="px-4 py-6 text-center text-gray-500">{{ 'competitions.detailsPage.loading' | translate }}</td>
                     </tr>
                   } @else {
                     @for (event of timetableEvents; track event.uuid; let i = $index) {
@@ -469,20 +469,20 @@
                             <app-searchable-select-dropdown
                               [staticSearch]="disciplineSearch"
                               [(ngModel)]="editTimetableData.disciplineId"
-                              placeholder="Дисциплина..."
+                              [placeholder]="'competitions.detailsPage.timetable.placeholders.disciplinePlaceholder' | translate"
                             ></app-searchable-select-dropdown>
                           </td>
                           <td class="px-4 py-2">
                             <app-searchable-select-dropdown
                               [options]="eventTypeOptions"
                               [(ngModel)]="editTimetableData.qualificationEventType"
-                              placeholder="Тип..."
+                              [placeholder]="'competitions.detailsPage.timetable.placeholders.typePlaceholder' | translate"
                             ></app-searchable-select-dropdown>
                           </td>
                           <td class="px-4 py-2" colspan="2">
                             <app-datetime-picker
                               size="sm"
-                              placeholder="Изберете дата и час..."
+                              [placeholder]="'competitions.detailsPage.timetable.placeholders.selectDateTime' | translate"
                               [(ngModel)]="editTimetableScheduledAt"
                             ></app-datetime-picker>
                           </td>
@@ -490,7 +490,7 @@
                             <app-searchable-select-dropdown
                               [options]="eventStatusOptions"
                               [(ngModel)]="editTimetableData.eventStatus"
-                              placeholder="Статус..."
+                              [placeholder]="'competitions.detailsPage.timetable.placeholders.statusPlaceholder' | translate"
                             ></app-searchable-select-dropdown>
                           </td>
                           <td class="px-4 py-2">
@@ -498,8 +498,8 @@
                               <p class="text-xs text-red-600 mb-1">{{ editTimetableError }}</p>
                             }
                             <div class="flex gap-3">
-                              <button type="button" class="text-green-600 hover:text-green-800 text-xs font-medium" [disabled]="savingTimetable" (click)="saveEditTimetableEvent()">Запази</button>
-                              <button type="button" class="text-gray-600 hover:text-gray-800 text-xs" [disabled]="savingTimetable" (click)="cancelEditTimetableEvent()">Отказ</button>
+                              <button type="button" class="text-green-600 hover:text-green-800 text-xs font-medium" [disabled]="savingTimetable" (click)="saveEditTimetableEvent()">{{ 'common.save' | translate }}</button>
+                              <button type="button" class="text-gray-600 hover:text-gray-800 text-xs" [disabled]="savingTimetable" (click)="cancelEditTimetableEvent()">{{ 'common.cancel' | translate }}</button>
                             </div>
                           </td>
                         </tr>
@@ -520,10 +520,10 @@
                           @if (canEdit) {
                             <td class="px-4 py-3">
                               <div class="flex gap-3">
-                                <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditTimetableEvent(event)" title="Редактирай">
+                                <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditTimetableEvent(event)" [title]="'competitions.detailsPage.timetable.editButton' | translate">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </button>
-                                <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteTimetableEvent(event)" title="Изтрий">
+                                <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteTimetableEvent(event)" [title]="'common.delete' | translate">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 </button>
                               </div>
@@ -534,7 +534,7 @@
                     } @empty {
                       <tr>
                         <td colspan="7" class="px-4 py-8 text-center text-gray-500">
-                          Няма добавени събития в разписанието
+                          {{ 'competitions.detailsPage.timetable.empty' | translate }}
                         </td>
                       </tr>
                     }
@@ -552,17 +552,17 @@
             <!-- Toolbar -->
             <div class="flex items-center justify-between">
               <div class="text-sm text-gray-500">
-                @if (loadingEntries) { Зареждане... }
+                @if (loadingEntries) { {{ 'competitions.detailsPage.loading' | translate }} }
                 @else if (clubEntries.length > 0) {
-                  {{ submittedClubs.length }} {{ submittedClubs.length === 1 ? 'клуб' : 'клуба' }}
-                  · {{ clubEntries.length }} {{ clubEntries.length === 1 ? 'заявка' : 'заявки' }}
+                  {{ submittedClubs.length === 1 ? ('competitions.detailsPage.entries.clubCount' | translate:{ count: submittedClubs.length }) : ('competitions.detailsPage.entries.clubCountPlural' | translate:{ count: submittedClubs.length }) }}
+                  · {{ clubEntries.length === 1 ? ('competitions.detailsPage.entries.entryCount' | translate:{ count: clubEntries.length }) : ('competitions.detailsPage.entries.entryCountPlural' | translate:{ count: clubEntries.length }) }}
                 }
               </div>
               @if (canSubmitEntries) {
                 <app-button
                   variant="primary"
                   size="sm"
-                  text="Подай / редактирай заявки"
+                  [text]="'competitions.detailsPage.entries.submitButton' | translate"
                   (click)="onSubmitEntriesClick()"
                 ></app-button>
               }
@@ -571,34 +571,34 @@
             @if (!isSubmissionOpen && !canEdit) {
               <div class="px-3 py-2 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-700">
                 @if (competition.entrySubmissionsOpenAt) {
-                  Периодът за подаване на заявки е приключил. Всички заявки са видими.
+                  {{ 'competitions.detailsPage.entries.submissionClosed' | translate }}
                 } @else {
-                  Периодът за подаване на заявки все още не е отворен.
+                  {{ 'competitions.detailsPage.entries.submissionNotOpen' | translate }}
                 }
               </div>
             }
 
             @if (loadingEntries) {
-              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+              <div class="text-gray-400 text-sm text-center py-8">{{ 'competitions.detailsPage.loading' | translate }}</div>
             } @else if (clubEntries.length === 0) {
               <div class="flex flex-col items-center justify-center py-12 text-gray-400">
                 <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                 </svg>
-                <p class="text-sm">Няма подадени заявки</p>
+                <p class="text-sm">{{ 'competitions.detailsPage.entries.empty' | translate }}</p>
               </div>
             } @else {
 
               <!-- Club submissions list -->
               <div class="border border-gray-200 rounded-lg overflow-x-auto">
                 <div class="bg-gray-50 px-4 py-2 border-b border-gray-200">
-                  <span class="text-xs font-medium text-gray-600 uppercase tracking-wide">Подадени заявки по клубове</span>
+                  <span class="text-xs font-medium text-gray-600 uppercase tracking-wide">{{ 'competitions.detailsPage.entries.clubSubmissionsTitle' | translate }}</span>
                 </div>
                 <table class="w-full text-sm">
                   <thead>
                     <tr class="border-b border-gray-100 text-xs text-gray-500">
-                      <th class="text-left py-2 px-4 font-medium">Клуб</th>
-                      <th class="text-right py-2 px-4 font-medium w-24">Заявки</th>
+                      <th class="text-left py-2 px-4 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                      <th class="text-right py-2 px-4 font-medium w-24">{{ 'competitions.detailsPage.entries.columns.entries' | translate }}</th>
                       <th class="text-right py-2 px-4 font-medium w-20"></th>
                     </tr>
                   </thead>
@@ -608,7 +608,7 @@
                         <td class="py-2 px-4 text-gray-700 font-medium">{{ club.clubName }}</td>
                         <td class="py-2 px-4 text-right text-gray-500">{{ club.entryCount }}</td>
                         <td class="py-2 px-4 text-right">
-                          <span class="text-xs text-bfg-blue">Виж</span>
+                          <span class="text-xs text-bfg-blue">{{ 'competitions.detailsPage.entries.viewButton' | translate }}</span>
                         </td>
                       </tr>
                     }
@@ -629,13 +629,13 @@
                         <span class="text-xs font-medium text-gray-600">{{ disc.label }}</span>
                         <span class="text-xs text-gray-400 ml-1">({{ disc.rows.length }})</span>
                       </div>
-                      <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="openDisciplineEntryDetail(disc.disciplineId, disc.label)">Виж</button>
+                      <button type="button" class="text-xs text-bfg-blue hover:underline" (click)="openDisciplineEntryDetail(disc.disciplineId, disc.label)">{{ 'competitions.detailsPage.entries.viewButton' | translate }}</button>
                     </div>
                     <table class="w-full text-sm">
                       <thead>
                         <tr class="border-b border-gray-100 text-xs text-gray-400">
-                          <th class="text-left py-1 px-4 font-medium">Клуб</th>
-                          <th class="text-left py-1 px-4 font-medium w-16">Отбор</th>
+                          <th class="text-left py-1 px-4 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                          <th class="text-left py-1 px-4 font-medium w-16">{{ 'competitions.detailsPage.entries.columns.team' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -692,7 +692,7 @@
                   <app-button
                     variant="primary"
                     size="sm"
-                    [text]="generatingProgression ? 'Изпълнение...' : 'Генерирай следващ етап'"
+                    [text]="generatingProgression ? ('competitions.detailsPage.progression.generating' | translate) : ('competitions.detailsPage.progression.generateButton' | translate)"
                     [disabled]="generatingProgression"
                     (click)="onAdvanceClick()"
                   ></app-button>
@@ -712,14 +712,14 @@
             }
 
             @if (loadingProgression) {
-              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+              <div class="text-gray-400 text-sm text-center py-8">{{ 'competitions.detailsPage.loading' | translate }}</div>
             } @else if (startListEvents.length === 0) {
               <div class="flex flex-col items-center justify-center py-12 text-gray-400">
                 <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 </svg>
-                <p class="text-sm">Няма генерирани стартови листи</p>
+                <p class="text-sm">{{ 'competitions.detailsPage.progression.empty' | translate }}</p>
               </div>
             } @else {
 
@@ -745,7 +745,7 @@
                         <button type="button"
                           class="ml-auto text-xs text-bfg-blue hover:underline transition-colors"
                           (click)="openLaneRearrange(ev); $event.stopPropagation()">
-                          Коридори
+                          {{ 'competitions.detailsPage.progression.lanesButton' | translate }}
                         </button>
                       }
                       @if (canEdit && ev.eventStatus !== 'CANCELLED' && ev.participations.length > 0) {
@@ -753,13 +753,13 @@
                           class="text-xs text-bfg-blue hover:underline transition-colors"
                           [class.ml-auto]="ev.eventStatus === 'OFFICIAL_RESULTS' || ev.eventStatus === 'UNOFFICIAL_RESULTS' || ev.eventStatus === 'CANCELLED'"
                           (click)="openResultsEntry(ev.eventUuid); $event.stopPropagation()">
-                          Резултати
+                          {{ 'competitions.detailsPage.progression.resultsButton' | translate }}
                         </button>
                       }
                       <button type="button"
                         class="text-gray-400 hover:text-gray-600 transition-colors"
                         [class.ml-auto]="!canEdit || ev.eventStatus === 'CANCELLED' || ev.participations.length === 0"
-                        title="Обнови"
+                        [title]="'competitions.detailsPage.progression.refreshButton' | translate"
                         (click)="loadTimetable(); loadProgression(true); $event.stopPropagation()">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                       </button>
@@ -770,13 +770,13 @@
                         <thead>
                           <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
                             @if (ev.hasResults) {
-                              <th class="text-center py-1.5 px-3 font-medium w-12">Място</th>
+                              <th class="text-center py-1.5 px-3 font-medium w-12">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
                             }
-                            <th class="text-center py-1.5 px-3 font-medium w-12">Кор.</th>
-                            <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
-                            <th class="text-left py-1.5 px-3 font-medium">Екипаж</th>
+                            <th class="text-center py-1.5 px-3 font-medium w-12">{{ 'competitions.detailsPage.progression.columns.lane' | translate }}</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.progression.columns.crew' | translate }}</th>
                             @if (ev.hasResults) {
-                              <th class="text-center py-1.5 px-3 font-medium w-24">Време</th>
+                              <th class="text-center py-1.5 px-3 font-medium w-24">{{ 'competitions.detailsPage.progression.columns.time' | translate }}</th>
                             }
                           </tr>
                         </thead>
@@ -815,7 +815,7 @@
                           }
                           @if (ev.participations.length === 0) {
                             <tr>
-                              <td [attr.colspan]="ev.hasResults ? 5 : 3" class="py-3 px-3 text-center text-gray-400 text-xs">Няма участници</td>
+                              <td [attr.colspan]="ev.hasResults ? 5 : 3" class="py-3 px-3 text-center text-gray-400 text-xs">{{ 'competitions.detailsPage.progression.noParticipants' | translate }}</td>
                             </tr>
                           }
                         </tbody>
@@ -843,14 +843,14 @@
             }
 
             @if (loadingStandings || loadingProgression) {
-              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+              <div class="text-gray-400 text-sm text-center py-8">{{ 'competitions.detailsPage.loading' | translate }}</div>
             } @else if (resultsDisciplines.length === 0) {
               <div class="flex flex-col items-center justify-center py-12 text-gray-400">
                 <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                 </svg>
-                <p class="text-sm">Няма дисциплини</p>
+                <p class="text-sm">{{ 'competitions.detailsPage.results.empty' | translate }}</p>
               </div>
             } @else {
               <!-- Bulk action -->
@@ -868,7 +868,7 @@
                 <app-button
                   variant="primary"
                   size="sm"
-                  [text]="computingStandings ? 'Генериране...' : 'Генерирай класиране'"
+                  [text]="computingStandings ? ('competitions.detailsPage.results.generating' | translate) : ('competitions.detailsPage.results.generateButton' | translate)"
                   [disabled]="computingStandings"
                   (click)="onGenerateStandingsClick()">
                 </app-button>
@@ -882,13 +882,13 @@
                       <span class="text-sm font-semibold text-gray-800">{{ disc.label }}</span>
                       <span class="ml-auto flex items-center gap-3">
                         @if (standingsForDiscipline(disc.disciplineId).length > 0) {
-                          <button type="button" class="text-xs text-red-500 hover:text-red-700" (click)="deleteStandings(disc.disciplineId)">Изтрий</button>
+                          <button type="button" class="text-xs text-red-500 hover:text-red-700" (click)="deleteStandings(disc.disciplineId)">{{ 'common.delete' | translate }}</button>
                         }
                         <button type="button"
                           class="text-xs text-bfg-blue hover:underline transition-colors"
                           [disabled]="computingStandings"
                           (click)="computeStandings([disc.disciplineId])">
-                          {{ standingsForDiscipline(disc.disciplineId).length > 0 ? 'Преизчисли' : 'Генерирай' }}
+                          {{ standingsForDiscipline(disc.disciplineId).length > 0 ? ('competitions.detailsPage.results.recalculate' | translate) : ('competitions.detailsPage.results.generate' | translate) }}
                         </button>
                       </span>
                     </div>
@@ -909,11 +909,11 @@
                         <table class="w-full text-sm">
                           <thead>
                             <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
-                              <th class="text-center py-1.5 px-3 font-medium w-12">Място</th>
-                              <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
-                              <th class="text-left py-1.5 px-3 font-medium">Екипаж</th>
-                              <th class="text-center py-1.5 px-3 font-medium w-24">Време</th>
-                              <th class="text-center py-1.5 px-3 font-medium w-20">Точки</th>
+                              <th class="text-center py-1.5 px-3 font-medium w-12">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
+                              <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                              <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.progression.columns.crew' | translate }}</th>
+                              <th class="text-center py-1.5 px-3 font-medium w-24">{{ 'competitions.detailsPage.progression.columns.time' | translate }}</th>
+                              <th class="text-center py-1.5 px-3 font-medium w-20">{{ 'competitions.detailsPage.results.columns.points' | translate }}</th>
                             </tr>
                           </thead>
                           <tbody>
@@ -942,7 +942,7 @@
                         </table>
                       </div>
                     } @else {
-                      <div class="border border-gray-200 rounded-lg py-6 text-center text-gray-400 text-sm">Няма класиране</div>
+                      <div class="border border-gray-200 rounded-lg py-6 text-center text-gray-400 text-sm">{{ 'competitions.detailsPage.results.noStandings' | translate }}</div>
                     }
                   </div>
                 }
@@ -954,7 +954,7 @@
         @if (activeTab === 'complex-standings') {
           <div class="flex flex-col gap-6">
             @if (loadingClubRankings) {
-              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+              <div class="text-gray-400 text-sm text-center py-8">{{ 'competitions.detailsPage.loading' | translate }}</div>
             } @else if (clubRankingsError) {
               <div class="px-3 py-2 bg-red-50 border border-red-200 rounded-lg flex items-start justify-between gap-2">
                 <p class="text-sm text-red-700">{{ clubRankingsError }}</p>
@@ -966,7 +966,7 @@
               </div>
             } @else if (clubRankings.length === 0) {
               <div class="flex flex-col items-center justify-center py-12 text-gray-400">
-                <span class="text-sm">Няма комплексно класиране. Генерирайте крайно класиране за дисциплините от таб "Резултати".</span>
+                <span class="text-sm">{{ 'competitions.detailsPage.complexStandings.empty' | translate }}</span>
               </div>
             } @else {
 
@@ -975,7 +975,7 @@
                 <!-- View buttons -->
                 <div class="flex flex-col sm:flex-row sm:items-center gap-3">
                   <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-500 mr-1">Изглед:</span>
+                    <span class="text-sm text-gray-500 mr-1">{{ 'competitions.detailsPage.complexStandings.viewButtons.label' | translate }}</span>
                     <button type="button"
                       class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
                       [class.bg-bfg-blue]="chartView === 'total'"
@@ -987,7 +987,7 @@
                       [class.hover:bg-bfg-blue]="chartView !== 'total'"
                       [class.hover:text-white]="chartView !== 'total'"
                       (click)="chartView = 'total'">
-                      Общо
+                      {{ 'competitions.detailsPage.complexStandings.viewButtons.total' | translate }}
                     </button>
                     <button type="button"
                       class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
@@ -1000,7 +1000,7 @@
                       [class.hover:bg-bfg-blue]="chartView !== 'stacked'"
                       [class.hover:text-white]="chartView !== 'stacked'"
                       (click)="chartView = 'stacked'">
-                      По дисциплини
+                      {{ 'competitions.detailsPage.complexStandings.viewButtons.byDisciplines' | translate }}
                     </button>
                     <button type="button"
                       class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
@@ -1013,12 +1013,12 @@
                       [class.hover:bg-bfg-blue]="chartView !== 'medals'"
                       [class.hover:text-white]="chartView !== 'medals'"
                       (click)="chartView = 'medals'">
-                      Медали
+                      {{ 'competitions.detailsPage.complexStandings.viewButtons.medals' | translate }}
                     </button>
                   </div>
 
                   <div class="flex items-center gap-2">
-                    <span class="text-sm text-gray-500 mr-1">Пол:</span>
+                    <span class="text-sm text-gray-500 mr-1">{{ 'competitions.detailsPage.complexStandings.genderButtons.label' | translate }}</span>
                     <button type="button"
                       class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
                       [class.bg-bfg-blue]="chartGender === 'ALL'"
@@ -1030,7 +1030,7 @@
                       [class.hover:bg-bfg-blue]="chartGender !== 'ALL'"
                       [class.hover:text-white]="chartGender !== 'ALL'"
                       (click)="chartGender = 'ALL'">
-                      Всички
+                      {{ 'competitions.detailsPage.complexStandings.genderButtons.all' | translate }}
                     </button>
                     <button type="button"
                       class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
@@ -1043,7 +1043,7 @@
                       [class.hover:bg-bfg-blue]="chartGender !== 'MALE'"
                       [class.hover:text-white]="chartGender !== 'MALE'"
                       (click)="chartGender = 'MALE'">
-                      Мъже
+                      {{ 'competitions.detailsPage.complexStandings.genderButtons.male' | translate }}
                     </button>
                     <button type="button"
                       class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
@@ -1056,13 +1056,13 @@
                       [class.hover:bg-bfg-blue]="chartGender !== 'FEMALE'"
                       [class.hover:text-white]="chartGender !== 'FEMALE'"
                       (click)="chartGender = 'FEMALE'">
-                      Жени
+                      {{ 'competitions.detailsPage.complexStandings.genderButtons.female' | translate }}
                     </button>
                   </div>
 
                   @if (teamRankingGroups.length > 0) {
                     <div class="flex items-center gap-2">
-                      <span class="text-sm text-gray-500 mr-1">Група:</span>
+                      <span class="text-sm text-gray-500 mr-1">{{ 'competitions.detailsPage.complexStandings.groupButton.label' | translate }}</span>
                       <button type="button"
                         class="inline-flex items-center justify-center font-medium rounded-lg border transition-colors px-3 py-1.5 text-sm whitespace-nowrap"
                         [class.bg-bfg-blue]="chartGroup === 'ALL'"
@@ -1074,7 +1074,7 @@
                         [class.hover:bg-bfg-blue]="chartGroup !== 'ALL'"
                         [class.hover:text-white]="chartGroup !== 'ALL'"
                         (click)="chartGroup = 'ALL'">
-                        Всички
+                        {{ 'competitions.detailsPage.complexStandings.groupButton.all' | translate }}
                       </button>
                       @for (g of teamRankingGroups; track g.id) {
                         <button type="button"
@@ -1112,14 +1112,14 @@
                   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     @if (teamRankingByGroup(group.id, 'MALE').length > 0) {
                       <div>
-                        <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ group.shortName }} — Мъже</div>
+                        <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ group.shortName }} — {{ 'competitions.detailsPage.complexStandings.genderButtons.male' | translate }}</div>
                         <div class="border border-gray-200 rounded-lg overflow-hidden">
                           <table class="w-full text-sm">
                             <thead>
                               <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
-                                <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
-                                <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
-                                <th class="text-center py-1.5 px-3 font-medium w-20">Точки</th>
+                                <th class="text-center py-1.5 px-3 font-medium w-16">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
+                                <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                                <th class="text-center py-1.5 px-3 font-medium w-20">{{ 'competitions.detailsPage.results.columns.points' | translate }}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1138,14 +1138,14 @@
 
                     @if (teamRankingByGroup(group.id, 'FEMALE').length > 0) {
                       <div>
-                        <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ group.shortName }} — Жени</div>
+                        <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ group.shortName }} — {{ 'competitions.detailsPage.complexStandings.genderButtons.female' | translate }}</div>
                         <div class="border border-gray-200 rounded-lg overflow-hidden">
                           <table class="w-full text-sm">
                             <thead>
                               <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
-                                <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
-                                <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
-                                <th class="text-center py-1.5 px-3 font-medium w-20">Точки</th>
+                                <th class="text-center py-1.5 px-3 font-medium w-16">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
+                                <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                                <th class="text-center py-1.5 px-3 font-medium w-20">{{ 'competitions.detailsPage.results.columns.points' | translate }}</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -1173,17 +1173,17 @@
               <!-- Males Summary -->
               @if (teamRankingSummary('MALE').length > 0) {
                 <div>
-                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">Мъже — Обобщение</div>
+                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ 'competitions.detailsPage.complexStandings.summaryTitles.maleSummary' | translate }}</div>
                   <div class="border border-gray-200 rounded-lg overflow-x-auto">
                     <table class="w-full text-sm">
                       <thead>
                         <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
-                          <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
-                          <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                          <th class="text-center py-1.5 px-3 font-medium w-16">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
+                          <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
                           @for (d of teamRankingDisciplines('MALE'); track d.id) {
                             <th class="text-center py-1.5 px-3 font-medium">{{ d.shortName }}</th>
                           }
-                          <th class="text-center py-1.5 px-3 font-medium w-20">Общо</th>
+                          <th class="text-center py-1.5 px-3 font-medium w-20">{{ 'competitions.detailsPage.complexStandings.viewButtons.total' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1208,17 +1208,17 @@
               <!-- Females Summary -->
               @if (teamRankingSummary('FEMALE').length > 0) {
                 <div>
-                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">Жени — Обобщение</div>
+                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ 'competitions.detailsPage.complexStandings.summaryTitles.femaleSummary' | translate }}</div>
                   <div class="border border-gray-200 rounded-lg overflow-x-auto">
                     <table class="w-full text-sm">
                       <thead>
                         <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
-                          <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
-                          <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                          <th class="text-center py-1.5 px-3 font-medium w-16">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
+                          <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
                           @for (d of teamRankingDisciplines('FEMALE'); track d.id) {
                             <th class="text-center py-1.5 px-3 font-medium">{{ d.shortName }}</th>
                           }
-                          <th class="text-center py-1.5 px-3 font-medium w-20">Общо</th>
+                          <th class="text-center py-1.5 px-3 font-medium w-20">{{ 'competitions.detailsPage.complexStandings.viewButtons.total' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1243,17 +1243,17 @@
               <!-- All Summary -->
               @if (teamRankingSummary('ALL').length > 0) {
                 <div>
-                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">Всички — Обобщение</div>
+                  <div class="text-sm font-semibold text-gray-800 mb-1 px-1">{{ 'competitions.detailsPage.complexStandings.summaryTitles.allSummary' | translate }}</div>
                   <div class="border border-gray-200 rounded-lg overflow-x-auto">
                     <table class="w-full text-sm">
                       <thead>
                         <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
-                          <th class="text-center py-1.5 px-3 font-medium w-16">Място</th>
-                          <th class="text-left py-1.5 px-3 font-medium">Клуб</th>
+                          <th class="text-center py-1.5 px-3 font-medium w-16">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
+                          <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
                           @for (d of teamRankingDisciplines('ALL'); track d.id) {
                             <th class="text-center py-1.5 px-3 font-medium">{{ d.shortName }}</th>
                           }
-                          <th class="text-center py-1.5 px-3 font-medium w-20">Общо</th>
+                          <th class="text-center py-1.5 px-3 font-medium w-20">{{ 'competitions.detailsPage.complexStandings.viewButtons.total' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1313,14 +1313,14 @@
             </div>
 
             @if (loadingWeights || loadingProgression) {
-              <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+              <div class="text-gray-400 text-sm text-center py-8">{{ 'competitions.detailsPage.loading' | translate }}</div>
             } @else if (weighInEventGroups.length === 0) {
               <div class="flex flex-col items-center justify-center py-12 text-gray-400">
                 <svg class="w-10 h-10 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                     d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"></path>
                 </svg>
-                <p class="text-sm">Няма атлети за измерване за избрания ден</p>
+                <p class="text-sm">{{ 'competitions.detailsPage.weighIn.empty' | translate }}</p>
               </div>
             } @else {
               <div class="space-y-6 max-w-2xl">
@@ -1329,7 +1329,7 @@
                     <svg class="w-4 h-4 text-amber-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"/>
                     </svg>
-                    <p class="text-sm text-amber-700">Измервания могат да се записват само за днешния ден.</p>
+                    <p class="text-sm text-amber-700">{{ 'competitions.detailsPage.weighIn.todayWarning' | translate }}</p>
                   </div>
                 }
                 @for (group of weighInEventGroups; track group.eventUuid) {
@@ -1342,7 +1342,7 @@
                       <span class="text-sm text-gray-400">{{ group.eventTypeLabel }}@if (group.showNumber) { {{ group.eventNumber }}}</span>
                       <button type="button"
                         class="ml-auto text-gray-400 hover:text-gray-600 transition-colors"
-                        title="Обнови"
+                        [title]="'competitions.detailsPage.progression.refreshButton' | translate"
                         (click)="loadWeightMeasurements(); $event.stopPropagation()">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                       </button>
@@ -1351,12 +1351,12 @@
                       <table class="w-full text-sm">
                         <thead>
                           <tr class="border-b border-gray-100 text-xs text-gray-400 bg-gray-50">
-                            <th class="text-left py-1.5 px-3 font-medium">Атлет</th>
-                            <th class="text-left py-1.5 px-3 font-medium">Карта</th>
-                            <th class="text-left py-1.5 px-3 font-medium">Роля</th>
-                            <th class="text-left py-1.5 px-3 font-medium">Лимит</th>
-                            <th class="text-left py-1.5 px-3 font-medium">Тегло</th>
-                            <th class="text-left py-1.5 px-3 font-medium">Коментар</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.weighIn.columns.athlete' | translate }}</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.weighIn.columns.cardNumber' | translate }}</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.weighIn.columns.role' | translate }}</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.weighIn.columns.limit' | translate }}</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.weighIn.columns.weight' | translate }}</th>
+                            <th class="text-left py-1.5 px-3 font-medium">{{ 'competitions.detailsPage.weighIn.columns.comment' | translate }}</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -1376,9 +1376,9 @@
                                 </td>
                                 <td class="py-1.5 px-3 text-gray-500 text-xs">{{ athlete.cardNumber }}</td>
                                 <td class="py-1.5 px-3 text-gray-500 text-xs">{{ athlete.roleLabel }}</td>
-                                <td class="py-1.5 px-3 text-gray-600">{{ athlete.weightLimit != null ? (athlete.weightLimit + ' кг') : '–' }}</td>
+                                <td class="py-1.5 px-3 text-gray-600">{{ athlete.weightLimit != null ? (athlete.weightLimit + ' ' + ('competitions.detailsPage.weighIn.weightUnit' | translate)) : '–' }}</td>
                                 <td class="py-1.5 px-3 font-semibold" [class]="athlete.weightKg == null ? 'text-gray-400' : (athlete.isInvalid ? 'text-red-600' : (athlete.needsCompensation ? 'text-orange-500' : 'text-green-600'))">
-                                  {{ athlete.weightKg != null ? (athlete.weightKg + ' кг') : '–' }}
+                                  {{ athlete.weightKg != null ? (athlete.weightKg + ' ' + ('competitions.detailsPage.weighIn.weightUnit' | translate)) : '–' }}
                                 </td>
                                 <td class="py-1.5 px-3 text-xs" [class]="athlete.isInvalid ? 'text-red-600' : (athlete.needsCompensation ? 'text-orange-500' : '')">
                                   {{ athlete.comment || '' }}
@@ -1415,7 +1415,7 @@
         } @else {
           <img
             [src]="weighInEditPhotoUrl || 'assets/images/default-user.png'"
-            [alt]="weighInEditName || 'Снимка'"
+            [alt]="weighInEditName || ('competitions.detailsPage.weighIn.photoAlt' | translate)"
             class="w-full h-full object-cover"
           />
         }
@@ -1439,7 +1439,7 @@
       <div class="flex items-center gap-3">
         <input type="number" step="0.01" min="0"
           class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          [(ngModel)]="weighInEditWeight" placeholder="Тегло (кг)" />
+          [(ngModel)]="weighInEditWeight" [placeholder]="'competitions.detailsPage.weighIn.editPlaceholder' | translate" />
         <button
           type="button"
           class="px-6 py-2.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
@@ -1449,7 +1449,7 @@
           @if (weighInRecording) {
             <span class="inline-block animate-spin mr-2">⟳</span>
           }
-          Запази
+          {{ 'competitions.detailsPage.weighIn.saveButton' | translate }}
         </button>
       </div>
       @if (weighInError) {
@@ -1468,15 +1468,13 @@
 </app-dialog>
 
 <!-- Editing Warning Dialog -->
-<app-dialog [isOpen]="showEditingWarningDialog" title="Незапазени промени" (closed)="showEditingWarningDialog = false">
+<app-dialog [isOpen]="showEditingWarningDialog" [title]="'competitions.detailsPage.editingWarning.title' | translate" (closed)="showEditingWarningDialog = false">
   <div class="py-4">
     <p class="text-gray-700 mb-6">
-      Имате незапазени промени. Моля, използвайте бутоните
-      <span class="font-medium">"Запази"</span> или
-      <span class="font-medium">"Отказ"</span>, за да излезете от редакция.
+      {{ 'competitions.detailsPage.editingWarning.message' | translate }}
     </p>
     <div class="flex justify-center">
-      <app-button variant="primary" size="md" text="Разбрах" (click)="showEditingWarningDialog = false"></app-button>
+      <app-button variant="primary" size="md" [text]="'competitions.detailsPage.editingWarning.confirm' | translate" (click)="showEditingWarningDialog = false"></app-button>
     </div>
   </div>
 </app-dialog>
@@ -1535,14 +1533,14 @@
 <!-- Club selection pre-dialog for admins -->
 <app-dialog
   [isOpen]="showClubSelectDialog"
-  title="Изберете клуб"
+  [title]="'competitions.detailsPage.clubSelect.title' | translate"
   size="md"
   (closed)="showClubSelectDialog = false">
   <div>
-    <label class="block text-sm font-medium text-gray-700 mb-2">Клуб:</label>
+    <label class="block text-sm font-medium text-gray-700 mb-2">{{ 'competitions.detailsPage.clubSelect.label' | translate }}</label>
     <app-searchable-select-dropdown
       [options]="clubOptions"
-      [placeholder]="'Търсене на клуб...'"
+      [placeholder]="'competitions.detailsPage.clubSelect.placeholder' | translate"
       [ngModel]="selectedClubForEntries"
       (ngModelChange)="onClubSelectedForEntries($event)">
     </app-searchable-select-dropdown>
@@ -1551,7 +1549,7 @@
     <app-button
       variant="primary"
       size="md"
-      text="Затвори"
+      [text]="'competitions.detailsPage.clubSelect.closeButton' | translate"
       (click)="showClubSelectDialog = false">
     </app-button>
   </div>
@@ -1572,7 +1570,7 @@
 <!-- Club entry detail dialog -->
 <app-dialog
   [isOpen]="!!selectedClubId"
-  [title]="'Заявка — ' + getSelectedClubName()"
+  [title]="('competitions.detailsPage.clubDetail.titlePrefix' | translate) + ' ' + getSelectedClubName()"
   size="xl"
   [noScroll]="true"
   (closed)="closeClubDetail()"
@@ -1581,9 +1579,9 @@
     <div class="flex flex-col max-h-[calc(90vh-120px)]">
       <div class="flex-1 overflow-y-auto">
         @if (loadingClubDetail) {
-          <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+          <div class="text-gray-400 text-sm text-center py-8">{{ 'competitions.detailsPage.loading' | translate }}</div>
         } @else if (entryGroupViews.length === 0) {
-          <p class="text-sm text-gray-400 py-4 text-center">Няма заявки от този клуб</p>
+          <p class="text-sm text-gray-400 py-4 text-center">{{ 'competitions.detailsPage.clubDetail.empty' | translate }}</p>
         } @else {
           @for (group of entryGroupViews; track group.groupId) {
             <!-- Group header -->
@@ -1594,14 +1592,14 @@
               @if (group.maleTeam && group.maleTeam.athletes.length > 0) {
                 <div class="mb-4">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-medium text-gray-700">Мъжки отбор</span>
-                    <span class="text-xs text-gray-500">{{ group.maleTeam.totalAthletes }} спортисти
-                      ({{ getTeamBreakdown(group.maleTeam.athletes).own }} в групата@if (group.transferRatio && group.transferRatio > 0) {<span class="text-orange-600">, {{ getTeamBreakdown(group.maleTeam.athletes).transfer }} трансфер</span>}@if (getTeamBreakdown(group.maleTeam.athletes).coxOnly > 0) {<span class="text-teal-600">, {{ getTeamBreakdown(group.maleTeam.athletes).coxOnly }} кормчия</span>})
+                    <span class="text-sm font-medium text-gray-700">{{ 'competitions.detailsPage.clubDetail.maleTeam' | translate }}</span>
+                    <span class="text-xs text-gray-500">{{ group.maleTeam.totalAthletes }} {{ 'competitions.detailsPage.clubDetail.athleteCountLabel' | translate }}
+                      ({{ getTeamBreakdown(group.maleTeam.athletes).own }} {{ 'competitions.detailsPage.clubDetail.inGroup' | translate }}@if (group.transferRatio && group.transferRatio > 0) {<span class="text-orange-600">, {{ getTeamBreakdown(group.maleTeam.athletes).transfer }} {{ 'competitions.detailsPage.clubDetail.transfer' | translate }}</span>}@if (getTeamBreakdown(group.maleTeam.athletes).coxOnly > 0) {<span class="text-teal-600">, {{ getTeamBreakdown(group.maleTeam.athletes).coxOnly }} {{ 'competitions.detailsPage.clubDetail.coxswain' | translate }}</span>})
                     </span>
                     @if (group.transferRatio && group.transferRatio > 0) {
                       <button class="text-xs text-blue-600 hover:text-blue-800 underline ml-1"
                               (click)="openTransferSchemaDialog(group.maleTeam.athletes, group.transferRatio, group.groupLabel)">
-                        Виж трансферна схема
+                        {{ 'competitions.detailsPage.clubDetail.viewTransferSchema' | translate }}
                       </button>
                     }
                   </div>
@@ -1611,12 +1609,12 @@
                       <thead class="bg-gray-50">
                         <tr>
                           <th class="px-3 py-1.5 text-left text-gray-500 font-medium">&#8470;</th>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Име</th>
-                          <th class="px-2 py-1.5 text-center text-gray-500 font-medium">Набор</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Дисц.</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Мед.</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Заст.</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Статус</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.name' | translate }}</th>
+                          <th class="px-2 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.birthYear' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.disciplines' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.medical' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.insurance' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.status' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1624,8 +1622,8 @@
                           <tr class="border-t border-gray-100">
                             <td class="px-3 py-1.5 text-gray-500">{{ a.accreditationNumber || '-' }}</td>
                             <td class="px-3 py-1.5 text-gray-700">
-                              @if (a.isTransfer && !(a.coxCount > 0 && a.disciplineCount === 0)) { <span class="text-orange-600 font-medium">[Т]</span> }
-                              @if (a.coxCount > 0 && a.disciplineCount === 0) { <span class="text-teal-600 font-medium">[К]</span> }
+                              @if (a.isTransfer && !(a.coxCount > 0 && a.disciplineCount === 0)) { <span class="text-orange-600 font-medium">{{ 'competitions.detailsPage.clubDetail.transferBadge' | translate }}</span> }
+                              @if (a.coxCount > 0 && a.disciplineCount === 0) { <span class="text-teal-600 font-medium">{{ 'competitions.detailsPage.clubDetail.coxBadge' | translate }}</span> }
                               {{ a.name }}
                             </td>
                             <td class="px-2 py-1.5 text-center text-gray-500">{{ a.dateOfBirth ? a.dateOfBirth.substring(2, 4) : '-' }}</td>
@@ -1651,7 +1649,7 @@
                             </td>
                             <td class="px-3 py-1.5 text-center">
                               <span class="text-xs" [class]="a.accreditationStatus === 'ACTIVE' ? 'text-green-600' : 'text-orange-500'">
-                                {{ a.accreditationStatus === 'ACTIVE' ? 'Активен' : a.accreditationStatus }}
+                                {{ a.accreditationStatus === 'ACTIVE' ? ('competitions.detailsPage.clubDetail.activeStatus' | translate) : a.accreditationStatus }}
                               </span>
                             </td>
                           </tr>
@@ -1666,14 +1664,14 @@
               @if (group.femaleTeam && group.femaleTeam.athletes.length > 0) {
                 <div class="mb-4">
                   <div class="flex items-center gap-2 mb-2">
-                    <span class="text-sm font-medium text-gray-700">Женски отбор</span>
-                    <span class="text-xs text-gray-500">{{ group.femaleTeam.totalAthletes }} спортисти
-                      ({{ getTeamBreakdown(group.femaleTeam.athletes).own }} в групата@if (group.transferRatio && group.transferRatio > 0) {<span class="text-orange-600">, {{ getTeamBreakdown(group.femaleTeam.athletes).transfer }} трансфер</span>}@if (getTeamBreakdown(group.femaleTeam.athletes).coxOnly > 0) {<span class="text-teal-600">, {{ getTeamBreakdown(group.femaleTeam.athletes).coxOnly }} кормчия</span>})
+                    <span class="text-sm font-medium text-gray-700">{{ 'competitions.detailsPage.clubDetail.femaleTeam' | translate }}</span>
+                    <span class="text-xs text-gray-500">{{ group.femaleTeam.totalAthletes }} {{ 'competitions.detailsPage.clubDetail.athleteCountLabel' | translate }}
+                      ({{ getTeamBreakdown(group.femaleTeam.athletes).own }} {{ 'competitions.detailsPage.clubDetail.inGroup' | translate }}@if (group.transferRatio && group.transferRatio > 0) {<span class="text-orange-600">, {{ getTeamBreakdown(group.femaleTeam.athletes).transfer }} {{ 'competitions.detailsPage.clubDetail.transfer' | translate }}</span>}@if (getTeamBreakdown(group.femaleTeam.athletes).coxOnly > 0) {<span class="text-teal-600">, {{ getTeamBreakdown(group.femaleTeam.athletes).coxOnly }} {{ 'competitions.detailsPage.clubDetail.coxswain' | translate }}</span>})
                     </span>
                     @if (group.transferRatio && group.transferRatio > 0) {
                       <button class="text-xs text-blue-600 hover:text-blue-800 underline ml-1"
                               (click)="openTransferSchemaDialog(group.femaleTeam.athletes, group.transferRatio, group.groupLabel)">
-                        Виж трансферна схема
+                        {{ 'competitions.detailsPage.clubDetail.viewTransferSchema' | translate }}
                       </button>
                     }
                   </div>
@@ -1682,12 +1680,12 @@
                       <thead class="bg-gray-50">
                         <tr>
                           <th class="px-3 py-1.5 text-left text-gray-500 font-medium">&#8470;</th>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Име</th>
-                          <th class="px-2 py-1.5 text-center text-gray-500 font-medium">Набор</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Дисц.</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Мед.</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Заст.</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Статус</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.name' | translate }}</th>
+                          <th class="px-2 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.birthYear' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.disciplines' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.medical' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.insurance' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.columns.status' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1695,8 +1693,8 @@
                           <tr class="border-t border-gray-100">
                             <td class="px-3 py-1.5 text-gray-500">{{ a.accreditationNumber || '-' }}</td>
                             <td class="px-3 py-1.5 text-gray-700">
-                              @if (a.isTransfer && !(a.coxCount > 0 && a.disciplineCount === 0)) { <span class="text-orange-600 font-medium">[Т]</span> }
-                              @if (a.coxCount > 0 && a.disciplineCount === 0) { <span class="text-teal-600 font-medium">[К]</span> }
+                              @if (a.isTransfer && !(a.coxCount > 0 && a.disciplineCount === 0)) { <span class="text-orange-600 font-medium">{{ 'competitions.detailsPage.clubDetail.transferBadge' | translate }}</span> }
+                              @if (a.coxCount > 0 && a.disciplineCount === 0) { <span class="text-teal-600 font-medium">{{ 'competitions.detailsPage.clubDetail.coxBadge' | translate }}</span> }
                               {{ a.name }}
                             </td>
                             <td class="px-2 py-1.5 text-center text-gray-500">{{ a.dateOfBirth ? a.dateOfBirth.substring(2, 4) : '-' }}</td>
@@ -1722,7 +1720,7 @@
                             </td>
                             <td class="px-3 py-1.5 text-center">
                               <span class="text-xs" [class]="a.accreditationStatus === 'ACTIVE' ? 'text-green-600' : 'text-orange-500'">
-                                {{ a.accreditationStatus === 'ACTIVE' ? 'Активен' : a.accreditationStatus }}
+                                {{ a.accreditationStatus === 'ACTIVE' ? ('competitions.detailsPage.clubDetail.activeStatus' | translate) : a.accreditationStatus }}
                               </span>
                             </td>
                           </tr>
@@ -1736,14 +1734,14 @@
               <!-- Male disciplines detail -->
               @if (group.maleDisciplines.length > 0) {
                 <div class="mb-3">
-                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Мъжки дисциплини</p>
+                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{{ 'competitions.detailsPage.clubDetail.maleDisciplines' | translate }}</p>
                   <div class="border border-gray-200 rounded-lg overflow-x-auto">
                     <table class="w-full text-xs">
                       <thead class="bg-gray-50">
                         <tr>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Дисциплина</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.disciplineColumns.discipline' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.disciplineColumns.team' | translate }}</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.progression.columns.crew' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1759,8 +1757,8 @@
                                     @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
                                     <span class="text-gray-900">{{ c.name }}</span>
                                     @if (c.genderSuffix) { <span class="text-gray-400">({{ c.genderSuffix }})</span> }
-                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">[Т]</span> }
-                                    @if (c.isCox) { <span class="text-teal-600 font-medium">[К]</span> }
+                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">{{ 'competitions.detailsPage.clubDetail.transferBadge' | translate }}</span> }
+                                    @if (c.isCox) { <span class="text-teal-600 font-medium">{{ 'competitions.detailsPage.clubDetail.coxBadge' | translate }}</span> }
                                   </div>
                                 }
                               </td>
@@ -1776,14 +1774,14 @@
               <!-- Female disciplines detail -->
               @if (group.femaleDisciplines.length > 0) {
                 <div class="mb-3">
-                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Женски дисциплини</p>
+                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{{ 'competitions.detailsPage.clubDetail.femaleDisciplines' | translate }}</p>
                   <div class="border border-gray-200 rounded-lg overflow-x-auto">
                     <table class="w-full text-xs">
                       <thead class="bg-gray-50">
                         <tr>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Дисциплина</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.disciplineColumns.discipline' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.disciplineColumns.team' | translate }}</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.progression.columns.crew' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1799,8 +1797,8 @@
                                     @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
                                     <span class="text-gray-900">{{ c.name }}</span>
                                     @if (c.genderSuffix) { <span class="text-gray-400">({{ c.genderSuffix }})</span> }
-                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">[Т]</span> }
-                                    @if (c.isCox) { <span class="text-teal-600 font-medium">[К]</span> }
+                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">{{ 'competitions.detailsPage.clubDetail.transferBadge' | translate }}</span> }
+                                    @if (c.isCox) { <span class="text-teal-600 font-medium">{{ 'competitions.detailsPage.clubDetail.coxBadge' | translate }}</span> }
                                   </div>
                                 }
                               </td>
@@ -1816,14 +1814,14 @@
               <!-- Mixed disciplines detail -->
               @if (group.mixedDisciplines.length > 0) {
                 <div class="mb-3">
-                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">Смесени дисциплини</p>
+                  <p class="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{{ 'competitions.detailsPage.clubDetail.mixedDisciplines' | translate }}</p>
                   <div class="border border-gray-200 rounded-lg overflow-x-auto">
                     <table class="w-full text-xs">
                       <thead class="bg-gray-50">
                         <tr>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Дисциплина</th>
-                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
-                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.disciplineColumns.discipline' | translate }}</th>
+                          <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.disciplineColumns.team' | translate }}</th>
+                          <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.progression.columns.crew' | translate }}</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1839,8 +1837,8 @@
                                     @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
                                     <span class="text-gray-900">{{ c.name }}</span>
                                     @if (c.genderSuffix) { <span class="text-gray-400">({{ c.genderSuffix }})</span> }
-                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">[Т]</span> }
-                                    @if (c.isCox) { <span class="text-teal-600 font-medium">[К]</span> }
+                                    @if (c.isTransfer) { <span class="text-orange-500 font-medium">{{ 'competitions.detailsPage.clubDetail.transferBadge' | translate }}</span> }
+                                    @if (c.isCox) { <span class="text-teal-600 font-medium">{{ 'competitions.detailsPage.clubDetail.coxBadge' | translate }}</span> }
                                   </div>
                                 }
                               </td>
@@ -1857,7 +1855,7 @@
         }
       </div>
       <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
-        <app-button variant="primary" size="md" text="Затвори" (click)="closeClubDetail()"></app-button>
+        <app-button variant="primary" size="md" [text]="'competitions.detailsPage.clubDetail.closeButton' | translate" (click)="closeClubDetail()"></app-button>
       </div>
     </div>
   }
@@ -1866,24 +1864,22 @@
 <!-- Transfer schema dialog -->
 <app-dialog
   [isOpen]="!!transferSchemaDialog"
-  [title]="'Схема за трансфер — ' + (transferSchemaDialog?.groupLabel || '')"
+  [title]="('competitions.detailsPage.transferSchema.titlePrefix' | translate) + ' ' + (transferSchemaDialog?.groupLabel || '')"
   size="md"
   [noScroll]="true"
   (closed)="closeTransferSchemaDialog()"
 >
   @if (transferSchemaDialog) {
     <div class="flex flex-col max-h-[calc(90vh-80px)]">
-      <p class="text-sm text-gray-600 mb-3 px-2 pt-2 flex-shrink-0">
-        Допуска се до <strong>{{ transferSchemaDialog.transferRatio }}%</strong> от стартиралите състезатели
-        да бъдат трансферирани.
+      <p class="text-sm text-gray-600 mb-3 px-2 pt-2 flex-shrink-0" [innerHTML]="'competitions.detailsPage.transferSchema.description' | translate:{ ratio: transferSchemaDialog.transferRatio }">
       </p>
 
       <div class="flex-1 overflow-y-auto">
         <table class="w-full text-sm border-collapse">
           <thead>
             <tr class="border-b border-gray-200">
-              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">Общ брой на отбора</th>
-              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">Макс. трансфер</th>
+              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">{{ 'competitions.detailsPage.transferSchema.columns.totalCrew' | translate }}</th>
+              <th class="text-left py-1.5 px-3 text-xs text-gray-500 font-medium">{{ 'competitions.detailsPage.transferSchema.columns.maxTransfer' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -1897,7 +1893,7 @@
                 <td class="py-1.5 px-3">
                   {{ row.maxTransfer }}
                   @if (transferSchemaDialog.teamSize === row.total) {
-                    <span class="text-xs text-gray-400 ml-1">(текущо)</span>
+                    <span class="text-xs text-gray-400 ml-1">{{ 'competitions.detailsPage.transferSchema.current' | translate }}</span>
                   }
                 </td>
               </tr>
@@ -1909,14 +1905,14 @@
       <div class="mt-3 px-3 py-2 rounded text-sm flex-shrink-0"
         [class]="transferSchemaDialog.isOver ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'">
         @if (transferSchemaDialog.isOver) {
-          Избрани {{ transferSchemaDialog.transferCount }} трансфер от {{ transferSchemaDialog.teamSize }} общо — надвишен лимит (макс. {{ transferSchemaDialog.maxAllowed }}).
+          {{ 'competitions.detailsPage.transferSchema.overLimit' | translate:{ count: transferSchemaDialog.transferCount, total: transferSchemaDialog.teamSize, max: transferSchemaDialog.maxAllowed } }}
         } @else {
-          Избрани {{ transferSchemaDialog.transferCount }} трансфер от {{ transferSchemaDialog.teamSize }} общо — в рамките на лимита (макс. {{ transferSchemaDialog.maxAllowed }}).
+          {{ 'competitions.detailsPage.transferSchema.withinLimit' | translate:{ count: transferSchemaDialog.transferCount, total: transferSchemaDialog.teamSize, max: transferSchemaDialog.maxAllowed } }}
         }
       </div>
 
       <div class="mt-4 flex justify-center flex-shrink-0">
-        <app-button variant="primary" size="md" text="Затвори" (click)="closeTransferSchemaDialog()"></app-button>
+        <app-button variant="primary" size="md" [text]="'competitions.detailsPage.transferSchema.closeButton' | translate" (click)="closeTransferSchemaDialog()"></app-button>
       </div>
     </div>
   }
@@ -1934,15 +1930,15 @@
     <div class="flex flex-col max-h-[calc(90vh-120px)]">
       <div class="flex-1 overflow-y-auto">
         @if (disciplineEntryRows.length === 0) {
-          <p class="text-sm text-gray-400 py-4 text-center">Няма заявки за тази дисциплина</p>
+          <p class="text-sm text-gray-400 py-4 text-center">{{ 'competitions.detailsPage.clubDetail.noDisciplineEntries' | translate }}</p>
         } @else {
           <div class="border border-gray-200 rounded-lg overflow-x-auto">
             <table class="w-full text-xs">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Клуб</th>
-                  <th class="px-3 py-1.5 text-center text-gray-500 font-medium">Отб.</th>
-                  <th class="px-3 py-1.5 text-left text-gray-500 font-medium">Екипаж</th>
+                  <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                  <th class="px-3 py-1.5 text-center text-gray-500 font-medium">{{ 'competitions.detailsPage.clubDetail.disciplineColumns.team' | translate }}</th>
+                  <th class="px-3 py-1.5 text-left text-gray-500 font-medium">{{ 'competitions.detailsPage.progression.columns.crew' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -1956,8 +1952,8 @@
                           <span class="text-gray-400 font-medium w-4">{{ c.seat }}</span>
                           @if (c.cardNumber) { <span class="text-gray-400 w-14">{{ c.cardNumber }}</span> }
                           <span [class.text-orange-600]="c.isTransfer" [class.text-teal-600]="c.isCox && !c.isTransfer" [class.text-gray-900]="!c.isTransfer && !c.isCox">
-                            @if (c.isTransfer) { <span class="font-medium">[Т]</span> }
-                            @if (c.isCox && !c.isTransfer) { <span class="font-medium">[К]</span> }
+                            @if (c.isTransfer) { <span class="font-medium">{{ 'competitions.detailsPage.clubDetail.transferBadge' | translate }}</span> }
+                            @if (c.isCox && !c.isTransfer) { <span class="font-medium">{{ 'competitions.detailsPage.clubDetail.coxBadge' | translate }}</span> }
                             {{ c.name }}
                           </span>
                         </div>
@@ -1971,7 +1967,7 @@
         }
       </div>
       <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
-        <app-button variant="primary" size="md" text="Затвори" (click)="closeDisciplineEntryDetail()"></app-button>
+        <app-button variant="primary" size="md" [text]="'competitions.detailsPage.clubDetail.closeButton' | translate" (click)="closeDisciplineEntryDetail()"></app-button>
       </div>
     </div>
   }
@@ -1980,7 +1976,7 @@
 <!-- Discipline selection dialog for progression advance -->
 <app-dialog
   [isOpen]="showDisciplineSelectDialog"
-  title="Изберете дисциплини за следващ етап"
+  [title]="'competitions.generateProgressionDialog.title' | translate"
   size="md"
   (closed)="showDisciplineSelectDialog = false"
 >
@@ -1991,7 +1987,7 @@
           class="rounded border-gray-300 text-bfg-blue focus:ring-bfg-blue"
           [checked]="allDisciplinesSelected"
           (change)="toggleAllDisciplines()" />
-        Всички дисциплини
+        {{ 'competitions.generateProgressionDialog.selectAll' | translate }}
       </label>
       <div class="space-y-0.5">
         @for (disc of resultsDisciplines; track disc.disciplineId) {
@@ -2002,14 +1998,14 @@
               (change)="toggleDiscipline(disc.disciplineId)" />
             <span class="flex-1">{{ disc.label }}</span>
             <span class="text-xs text-gray-400">{{ disc.currentStage || '-' }}</span>
-            <span class="text-xs text-gray-400">{{ disc.entryCount }} зап.</span>
+            <span class="text-xs text-gray-400">{{ disc.entryCount }} {{ 'competitions.generateProgressionDialog.entriesCount' | translate }}</span>
           </label>
         }
       </div>
     </div>
     <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center gap-2">
-      <app-button variant="outline" size="md" text="Отказ" (click)="showDisciplineSelectDialog = false"></app-button>
-      <app-button variant="primary" size="md" text="Генерирай следващ етап" [disabled]="generatingProgression" (click)="confirmAdvanceProgression()"></app-button>
+      <app-button variant="outline" size="md" [text]="'common.cancel' | translate" (click)="showDisciplineSelectDialog = false"></app-button>
+      <app-button variant="primary" size="md" [text]="'competitions.detailsPage.progression.generateButton' | translate" [disabled]="generatingProgression" (click)="confirmAdvanceProgression()"></app-button>
     </div>
   </div>
 </app-dialog>
@@ -2017,25 +2013,25 @@
 <!-- Generate progression results dialog -->
 <app-dialog
   [isOpen]="showGenerateResultsDialog"
-  title="Резултати от генериране"
+  [title]="'competitions.generateResultsDialog.title' | translate"
   size="lg"
   (closed)="showGenerateResultsDialog = false"
 >
   <div class="flex flex-col max-h-[calc(90vh-120px)]">
     <div class="flex-1 overflow-y-auto">
       @if (generateResults.length === 0) {
-        <p class="text-sm text-gray-400 py-4 text-center">Няма резултати</p>
+        <p class="text-sm text-gray-400 py-4 text-center">{{ 'competitions.generateResultsDialog.empty' | translate }}</p>
       } @else {
         <div class="border border-gray-200 rounded-lg overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Дисциплина</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Статус</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Причина</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">От етап</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Към етап</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Заявки</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.discipline' | translate }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.status' | translate }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ 'competitions.generateResultsDialog.columns.reason' | translate }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">{{ 'competitions.generateResultsDialog.columns.fromStage' | translate }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">{{ 'competitions.generateResultsDialog.columns.toStage' | translate }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.entries.columns.entries' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -2066,7 +2062,7 @@
       }
     </div>
     <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
-      <app-button variant="primary" size="md" text="Затвори" (click)="showGenerateResultsDialog = false"></app-button>
+      <app-button variant="primary" size="md" [text]="'competitions.generateResultsDialog.closeButton' | translate" (click)="showGenerateResultsDialog = false"></app-button>
     </div>
   </div>
 </app-dialog>
@@ -2074,7 +2070,7 @@
 <!-- Standings discipline selection dialog -->
 <app-dialog
   [isOpen]="showStandingsSelectDialog"
-  title="Изберете дисциплини за класиране"
+  [title]="'competitions.generateStandingsDialog.title' | translate"
   size="md"
   (closed)="showStandingsSelectDialog = false"
 >
@@ -2085,7 +2081,7 @@
           class="rounded border-gray-300 text-bfg-blue focus:ring-bfg-blue"
           [checked]="allStandingsSelected"
           (change)="toggleAllStandingsSelection()" />
-        Всички дисциплини
+        {{ 'competitions.generateStandingsDialog.selectAll' | translate }}
       </label>
       <div class="space-y-0.5">
         @for (disc of resultsDisciplines; track disc.disciplineId) {
@@ -2100,8 +2096,8 @@
       </div>
     </div>
     <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center gap-2">
-      <app-button variant="outline" size="md" text="Отказ" (click)="showStandingsSelectDialog = false"></app-button>
-      <app-button variant="primary" size="md" text="Генерирай класиране" [disabled]="computingStandings" (click)="confirmGenerateStandings()"></app-button>
+      <app-button variant="outline" size="md" [text]="'common.cancel' | translate" (click)="showStandingsSelectDialog = false"></app-button>
+      <app-button variant="primary" size="md" [text]="'competitions.detailsPage.results.generateButton' | translate" [disabled]="computingStandings" (click)="confirmGenerateStandings()"></app-button>
     </div>
   </div>
 </app-dialog>
@@ -2109,22 +2105,22 @@
 <!-- Standings generation results dialog -->
 <app-dialog
   [isOpen]="showStandingsResultsDialog"
-  title="Резултати от генериране на класиране"
+  [title]="'competitions.standingsResultsDialog.title' | translate"
   size="lg"
   (closed)="showStandingsResultsDialog = false"
 >
   <div class="flex flex-col max-h-[calc(90vh-120px)]">
     <div class="flex-1 overflow-y-auto">
       @if (standingsGenerateResults.length === 0) {
-        <p class="text-sm text-gray-400 py-4 text-center">Няма резултати</p>
+        <p class="text-sm text-gray-400 py-4 text-center">{{ 'competitions.standingsResultsDialog.empty' | translate }}</p>
       } @else {
         <div class="border border-gray-200 rounded-lg overflow-x-auto">
           <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50">
               <tr>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Дисциплина</th>
-                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">Статус</th>
-                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">Причина</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.discipline' | translate }}</th>
+                <th class="px-4 py-2 text-center text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.timetable.columns.status' | translate }}</th>
+                <th class="px-4 py-2 text-left text-xs font-medium text-gray-500">{{ 'competitions.standingsResultsDialog.columns.reason' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -2152,7 +2148,7 @@
       }
     </div>
     <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
-      <app-button variant="primary" size="md" text="Затвори" (click)="showStandingsResultsDialog = false"></app-button>
+      <app-button variant="primary" size="md" [text]="'competitions.standingsResultsDialog.closeButton' | translate" (click)="showStandingsResultsDialog = false"></app-button>
     </div>
   </div>
 </app-dialog>
@@ -2160,7 +2156,7 @@
 <!-- Discipline progression detail dialog -->
 <app-dialog
   [isOpen]="!!selectedProgressionDisciplineId"
-  [title]="'Прогресия — ' + selectedProgressionDisciplineLabel"
+  [title]="('competitions.progressionDialog.titlePrefix' | translate) + ' ' + selectedProgressionDisciplineLabel"
   size="xl"
   [noScroll]="true"
   (closed)="closeProgressionDiscipline()"
@@ -2169,14 +2165,14 @@
     <div class="flex flex-col max-h-[calc(90vh-120px)]">
       <div class="flex-1 overflow-y-auto space-y-4">
         @if (disciplineEvents.length === 0) {
-          <p class="text-sm text-gray-400 py-4 text-center">Няма генерирани събития за тази дисциплина</p>
+          <p class="text-sm text-gray-400 py-4 text-center">{{ 'competitions.progressionDialog.empty' | translate }}</p>
         } @else if (editingLanes) {
           <!-- Lane editing mode -->
           <div class="mb-2 flex items-center justify-between">
-            <span class="text-sm font-medium text-gray-700">Редактиране на коридори</span>
+            <span class="text-sm font-medium text-gray-700">{{ 'competitions.progressionDialog.laneEditing' | translate }}</span>
             <div class="flex gap-2">
-              <app-button variant="outline" size="sm" text="Отказ" [disabled]="savingLanes" (click)="cancelEditingLanes()"></app-button>
-              <app-button variant="primary" size="sm" text="Запази" [disabled]="savingLanes" (click)="saveLanes()"></app-button>
+              <app-button variant="outline" size="sm" [text]="'common.cancel' | translate" [disabled]="savingLanes" (click)="cancelEditingLanes()"></app-button>
+              <app-button variant="primary" size="sm" [text]="'common.save' | translate" [disabled]="savingLanes" (click)="saveLanes()"></app-button>
             </div>
           </div>
           @if (lanesError) {
@@ -2193,9 +2189,9 @@
             <table class="w-full text-sm">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-4 py-1.5 text-left text-xs text-gray-500 font-medium">Серия</th>
-                  <th class="px-4 py-1.5 text-center text-xs text-gray-500 font-medium w-20">Коридор</th>
-                  <th class="px-4 py-1.5 text-left text-xs text-gray-500 font-medium">Екипаж</th>
+                  <th class="px-4 py-1.5 text-left text-xs text-gray-500 font-medium">{{ 'competitions.progressionDialog.columns.series' | translate }}</th>
+                  <th class="px-4 py-1.5 text-center text-xs text-gray-500 font-medium w-20">{{ 'competitions.progressionDialog.columns.lane' | translate }}</th>
+                  <th class="px-4 py-1.5 text-left text-xs text-gray-500 font-medium">{{ 'competitions.detailsPage.progression.columns.crew' | translate }}</th>
                 </tr>
               </thead>
               <tbody>
@@ -2217,7 +2213,7 @@
           <!-- Normal view with edit button -->
           @if (canEdit && disciplineEvents.length > 0 && disciplineEvents[0].eventStatus !== 'OFFICIAL_RESULTS') {
             <div class="flex justify-end mb-2">
-              <app-button variant="outline" size="sm" text="Промени коридори" (click)="startEditingLanes()"></app-button>
+              <app-button variant="outline" size="sm" [text]="'competitions.progressionDialog.editLanesButton' | translate" (click)="startEditingLanes()"></app-button>
             </div>
           }
           @for (ev of disciplineEvents; track ev.eventUuid) {
@@ -2238,21 +2234,21 @@
                   </span>
                 </div>
                 @if (canEdit && ev.eventStatus !== 'CANCELLED' && ev.participations.length > 0) {
-                  <app-button variant="outline" size="sm" text="Запиши резултати" (click)="openResultsEntry(ev.eventUuid)"></app-button>
+                  <app-button variant="outline" size="sm" [text]="'competitions.resultsEntry.saveButton' | translate" (click)="openResultsEntry(ev.eventUuid)"></app-button>
                 }
               </div>
               @if (ev.participations.length === 0) {
-                <div class="px-4 py-4 text-center text-sm text-gray-400">Няма участници</div>
+                <div class="px-4 py-4 text-center text-sm text-gray-400">{{ 'competitions.detailsPage.progression.noParticipants' | translate }}</div>
               } @else {
                 <table class="w-full text-sm">
                   <thead>
                     <tr class="border-b border-gray-100 text-xs text-gray-400">
-                      <th class="text-center py-1.5 px-4 font-medium w-16">Кор.</th>
-                      <th class="text-left py-1.5 px-4 font-medium">Клуб</th>
+                      <th class="text-center py-1.5 px-4 font-medium w-16">{{ 'competitions.detailsPage.progression.columns.lane' | translate }}</th>
+                      <th class="text-left py-1.5 px-4 font-medium">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
                       @if (ev.eventStatus === 'UNOFFICIAL_RESULTS' || ev.eventStatus === 'OFFICIAL_RESULTS') {
-                        <th class="text-center py-1.5 px-4 font-medium w-16">Място</th>
-                        <th class="text-center py-1.5 px-4 font-medium w-24">Време</th>
-                        <th class="text-center py-1.5 px-4 font-medium w-16">Статус</th>
+                        <th class="text-center py-1.5 px-4 font-medium w-16">{{ 'competitions.detailsPage.progression.columns.place' | translate }}</th>
+                        <th class="text-center py-1.5 px-4 font-medium w-24">{{ 'competitions.detailsPage.progression.columns.time' | translate }}</th>
+                        <th class="text-center py-1.5 px-4 font-medium w-16">{{ 'competitions.progressionDialog.columns.status' | translate }}</th>
                       }
                     </tr>
                   </thead>
@@ -2284,7 +2280,7 @@
         }
       </div>
       <div class="shrink-0 pt-4 border-t border-gray-200 flex justify-center">
-        <app-button variant="primary" size="md" text="Затвори" (click)="closeProgressionDiscipline()"></app-button>
+        <app-button variant="primary" size="md" [text]="'competitions.progressionDialog.closeButton' | translate" (click)="closeProgressionDiscipline()"></app-button>
       </div>
     </div>
   }
@@ -2293,7 +2289,7 @@
 <!-- Record results dialog -->
 <app-dialog
   [isOpen]="!!selectedProgressionEventId"
-  [title]="'Резултати — ' + selectedEventLabel"
+  [title]="('competitions.resultsEntry.titlePrefix' | translate) + ' ' + selectedEventLabel"
   size="lg"
   [noScroll]="true"
   (closed)="closeResultsEntry()"
@@ -2304,7 +2300,7 @@
       @if (isChronoRunning) {
         <div class="flex items-center gap-2 px-3 py-2 mb-3 bg-green-50 border border-green-200 rounded-lg">
           <span class="inline-block h-2.5 w-2.5 rounded-full bg-green-500 animate-pulse"></span>
-          <span class="text-sm text-green-700 font-medium">Хронометърът работи</span>
+          <span class="text-sm text-green-700 font-medium">{{ 'competitions.resultsEntry.chronoRunning' | translate }}</span>
         </div>
       }
 
@@ -2314,7 +2310,7 @@
           <svg class="w-4 h-4 text-yellow-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/>
           </svg>
-          <p class="text-xs text-yellow-800">Промяната на резултатите ще изтрие стартовите листи и класирането за всички следващи етапи на тази дисциплина.</p>
+          <p class="text-xs text-yellow-800">{{ 'competitions.resultsEntry.resultsWarning' | translate }}</p>
         </div>
       }
 
@@ -2331,18 +2327,18 @@
         }
 
         @if (loadingEventParticipations) {
-          <div class="text-gray-400 text-sm text-center py-8">Зареждане...</div>
+          <div class="text-gray-400 text-sm text-center py-8">{{ 'competitions.detailsPage.loading' | translate }}</div>
         } @else if (resultEdits.length === 0) {
-          <p class="text-sm text-gray-400 py-4 text-center">Няма участници в това събитие</p>
+          <p class="text-sm text-gray-400 py-4 text-center">{{ 'competitions.resultsEntry.noParticipants' | translate }}</p>
         } @else {
           <div class="border border-gray-200 rounded-lg overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200 text-sm">
               <thead class="bg-gray-50">
                 <tr>
-                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-16">Кор.</th>
-                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Клуб</th>
-                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-28">Статус</th>
-                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-32">Време (мм:сс.дд)</th>
+                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-16">{{ 'competitions.detailsPage.progression.columns.lane' | translate }}</th>
+                  <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'competitions.detailsPage.entries.columns.club' | translate }}</th>
+                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-28">{{ 'competitions.resultsEntry.columns.status' | translate }}</th>
+                  <th class="px-3 py-2 text-center text-xs font-medium text-gray-500 w-32">{{ 'competitions.resultsEntry.columns.time' | translate }}</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-200">
@@ -2375,23 +2371,23 @@
 
         <!-- Status selector -->
         <div class="mt-4">
-          <label class="block text-xs text-gray-500 mb-0.5">Статус на събитието при запис:</label>
+          <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.resultsEntry.eventStatusLabel' | translate }}</label>
           <app-searchable-select-dropdown
             [options]="saveResultsStatusOptions"
             [(ngModel)]="saveResultsStatus"
-            placeholder="Изберете статус..."
+            [placeholder]="'competitions.detailsPage.timetable.placeholders.statusPlaceholder' | translate"
           ></app-searchable-select-dropdown>
         </div>
       </div>
       <div class="shrink-0 pt-4 border-t border-gray-200 flex gap-3 justify-center flex-wrap items-center">
         @if (!isChronoRunning && resultEdits.length > 0) {
-          <app-button variant="outline" size="md" text="Процес старт" [disabled]="savingResults" (click)="openChronoStart()"></app-button>
+          <app-button variant="outline" size="md" [text]="'competitions.resultsEntry.processStart' | translate" [disabled]="savingResults" (click)="openChronoStart()"></app-button>
         }
         @if (isChronoRunning) {
-          <app-button variant="outline" size="md" text="Процес финиш" [disabled]="savingResults" (click)="openChronoFinish()"></app-button>
+          <app-button variant="outline" size="md" [text]="'competitions.resultsEntry.processFinish' | translate" [disabled]="savingResults" (click)="openChronoFinish()"></app-button>
         }
-        <app-button variant="outline" size="md" text="Отказ" [disabled]="savingResults" (click)="closeResultsEntry()"></app-button>
-        <app-button variant="primary" size="md" [text]="savingResults ? 'Записване...' : 'Запиши резултати'" [disabled]="savingResults || resultEdits.length === 0" (click)="saveResults()"></app-button>
+        <app-button variant="outline" size="md" [text]="'common.cancel' | translate" [disabled]="savingResults" (click)="closeResultsEntry()"></app-button>
+        <app-button variant="primary" size="md" [text]="savingResults ? ('competitions.resultsEntry.savingButton' | translate) : ('competitions.resultsEntry.saveButton' | translate)" [disabled]="savingResults || resultEdits.length === 0" (click)="saveResults()"></app-button>
       </div>
     </div>
   }
@@ -2414,17 +2410,17 @@
 <!-- Chrono stop confirmation dialog -->
 <app-dialog
   [isOpen]="showChronoStopConfirm"
-  title="Активен хронометър"
+  [title]="'competitions.chronoWarning.title' | translate"
   size="md"
   (closed)="cancelChronoStop()"
 >
   <div class="py-4">
     <p class="text-gray-700 mb-6">
-      Хронометърът работи. Сигурни ли сте, че искате да затворите диалога? Хронометърът ще бъде спрян.
+      {{ 'competitions.chronoWarning.message' | translate }}
     </p>
     <div class="flex gap-3 justify-center">
-      <app-button variant="outline" size="md" text="Не, върни се" (click)="cancelChronoStop()"></app-button>
-      <app-button variant="danger" size="md" text="Да, затвори" (click)="confirmChronoStop()"></app-button>
+      <app-button variant="outline" size="md" [text]="'competitions.chronoWarning.cancel' | translate" (click)="cancelChronoStop()"></app-button>
+      <app-button variant="danger" size="md" [text]="'competitions.chronoWarning.confirm' | translate" (click)="confirmChronoStop()"></app-button>
     </div>
   </div>
 </app-dialog>
@@ -2481,15 +2477,15 @@
               </div>
             }
             @if (ev.entries.length === 0) {
-              <div class="text-center text-xs text-gray-400 py-4">Празно</div>
+              <div class="text-center text-xs text-gray-400 py-4">{{ 'competitions.crewVerify.empty' | translate }}</div>
             }
           </div>
         </div>
       }
     </div>
     <div class="shrink-0 pt-4 mt-4 border-t border-gray-200 flex justify-center gap-2">
-      <app-button variant="outline" size="md" text="Отказ" [disabled]="laneRearrangeSaving" (click)="closeLaneRearrange()"></app-button>
-      <app-button variant="primary" size="md" [text]="laneRearrangeSaving ? 'Записване...' : 'Запази'"
+      <app-button variant="outline" size="md" [text]="'common.cancel' | translate" [disabled]="laneRearrangeSaving" (click)="closeLaneRearrange()"></app-button>
+      <app-button variant="primary" size="md" [text]="laneRearrangeSaving ? ('competitions.resultsEntry.savingButton' | translate) : ('common.save' | translate)"
         [disabled]="laneRearrangeSaving" (click)="saveLaneRearrange()"></app-button>
     </div>
   </div>
@@ -2526,7 +2522,7 @@
           } @else {
             <img
               [src]="crewVerifyPhotoUrl || 'assets/images/default-user.png'"
-              [alt]="member.name || 'Снимка'"
+              [alt]="member.name || ('competitions.crewVerify.photoAlt' | translate)"
               class="w-full h-full object-cover"
             />
           }
@@ -2572,18 +2568,18 @@
           <p class="text-gray-500">
             @if (member.accreditationYear) { {{ member.accreditationYear }} }
             @if (member.accreditationYear && member.accreditationStatus) { · }
-            @if (member.accreditationStatus) { {{ member.accreditationStatus }} }
+            @if (member.accreditationStatus) { <span [class]="getAccreditationStatusClass(member.accreditationStatusRaw)">{{ member.accreditationStatus }}</span> }
           </p>
         }
         @if (getAthleteWeight(member.athleteId); as w) {
           <p [class]="crewVerifyWeightClass(member)">
-            ⚖ {{ w.weightKg }} кг @if (crewVerifyWeightComment(member); as comment) { · {{ comment }}}
+            ⚖ {{ w.weightKg }} {{ 'competitions.crewVerify.weightUnit' | translate }} @if (crewVerifyWeightComment(member); as comment) { · {{ comment }}}
           </p>
         } @else if (crewVerifyNeedsWeight(member)) {
-          <p class="text-gray-400 text-xs">⚖ Не е измерен</p>
+          <p class="text-gray-400 text-xs">⚖ {{ 'competitions.crewVerify.notMeasured' | translate }}</p>
         }
         @if (crewVerifyParticipation && crewVerifyParticipation.crew.length > 1) {
-          <p class="text-xs text-gray-400 pt-1">{{ crewVerifyIndex + 1 }} от {{ crewVerifyParticipation.crew.length }}</p>
+          <p class="text-xs text-gray-400 pt-1">{{ 'competitions.crewVerify.indexLabel' | translate:{ current: crewVerifyIndex + 1, total: crewVerifyParticipation.crew.length } }}</p>
         }
       </div>
 
@@ -2607,7 +2603,7 @@
             @if (crewVerifySaving) {
               <span class="inline-block animate-spin mr-2">⟳</span>
             }
-            {{ crewVerifyParticipation.participationStatus === 'CHECKED_IN' ? 'Маркирай като непроверен' : 'Маркирай като проверен' }}
+            {{ crewVerifyParticipation.participationStatus === 'CHECKED_IN' ? ('competitions.crewVerify.markUnchecked' | translate) : ('competitions.crewVerify.markChecked' | translate) }}
           </button>
         }
       </div>

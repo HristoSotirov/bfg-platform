@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
 import { HeaderComponent } from '../../layout/header/header.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -90,6 +91,7 @@ export interface AccreditationFilters {
     MigrationDialogComponent,
     ButtonComponent,
     MobileActionMenuComponent,
+    TranslateModule,
   ],
   templateUrl: './accreditations.component.html',
   styleUrl: './accreditations.component.scss',
@@ -119,22 +121,22 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     birthYears: [],
   };
   athleteFilterConfigs: AthleteFilterConfig[] = [
-    { id: 'gender', label: 'Пол', visible: true },
-    { id: 'birthYear', label: 'Година на раждане', visible: true },
+    { id: 'gender', label: this.translateService.instant('accreditations.columns.gender'), visible: true },
+    { id: 'birthYear', label: this.translateService.instant('accreditations.filters.birthYearFull'), visible: true },
   ];
   availableBirthYears: number[] = [];
   athleteOrderBy: string[] = ['lastName_asc'];
 
   athleteColumns: ColumnConfig[] = [
-    { id: 'lastName', label: 'Фамилия', visible: true },
-    { id: 'firstName', label: 'Иme', visible: true },
-    { id: 'middleName', label: 'Презиме', visible: true },
-    { id: 'dateOfBirth', label: 'Дата на раждане', visible: true },
-    { id: 'gender', label: 'Пол', visible: true },
-    { id: 'medicalExaminationDue', label: 'Мед. преглед до', visible: false },
-    { id: 'insurance', label: 'Застраховка', visible: false },
-    { id: 'registeredOn', label: 'Регистриран на', visible: false },
-    { id: 'modifiedAt', label: 'Променен на', visible: false },
+    { id: 'lastName', label: this.translateService.instant('accreditations.columns.lastName'), visible: true },
+    { id: 'firstName', label: this.translateService.instant('accreditations.columns.firstName'), visible: true },
+    { id: 'middleName', label: this.translateService.instant('accreditations.columns.middleName'), visible: true },
+    { id: 'dateOfBirth', label: this.translateService.instant('accreditations.columns.dateOfBirth'), visible: true },
+    { id: 'gender', label: this.translateService.instant('accreditations.columns.gender'), visible: true },
+    { id: 'medicalExaminationDue', label: this.translateService.instant('accreditations.columns.medicalExamDue'), visible: false },
+    { id: 'insurance', label: this.translateService.instant('accreditations.columns.insurance'), visible: false },
+    { id: 'registeredOn', label: this.translateService.instant('accreditations.columns.registeredAt'), visible: false },
+    { id: 'modifiedAt', label: this.translateService.instant('accreditations.columns.modifiedOn'), visible: false },
   ];
 
   isAthletesSettingsDialogOpen = false;
@@ -158,26 +160,26 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   hasMore = true;
 
   columns: ColumnConfig[] = [
-    { id: 'firstName', label: 'Име', visible: true },
-    { id: 'middleName', label: 'Презиме', visible: true },
-    { id: 'lastName', label: 'Фамилия', visible: true },
-    { id: 'gender', label: 'Пол', visible: true },
-    { id: 'dateOfBirth', label: 'Дата на раждане', visible: true },
-    { id: 'clubShortName', label: 'Клуб', visible: true },
-    { id: 'accreditationNumber', label: 'Номер', visible: true },
-    { id: 'year', label: 'Година', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
-    { id: 'medicalExamDue', label: 'Мед. преглед до', visible: true },
-    { id: 'insurance', label: 'Застраховка', visible: true },
-    { id: 'createdAt', label: 'Създадена', visible: true },
-    { id: 'updatedAt', label: 'Променена', visible: true },
+    { id: 'firstName', label: this.translateService.instant('accreditations.columns.firstName'), visible: true },
+    { id: 'middleName', label: this.translateService.instant('accreditations.columns.middleName'), visible: true },
+    { id: 'lastName', label: this.translateService.instant('accreditations.columns.lastName'), visible: true },
+    { id: 'gender', label: this.translateService.instant('accreditations.columns.gender'), visible: true },
+    { id: 'dateOfBirth', label: this.translateService.instant('accreditations.columns.dateOfBirth'), visible: true },
+    { id: 'clubShortName', label: this.translateService.instant('accreditations.columns.club'), visible: true },
+    { id: 'accreditationNumber', label: this.translateService.instant('accreditations.columns.number'), visible: true },
+    { id: 'year', label: this.translateService.instant('accreditations.columns.year'), visible: true },
+    { id: 'status', label: this.translateService.instant('accreditations.columns.status'), visible: true },
+    { id: 'medicalExamDue', label: this.translateService.instant('accreditations.columns.medicalExamDue'), visible: true },
+    { id: 'insurance', label: this.translateService.instant('accreditations.columns.insurance'), visible: true },
+    { id: 'createdAt', label: this.translateService.instant('accreditations.columns.createdAt'), visible: true },
+    { id: 'updatedAt', label: this.translateService.instant('accreditations.columns.modifiedAt'), visible: true },
   ];
 
   filterConfigs: FilterConfig[] = [
-    { id: 'gender', label: 'Пол', visible: true },
-    { id: 'birthYear', label: 'Година на раждане', visible: true },
-    { id: 'year', label: 'Година', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
+    { id: 'gender', label: this.translateService.instant('accreditations.columns.gender'), visible: true },
+    { id: 'birthYear', label: this.translateService.instant('accreditations.filters.birthYearFull'), visible: true },
+    { id: 'year', label: this.translateService.instant('accreditations.columns.year'), visible: true },
+    { id: 'status', label: this.translateService.instant('accreditations.columns.status'), visible: true },
     // Note: 'club' filter is added dynamically based on user permissions
   ];
 
@@ -194,29 +196,29 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
   get mobileMenuItems(): MobileActionMenuItem[] {
     return [
       {
-        label: 'Подновяване',
+        label: this.translateService.instant('accreditations.page.mobileMenu.renew'),
         action: () => this.openRenewDialog(),
         visible: this.canRenewAccreditation,
         disabled: this.selectedAccreditations.size === 0,
       },
       {
-        label: 'Добавяне',
+        label: this.translateService.instant('accreditations.page.mobileMenu.add'),
         action: () => this.openAddDialog(),
         visible: this.canRenewAccreditation,
       },
       {
-        label: 'Мед. данни',
+        label: this.translateService.instant('accreditations.page.mobileMenu.medicalData'),
         action: () => this.openBatchMedicalDialog(),
         visible: this.canEdit,
         disabled: this.selectedAccreditations.size === 0,
       },
       {
-        label: 'Миграция',
+        label: this.translateService.instant('accreditations.page.mobileMenu.migration'),
         action: () => this.openMigrationDialog(),
         visible: this.canMigrate,
       },
       {
-        label: 'Експорт',
+        label: this.translateService.instant('accreditations.page.mobileMenu.export'),
         action: () => this.exportToExcel(),
         disabled: this.exporting || this.totalElements === 0,
       },
@@ -249,6 +251,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
     private router: Router,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -300,13 +303,13 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
         if (yearIndex >= 0) {
           this.filterConfigs = [
             ...this.filterConfigs.slice(0, yearIndex + 1),
-            { id: 'club', label: 'Клуб', visible: true },
+            { id: 'club', label: this.translateService.instant('accreditations.filters.club'), visible: true },
             ...this.filterConfigs.slice(yearIndex + 1),
           ];
         } else {
           this.filterConfigs = [
             ...this.filterConfigs,
-            { id: 'club', label: 'Клуб', visible: true },
+            { id: 'club', label: this.translateService.instant('accreditations.filters.club'), visible: true },
           ];
         }
       }
@@ -533,7 +536,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translateService.instant('accreditations.page.loadError');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -556,7 +559,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translateService.instant('accreditations.page.loadError');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -667,7 +670,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
       this.selectedAccreditations = new Set(
         [...selectedIds].slice(0, this.maxSelection),
       );
-      this.selectionMessage = `Само първите ${this.maxSelection} акредитации са избрани.`;
+      this.selectionMessage = this.translateService.instant('accreditations.page.selection.maxSelectionMessage', { max: this.maxSelection });
     }
     this.cdr.markForCheck();
   }
@@ -730,7 +733,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                 reachedLimit &&
                 (total > this.maxSelection || list.length === this.pageSize)
               ) {
-                this.selectionMessage = `Само първите ${this.maxSelection} акредитации са избрани.`;
+                this.selectionMessage = this.translateService.instant('accreditations.page.selection.maxSelectionMessage', { max: this.maxSelection });
               }
               this.selectingAll = false;
               this.cdr.markForCheck();
@@ -740,7 +743,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           },
           error: (err) => {
             this.selectingAll = false;
-            this.error = err?.error?.message || 'Грешка при избиране на всички';
+            this.error = err?.error?.message || this.translateService.instant('accreditations.page.selectAllError');
             this.cdr.markForCheck();
           },
         });
@@ -1244,7 +1247,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
           let allAccreditations = allItems;
 
           if (allAccreditations.length === 0) {
-            this.error = 'Няма данни за експорт';
+            this.error = this.translateService.instant('accreditations.page.export.noDataError');
             this.exporting = false;
             this.cdr.markForCheck();
             return;
@@ -1272,9 +1275,9 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                   case 'gender':
                     row[col.label] =
                       acc.athlete?.gender === Gender.MALE
-                        ? 'Мъж'
+                        ? this.translateService.instant('accreditations.gender.male')
                         : acc.athlete?.gender === Gender.FEMALE
-                          ? 'Жена'
+                          ? this.translateService.instant('accreditations.gender.female')
                           : '';
                     break;
                   case 'dateOfBirth':
@@ -1300,10 +1303,10 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
                     );
                     break;
                   case 'insurance':
-                    row['Застраховка от'] = this.formatDateForExcel(
+                    row[this.translateService.instant('accreditations.columns.insuranceFrom')] = this.formatDateForExcel(
                       acc.athlete?.insuranceFrom,
                     );
-                    row['Застраховка до'] = this.formatDateForExcel(
+                    row[this.translateService.instant('accreditations.columns.insuranceTo')] = this.formatDateForExcel(
                       acc.athlete?.insuranceTo,
                     );
                     break;
@@ -1374,7 +1377,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
             }
 
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Картотеки');
+            XLSX.utils.book_append_sheet(wb, ws, this.translateService.instant('accreditations.page.export.sheetName'));
             const now = new Date();
             const dateStr = `${String(now.getDate()).padStart(2, '0')}-${String(now.getMonth() + 1).padStart(2, '0')}-${now.getFullYear()}`;
             XLSX.writeFile(wb, `accreditations_${dateStr}.xlsx`);
@@ -1383,7 +1386,7 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
             this.cdr.markForCheck();
           } catch (error) {
             console.error('Export error:', error);
-            this.error = 'Грешка при експорт на данните';
+            this.error = this.translateService.instant('accreditations.page.export.exportError');
             this.exporting = false;
             this.cdr.markForCheck();
           }
@@ -1397,12 +1400,12 @@ export class AccreditationsComponent implements OnInit, OnDestroy {
 
   private getStatusLabel(status: string | undefined): string {
     const statusMap: Record<string, string> = {
-      [AccreditationStatus.Active]: 'Активна',
-      [AccreditationStatus.PendingValidation]: 'Заявена',
-      [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
-      [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
-      [AccreditationStatus.Expired]: 'Изтекла',
-      [AccreditationStatus.Suspended]: 'Спряна',
+      [AccreditationStatus.Active]: this.translateService.instant('accreditations.status.active'),
+      [AccreditationStatus.PendingValidation]: this.translateService.instant('accreditations.status.requested'),
+      [AccreditationStatus.PendingPhotoValidation]: this.translateService.instant('accreditations.status.pendingPhoto'),
+      [AccreditationStatus.NewPhotoRequired]: this.translateService.instant('accreditations.status.newPhoto'),
+      [AccreditationStatus.Expired]: this.translateService.instant('accreditations.status.expired'),
+      [AccreditationStatus.Suspended]: this.translateService.instant('accreditations.status.suspended'),
     };
     return statusMap[status || ''] || status || '';
   }

@@ -9,11 +9,11 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
         </svg>
       </a>
-      <h1 class="text-2xl font-bold text-gray-900 break-words min-w-0">{{ scheme?.name || 'Схема за точкуване' }}</h1>
+      <h1 class="text-2xl font-bold text-gray-900 break-words min-w-0">{{ scheme?.name || ('scoring.details.defaultTitle' | translate) }}</h1>
     </div>
 
     @if (loading) {
-      <div class="flex items-center justify-center flex-1 text-gray-500">Зареждане...</div>
+      <div class="flex items-center justify-center flex-1 text-gray-500">{{ 'common.loading' | translate }}</div>
     } @else if (error) {
       <div class="flex items-center justify-center flex-1 text-red-500">{{ error }}</div>
     } @else if (scheme) {
@@ -22,7 +22,7 @@
         <nav class="-mb-px flex gap-1">
           <button type="button"
             class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors border-bfg-blue text-bfg-blue">
-            Детайли
+            {{ 'scoring.details.tabDetails' | translate }}
           </button>
         </nav>
       </div>
@@ -35,47 +35,47 @@
             @if (!isEditing) {
               <div class="space-y-1">
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Ime:</span>
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'scoring.details.labels.name' | translate }}</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ scheme.name || "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Тип:</span>
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'scoring.details.labels.type' | translate }}</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ getScoringTypeLabel(scheme.scoringType) }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Статус:</span>
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'scoring.details.labels.status' | translate }}</span>
                   <span class="text-sm font-medium break-all min-w-0" [class]="scheme.isActive ? 'text-green-600' : 'text-red-600'">
-                    {{ scheme.isActive ? "Активен" : "Неактивен" }}
+                    {{ scheme.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
                   </span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Създаден на:</span>
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'scoring.details.labels.createdAt' | translate }}</span>
                   <span class="text-sm">{{ formatDateTime(scheme.createdAt) }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">Променен на:</span>
+                  <span class="text-xs text-gray-500 w-28 flex-shrink-0">{{ 'scoring.details.labels.modifiedAt' | translate }}</span>
                   <span class="text-sm">{{ formatDateTime(scheme.modifiedAt) }}</span>
                 </div>
               </div>
             } @else {
               <div class="space-y-1.5 max-w-sm">
                 <div>
-                  <label class="block text-xs text-gray-500 mb-0.5">Ime <span class="text-red-500">*</span>:</label>
+                  <label class="block text-xs text-gray-500 mb-0.5">{{ 'scoring.form.nameLabel' | translate }} <span class="text-red-500">*</span>:</label>
                   <input type="text" [(ngModel)]="editData.name"
                     [class.border-red-500]="touched['name'] && !editData.name.trim()"
                     (blur)="touched['name'] = true"
                     class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                 </div>
                 <div>
-                  <label class="block text-xs text-gray-500 mb-0.5">Тип <span class="text-red-500">*</span>:</label>
-                  <app-searchable-select-dropdown [options]="scoringTypeOptions" [(ngModel)]="editData.scoringType" placeholder="Изберете тип..."></app-searchable-select-dropdown>
+                  <label class="block text-xs text-gray-500 mb-0.5">{{ 'scoring.form.typeLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                  <app-searchable-select-dropdown [options]="scoringTypeOptions" [(ngModel)]="editData.scoringType" [placeholder]="'scoring.placeholders.selectType' | translate"></app-searchable-select-dropdown>
                 </div>
                 <div>
-                  <label class="block text-xs text-gray-500 mb-0.5">Статус:</label>
+                  <label class="block text-xs text-gray-500 mb-0.5">{{ 'scoring.form.statusLabel' | translate }}:</label>
                   <app-searchable-select-dropdown [options]="statusOptions"
                     [ngModel]="editData.isActive ? 'true' : 'false'"
                     (ngModelChange)="editData.isActive = $event === 'true'"
-                    placeholder="Изберете статус...">
+                    [placeholder]="'scoring.placeholders.selectStatus' | translate">
                   </app-searchable-select-dropdown>
                 </div>
               </div>
@@ -88,17 +88,17 @@
             <!-- Scoring Rules -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
-                <h4 class="text-sm font-medium text-gray-700">Правила</h4>
+                <h4 class="text-sm font-medium text-gray-700">{{ 'scoring.details.rules.title' | translate }}</h4>
                 @if (canEdit && !isEditing) {
-                  <app-button variant="outline" size="sm" text="Добави правило" (click)="openAddRuleDialog()"></app-button>
+                  <app-button variant="outline" size="sm" [text]="'scoring.details.rules.addButton' | translate" (click)="openAddRuleDialog()"></app-button>
                 }
               </div>
               <div class="border rounded-lg overflow-hidden max-h-64 overflow-y-auto overflow-x-auto scrollbar-hover">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                   <thead class="bg-gray-50 sticky top-0">
                     <tr>
-                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">Място</th>
-                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">Базови точки</th>
+                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">{{ 'scoring.details.rules.placement' | translate }}</th>
+                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">{{ 'scoring.details.rules.basePoints' | translate }}</th>
                       @if (canEdit && !isEditing) {
                         <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500"></th>
                       }
@@ -106,7 +106,7 @@
                   </thead>
                   <tbody class="divide-y divide-gray-200">
                     @if (loadingRules) {
-                      <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">Зареждане...</td></tr>
+                      <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">{{ 'common.loading' | translate }}</td></tr>
                     } @else {
                       @for (rule of rules; track rule.uuid) {
                         @if (editingRuleId === rule.uuid) {
@@ -117,10 +117,10 @@
                             </td>
                             <td class="px-2 py-1.5">
                               <div class="flex gap-3">
-                                <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50" [disabled]="!isRuleEditValid || savingRule" (click)="saveRule()" title="Запази">
+                                <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50" [disabled]="!isRuleEditValid || savingRule" (click)="saveRule()" [title]="'common.save' | translate">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </button>
-                                <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50" [disabled]="savingRule" (click)="cancelEditingRule()" title="Отказ">
+                                <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50" [disabled]="savingRule" (click)="cancelEditingRule()" [title]="'common.cancel' | translate">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                               </div>
@@ -133,10 +133,10 @@
                             @if (canEdit && !isEditing) {
                               <td class="px-2 py-1.5">
                                 <div class="flex gap-3">
-                                  <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditingRule(rule)" title="Редактирай">
+                                  <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditingRule(rule)" [title]="'common.edit' | translate">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                   </button>
-                                  <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteRule(rule)" title="Изтрий">
+                                  <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteRule(rule)" [title]="'common.delete' | translate">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                   </button>
                                 </div>
@@ -145,7 +145,7 @@
                           </tr>
                         }
                       } @empty {
-                        <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">Няма правила</td></tr>
+                        <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">{{ 'scoring.details.rules.empty' | translate }}</td></tr>
                       }
                     }
                   </tbody>
@@ -156,17 +156,17 @@
             <!-- Boat Coefficients -->
             <div class="space-y-1.5">
               <div class="flex items-center justify-between">
-                <h4 class="text-sm font-medium text-gray-700">Коефициенти</h4>
+                <h4 class="text-sm font-medium text-gray-700">{{ 'scoring.details.coefficients.title' | translate }}</h4>
                 @if (canEdit && !isEditing) {
-                  <app-button variant="outline" size="sm" text="Добави коефициент" (click)="openAddCoefficientDialog()"></app-button>
+                  <app-button variant="outline" size="sm" [text]="'scoring.details.coefficients.addButton' | translate" (click)="openAddCoefficientDialog()"></app-button>
                 }
               </div>
               <div class="border rounded-lg overflow-hidden max-h-64 overflow-y-auto overflow-x-auto scrollbar-hover">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                   <thead class="bg-gray-50 sticky top-0">
                     <tr>
-                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">Клас лодка</th>
-                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">Коефициент</th>
+                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">{{ 'scoring.details.coefficients.boatClass' | translate }}</th>
+                      <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500">{{ 'scoring.details.coefficients.coefficient' | translate }}</th>
                       @if (canEdit && !isEditing) {
                         <th class="px-2 py-1.5 text-left text-xs font-medium text-gray-500"></th>
                       }
@@ -174,23 +174,23 @@
                   </thead>
                   <tbody class="divide-y divide-gray-200">
                     @if (loadingCoefficients) {
-                      <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">Зареждане...</td></tr>
+                      <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">{{ 'common.loading' | translate }}</td></tr>
                     } @else {
                       @for (coeff of coefficients; track coeff.uuid) {
                         @if (editingCoefficientId === coeff.uuid) {
                           <tr class="bg-blue-50">
                             <td class="px-2 py-1.5">
-                              <app-searchable-select-dropdown [options]="boatClassOptions" [(ngModel)]="coeffEditData.boatClass" placeholder="Клас..." class="w-24"></app-searchable-select-dropdown>
+                              <app-searchable-select-dropdown [options]="boatClassOptions" [(ngModel)]="coeffEditData.boatClass" [placeholder]="'scoring.placeholders.selectBoatClass' | translate" class="w-24"></app-searchable-select-dropdown>
                             </td>
                             <td class="px-2 py-1.5">
                               <input type="number" [(ngModel)]="coeffEditData.coefficient" step="0.01" class="w-20 px-1 py-0.5 border border-gray-300 rounded text-sm" />
                             </td>
                             <td class="px-2 py-1.5">
                               <div class="flex gap-3">
-                                <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50" [disabled]="!isCoeffEditValid || savingCoefficient" (click)="saveCoefficient()" title="Запази">
+                                <button type="button" class="text-green-600 hover:text-green-800 disabled:opacity-50" [disabled]="!isCoeffEditValid || savingCoefficient" (click)="saveCoefficient()" [title]="'common.save' | translate">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
                                 </button>
-                                <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50" [disabled]="savingCoefficient" (click)="cancelEditingCoefficient()" title="Отказ">
+                                <button type="button" class="text-gray-400 hover:text-gray-600 disabled:opacity-50" [disabled]="savingCoefficient" (click)="cancelEditingCoefficient()" [title]="'common.cancel' | translate">
                                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                               </div>
@@ -203,10 +203,10 @@
                             @if (canEdit && !isEditing) {
                               <td class="px-2 py-1.5">
                                 <div class="flex gap-3">
-                                  <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditingCoefficient(coeff)" title="Редактирай">
+                                  <button type="button" class="text-bfg-blue hover:text-bfg-blue/70" (click)="startEditingCoefficient(coeff)" [title]="'common.edit' | translate">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                   </button>
-                                  <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteCoefficient(coeff)" title="Изтрий">
+                                  <button type="button" class="text-red-400 hover:text-red-600" (click)="confirmDeleteCoefficient(coeff)" [title]="'common.delete' | translate">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                   </button>
                                 </div>
@@ -215,7 +215,7 @@
                           </tr>
                         }
                       } @empty {
-                        <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">Няма коефициенти</td></tr>
+                        <tr><td colspan="3" class="px-2 py-3 text-center text-gray-500">{{ 'scoring.details.coefficients.empty' | translate }}</td></tr>
                       }
                     }
                   </tbody>
@@ -239,12 +239,12 @@
             <div class="flex items-center gap-2">
               @if (!isEditing) {
                 @if (canEdit) {
-                  <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
-                  <app-button variant="outline" size="md" text="Изтрий" (click)="confirmDeleteScheme()"></app-button>
+                  <app-button variant="outline" size="md" [text]="'common.edit' | translate" (click)="startEditing()"></app-button>
+                  <app-button variant="outline" size="md" [text]="'common.delete' | translate" (click)="confirmDeleteScheme()"></app-button>
                 }
               } @else {
-                <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
-                <app-button variant="primary" size="md" text="Запази" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
+                <app-button variant="outline" size="md" [text]="'common.cancel' | translate" [disabled]="saving" (click)="cancelEditing()"></app-button>
+                <app-button variant="primary" size="md" [text]="'common.save' | translate" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
               }
             </div>
           </div>
@@ -256,7 +256,7 @@
 
 <app-delete-confirm-dialog
   [isOpen]="showDeleteRuleConfirm"
-  [itemName]="'Място ' + ruleToDelete?.placement"
+  [itemName]="('scoring.details.rules.placementPrefix' | translate) + ' ' + ruleToDelete?.placement"
   [error]="deleteRuleError"
   (closed)="closeDeleteRuleConfirm()"
   (confirmed)="deleteRule()"

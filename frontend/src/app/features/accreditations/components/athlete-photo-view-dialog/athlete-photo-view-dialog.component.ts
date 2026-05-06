@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 
 export interface AthletePhotoViewInfo {
@@ -7,17 +8,17 @@ export interface AthletePhotoViewInfo {
   middleName: string;
   lastName: string;
   dateOfBirth: string;
-  raceGroup: string;
   lastAccreditationClub: string;
   lastAccreditationYear: number;
   lastAccreditationNumber: string;
   lastAccreditationStatus: string;
+  lastAccreditationStatusClass: string;
 }
 
 @Component({
   selector: 'app-athlete-photo-view-dialog',
   standalone: true,
-  imports: [CommonModule, DialogComponent],
+  imports: [CommonModule, DialogComponent, TranslateModule],
   templateUrl: './athlete-photo-view-dialog.component.html',
   styleUrl: './athlete-photo-view-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

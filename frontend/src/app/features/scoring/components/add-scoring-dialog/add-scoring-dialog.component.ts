@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -23,7 +24,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-add-scoring-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './add-scoring-dialog.component.html',
   styleUrl: './add-scoring-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,8 +51,8 @@ export class AddScoringDialogComponent implements OnChanges {
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   saving = false;
@@ -60,6 +61,7 @@ export class AddScoringDialogComponent implements OnChanges {
   constructor(
     private scoringSchemesService: ScoringSchemesService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -116,7 +118,7 @@ export class AddScoringDialogComponent implements OnChanges {
         error: (err) => {
           this.saving = false;
           this.error =
-            err?.error?.message || 'Грешка при създаване на схема за точкуване';
+            err?.error?.message || this.translate.instant('scoring.form.createError');
           this.cdr.markForCheck();
         },
       });

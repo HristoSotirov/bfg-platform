@@ -1,6 +1,7 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy, ChangeDetectorRef, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -11,7 +12,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-add-club-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './add-club-dialog.component.html',
   styleUrl: './add-club-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush
@@ -33,11 +34,7 @@ export class AddClubDialogComponent implements OnChanges {
     type: ScopeType.Internal as ScopeType,
   };
 
-  scopeTypeOptions: SearchableSelectOption[] = [
-    { value: ScopeType.Internal, label: 'Вътрешен' },
-    { value: ScopeType.External, label: 'Външен' },
-    { value: ScopeType.National, label: 'Национален' },
-  ];
+  scopeTypeOptions: SearchableSelectOption[] = [];
   readonly ScopeType = ScopeType;
 
   saving = false;
@@ -46,8 +43,19 @@ export class AddClubDialogComponent implements OnChanges {
   constructor(
     private clubsService: ClubsService,
     private usersService: UsersService,
-    private cdr: ChangeDetectorRef
-  ) {}
+    private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
+  ) {
+    this.initScopeTypeOptions();
+  }
+
+  private initScopeTypeOptions(): void {
+    this.scopeTypeOptions = [
+      { value: ScopeType.Internal, label: this.translateService.instant('clubs.scopeTypes.internal') },
+      { value: ScopeType.External, label: this.translateService.instant('clubs.scopeTypes.external') },
+      { value: ScopeType.National, label: this.translateService.instant('clubs.scopeTypes.national') },
+    ];
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen) {
@@ -133,7 +141,7 @@ export class AddClubDialogComponent implements OnChanges {
       },
       error: (err) => {
         this.saving = false;
-        this.error = err?.error?.message || 'Грешка при създаване на клуб';
+        this.error = err?.error?.message || this.translateService.instant('clubs.form.createError');
         this.cdr.markForCheck();
       }
     });

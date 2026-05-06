@@ -21,7 +21,7 @@
           ></path>
         </svg>
       </a>
-      <h1 class="text-2xl font-bold text-gray-900">Клубове</h1>
+      <h1 class="text-2xl font-bold text-gray-900">{{ 'clubs.title' | translate }}</h1>
     </div>
 
     @if (showNoClubMessage) {
@@ -30,8 +30,8 @@
           <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
           </svg>
-          <p class="text-lg font-medium text-gray-700 mb-2">Не сте назначен към клуб</p>
-          <p class="text-sm text-gray-500">За достъп до клубове е необходимо да бъдете назначен като администратор или треньор на клуб.</p>
+          <p class="text-lg font-medium text-gray-700 mb-2">{{ 'clubs.noClubMessage' | translate }}</p>
+          <p class="text-sm text-gray-500">{{ 'clubs.noClubDescription' | translate }}</p>
         </div>
       </div>
     } @else {
@@ -45,7 +45,7 @@
 
     <div class="flex items-center justify-between gap-4 mb-4">
       <div class="text-sm text-gray-600 flex-shrink-0">
-        Брой клубове: <span class="font-semibold">{{ totalElements }}</span>
+        {{ 'clubs.count' | translate }} <span class="font-semibold">{{ totalElements }}</span>
       </div>
 
       <div class="flex items-center gap-2 ml-auto">
@@ -54,7 +54,7 @@
             <app-button
               variant="white"
               size="md"
-              text="Добавяне на клуб"
+              [text]="'clubs.addButton' | translate"
               (click)="openAddDialog()"
             >
             </app-button>
@@ -64,7 +64,7 @@
             <app-button
               variant="white"
               size="md"
-              text="Миграция"
+              [text]="'common.migration' | translate"
               (click)="openMigrationDialog()"
             >
             </app-button>
@@ -74,7 +74,7 @@
             variant="white"
             size="md"
             [disabled]="exporting || totalElements === 0"
-            text="Експорт в Excel"
+            [text]="'common.exportExcel' | translate"
             (click)="exportToExcel()"
           >
           </app-button>
@@ -116,7 +116,7 @@
           <div
             class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200"
           >
-            Настройки на таблицата
+            {{ 'common.settings' | translate }}
             <div
               class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
             >
@@ -132,7 +132,7 @@
     >
       @if (loading && clubs.length === 0) {
         <div class="flex items-center justify-center h-full">
-          <div class="text-gray-500">Зареждане...</div>
+          <div class="text-gray-500">{{ 'common.loading' | translate }}</div>
         </div>
       } @else if (error) {
         <div class="flex items-center justify-center h-full">

@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { HeaderComponent } from '../../layout/header/header.component';
@@ -46,6 +47,7 @@ export interface DisciplineFilters {
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     DisciplinesTableComponent,
     DisciplineDetailsDialogComponent,
@@ -83,27 +85,9 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   currentSkip = 0;
   hasMore = true;
 
-  columns: DisciplineColumnConfig[] = [
-    { id: 'name', label: 'Име', visible: true },
-    { id: 'shortName', label: 'Кратко име', visible: true },
-    { id: 'gender', label: 'Пол', visible: true },
-    { id: 'competitionGroup', label: 'Състезателна група', visible: true },
-    { id: 'boatClass', label: 'Клас лодка', visible: true },
-    { id: 'crewSize', label: 'Размер екипаж', visible: true },
-    { id: 'maxCrewFromTransfer', label: 'Макс. прехвърлени', visible: true },
-    { id: 'hasCoxswain', label: 'Кокс', visible: true },
-    { id: 'isLightweight', label: 'Лековес', visible: true },
-    { id: 'distanceMeters', label: 'Дистанция (м)', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  columns: DisciplineColumnConfig[] = [];
 
-  filterConfigs: DisciplineFilterConfig[] = [
-    { id: 'competitionGroup', label: 'Състезателна група', visible: true },
-    { id: 'boatClass', label: 'Клас лодка', visible: true },
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  filterConfigs: DisciplineFilterConfig[] = [];
 
   isDetailsDialogOpen = false;
   isAddDialogOpen = false;
@@ -117,9 +101,15 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initTranslatedLabels();
+    this.translate.onLangChange.subscribe(() => {
+      this.initTranslatedLabels();
+      this.cdr.markForCheck();
+    });
     this.loadSettings();
     this.initializeUserContext();
     this.loadGroupMap();
@@ -240,7 +230,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -259,7 +249,7 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -367,6 +357,29 @@ export class DisciplinesComponent implements OnInit, OnDestroy {
   onDisciplineAdded(): void {
     this.loadDisciplines();
     this.closeAddDialog();
+  }
+
+  private initTranslatedLabels(): void {
+    this.columns = [
+      { id: 'name', label: this.translate.instant('disciplines.table.columns.name'), visible: true },
+      { id: 'shortName', label: this.translate.instant('disciplines.table.columns.shortName'), visible: true },
+      { id: 'competitionGroup', label: this.translate.instant('disciplines.table.columns.competitionGroup'), visible: true },
+      { id: 'boatClass', label: this.translate.instant('disciplines.table.columns.boatClass'), visible: true },
+      { id: 'crewSize', label: this.translate.instant('disciplines.table.columns.crewSize'), visible: true },
+      { id: 'maxCrewFromTransfer', label: this.translate.instant('disciplines.table.columns.maxCrewFromTransfer'), visible: true },
+      { id: 'hasCoxswain', label: this.translate.instant('disciplines.table.columns.hasCoxswain'), visible: true },
+      { id: 'isLightweight', label: this.translate.instant('disciplines.table.columns.isLightweight'), visible: true },
+      { id: 'distanceMeters', label: this.translate.instant('disciplines.table.columns.distanceMeters'), visible: true },
+      { id: 'isActive', label: this.translate.instant('disciplines.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('disciplines.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('disciplines.table.columns.modifiedAt'), visible: true },
+    ];
+    this.filterConfigs = [
+      { id: 'competitionGroup', label: this.translate.instant('disciplines.filterConfigs.competitionGroup'), visible: true },
+      { id: 'boatClass', label: this.translate.instant('disciplines.filterConfigs.boatClass'), visible: true },
+      { id: 'status', label: this.translate.instant('disciplines.filterConfigs.status'), visible: true },
+    ];
+    this.loadSettings();
   }
 
   private saveSettings(): void {

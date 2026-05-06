@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule } from '@ngx-translate/core';
 import { CompetitionFilters, CompetitionFilterConfig } from '../../competitions.component';
 import {
   MultiSelectDropdownComponent,
@@ -22,6 +23,7 @@ import { FilterToggleButtonComponent } from '../../../../shared/components/filte
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     MultiSelectDropdownComponent,
     SearchBarComponent,
     FilterToggleButtonComponent,

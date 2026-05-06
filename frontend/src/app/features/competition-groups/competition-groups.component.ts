@@ -6,6 +6,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of, timeout } from 'rxjs';
 import { fetchAllPages } from '../../core/utils/fetch-all-pages';
@@ -44,6 +45,7 @@ export interface CompetitionGroupFilters {
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     CompetitionGroupsTableComponent,
     CompetitionGroupDetailsDialogComponent,
@@ -77,33 +79,9 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
   hasMore = true;
   groupLookup: Record<string, string> = {};
 
-  columns: ColumnConfig[] = [
-    { id: 'name', label: 'Име', visible: true },
-    { id: 'shortName', label: 'Кратко име', visible: true },
-    { id: 'minAge', label: 'Мин. възраст', visible: true },
-    { id: 'maxAge', label: 'Макс. възраст', visible: true },
-    { id: 'coxMinAge', label: 'Рулеви мин. възраст', visible: false },
-    { id: 'coxMaxAge', label: 'Рулеви макс. възраст', visible: false },
-    { id: 'maxDisciplinesPerAthlete', label: 'Макс. дисциплини', visible: true },
-    { id: 'transferFromGroupId', label: 'Трансфер от група', visible: true },
-    { id: 'minCrewForTransfer', label: 'Мин. екипаж', visible: true },
-    { id: 'transferRatio', label: 'Съотношение', visible: true },
-    { id: 'transferRounding', label: 'Закръгляне', visible: true },
-    { id: 'transferredMaxDisciplinesPerAthlete', label: 'Макс. дисц. (трансф.)', visible: true },
-    { id: 'maleTeamCoxRequiredWeightKg', label: 'М. рулеви изискв. тегло', visible: true },
-    { id: 'maleTeamCoxMinWeightKg', label: 'М. рулеви мин. тегло', visible: true },
-    { id: 'maleTeamLightMaxWeightKg', label: 'М. лек макс. тегло', visible: true },
-    { id: 'femaleTeamCoxRequiredWeightKg', label: 'Ж. рулеви изискв. тегло', visible: true },
-    { id: 'femaleTeamCoxMinWeightKg', label: 'Ж. рулеви мин. тегло', visible: true },
-    { id: 'femaleTeamLightMaxWeightKg', label: 'Ж. лек макс. тегло', visible: true },
-    { id: 'isActive', label: 'Статус', visible: true },
-    { id: 'createdAt', label: 'Създаден на', visible: true },
-    { id: 'modifiedAt', label: 'Променен на', visible: true },
-  ];
+  columns: ColumnConfig[] = [];
 
-  filterConfigs: FilterConfig[] = [
-    { id: 'status', label: 'Статус', visible: true },
-  ];
+  filterConfigs: FilterConfig[] = [];
 
   isDetailsDialogOpen = false;
   isAddDialogOpen = false;
@@ -117,9 +95,16 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
     private route: ActivatedRoute,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initTranslatedLabels();
+    this.translate.onLangChange.subscribe(() => {
+      this.initTranslatedLabels();
+      this.cdr.markForCheck();
+    });
+
     this.loadSettings();
     this.loadGroupLookup();
     this.initializeUserContext();
@@ -212,7 +197,7 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
       .pipe(
         timeout(30000),
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           return of({ content: [], totalElements: 0 });
         }),
@@ -231,7 +216,7 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('common.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
         },
@@ -338,6 +323,36 @@ export class CompetitionGroupsComponent implements OnInit, OnDestroy {
   onGroupAdded(): void {
     this.loadGroups();
     this.closeAddDialog();
+  }
+
+  private initTranslatedLabels(): void {
+    this.columns = [
+      { id: 'name', label: this.translate.instant('competitionGroups.table.columns.name'), visible: true },
+      { id: 'shortName', label: this.translate.instant('competitionGroups.table.columns.shortName'), visible: true },
+      { id: 'minAge', label: this.translate.instant('competitionGroups.table.columns.minAge'), visible: true },
+      { id: 'maxAge', label: this.translate.instant('competitionGroups.table.columns.maxAge'), visible: true },
+      { id: 'coxMinAge', label: this.translate.instant('competitionGroups.table.columns.coxMinAge'), visible: false },
+      { id: 'coxMaxAge', label: this.translate.instant('competitionGroups.table.columns.coxMaxAge'), visible: false },
+      { id: 'maxDisciplinesPerAthlete', label: this.translate.instant('competitionGroups.table.columns.maxDisciplinesPerAthlete'), visible: true },
+      { id: 'transferFromGroupId', label: this.translate.instant('competitionGroups.table.columns.transferFromGroupId'), visible: true },
+      { id: 'minCrewForTransfer', label: this.translate.instant('competitionGroups.table.columns.minCrewForTransfer'), visible: true },
+      { id: 'transferRatio', label: this.translate.instant('competitionGroups.table.columns.transferRatio'), visible: true },
+      { id: 'transferRounding', label: this.translate.instant('competitionGroups.table.columns.transferRounding'), visible: true },
+      { id: 'transferredMaxDisciplinesPerAthlete', label: this.translate.instant('competitionGroups.table.columns.transferredMaxDisciplinesPerAthlete'), visible: true },
+      { id: 'maleTeamCoxRequiredWeightKg', label: this.translate.instant('competitionGroups.table.columns.maleTeamCoxRequiredWeightKg'), visible: true },
+      { id: 'maleTeamCoxMinWeightKg', label: this.translate.instant('competitionGroups.table.columns.maleTeamCoxMinWeightKg'), visible: true },
+      { id: 'maleTeamLightMaxWeightKg', label: this.translate.instant('competitionGroups.table.columns.maleTeamLightMaxWeightKg'), visible: true },
+      { id: 'femaleTeamCoxRequiredWeightKg', label: this.translate.instant('competitionGroups.table.columns.femaleTeamCoxRequiredWeightKg'), visible: true },
+      { id: 'femaleTeamCoxMinWeightKg', label: this.translate.instant('competitionGroups.table.columns.femaleTeamCoxMinWeightKg'), visible: true },
+      { id: 'femaleTeamLightMaxWeightKg', label: this.translate.instant('competitionGroups.table.columns.femaleTeamLightMaxWeightKg'), visible: true },
+      { id: 'isActive', label: this.translate.instant('competitionGroups.table.columns.isActive'), visible: true },
+      { id: 'createdAt', label: this.translate.instant('competitionGroups.table.columns.createdAt'), visible: true },
+      { id: 'modifiedAt', label: this.translate.instant('competitionGroups.table.columns.modifiedAt'), visible: true },
+    ];
+    this.filterConfigs = [
+      { id: 'status', label: this.translate.instant('competitionGroups.filterConfigs.status'), visible: true },
+    ];
+    this.loadSettings();
   }
 
   private saveSettings(): void {

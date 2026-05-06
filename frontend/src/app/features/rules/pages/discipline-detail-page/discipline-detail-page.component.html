@@ -10,11 +10,11 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
         </svg>
       </a>
-      <h1 class="text-2xl font-bold text-gray-900 break-words min-w-0">{{ discipline?.name || 'Дисциплина' }}</h1>
+      <h1 class="text-2xl font-bold text-gray-900 break-words min-w-0">{{ discipline?.name || ('disciplines.details.defaultTitle' | translate) }}</h1>
     </div>
 
     @if (loading) {
-      <div class="flex items-center justify-center flex-1 text-gray-500">Зареждане...</div>
+      <div class="flex items-center justify-center flex-1 text-gray-500">{{ 'common.loading' | translate }}</div>
     } @else if (error) {
       <div class="flex items-center justify-center flex-1 text-red-500">{{ error }}</div>
     } @else if (discipline) {
@@ -24,7 +24,7 @@
         <nav class="-mb-px flex gap-1">
           <button type="button"
             class="px-4 py-2.5 text-sm font-medium border-b-2 transition-colors border-bfg-blue text-bfg-blue">
-            Детайли
+            {{ 'disciplines.details.tabDetails' | translate }}
           </button>
         </nav>
       </div>
@@ -41,19 +41,19 @@
                 <div class="space-y-4">
                   <div class="space-y-1">
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Ime:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.name' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.name || "-" }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Кратко ime:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.shortName' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.shortName || "-" }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Пол:</span>
-                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.gender === 'MALE' ? 'Мъже' : discipline.gender === 'FEMALE' ? 'Жени' : discipline.gender === 'MIXED' ? 'Смесени' : '-' }}</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.gender' | translate }}</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.gender === 'MALE' ? ('common.gender.male' | translate) : discipline.gender === 'FEMALE' ? ('common.gender.female' | translate) : discipline.gender === 'MIXED' ? ('common.gender.mixed' | translate) : '-' }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Состезателна група:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.competitionGroup' | translate }}</span>
                       @if (discipline.competitionGroupId) {
                         <button type="button" class="text-sm font-medium text-bfg-blue hover:underline cursor-pointer"
                           (click)="openGroupDialog()">
@@ -64,15 +64,15 @@
                       }
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Клас лодка:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.boatClass' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0">{{ getBoatClassLabel(discipline.boatClass) }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Размер екипаж:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.crewSize' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.crewSize != null ? discipline.crewSize : "-" }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Макс. прехвърлени:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.maxCrewFromTransfer' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.maxCrewFromTransfer != null ? discipline.maxCrewFromTransfer : "-" }}</span>
                     </div>
                   </div>
@@ -80,47 +80,47 @@
               } @else {
                 <div class="space-y-1.5">
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Ime <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.nameLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <input type="text" [(ngModel)]="editData.name"
                       [class.border-red-500]="touched['name'] && !editData.name.trim()"
                       (blur)="touched['name'] = true"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Кратко ime <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.shortNameLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <input type="text" [(ngModel)]="editData.shortName"
                       [class.border-red-500]="touched['shortName'] && !editData.shortName.trim()"
                       (blur)="touched['shortName'] = true"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Пол <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.genderLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <app-searchable-select-dropdown
                       [options]="genderOptions"
-                      [placeholder]="'Изберете пол'"
+                      [placeholder]="'disciplines.placeholders.selectGender' | translate"
                       [ngModel]="editData.gender"
                       (ngModelChange)="onGenderChange($event)"
                       [disabled]="saving">
                     </app-searchable-select-dropdown>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Состезателна група <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.competitionGroupLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <app-searchable-select-dropdown
-                      [staticSearch]="groupSearch" [placeholder]="'Изберете состезателна група'"
+                      [staticSearch]="groupSearch" [placeholder]="'disciplines.placeholders.selectGroup' | translate"
                       [ngModel]="editData.competitionGroupId" (ngModelChange)="onCompetitionGroupChange($event)"
                       [disabled]="saving">
                     </app-searchable-select-dropdown>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Клас лодка <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.boatClassLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <app-searchable-select-dropdown
-                      [options]="boatClassOptions" [placeholder]="'Изберете клас лодка'"
+                      [options]="boatClassOptions" [placeholder]="'disciplines.placeholders.selectBoatClass' | translate"
                       [ngModel]="editData.boatClass" (ngModelChange)="onBoatClassChange($event)"
                       [disabled]="saving">
                     </app-searchable-select-dropdown>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Макс. прехвърлени <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.maxCrewFromTransferLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <input type="number" [(ngModel)]="editData.maxCrewFromTransfer" min="0"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
@@ -134,36 +134,36 @@
                 <div class="space-y-4">
                   <div class="space-y-1">
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Кокс:</span>
-                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.hasCoxswain ? "Да" : "Не" }}</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.hasCoxswain' | translate }}</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.hasCoxswain ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Лековес:</span>
-                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.isLightweight ? "Да" : "Не" }}</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.isLightweight' | translate }}</span>
+                      <span class="text-sm font-medium break-all min-w-0">{{ discipline.isLightweight ? ('common.yes' | translate) : ('common.no' | translate) }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Дистанция (м):</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.distance' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.distanceMeters != null ? discipline.distanceMeters : "-" }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Макс. отбори на клуб:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.maxBoats' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0">{{ discipline.maxBoatsPerClub != null ? discipline.maxBoatsPerClub : "-" }}</span>
                     </div>
                     <div class="flex items-baseline">
-                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">Статус:</span>
+                      <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.status' | translate }}</span>
                       <span class="text-sm font-medium break-all min-w-0" [class]="discipline.isActive ? 'text-green-600' : 'text-red-600'">
-                        {{ discipline.isActive ? "Активен" : "Неактивен" }}
+                        {{ discipline.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
                       </span>
                     </div>
                   </div>
                   <div class="pt-2 border-t border-gray-200">
                     <div class="space-y-1">
                       <div class="flex items-baseline">
-                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Създадена на:</span>
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.createdAt' | translate }}</span>
                         <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(discipline.createdAt) }}</span>
                       </div>
                       <div class="flex items-baseline">
-                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">Променена на:</span>
+                        <span class="text-xs text-gray-500 w-40 flex-shrink-0">{{ 'disciplines.details.labels.modifiedAt' | translate }}</span>
                         <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(discipline.modifiedAt) }}</span>
                       </div>
                     </div>
@@ -172,27 +172,27 @@
               } @else {
                 <div class="space-y-1.5">
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Лековес <span class="text-red-500">*</span>:</label>
-                    <app-searchable-select-dropdown [options]="booleanOptions" [placeholder]="'Изберете'"
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.isLightweightLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown [options]="booleanOptions" [placeholder]="'disciplines.placeholders.select' | translate"
                       [ngModel]="editData.isLightweight ? 'true' : 'false'" (ngModelChange)="onIsLightweightChange($event)"
                       [disabled]="saving">
                     </app-searchable-select-dropdown>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Дистанция (м) <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.distanceLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <input type="number" [(ngModel)]="editData.distanceMeters" min="0"
                       [class.border-red-500]="touched['distanceMeters'] && editData.distanceMeters == null"
                       (blur)="touched['distanceMeters'] = true"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Макс. отбори на клуб <span class="text-red-500">*</span>:</label>
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.maxBoatsLabel' | translate }} <span class="text-red-500">*</span>:</label>
                     <input type="number" [(ngModel)]="editData.maxBoatsPerClub" min="1"
                       class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-500 mb-0.5">Статус <span class="text-red-500">*</span>:</label>
-                    <app-searchable-select-dropdown [options]="statusOptions" [placeholder]="'Изберете статус'"
+                    <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.statusLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                    <app-searchable-select-dropdown [options]="statusOptions" [placeholder]="'disciplines.placeholders.selectStatus' | translate"
                       [ngModel]="editData.isActive ? 'true' : 'false'" (ngModelChange)="onStatusChange($event)"
                       [disabled]="saving">
                     </app-searchable-select-dropdown>
@@ -217,12 +217,12 @@
             <div class="flex items-center gap-2">
               @if (!isEditing) {
                 @if (canEdit) {
-                  <app-button variant="outline" size="md" text="Редактирай" (click)="startEditing()"></app-button>
-                  <app-button variant="white" size="md" text="Изтрий" [disabled]="deleting" (click)="confirmDelete()"></app-button>
+                  <app-button variant="outline" size="md" [text]="'common.edit' | translate" (click)="startEditing()"></app-button>
+                  <app-button variant="white" size="md" [text]="'common.delete' | translate" [disabled]="deleting" (click)="confirmDelete()"></app-button>
                 }
               } @else {
-                <app-button variant="outline" size="md" text="Отказ" [disabled]="saving" (click)="cancelEditing()"></app-button>
-                <app-button variant="primary" size="md" text="Запази" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
+                <app-button variant="outline" size="md" [text]="'common.cancel' | translate" [disabled]="saving" (click)="cancelEditing()"></app-button>
+                <app-button variant="primary" size="md" [text]="'common.save' | translate" [disabled]="saving || !isEditFormValid" (click)="save()"></app-button>
               }
             </div>
           </div>

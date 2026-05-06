@@ -1,20 +1,20 @@
 <app-dialog
   [isOpen]="isOpen"
-  title="Лого на клуб"
+  [title]="'clubs.details.logo.altClubLogo' | translate"
   size="lg"
   [noScroll]="true"
   (closed)="close()"
 >
   <div class="flex flex-col items-center gap-4">
-    
+
     <div class="w-full max-w-sm aspect-square rounded-lg overflow-hidden border border-gray-200 bg-gray-100">
       <img
         [src]="logoUrl || 'assets/images/default-club.png'"
-        [alt]="logoUrl ? 'Лого на клуб' : 'Лого по подразбиране'"
+        [alt]="logoUrl ? ('clubs.details.logo.altClubLogo' | translate) : ('clubs.details.logo.altDefaultLogo' | translate)"
         class="w-full h-full object-contain"
       />
     </div>
-    
+
     @if (clubInfo) {
       <div class="w-full text-center space-y-1 text-sm border-t border-gray-200 pt-4">
         <p class="font-medium text-gray-900">

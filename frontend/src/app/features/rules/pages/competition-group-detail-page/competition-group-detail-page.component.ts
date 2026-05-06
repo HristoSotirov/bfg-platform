@@ -6,6 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, Observable, map, throwError, timeout } from 'rxjs';
@@ -40,6 +41,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     FormsModule,
     RouterModule,
     HeaderComponent,
@@ -125,15 +127,15 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   touched: Record<string, boolean> = {};
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   readonly roundingOptions: SearchableSelectOption[] = [
-    { value: '', label: 'Няма' },
-    { value: TransferRounding.Floor, label: 'Закръгляне надолу (FLOOR)' },
-    { value: TransferRounding.Ceil, label: 'Закръгляне нагоре (CEIL)' },
-    { value: TransferRounding.Round, label: 'Закръгляне (ROUND)' },
+    { value: '', label: '-' },
+    { value: TransferRounding.Floor, label: this.translate.instant('competitionGroups.rounding.down') + ' (FLOOR)' },
+    { value: TransferRounding.Ceil, label: this.translate.instant('competitionGroups.rounding.up') + ' (CEIL)' },
+    { value: TransferRounding.Round, label: this.translate.instant('competitionGroups.rounding.round') + ' (ROUND)' },
   ];
 
   groupSearch = (): Observable<SearchableSelectOption[]> =>
@@ -141,7 +143,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       this.competitionGroupDefinitionsService
         .getAllCompetitionGroupDefinitions(undefined, undefined, ['name_asc'] as any, top, skip) as any
     ).pipe(map((groups: any[]) => [
-      { value: '', label: 'Няма' },
+      { value: '', label: '-' },
       ...groups.map((g: any) => ({
         value: g.uuid || '',
         label: `${g.shortName || g.name || '-'} (${g.minAge}-${g.maxAge ?? '∞'})`,
@@ -194,13 +196,13 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   ];
 
   readonly disciplineGenderOptions: SearchableSelectOption[] = [
-    { value: DisciplineGender.Male, label: 'Мъже' },
-    { value: DisciplineGender.Female, label: 'Жени' },
-    { value: DisciplineGender.Mixed, label: 'Смесени' },
+    { value: DisciplineGender.Male, label: this.translate.instant('common.gender.male') },
+    { value: DisciplineGender.Female, label: this.translate.instant('common.gender.female') },
+    { value: DisciplineGender.Mixed, label: this.translate.instant('common.gender.mixed') },
   ];
 
   readonly booleanOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Да' }, { value: 'false', label: 'Не' },
+    { value: 'true', label: this.translate.instant('common.yes') }, { value: 'false', label: this.translate.instant('common.no') },
   ];
 
   showTransferSchemaDialog = false;
@@ -243,6 +245,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     private disciplineDefinitionsService: DisciplineDefinitionsService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -288,7 +291,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       .subscribe((group) => {
         this.group = group;
         this.loading = false;
-        if (!group) this.error = 'Групата не е намерена.';
+        if (!group) this.error = this.translate.instant('common.errorNotFound');
         if (group && this.activeTab === 'disciplines' && !this.disciplinesLoaded) {
           this.loadDisciplines();
         }
@@ -330,7 +333,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
     ).pipe(
       timeout(30000),
       catchError((err) => {
-        this.disciplinesError = err?.error?.message || 'Грешка при зареждане';
+        this.disciplinesError = err?.error?.message || this.translate.instant('common.errorLoading');
         this.disciplinesLoading = false;
         this.cdr.markForCheck();
         return of({ content: [], totalElements: 0 });
@@ -405,7 +408,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       .updateDisciplineDefinitionByUuid(this.editingDisciplineId, request)
       .pipe(
         catchError((err) => {
-          this.disciplineSaveError = err?.error?.message || 'Грешка при запазване';
+          this.disciplineSaveError = err?.error?.message || this.translate.instant('common.errorSaving');
           this.savingDiscipline = false;
           this.cdr.markForCheck();
           return of(null);
@@ -453,7 +456,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.disciplineDeleteError = err?.error?.message || 'Грешка при изтриване на дисциплина';
+          this.disciplineDeleteError = err?.error?.message || this.translate.instant('common.errorDeleting');
           this.cdr.markForCheck();
         },
       });
@@ -485,9 +488,9 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
   getRoundingLabel(rounding: TransferRounding | undefined): string {
     if (!rounding) return '-';
     const labels: Record<string, string> = {
-      FLOOR: 'Закръгляне надолу',
-      CEIL: 'Закръгляне нагоре',
-      ROUND: 'Закръгляне',
+      FLOOR: this.translate.instant('competitionGroups.rounding.down'),
+      CEIL: this.translate.instant('competitionGroups.rounding.up'),
+      ROUND: this.translate.instant('competitionGroups.rounding.round'),
     };
     return labels[rounding] ?? rounding;
   }
@@ -629,7 +632,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       .updateCompetitionGroupDefinitionByUuid(this.group.uuid, request)
       .pipe(
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при запазване';
+          let errorMessage = this.translate.instant('common.errorSaving');
           if (err.status === 409) {
             errorMessage = err?.error?.message || 'Конфликт при запазване.';
           } else if (err?.error?.message) {
@@ -649,7 +652,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.saving = false;
-          this.saveError = err?.message || 'Грешка при запазване';
+          this.saveError = err?.message || this.translate.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });
@@ -676,7 +679,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
       .deleteCompetitionGroupDefinitionByUuid(this.group.uuid)
       .pipe(
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при изтриване';
+          let errorMessage = this.translate.instant('common.errorDeleting');
           if (err?.error?.message) errorMessage = err.error.message;
           return throwError(() => ({ message: errorMessage }));
         }),
@@ -688,7 +691,7 @@ export class CompetitionGroupDetailPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.deleting = false;
-          this.deleteError = err?.message || 'Грешка при изтриване';
+          this.deleteError = err?.message || this.translate.instant('common.errorDeleting');
           this.cdr.markForCheck();
         },
       });

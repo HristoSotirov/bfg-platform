@@ -13,6 +13,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 
@@ -38,7 +39,7 @@ const MAX_DURATION_MS = 20 * 60 * 1000;
 @Component({
   selector: 'app-race-chronometer',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent],
   templateUrl: './race-chronometer.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -83,6 +84,7 @@ export class RaceChronometerComponent implements OnChanges, OnDestroy {
   constructor(
     private cdr: ChangeDetectorRef,
     private ngZone: NgZone,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -116,11 +118,11 @@ export class RaceChronometerComponent implements OnChanges, OnDestroy {
   get dialogTitle(): string {
     switch (this.dialogMode) {
       case 'start':
-        return 'Хронометър — ' + this.eventLabel;
+        return this.translate.instant('competitions.chronometer.titlePrefix.start') + ' ' + this.eventLabel;
       case 'finish':
-        return 'Финиш — ' + this.eventLabel;
+        return this.translate.instant('competitions.chronometer.titlePrefix.finish') + ' ' + this.eventLabel;
       case 'assign':
-        return 'Разпределение — ' + this.eventLabel;
+        return this.translate.instant('competitions.chronometer.titlePrefix.assign') + ' ' + this.eventLabel;
     }
   }
 
@@ -207,7 +209,7 @@ export class RaceChronometerComponent implements OnChanges, OnDestroy {
     if (index < 0 || index >= this.splitSelected.length) return;
     const wouldBeSelected = !this.splitSelected[index];
     if (wouldBeSelected && this.selectedSplitCount >= this.lanes.length) {
-      this.assignError = `Максимум ${this.lanes.length} времена (колкото коридори)`;
+      this.assignError = this.translate.instant('competitions.chronometer.assign.errors.maxSplits', { max: this.lanes.length });
       this.cdr.markForCheck();
       return;
     }
@@ -221,19 +223,19 @@ export class RaceChronometerComponent implements OnChanges, OnDestroy {
 
     const selected = this.selectedSplits;
     if (selected.length === 0) {
-      this.assignError = 'Изберете поне едно време';
+      this.assignError = this.translate.instant('competitions.chronometer.assign.errors.selectAtLeastOne');
       return;
     }
 
     const trimmed = this.laneOrderInput.trim();
     if (!trimmed) {
-      this.assignError = 'Моля, въведете коридорите на финиширане';
+      this.assignError = this.translate.instant('competitions.chronometer.assign.errors.enterLanes');
       return;
     }
 
     const parts = trimmed.split(/[\s,]+/);
     if (parts.length !== selected.length) {
-      this.assignError = `Въведете точно ${selected.length} коридора (въведени: ${parts.length})`;
+      this.assignError = this.translate.instant('competitions.chronometer.assign.errors.exactLanes', { expected: selected.length, entered: parts.length });
       return;
     }
 
@@ -241,15 +243,15 @@ export class RaceChronometerComponent implements OnChanges, OnDestroy {
     for (const p of parts) {
       const n = parseInt(p, 10);
       if (isNaN(n)) {
-        this.assignError = `"${p}" не е валиден номер на коридор`;
+        this.assignError = this.translate.instant('competitions.chronometer.assign.errors.invalidLane', { value: p });
         return;
       }
       if (!this.lanes.includes(n)) {
-        this.assignError = `Коридор ${n} не съществува в това събитие (налични: ${this.lanes.join(', ')})`;
+        this.assignError = this.translate.instant('competitions.chronometer.assign.errors.laneNotExist', { lane: n, available: this.lanes.join(', ') });
         return;
       }
       if (laneNumbers.includes(n)) {
-        this.assignError = `Коридор ${n} е въведен повече от веднъж`;
+        this.assignError = this.translate.instant('competitions.chronometer.assign.errors.duplicateLane', { lane: n });
         return;
       }
       laneNumbers.push(n);

@@ -11,7 +11,7 @@
       [routerLink]="permalinkRoute"
       (click)="onPermalinkClick()"
       class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
-      title="Отвори страницата"
+      [title]="'common.openPage' | translate"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
@@ -32,40 +32,40 @@
               <!-- Basic info -->
               <div class="space-y-1">
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Име:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.name' | translate }}</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.name || "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.shortName' | translate }}</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.shortName || "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.minAgeLabel' | translate }}:</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.minAge != null ? group.minAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.maxAgeLabel' | translate }}:</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви мин. възраст:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.coxMinAgeLabel' | translate }}:</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinAge != null ? group.coxMinAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Рулеви макс. възраст:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.coxMaxAgeLabel' | translate }}:</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.coxMaxAge != null ? group.coxMaxAge : "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисциплини:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maxDisciplines' | translate }}</span>
                   <span class="text-sm font-medium break-all min-w-0">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
                 </div>
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
+                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.status' | translate }}</span>
                   <span
                     class="text-sm font-medium break-all min-w-0"
                     [class]="group.isActive ? 'text-green-600' : 'text-red-600'"
                   >
-                    {{ group.isActive ? "Активен" : "Неактивен" }}
+                    {{ group.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
                   </span>
                 </div>
               </div>
@@ -74,27 +74,27 @@
               <div class="pt-2 border-t border-gray-200">
                 <div class="space-y-1">
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. лек макс. тегло:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamLightMaxWeight' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamLightMaxWeightKg != null ? group.maleTeamLightMaxWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. рулеви мин. тегло:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamCoxMinWeight' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxMinWeightKg != null ? group.maleTeamCoxMinWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">М. рулеви изискв. тегло:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamCoxRequiredWeight' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxRequiredWeightKg != null ? group.maleTeamCoxRequiredWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. лек макс. тегло:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamLightMaxWeight' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamLightMaxWeightKg != null ? group.femaleTeamLightMaxWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. рулеви мин. тегло:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamCoxMinWeight' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxMinWeightKg != null ? group.femaleTeamCoxMinWeightKg : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Ж. рулеви изискв. тегло:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamCoxRequiredWeight' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxRequiredWeightKg != null ? group.femaleTeamCoxRequiredWeightKg : "-" }}</span>
                   </div>
                 </div>
@@ -104,11 +104,11 @@
               <div class="pt-2 border-t border-gray-200">
                 <div class="space-y-1">
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Създадена на:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.createdAt' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.createdAt) }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Променена на:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.modifiedAt' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.modifiedAt) }}</span>
                   </div>
                 </div>
@@ -118,7 +118,7 @@
             <!-- Edit mode -->
             <div class="space-y-1.5">
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Име <span class="text-red-500">*</span>:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.nameLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <input
                   type="text"
                   [(ngModel)]="editData.name"
@@ -128,7 +128,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Кратко име <span class="text-red-500">*</span>:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.shortNameLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <input
                   type="text"
                   [(ngModel)]="editData.shortName"
@@ -138,7 +138,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Мин. възраст <span class="text-red-500">*</span>:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.minAgeLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.minAge"
@@ -148,7 +148,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Макс. възраст <span class="text-red-500">*</span>:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maxAgeLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.maxAge"
@@ -158,7 +158,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Рулеви мин. възраст:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.coxMinAgeLabel' | translate }}:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.coxMinAge"
@@ -166,7 +166,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Рулеви макс. възраст:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.coxMaxAgeLabel' | translate }}:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.coxMaxAge"
@@ -174,7 +174,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Макс. дисциплини <span class="text-red-500">*</span>:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maxDisciplinesLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.maxDisciplinesPerAthlete"
@@ -183,10 +183,10 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Статус <span class="text-red-500">*</span>:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.statusLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <app-searchable-select-dropdown
                   [options]="statusOptions"
-                  [placeholder]="'Изберете статус'"
+                  [placeholder]="'competitionGroups.placeholders.selectStatus' | translate"
                   [ngModel]="editData.isActive ? 'true' : 'false'"
                   (ngModelChange)="onStatusChange($event)"
                   [disabled]="saving">
@@ -204,7 +204,7 @@
               <div>
                 <div class="space-y-1">
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Група за трансфер:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferFromGroup' | translate }}</span>
                     @if (group.transferFromGroupId) {
                       <button
                         type="button"
@@ -218,19 +218,19 @@
                     }
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. екипаж:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.minCrewForTransfer' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.minCrewForTransfer != null ? group.minCrewForTransfer : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Коефициент:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferRatio' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.transferRatio != null ? group.transferRatio : "-" }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Закръгляне:</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferRounding' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ getRoundingLabel(group.transferRounding) }}</span>
                   </div>
                   <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. дисц. (трансф.):</span>
+                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferredMaxDisciplines' | translate }}</span>
                     <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerAthlete != null ? group.transferredMaxDisciplinesPerAthlete : "-" }}</span>
                   </div>
                 </div>
@@ -241,7 +241,7 @@
                   class="mt-2 text-xs text-bfg-blue hover:underline"
                   (click)="showTransferSchemaDialog = true"
                 >
-                  Преглед на схема за трансфер
+                  {{ 'competitionGroups.details.transferSchema.viewLink' | translate }}
                 </button>
               }
             </div>
@@ -249,15 +249,15 @@
             <!-- Transfer info (edit) -->
             <div class="space-y-1.5">
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Група за трансфер:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferFromGroupLabel' | translate }}:</label>
                 <app-searchable-select-dropdown
                   [staticSearch]="groupSearch"
                   [(ngModel)]="editData.transferFromGroupId"
-                  placeholder="Изберете група..."
+                  [placeholder]="'competitionGroups.placeholders.selectGroup' | translate"
                 ></app-searchable-select-dropdown>
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Мин. екипаж за трансфер:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.minCrewForTransferLabel' | translate }}:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.minCrewForTransfer"
@@ -265,7 +265,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Коефициент на трансфер:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferRatioLabel' | translate }}:</label>
                 <input
                   type="number"
                   step="0.01"
@@ -274,17 +274,17 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Закръгляне:</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferRoundingLabel' | translate }}:</label>
                 <app-searchable-select-dropdown
                   [options]="roundingOptions"
-                  [placeholder]="'Изберете закръгляне'"
+                  [placeholder]="'competitionGroups.placeholders.selectRounding' | translate"
                   [ngModel]="editData.transferRounding"
                   (ngModelChange)="onRoundingChange($event)"
                   [disabled]="saving">
                 </app-searchable-select-dropdown>
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Макс. дисц. (трансф.):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferredMaxDisciplinesLabel' | translate }}:</label>
                 <input
                   type="number"
                   [(ngModel)]="editData.transferredMaxDisciplinesPerAthlete"
@@ -294,7 +294,7 @@
               </div>
 
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Лек макс. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamLightMaxWeightLabel' | translate }}:</label>
                 <input
                   type="number"
                   step="0.1"
@@ -303,7 +303,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви мин. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamCoxMinWeightLabel' | translate }}:</label>
                 <input
                   type="number"
                   step="0.1"
@@ -312,7 +312,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Мъжки отбор - Рулеви изискв. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamCoxRequiredWeightLabel' | translate }}:</label>
                 <input
                   type="number"
                   step="0.1"
@@ -321,7 +321,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Лек макс. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamLightMaxWeightLabel' | translate }}:</label>
                 <input
                   type="number"
                   step="0.1"
@@ -330,7 +330,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви мин. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamCoxMinWeightLabel' | translate }}:</label>
                 <input
                   type="number"
                   step="0.1"
@@ -339,7 +339,7 @@
                 />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">Женски отбор - Рулеви изискв. тегло (кг):</label>
+                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamCoxRequiredWeightLabel' | translate }}:</label>
                 <input
                   type="number"
                   step="0.1"
@@ -371,14 +371,14 @@
             <app-button
               variant="outline"
               size="md"
-              text="Редактирай"
+              [text]="'common.edit' | translate"
               (click)="startEditing()"
             >
             </app-button>
             <app-button
               variant="outline"
               size="md"
-              text="Изтриване"
+              [text]="'common.delete' | translate"
               [disabled]="deleting"
               (click)="confirmDelete()"
             >
@@ -387,7 +387,7 @@
           <app-button
             variant="primary"
             size="md"
-            text="Затвори"
+            [text]="'common.close' | translate"
             (click)="close()"
           >
           </app-button>
@@ -395,7 +395,7 @@
           <app-button
             variant="outline"
             size="md"
-            text="Отказ"
+            [text]="'common.cancel' | translate"
             [disabled]="saving"
             (click)="cancelEditing()"
           >
@@ -403,7 +403,7 @@
           <app-button
             variant="primary"
             size="md"
-            text="Запази"
+            [text]="'common.save' | translate"
             [disabled]="saving || !isEditFormValid"
             (click)="save()"
           >
@@ -418,20 +418,20 @@
 
 <app-dialog
   [isOpen]="showEditingWarningDialog"
-  title="Незапазени промени"
+  [title]="'common.unsavedChanges.title' | translate"
   (closed)="showEditingWarningDialog = false"
 >
   <div class="py-4">
     <p class="text-gray-700 mb-6">
-      Имате незапазени промени. Моля, използвайте бутоните
-      <span class="font-medium">"Запази"</span> или
-      <span class="font-medium">"Отказ"</span>, за да излезете от редакция.
+      {{ 'common.unsavedChanges.message' | translate }}
+      <span class="font-medium">{{ 'common.unsavedChanges.saveButton' | translate }}</span> {{ 'common.or' | translate }}
+      <span class="font-medium">{{ 'common.unsavedChanges.cancelButton' | translate }}</span>{{ 'common.unsavedChanges.messageSuffix' | translate }}
     </p>
     <div class="flex justify-center">
       <app-button
         variant="primary"
         size="md"
-        text="Разбрах"
+        [text]="'common.unsavedChanges.confirmButton' | translate"
         (click)="showEditingWarningDialog = false"
       >
       </app-button>
@@ -452,7 +452,7 @@
 <!-- Transfer Schema Dialog -->
 <app-dialog
   [isOpen]="showTransferSchemaDialog"
-  title="Схема за трансфер"
+  [title]="'competitionGroups.details.transferSchema.title' | translate"
   size="sm"
   (closed)="showTransferSchemaDialog = false"
 >
@@ -461,8 +461,8 @@
       <table class="w-full text-sm">
         <thead class="sticky top-0 bg-white">
           <tr class="border-b border-gray-200">
-            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">Размер на екипажа</th>
-            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">Брой трансферирани</th>
+            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">{{ 'competitionGroups.details.transferSchema.crewSize' | translate }}</th>
+            <th class="text-left py-2 px-3 text-xs font-medium text-gray-500">{{ 'competitionGroups.details.transferSchema.transferCount' | translate }}</th>
           </tr>
         </thead>
         <tbody>
@@ -476,7 +476,7 @@
       </table>
     </div>
     <div class="flex justify-center pt-4 flex-shrink-0">
-      <app-button variant="outline" size="md" text="Затвори" (click)="showTransferSchemaDialog = false"></app-button>
+      <app-button variant="outline" size="md" [text]="'common.close' | translate" (click)="showTransferSchemaDialog = false"></app-button>
     </div>
   </div>
 </app-dialog>
@@ -494,7 +494,7 @@
       [routerLink]="transferGroupPermalinkRoute"
       (click)="onTransferGroupPermalinkClick()"
       class="p-1 text-gray-400 hover:text-bfg-blue transition-colors rounded"
-      title="Отвори страницата"
+      [title]="'common.openPage' | translate"
     >
       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
@@ -505,30 +505,30 @@
     <div class="space-y-4 py-2">
       <div class="space-y-1">
         <div class="flex items-baseline">
-          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Име:</span>
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.name' | translate }}</span>
           <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.name || "-" }}</span>
         </div>
         <div class="flex items-baseline">
-          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Кратко име:</span>
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.shortName' | translate }}</span>
           <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.shortName || "-" }}</span>
         </div>
         <div class="flex items-baseline">
-          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Мин. възраст:</span>
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.minAgeLabel' | translate }}:</span>
           <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.minAge != null ? transferGroup.minAge : "-" }}</span>
         </div>
         <div class="flex items-baseline">
-          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Макс. възраст:</span>
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.maxAgeLabel' | translate }}:</span>
           <span class="text-sm font-medium break-all min-w-0">{{ transferGroup.maxAge != null ? transferGroup.maxAge : "-" }}</span>
         </div>
         <div class="flex items-baseline">
-          <span class="text-xs text-gray-500 w-32 flex-shrink-0">Статус:</span>
+          <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.status' | translate }}</span>
           <span class="text-sm font-medium break-all min-w-0" [class]="transferGroup.isActive ? 'text-green-600' : 'text-red-600'">
-            {{ transferGroup.isActive ? "Активен" : "Неактивен" }}
+            {{ transferGroup.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
           </span>
         </div>
       </div>
       <div class="flex justify-center pt-2">
-        <app-button variant="primary" size="md" text="Затвори" (click)="closeTransferGroupDialog()"></app-button>
+        <app-button variant="primary" size="md" [text]="'common.close' | translate" (click)="closeTransferGroupDialog()"></app-button>
       </div>
     </div>
   }

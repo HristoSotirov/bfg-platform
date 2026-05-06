@@ -7,6 +7,7 @@ import {
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { ScoringFilters, ScoringFilterConfig } from '../../scoring.component';
 import {
@@ -21,6 +22,7 @@ import { FilterToggleButtonComponent } from '../../../../shared/components/filte
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     FormsModule,
     MultiSelectDropdownComponent,
     SearchBarComponent,
@@ -44,18 +46,21 @@ export class ScoringFiltersComponent implements OnInit {
   searchValue = '';
   filtersExpanded = false;
 
-  readonly scoringTypeOptions: DropdownOption[] = [
+  scoringTypeOptions: DropdownOption[] = [
     { value: 'FIXED', label: 'Фиксирано' },
     { value: 'OFFSET_FROM_END', label: 'От края' },
   ];
 
-  readonly statusOptions: DropdownOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
-  ];
+  statusOptions: DropdownOption[] = [];
+
+  constructor(private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.searchValue = this.filters.search || '';
+    this.statusOptions = [
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
+  ];
   }
 
   isFilterVisible(filterId: string): boolean {

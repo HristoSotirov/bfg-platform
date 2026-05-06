@@ -9,7 +9,6 @@ import {
 import { Observable, throwError, BehaviorSubject } from 'rxjs';
 import { catchError, switchMap, timeout, finalize } from 'rxjs/operators';
 import { AuthService } from '../services/auth.service';
-import { LanguageService } from '../services/language.service';
 
 interface PendingRequest {
   request: HttpRequest<any>;
@@ -36,10 +35,13 @@ export class AuthInterceptor implements HttpInterceptor {
 
   constructor(
     private authService: AuthService,
-    private languageService: LanguageService,
   ) {
     // Safety: Reset stuck refresh state on service init
     this.checkAndResetStuckState();
+  }
+
+  private getCurrentLanguage(): string {
+    return localStorage.getItem('bfg_language') || 'bg';
   }
 
   /**
@@ -72,11 +74,16 @@ export class AuthInterceptor implements HttpInterceptor {
     request: HttpRequest<any>,
     next: HttpHandler,
   ): Observable<HttpEvent<any>> {
+    // Skip interceptor for i18n translation file requests
+    if (request.url.includes('/assets/i18n/')) {
+      return next.handle(request);
+    }
+
     // Safety check: reset stuck refresh state
     this.checkAndResetStuckState();
 
     // Only add Accept-Language header - OpenAPI services handle Authorization via Configuration
-    const lang = this.languageService.currentLanguage || 'bg';
+    const lang = this.getCurrentLanguage();
     request = request.clone({
       setHeaders: {
         'Accept-Language': lang,
@@ -99,7 +106,7 @@ export class AuthInterceptor implements HttpInterceptor {
   }
 
   private addToken(request: HttpRequest<any>, token: string): HttpRequest<any> {
-    const lang = this.languageService.currentLanguage || 'bg';
+    const lang = this.getCurrentLanguage();
     return request.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`,

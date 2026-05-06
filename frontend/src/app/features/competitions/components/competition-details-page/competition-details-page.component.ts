@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, catchError, of, forkJoin, Observable, map } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import {
   CdkDragDrop,
   DragDropModule,
@@ -168,7 +169,7 @@ interface StartListEventView {
     finishTimeMs: number | null;
     participationStatus: string | null;
     modifiedAt: string | null;
-    crew: { seat: string; seatPosition: string; cardNumber: string; name: string; athleteId: string; accreditationYear: number | null; accreditationStatus: string; }[];
+    crew: { seat: string; seatPosition: string; cardNumber: string; name: string; athleteId: string; accreditationYear: number | null; accreditationStatus: string; accreditationStatusRaw: string; }[];
   }[];
 }
 
@@ -213,6 +214,7 @@ interface ResultEditRow {
     FormsModule,
     DragDropModule,
     NgChartsModule,
+    TranslateModule,
     HeaderComponent,
     ButtonComponent,
     DialogComponent,
@@ -279,7 +281,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
       const disc = e.discipline;
       const groupId = disc?.competitionGroupId || 'unknown';
-      const groupName = disc?.competitionGroup?.shortName || disc?.competitionGroup?.name || 'Без група';
+      const groupName = disc?.competitionGroup?.shortName || disc?.competitionGroup?.name || this.translate.instant('competitions.detailsPage.disciplines.noGroup');
 
       if (!groupMap.has(groupId)) {
         groupMap.set(groupId, { groupId, groupName, group: disc?.competitionGroup ?? null, disciplines: [] });
@@ -401,24 +403,18 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     return !!this.editingTimetableUuid || this.showAddTimetableEvent;
   }
 
-  readonly eventStatusOptions: SearchableSelectOption[] = [
-    { value: CompetitionEventStatus.Scheduled, label: 'Планирано' },
-    { value: CompetitionEventStatus.InProgress, label: 'В прогрес' },
-    { value: CompetitionEventStatus.UnofficialResults, label: 'Неофициални резултати' },
-    { value: CompetitionEventStatus.OfficialResults, label: 'Официални резултати' },
-    { value: CompetitionEventStatus.Cancelled, label: 'Отменено' },
-  ];
+  readonly eventStatusOptions: SearchableSelectOption[] = [];
 
   get eventTypeOptions(): SearchableSelectOption[] {
     const type = this.competition?.competitionType as string | undefined;
     if (type === CompetitionType.NationalErgo) {
-      return [{ value: QualificationEventType.H, label: 'Серия' }];
+      return [{ value: QualificationEventType.H, label: this.translate.instant('competitions.eventType.heat') }];
     }
     return [
-      { value: QualificationEventType.H, label: 'Серия' },
-      { value: QualificationEventType.Sf, label: 'Полуфинал' },
-      { value: QualificationEventType.Fb, label: 'Финал Б' },
-      { value: QualificationEventType.Fa, label: 'Финал А' },
+      { value: QualificationEventType.H, label: this.translate.instant('competitions.eventType.heat') },
+      { value: QualificationEventType.Sf, label: this.translate.instant('competitions.eventType.semifinal') },
+      { value: QualificationEventType.Fb, label: this.translate.instant('competitions.eventType.finalB') },
+      { value: QualificationEventType.Fa, label: this.translate.instant('competitions.eventType.finalA') },
     ];
   }
 
@@ -443,11 +439,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   userRole: SystemRole | null = null;
 
-  readonly competitionTypeOptions: SearchableSelectOption[] = [
-    { value: CompetitionType.NationalErgo, label: 'Национално (ерго)' },
-    { value: CompetitionType.NationalWater, label: 'Национално (вода)' },
-    { value: CompetitionType.Balkan, label: 'Балкански' },
-  ];
+  readonly competitionTypeOptions: SearchableSelectOption[] = [];
 
   constructor(
     private route: ActivatedRoute,
@@ -469,9 +461,16 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     private finalStandingsService: FinalStandingsService,
     private clubRankingsService: ClubRankingsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
+    this.initTranslatableOptions();
+    this.translate.onLangChange.pipe(takeUntil(this.destroy$)).subscribe(() => {
+      this.initTranslatableOptions();
+      this.cdr.markForCheck();
+    });
+
     const user = this.authService.currentUser;
     if (user && user.roles.length > 0) {
       this.userRole = user.roles[0] as SystemRole;
@@ -521,6 +520,22 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  private initTranslatableOptions(): void {
+    const t = (key: string) => this.translate.instant(key);
+    (this as any).eventStatusOptions = [
+      { value: CompetitionEventStatus.Scheduled, label: t('competitions.eventStatus.planiranoFull') },
+      { value: CompetitionEventStatus.InProgress, label: t('competitions.eventStatus.inProgressFull') },
+      { value: CompetitionEventStatus.UnofficialResults, label: t('competitions.eventStatus.unofficialResultsFull') },
+      { value: CompetitionEventStatus.OfficialResults, label: t('competitions.eventStatus.officialResultsFull') },
+      { value: CompetitionEventStatus.Cancelled, label: t('competitions.eventStatus.cancelledFull') },
+    ];
+    (this as any).competitionTypeOptions = [
+      { value: CompetitionType.NationalErgo, label: t('competitions.competitionType.nationalErgo') },
+      { value: CompetitionType.NationalWater, label: t('competitions.competitionType.nationalWater') },
+      { value: CompetitionType.Balkan, label: t('competitions.competitionType.balkan') },
+    ];
+  }
+
   get canEdit(): boolean {
     return this.userRole === SystemRole.AppAdmin || this.userRole === SystemRole.FederationAdmin;
   }
@@ -528,14 +543,14 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   get tabs(): { id: Tab; label: string; available: boolean }[] {
     const isReal = !this.competition?.isTemplate;
     return [
-      { id: 'details', label: 'Детайли', available: true },
-      { id: 'disciplines', label: 'Дисциплини', available: true },
-      { id: 'timetable', label: 'Разписание', available: true },
-      { id: 'entries', label: 'Заявки', available: isReal },
-      { id: 'progression', label: 'Стартова листа', available: isReal },
-      { id: 'weigh-in', label: 'Кантар', available: isReal },
-      { id: 'results', label: 'Резултати', available: isReal },
-      { id: 'complex-standings', label: 'Отборно класиране', available: isReal },
+      { id: 'details', label: this.translate.instant('competitions.detailsPage.tabs.details'), available: true },
+      { id: 'disciplines', label: this.translate.instant('competitions.detailsPage.tabs.disciplines'), available: true },
+      { id: 'timetable', label: this.translate.instant('competitions.detailsPage.tabs.timetable'), available: true },
+      { id: 'entries', label: this.translate.instant('competitions.detailsPage.tabs.entries'), available: isReal },
+      { id: 'progression', label: this.translate.instant('competitions.detailsPage.tabs.progression'), available: isReal },
+      { id: 'weigh-in', label: this.translate.instant('competitions.detailsPage.tabs.weighIn'), available: isReal },
+      { id: 'results', label: this.translate.instant('competitions.detailsPage.tabs.results'), available: isReal },
+      { id: 'complex-standings', label: this.translate.instant('competitions.detailsPage.tabs.complexStandings'), available: isReal },
     ];
   }
 
@@ -611,7 +626,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       .getCompetitionByUuid(uuid)
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на данните';
+          this.error = err?.error?.message || this.translate.instant('competitions.detailsPage.errors.loadFailed');
           this.loading = false;
           this.cdr.markForCheck();
           return of(null);
@@ -751,7 +766,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       const d = e.discipline;
       discInfo.set(e.disciplineId, {
         groupId: d?.competitionGroupId || 'unknown',
-        groupName: d?.competitionGroup?.shortName || d?.competitionGroup?.name || 'Без група',
+        groupName: d?.competitionGroup?.shortName || d?.competitionGroup?.name || this.translate.instant('competitions.detailsPage.disciplines.noGroup'),
         label: d?.shortName || d?.name || e.disciplineId,
       });
     }
@@ -940,17 +955,19 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   // ===== CLUB DETAIL — GROUPED VIEW =====
 
-  private readonly SEAT_LABELS: Record<string, string> = {
-    BOW: 'B',
-    TWO: '2',
-    THREE: '3',
-    FOUR: '4',
-    FIVE: '5',
-    SIX: '6',
-    SEVEN: '7',
-    STROKE: 'S',
-    COX: 'C',
-  };
+  private get SEAT_LABELS(): Record<string, string> {
+    return {
+      BOW: this.translate.instant('competitions.seatLabels.BOW'),
+      TWO: this.translate.instant('competitions.seatLabels.TWO'),
+      THREE: this.translate.instant('competitions.seatLabels.THREE'),
+      FOUR: this.translate.instant('competitions.seatLabels.FOUR'),
+      FIVE: this.translate.instant('competitions.seatLabels.FIVE'),
+      SIX: this.translate.instant('competitions.seatLabels.SIX'),
+      SEVEN: this.translate.instant('competitions.seatLabels.SEVEN'),
+      STROKE: this.translate.instant('competitions.seatLabels.STROKE'),
+      COX: this.translate.instant('competitions.seatLabels.COX'),
+    };
+  }
 
   private buildDisciplineMeta(): Map<string, { gender: string; groupId: string; groupName: string; discLabel: string; transferRatio: number | null }> {
     const meta = new Map<string, { gender: string; groupId: string; groupName: string; discLabel: string; transferRatio: number | null }>();
@@ -960,7 +977,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       meta.set(e.disciplineId, {
         gender: disc.gender || 'MALE',
         groupId: disc.competitionGroupId || 'unknown',
-        groupName: disc.competitionGroup?.shortName || disc.competitionGroup?.name || 'Без група',
+        groupName: disc.competitionGroup?.shortName || disc.competitionGroup?.name || this.translate.instant('competitions.detailsPage.disciplines.noGroup'),
         discLabel: disc.shortName || disc.name || e.disciplineId,
         transferRatio: disc.competitionGroup?.transferRatio ?? null,
       });
@@ -998,7 +1015,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       const dId = entry.disciplineId || 'unknown';
       const meta = discMeta.get(dId);
       const gId = meta?.groupId || 'unknown';
-      const gName = meta?.groupName || 'Без група';
+      const gName = meta?.groupName || this.translate.instant('competitions.detailsPage.disciplines.noGroup');
       if (!groupEntriesMap.has(gId)) groupEntriesMap.set(gId, { groupName: gName, entries: [] });
       groupEntriesMap.get(gId)!.entries.push(entry);
     }
@@ -1049,8 +1066,8 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         groupId,
         groupLabel: groupData.groupName,
         transferRatio,
-        maleTeam: maleAthletes.length > 0 ? { genderLabel: 'Мъжки отбор', athletes: maleAthletes, totalAthletes: maleAthletes.length } : null,
-        femaleTeam: femaleAthletes.length > 0 ? { genderLabel: 'Женски отбор', athletes: femaleAthletes, totalAthletes: femaleAthletes.length } : null,
+        maleTeam: maleAthletes.length > 0 ? { genderLabel: this.translate.instant('competitions.detailsPage.clubDetail.maleTeam'), athletes: maleAthletes, totalAthletes: maleAthletes.length } : null,
+        femaleTeam: femaleAthletes.length > 0 ? { genderLabel: this.translate.instant('competitions.detailsPage.clubDetail.femaleTeam'), athletes: femaleAthletes, totalAthletes: femaleAthletes.length } : null,
         maleDisciplines,
         femaleDisciplines,
         mixedDisciplines,
@@ -1136,7 +1153,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
             const cardNumber = cm.accreditation?.accreditationNumber || '';
             const isCox = cm.seatPosition === SeatPosition.Cox;
             const genderSuffix = (!isCox && mode === 'mixed' && athlete?.gender)
-              ? (athlete.gender === Gender.MALE ? 'М' : 'Ж')
+              ? (athlete.gender === Gender.MALE ? this.translate.instant('competitions.genderAbbrev.male') : this.translate.instant('competitions.genderAbbrev.female'))
               : null;
             const isTransfer = !isCox && !!(cm.accreditation?.clubId && entry.clubId && cm.accreditation.clubId !== entry.clubId);
             return { seat, cardNumber, name, genderSuffix, isTransfer, isCox: false };
@@ -1283,8 +1300,8 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   readonly CompetitionEventStatus = CompetitionEventStatus;
   readonly saveResultsStatusOptions: SearchableSelectOption[] = [
-    { value: CompetitionEventStatus.UnofficialResults, label: 'Неофициални резултати' },
-    { value: CompetitionEventStatus.OfficialResults, label: 'Официални резултати' },
+    { value: CompetitionEventStatus.UnofficialResults, label: this.translate.instant('competitions.resultsEntry.statusOptions.unofficialResults') },
+    { value: CompetitionEventStatus.OfficialResults, label: this.translate.instant('competitions.resultsEntry.statusOptions.officialResults') },
   ];
 
   // Chronometer
@@ -1341,7 +1358,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.progressionError = err?.error?.message || 'Грешка при зареждане на прогресията';
+          this.progressionError = err?.error?.message || this.translate.instant('competitions.detailsPage.progression.errors.loadFailed');
           this.loadingProgression = false;
           this.cdr.markForCheck();
         },
@@ -1389,7 +1406,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
       // Determine status
       let status: 'not_started' | 'in_progress' | 'finished' = 'not_started';
-      let statusLabel = 'Не е стартирано';
+      let statusLabel = this.translate.instant('competitions.detailsPage.progression.statusLabels.notStarted');
       if (discParticipations.length > 0) {
         const allFinished = data.events
           .filter(e => {
@@ -1400,10 +1417,10 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
         if (allFinished) {
           status = 'finished';
-          statusLabel = 'Завършено';
+          statusLabel = this.translate.instant('competitions.detailsPage.progression.statusLabels.finished');
         } else {
           status = 'in_progress';
-          statusLabel = 'В ход';
+          statusLabel = this.translate.instant('competitions.detailsPage.progression.statusLabels.inProgress');
         }
       }
 
@@ -1488,6 +1505,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
                 athleteId: cm.accreditation?.athleteId || '',
                 accreditationYear: cm.accreditation?.year ?? null,
                 accreditationStatus: this.getAccreditationStatusLabel(cm.accreditation?.status),
+                accreditationStatusRaw: cm.accreditation?.status || '',
               }))
             : [];
           return {
@@ -1630,7 +1648,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.progressionError = err?.error?.message || 'Грешка при генериране на прогресията';
+          this.progressionError = err?.error?.message || this.translate.instant('competitions.detailsPage.progression.errors.generateFailed');
           this.generatingProgression = false;
           this.cdr.markForCheck();
         },
@@ -1648,7 +1666,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
     this.laneRearrangeDisciplineId = ev.disciplineId;
     this.laneRearrangeEventType = ev.qualificationEventType;
-    this.laneRearrangeTitle = `${ev.disciplineLabel} — ${ev.eventTypeLabel} · Коридори`;
+    this.laneRearrangeTitle = `${ev.disciplineLabel} — ${ev.eventTypeLabel} · ${this.translate.instant('competitions.laneRearrange.titleSuffix')}`;
     this.laneRearrangeEvents = allEvents.map((e, i) => ({
       eventUuid: e.eventUuid,
       eventIndex: i,
@@ -1720,7 +1738,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.laneRearrangeError = err?.error?.errors?.join(', ') || err?.error?.message || 'Грешка при записване на коридорите';
+          this.laneRearrangeError = err?.error?.errors?.join(', ') || err?.error?.message || this.translate.instant('competitions.laneRearrangeErrors.saveFailed');
           this.laneRearrangeSaving = false;
           this.cdr.markForCheck();
         },
@@ -1782,7 +1800,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.crewVerifySaving = false;
           const errors = err?.error?.errors;
-          this.crewVerifyError = Array.isArray(errors) ? errors.join(', ') : (err?.error?.message || 'Грешка при промяна на статуса');
+          this.crewVerifyError = Array.isArray(errors) ? errors.join(', ') : (err?.error?.message || this.translate.instant('competitions.crewVerifyErrors.statusFailed'));
           this.cdr.markForCheck();
         },
       });
@@ -1898,15 +1916,15 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
             const isInvalid = wKg != null && coxMin != null && wKg < coxMin;
             const needsCompensation = wKg != null && !isInvalid && coxRequired != null && wKg < coxRequired;
             let comment: string | null = null;
-            if (isInvalid && coxMin != null) comment = `Под минимума (мин. ${coxMin} кг)`;
-            else if (needsCompensation && coxRequired != null) comment = `Компенсация (изисквемо ${coxRequired} кг)`;
+            if (isInvalid && coxMin != null) comment = this.translate.instant('competitions.weighInComments.belowMinimum', { min: coxMin });
+            else if (needsCompensation && coxRequired != null) comment = this.translate.instant('competitions.weighInComments.compensation', { required: coxRequired });
             athletes.push({
               athleteId: crew.athleteId,
               seat,
               name: crew.name,
               cardNumber: crew.cardNumber,
               role: WeightMeasurementRole.Cox,
-              roleLabel: 'Рулеви',
+              roleLabel: this.translate.instant('competitions.roleLabels.cox'),
               weightKg: wKg,
               weightLimit: coxRequired,
               weightMin: coxMin,
@@ -1916,14 +1934,14 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
             });
           } else if (!isCox && isLightweight) {
             const isInvalid = wKg != null && rowerLimit != null && wKg > rowerLimit;
-            const comment = isInvalid && rowerLimit != null ? `Над лимита (макс. ${rowerLimit} кг)` : null;
+            const comment = isInvalid && rowerLimit != null ? this.translate.instant('competitions.weighInComments.aboveLimit', { max: rowerLimit }) : null;
             athletes.push({
               athleteId: crew.athleteId,
               seat,
               name: crew.name,
               cardNumber: crew.cardNumber,
               role: WeightMeasurementRole.Rower,
-              roleLabel: 'Гребец',
+              roleLabel: this.translate.instant('competitions.roleLabels.rower'),
               weightKg: wKg,
               weightLimit: rowerLimit,
               weightMin: null,
@@ -2017,10 +2035,10 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     const diffHours = diffMs / (1000 * 60 * 60);
 
     if (diffHours < 1) {
-      return 'Измерването е по-малко от 1 час преди старта';
+      return this.translate.instant('competitions.weighInWarnings.lessThanOneHour');
     }
     if (diffHours > 2) {
-      return 'Измерването е повече от 2 часа преди старта';
+      return this.translate.instant('competitions.weighInWarnings.moreThanTwoHours');
     }
     return null;
   }
@@ -2058,7 +2076,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.weighInRecording = false;
-          this.weighInError = err?.error?.message || 'Грешка при записване на теглото';
+          this.weighInError = err?.error?.message || this.translate.instant('competitions.weighInErrors.saveFailed');
           this.cdr.markForCheck();
         },
       });
@@ -2068,17 +2086,31 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     return this.weightMeasurements.find(m => m.athleteId === athleteId) ?? null;
   }
 
-  private readonly ACCREDITATION_STATUS_LABELS: Record<string, string> = {
-    [AccreditationStatus.Active]: 'Активна',
-    [AccreditationStatus.PendingValidation]: 'Чакаща валидация',
-    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
-    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
-    [AccreditationStatus.Expired]: 'Изтекла',
-    [AccreditationStatus.Suspended]: 'Спряна',
-  };
+  private get ACCREDITATION_STATUS_LABELS(): Record<string, string> {
+    return {
+      [AccreditationStatus.Active]: this.translate.instant('competitions.accreditationStatusLabels.ACTIVE'),
+      [AccreditationStatus.PendingValidation]: this.translate.instant('competitions.accreditationStatusLabels.PENDING_VALIDATION'),
+      [AccreditationStatus.PendingPhotoValidation]: this.translate.instant('competitions.accreditationStatusLabels.PENDING_PHOTO_VALIDATION'),
+      [AccreditationStatus.NewPhotoRequired]: this.translate.instant('competitions.accreditationStatusLabels.NEW_PHOTO_REQUIRED'),
+      [AccreditationStatus.Expired]: this.translate.instant('competitions.accreditationStatusLabels.EXPIRED'),
+      [AccreditationStatus.Suspended]: this.translate.instant('competitions.accreditationStatusLabels.SUSPENDED'),
+    };
+  }
 
   private getAccreditationStatusLabel(status: string | undefined): string {
     return status ? (this.ACCREDITATION_STATUS_LABELS[status] || status) : '';
+  }
+
+  getAccreditationStatusClass(status: string): string {
+    switch (status) {
+      case AccreditationStatus.Active: return 'text-green-600';
+      case AccreditationStatus.Expired: return 'text-gray-500';
+      case AccreditationStatus.PendingValidation:
+      case AccreditationStatus.PendingPhotoValidation: return 'text-yellow-600';
+      case AccreditationStatus.NewPhotoRequired: return 'text-orange-500';
+      case AccreditationStatus.Suspended: return 'text-red-600';
+      default: return 'text-gray-500';
+    }
   }
 
   get crewVerifyTitle(): string {
@@ -2145,13 +2177,13 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       const requiredWeight = disc?.gender === DisciplineGender.Female
         ? (group.femaleTeamCoxRequiredWeightKg ?? null)
         : (group.maleTeamCoxRequiredWeightKg ?? null);
-      if (minWeight != null && w.weightKg < minWeight) return `Под минимума (мин. ${minWeight} кг)`;
-      if (requiredWeight != null && w.weightKg < requiredWeight) return `Компенсация (изисквано ${requiredWeight} кг)`;
+      if (minWeight != null && w.weightKg < minWeight) return this.translate.instant('competitions.weighInComments.belowMinimum', { min: minWeight });
+      if (requiredWeight != null && w.weightKg < requiredWeight) return this.translate.instant('competitions.weighInComments.compensation', { required: requiredWeight });
     } else if (disc?.isLightweight) {
       const limit = disc?.gender === DisciplineGender.Female
         ? (group.femaleTeamLightMaxWeightKg ?? null)
         : (group.maleTeamLightMaxWeightKg ?? null);
-      if (limit != null && w.weightKg > limit) return `Над лимита (макс. ${limit} кг)`;
+      if (limit != null && w.weightKg > limit) return this.translate.instant('competitions.weighInComments.aboveLimit', { max: limit });
     }
 
     return null;
@@ -2279,7 +2311,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.lanesError = err?.error?.errors?.join(', ') || err?.error?.message || 'Грешка при записване';
+          this.lanesError = err?.error?.errors?.join(', ') || err?.error?.message || this.translate.instant('competitions.resultsErrors.lanesSaveFailed');
           this.savingLanes = false;
           this.cdr.markForCheck();
         },
@@ -2416,7 +2448,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     // Validate that FINISHED rows have valid time
     const invalidRow = results.find(r => r.finishStatus === ParticipationStatus.Finished && (r.finishTimeMs === null || r.finishTimeMs === undefined));
     if (invalidRow) {
-      this.resultsError = 'Моля, въведете валидно време за всички участници със статус FINISHED (формат: мм:сс.дд)';
+      this.resultsError = this.translate.instant('competitions.resultsErrors.invalidTime');
       this.savingResults = false;
       this.cdr.markForCheck();
       return;
@@ -2438,7 +2470,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.resultsError = err?.error?.message || 'Грешка при записване на резултатите';
+          this.resultsError = err?.error?.message || this.translate.instant('competitions.resultsErrors.saveFailed');
           this.savingResults = false;
           this.cdr.markForCheck();
         },
@@ -2486,9 +2518,9 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   getGenerationStatusLabel(status: string | undefined): string {
     switch (status) {
-      case ProgressionGenerationStatus.Success: return 'Успешно';
-      case ProgressionGenerationStatus.Skipped: return 'Пропуснато';
-      case ProgressionGenerationStatus.Error: return 'Грешка';
+      case ProgressionGenerationStatus.Success: return this.translate.instant('competitions.generationStatusLabels.success');
+      case ProgressionGenerationStatus.Skipped: return this.translate.instant('competitions.generationStatusLabels.skipped');
+      case ProgressionGenerationStatus.Error: return this.translate.instant('competitions.generationStatusLabels.error');
       default: return '-';
     }
   }
@@ -2555,7 +2587,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.finalStandingsService.getFinalStandings(this.competition.uuid)
       .pipe(
         catchError(err => {
-          this.standingsError = err?.error?.message || 'Грешка при зареждане на класирането';
+          this.standingsError = err?.error?.message || this.translate.instant('competitions.standingsErrors.loadFailed');
           return of({ standings: [] } as FinalStandingsDto);
         }),
         takeUntil(this.destroy$),
@@ -2617,7 +2649,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.finalStandingsService.computeFinalStandings(this.competition.uuid, { disciplineIds: selectedIds })
       .pipe(
         catchError(err => {
-          this.standingsError = err?.error?.message || 'Грешка при генериране на класирането';
+          this.standingsError = err?.error?.message || this.translate.instant('competitions.standingsErrors.generateFailed');
           return of({ results: [] } as ComputeStandingsResponse);
         }),
         takeUntil(this.destroy$),
@@ -2639,9 +2671,9 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       .pipe(
         catchError(err => {
           if (disciplineIds.length === 1) {
-            this.standingsDisciplineErrors[disciplineIds[0]] = err?.error?.message || 'Грешка при генериране';
+            this.standingsDisciplineErrors[disciplineIds[0]] = err?.error?.message || this.translate.instant('competitions.standingsErrors.generateSingleFailed');
           } else {
-            this.standingsError = err?.error?.message || 'Грешка при генериране на класирането';
+            this.standingsError = err?.error?.message || this.translate.instant('competitions.standingsErrors.generateFailed');
           }
           return of({ results: [] } as ComputeStandingsResponse);
         }),
@@ -2673,7 +2705,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.standingsDisciplineErrors[disciplineId] = err?.error?.message || 'Грешка при изтриване на класирането';
+          this.standingsDisciplineErrors[disciplineId] = err?.error?.message || this.translate.instant('competitions.standingsErrors.deleteFailed');
           this.cdr.markForCheck();
         },
       });
@@ -2711,7 +2743,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.clubRankingsService.computeClubRankings({ competitionIds: [this.competition.uuid] })
       .pipe(
         catchError(err => {
-          this.clubRankingsError = err?.error?.message || 'Грешка при изчисляване на отборното класиране';
+          this.clubRankingsError = err?.error?.message || this.translate.instant('competitions.standingsErrors.clubRankingsFailed');
           return of({ rankings: [] } as any);
         }),
         takeUntil(this.destroy$),
@@ -2914,25 +2946,25 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   get chartBarData(): ChartData<'bar'> {
     if (this.chartView === 'medals') {
       const summary = this.medalSummary;
-      const labels = summary.map(r => [`${r.rank}. ${r.clubShortName}`, `${r.first + r.second + r.third} мед.`]);
+      const labels = summary.map(r => [`${r.rank}. ${r.clubShortName}`, `${r.first + r.second + r.third} ${this.translate.instant('competitions.chartLabels.medalsAxis')}`]);
       return {
         labels,
         datasets: [
-          { label: '1-во място', data: summary.map(r => r.first), backgroundColor: '#FFD700' },
-          { label: '2-ро място', data: summary.map(r => r.second), backgroundColor: '#C0C0C0' },
-          { label: '3-то място', data: summary.map(r => r.third), backgroundColor: '#CD7F32' },
+          { label: this.translate.instant('competitions.chartLabels.firstPlace'), data: summary.map(r => r.first), backgroundColor: '#FFD700' },
+          { label: this.translate.instant('competitions.chartLabels.secondPlace'), data: summary.map(r => r.second), backgroundColor: '#C0C0C0' },
+          { label: this.translate.instant('competitions.chartLabels.thirdPlace'), data: summary.map(r => r.third), backgroundColor: '#CD7F32' },
         ],
       };
     }
 
     const summary = this.chartSummary;
-    const labels = summary.map(r => [`${r.rank}. ${r.clubShortName}`, `${r.total.toFixed(1)} т.`]);
+    const labels = summary.map(r => [`${r.rank}. ${r.clubShortName}`, `${r.total.toFixed(1)} ${this.translate.instant('competitions.chartLabels.pointsAxis')}`]);
 
     if (this.chartView === 'total') {
       return {
         labels,
         datasets: [{
-          label: 'Общо точки',
+          label: this.translate.instant('competitions.chartLabels.totalPoints'),
           data: summary.map(r => r.total),
           backgroundColor: '#6185A8',
         }],
@@ -3020,7 +3052,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           tooltip: { enabled: true },
         },
         scales: {
-          x: { stacked: true, beginAtZero: true, suggestedMax: paddedMax, title: { display: true, text: 'Брой медали' }, ticks: { stepSize: 1 } },
+          x: { stacked: true, beginAtZero: true, suggestedMax: paddedMax, title: { display: true, text: this.translate.instant('competitions.chartLabels.medalsAxis') }, ticks: { stepSize: 1 } },
           y: { stacked: true, grid: { display: false }, ticks: { crossAlign: 'center' } },
         },
       };
@@ -3041,7 +3073,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         tooltip: { enabled: true },
       },
       scales: {
-        x: { stacked, beginAtZero: true, suggestedMax: paddedMax, title: { display: true, text: 'Точки' } },
+        x: { stacked, beginAtZero: true, suggestedMax: paddedMax, title: { display: true, text: this.translate.instant('competitions.chartLabels.pointsAxis') } },
         y: { stacked, grid: { display: false }, ticks: { crossAlign: 'center' } },
       },
     };
@@ -3287,7 +3319,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.deletingCompetition = false;
-          this.deleteCompetitionError = err?.error?.message || 'Грешка при изтриване на състезание';
+          this.deleteCompetitionError = err?.error?.message || this.translate.instant('competitions.deleteErrors.competitionFailed');
           this.cdr.markForCheck();
         },
       });
@@ -3349,7 +3381,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.cdr.markForCheck();
         },
         error: (err) => {
-          this.editError = err?.error?.message || 'Грешка при записване';
+          this.editError = err?.error?.message || this.translate.instant('competitions.editErrors.saveFailed');
           this.saving = false;
           this.cdr.markForCheck();
         },
@@ -3420,7 +3452,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.loadTimetable();
         },
         error: (err) => {
-          this.timetableError = err?.error?.message || 'Грешка при запис';
+          this.timetableError = err?.error?.message || this.translate.instant('competitions.timetableErrors.saveFailed');
           this.savingTimetable = false;
           this.cdr.markForCheck();
         },
@@ -3479,7 +3511,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.loadTimetable();
         },
         error: (err) => {
-          this.editTimetableError = err?.error?.message || 'Грешка при запис';
+          this.editTimetableError = err?.error?.message || this.translate.instant('competitions.timetableErrors.saveFailed');
           this.savingTimetable = false;
           this.cdr.markForCheck();
         },
@@ -3506,7 +3538,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
           this.loadTimetable();
         },
         error: (err) => {
-          this.deleteTimetableError = err?.error?.message || 'Грешка при изтриване';
+          this.deleteTimetableError = err?.error?.message || this.translate.instant('competitions.timetableErrors.deleteFailed');
           this.cdr.markForCheck();
         },
       });
@@ -3530,21 +3562,21 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   getEventTypLabel(type: string | undefined): string {
     const labels: Record<string, string> = {
-      H: 'Серия',
-      SF: 'Полуфинал',
-      FB: 'Финал Б',
-      FA: 'Финал А',
+      H: this.translate.instant('competitions.eventTypeMap.H'),
+      SF: this.translate.instant('competitions.eventTypeMap.SF'),
+      FB: this.translate.instant('competitions.eventTypeMap.FB'),
+      FA: this.translate.instant('competitions.eventTypeMap.FA'),
     };
     return type ? (labels[type] ?? type) : '-';
   }
 
   getEventStatusLabel(status: string | undefined): string {
     const labels: Record<string, string> = {
-      SCHEDULED: 'Насрочено',
-      IN_PROGRESS: 'В ход',
-      UNOFFICIAL_RESULTS: 'Неофициални',
-      OFFICIAL_RESULTS: 'Официални',
-      CANCELLED: 'Отменено',
+      SCHEDULED: this.translate.instant('competitions.eventStatusMap.SCHEDULED'),
+      IN_PROGRESS: this.translate.instant('competitions.eventStatusMap.IN_PROGRESS'),
+      UNOFFICIAL_RESULTS: this.translate.instant('competitions.eventStatusMap.UNOFFICIAL_RESULTS'),
+      OFFICIAL_RESULTS: this.translate.instant('competitions.eventStatusMap.OFFICIAL_RESULTS'),
+      CANCELLED: this.translate.instant('competitions.eventStatusMap.CANCELLED'),
     };
     return status ? (labels[status] ?? status) : '-';
   }
@@ -3589,15 +3621,16 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   getCompetitionTypeLabel(type: string | undefined): string {
     const labels: Record<string, string> = {
-      [CompetitionType.NationalErgo]: 'Национално (ерго)',
-      [CompetitionType.NationalWater]: 'Национално (вода)',
-      [CompetitionType.Balkan]: 'Балкански',
+      [CompetitionType.NationalErgo]: this.translate.instant('competitions.competitionType.nationalErgo'),
+      [CompetitionType.NationalWater]: this.translate.instant('competitions.competitionType.nationalWater'),
+      [CompetitionType.Balkan]: this.translate.instant('competitions.competitionType.balkan'),
     };
     return type ? (labels[type] ?? type) : '-';
   }
 
   getStatusLabel(status: string | null | undefined): string {
-    return status ? (STATUS_LABELS[status as ComputedCompetitionStatus] ?? status) : '-';
+    const key = status ? (STATUS_LABELS[status as ComputedCompetitionStatus] ?? null) : null;
+    return key ? this.translate.instant(key) : '-';
   }
 
   getStatusClass(status: string | null | undefined): string {
@@ -3634,6 +3667,13 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       location: this.competition.location || '',
       dayLabel,
       events,
+      labels: {
+        tableHeaders: [
+          this.translate.instant('competitions.pdf.startList.lane'),
+          this.translate.instant('competitions.pdf.startList.club'),
+          this.translate.instant('competitions.pdf.startList.crew'),
+        ],
+      },
     });
   }
 
@@ -3664,6 +3704,17 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       competitionName: this.competition.name || this.competition.shortName || '',
       location: this.competition.location || '',
       disciplines,
+      labels: {
+        subtitle: this.translate.instant('competitions.pdf.results.subtitle'),
+        tableHeaders: [
+          this.translate.instant('competitions.pdf.results.rank'),
+          this.translate.instant('competitions.pdf.results.club'),
+          this.translate.instant('competitions.pdf.results.crew'),
+          this.translate.instant('competitions.pdf.results.time'),
+          this.translate.instant('competitions.pdf.results.points'),
+        ],
+        filenameSuffix: this.translate.instant('competitions.pdf.results.filenameSuffix'),
+      },
     });
   }
 
@@ -3700,6 +3751,19 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       location: this.competition.location || '',
       dayLabel,
       events,
+      labels: {
+        subtitle: this.translate.instant('competitions.pdf.weighIn.subtitle'),
+        tableHeaders: [
+          this.translate.instant('competitions.pdf.weighIn.athlete'),
+          this.translate.instant('competitions.pdf.weighIn.card'),
+          this.translate.instant('competitions.pdf.weighIn.role'),
+          this.translate.instant('competitions.pdf.weighIn.limit'),
+          this.translate.instant('competitions.pdf.weighIn.weight'),
+          this.translate.instant('competitions.pdf.weighIn.comment'),
+        ],
+        weightUnit: this.translate.instant('competitions.pdf.weighIn.weightUnit'),
+        filenameSuffix: this.translate.instant('competitions.pdf.weighIn.filenameSuffix'),
+      },
     });
   }
 }

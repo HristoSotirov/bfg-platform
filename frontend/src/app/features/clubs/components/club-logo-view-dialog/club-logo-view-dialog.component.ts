@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 
 export interface ClubLogoViewInfo {
@@ -10,7 +11,7 @@ export interface ClubLogoViewInfo {
 @Component({
   selector: 'app-club-logo-view-dialog',
   standalone: true,
-  imports: [CommonModule, DialogComponent],
+  imports: [CommonModule, TranslateModule, DialogComponent],
   templateUrl: './club-logo-view-dialog.component.html',
   styleUrl: './club-logo-view-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

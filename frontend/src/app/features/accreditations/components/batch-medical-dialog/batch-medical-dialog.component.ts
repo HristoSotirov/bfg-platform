@@ -13,6 +13,7 @@ import { ButtonComponent } from '../../../../shared/components/button/button.com
 import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
 import { AthletesService } from '../../../../core/services/api';
 import { forkJoin, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { catchError } from 'rxjs/operators';
 
 const BATCH_SIZE = 100;
@@ -20,7 +21,7 @@ const BATCH_SIZE = 100;
 @Component({
   selector: 'app-batch-medical-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, DatePickerComponent],
+  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, DatePickerComponent, TranslateModule],
   templateUrl: './batch-medical-dialog.component.html',
   styleUrl: './batch-medical-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -42,6 +43,7 @@ export class BatchMedicalDialogComponent {
   constructor(
     private athletesService: AthletesService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   get uniqueCount(): number {
@@ -95,7 +97,7 @@ export class BatchMedicalDialogComponent {
 
   submit(): void {
     if (this.athleteIds.length === 0) {
-      this.error = 'Няма избрани състезатели.';
+      this.error = this.translateService.instant('accreditations.batchMedicalDialog.validation.noSelection');
       this.cdr.markForCheck();
       return;
     }
@@ -104,28 +106,28 @@ export class BatchMedicalDialogComponent {
     const hasMedical = this.medicalExaminationStartDate?.trim() && this.medicalExaminationDurationMonths;
 
     if (!hasInsurance && !hasMedical) {
-      this.error = 'Попълнете поне една двойка: или застраховка (от/до), или медицински преглед (начална дата/продължителност).';
+      this.error = this.translateService.instant('accreditations.batchMedicalDialog.validation.fillAtLeastOne');
       this.cdr.markForCheck();
       return;
     }
 
     if (this.insuranceFrom?.trim() && !this.insuranceTo?.trim()) {
-      this.error = 'Попълнете "Застраховка до" когато е попълнено "Застраховка от".';
+      this.error = this.translateService.instant('accreditations.batchMedicalDialog.validation.fillInsuranceTo');
       this.cdr.markForCheck();
       return;
     }
     if (this.insuranceTo?.trim() && !this.insuranceFrom?.trim()) {
-      this.error = 'Попълнете "Застраховка от" когато е попълнено "Застраховка до".';
+      this.error = this.translateService.instant('accreditations.batchMedicalDialog.validation.fillInsuranceFrom');
       this.cdr.markForCheck();
       return;
     }
     if (this.medicalExaminationStartDate?.trim() && !this.medicalExaminationDurationMonths) {
-      this.error = 'Попълнете "Продължителност" когато е попълнена "Начална дата" на медицинския преглед.';
+      this.error = this.translateService.instant('accreditations.batchMedicalDialog.validation.fillMedicalDuration');
       this.cdr.markForCheck();
       return;
     }
     if (this.medicalExaminationDurationMonths && !this.medicalExaminationStartDate?.trim()) {
-      this.error = 'Попълнете "Начална дата" когато е попълнена "Продължителност" на медицинския преглед.';
+      this.error = this.translateService.instant('accreditations.batchMedicalDialog.validation.fillMedicalStart');
       this.cdr.markForCheck();
       return;
     }
@@ -158,7 +160,7 @@ export class BatchMedicalDialogComponent {
         .batchUpdateMedicalInfo(request)
         .pipe(
           catchError((err) => {
-            return of({ _error: err?.error?.message || 'Грешка при обновяване' });
+            return of({ _error: err?.error?.message || this.translateService.instant('accreditations.batchMedicalDialog.errors.updateFailed') });
           }),
         );
     });
@@ -168,7 +170,7 @@ export class BatchMedicalDialogComponent {
         const failed = responses.some((r: any) => r && r._error);
         if (failed) {
           const firstError = responses.find((r: any) => r && r._error);
-          this.error = (firstError as any)?._error || 'Една или повече заявки не успяха.';
+          this.error = (firstError as any)?._error || this.translateService.instant('accreditations.batchMedicalDialog.errors.partialFailed');
         } else {
           this.loading = false;
           this.completed.emit();
@@ -179,7 +181,7 @@ export class BatchMedicalDialogComponent {
       },
       error: (err) => {
         this.loading = false;
-        this.error = err?.error?.message || 'Грешка при запазване';
+        this.error = err?.error?.message || this.translateService.instant('accreditations.batchMedicalDialog.errors.saveFailed');
         this.cdr.markForCheck();
       },
     });

@@ -5,8 +5,10 @@ import {
   EventEmitter,
   ChangeDetectionStrategy,
   OnInit,
+  inject,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CompetitionDto } from '../../../../core/services/api';
 import { CompetitionColumnConfig } from '../../competitions.component';
 import { computeCompetitionStatus, STATUS_LABELS, STATUS_CLASSES, ComputedCompetitionStatus } from '../../utils/competition-status.util';
@@ -14,12 +16,14 @@ import { computeCompetitionStatus, STATUS_LABELS, STATUS_CLASSES, ComputedCompet
 @Component({
   selector: 'app-competitions-table',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './competitions-table.component.html',
   styleUrl: './competitions-table.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CompetitionsTableComponent implements OnInit {
+  private translate = inject(TranslateService);
+
   @Input() competitions: CompetitionDto[] = [];
   @Input() columns: CompetitionColumnConfig[] = [];
   @Input() loading = false;
@@ -85,7 +89,8 @@ export class CompetitionsTableComponent implements OnInit {
   }
 
   getStatusLabel(status: string | null | undefined): string {
-    return status ? (STATUS_LABELS[status as ComputedCompetitionStatus] ?? status) : '-';
+    const key = status ? (STATUS_LABELS[status as ComputedCompetitionStatus] ?? null) : null;
+    return key ? this.translate.instant(key) : '-';
   }
 
   getStatusClass(c: CompetitionDto): string {

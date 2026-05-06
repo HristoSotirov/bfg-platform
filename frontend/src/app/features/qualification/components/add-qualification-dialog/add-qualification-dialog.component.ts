@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -21,7 +22,7 @@ import { Subject, takeUntil } from 'rxjs';
 @Component({
   selector: 'app-add-qualification-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, DialogComponent, ButtonComponent],
   templateUrl: './add-qualification-dialog.component.html',
   styleUrl: './add-qualification-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +48,7 @@ export class AddQualificationDialogComponent implements OnChanges {
   constructor(
     private schemesService: QualificationSchemesService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -102,7 +104,7 @@ export class AddQualificationDialogComponent implements OnChanges {
         error: (err) => {
           this.saving = false;
           this.error =
-            err?.error?.message || 'Грешка при създаване на схема';
+            err?.error?.message || this.translate.instant('qualification.form.createError');
           this.cdr.markForCheck();
         },
       });

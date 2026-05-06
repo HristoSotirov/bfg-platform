@@ -1,6 +1,6 @@
 <app-dialog
   [isOpen]="isOpen"
-  title="Настройки на таблицата"
+  [title]="'common.settingsDialog.title' | translate"
   size="md"
   (closed)="close()"
 >
@@ -14,9 +14,7 @@
         [class.border-bfg-blue]="activeTab === 'columns'"
         [class.text-gray-500]="activeTab !== 'columns'"
         (click)="activeTab = 'columns'"
-      >
-        Колони
-      </button>
+      >{{ 'common.settingsDialog.tabColumns' | translate }}</button>
       <button
         type="button"
         class="px-4 py-2 text-sm font-medium transition-colors"
@@ -25,16 +23,14 @@
         [class.border-bfg-blue]="activeTab === 'filters'"
         [class.text-gray-500]="activeTab !== 'filters'"
         (click)="activeTab = 'filters'"
-      >
-        Филтри
-      </button>
+      >{{ 'common.settingsDialog.tabFilters' | translate }}</button>
     </div>
 
     <div class="min-h-[320px]">
       @if (activeTab === "columns") {
         <div class="space-y-3">
           <p class="text-sm text-gray-600">
-            Изберете кои колони да се показват в таблицата.
+            {{ 'common.settingsDialog.columnsDescription' | translate }}
           </p>
 
           <div class="flex gap-2 mb-2">
@@ -42,17 +38,13 @@
               type="button"
               class="text-xs text-bfg-blue hover:underline"
               (click)="selectAllColumns()"
-            >
-              Избери всички
-            </button>
+            >{{ 'common.selectAll' | translate }}</button>
             <span class="text-gray-300">|</span>
             <button
               type="button"
               class="text-xs text-bfg-blue hover:underline"
               (click)="deselectAllColumns()"
-            >
-              Премахни всички
-            </button>
+            >{{ 'common.deselectAll' | translate }}</button>
           </div>
 
           <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
@@ -76,8 +68,7 @@
       @if (activeTab === "filters") {
         <div class="space-y-3">
           <p class="text-sm text-gray-600">
-            Изберете кои филтри да се показват. При скриване на филтър
-            стойността му се изчиства.
+            {{ 'common.settingsDialog.filtersDescription' | translate }}
           </p>
 
           <div class="flex gap-2 mb-2">
@@ -85,17 +76,13 @@
               type="button"
               class="text-xs text-bfg-blue hover:underline"
               (click)="selectAllFilters()"
-            >
-              Избери всички
-            </button>
+            >{{ 'common.selectAll' | translate }}</button>
             <span class="text-gray-300">|</span>
             <button
               type="button"
               class="text-xs text-bfg-blue hover:underline"
               (click)="deselectAllFilters()"
-            >
-              Премахни всички
-            </button>
+            >{{ 'common.deselectAll' | translate }}</button>
           </div>
 
           <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
@@ -118,9 +105,9 @@
     </div>
 
     <div class="flex justify-center gap-3 pt-4 border-t">
-      <app-button variant="outline" size="md" text="Отказ" (click)="close()">
+      <app-button variant="outline" size="md" [text]="'common.cancel' | translate" (click)="close()">
       </app-button>
-      <app-button variant="primary" size="md" text="Запази" (click)="save()">
+      <app-button variant="primary" size="md" [text]="'common.save' | translate" (click)="save()">
       </app-button>
     </div>
   </div>

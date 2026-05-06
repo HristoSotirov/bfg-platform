@@ -4,6 +4,7 @@ import com.bfg.platform.auth.jwt.JwtService;
 import com.bfg.platform.common.email.EmailService;
 import com.bfg.platform.common.exception.UnauthorizedException;
 import com.bfg.platform.common.exception.ValidationException;
+import com.bfg.platform.common.i18n.MessageResolver;
 import com.bfg.platform.gen.model.TokenResponse;
 import com.bfg.platform.user.entity.User;
 import com.bfg.platform.user.repository.UserRepository;
@@ -24,6 +25,7 @@ public class AuthServiceImpl implements AuthService {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final EmailService emailService;
+    private final MessageResolver messageResolver;
     private final long tokenTtlSeconds;
 
     private static final Pattern PASSWORD_PATTERN = Pattern.compile(
@@ -35,12 +37,14 @@ public class AuthServiceImpl implements AuthService {
             PasswordEncoder passwordEncoder,
             JwtService jwtService,
             EmailService emailService,
+            MessageResolver messageResolver,
             @Value("${bfg.password-reset.token-ttl-hours}") int tokenTtlHours
     ) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.emailService = emailService;
+        this.messageResolver = messageResolver;
         this.tokenTtlSeconds = tokenTtlHours * 3600L;
     }
 
@@ -48,14 +52,14 @@ public class AuthServiceImpl implements AuthService {
     @Transactional(readOnly = true)
     public TokenResponse login(String username, String password) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UnauthorizedException("Invalid username or password"));
+                .orElseThrow(() -> new UnauthorizedException(messageResolver.resolve("auth.invalidCredentials")));
 
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
-            throw new UnauthorizedException("Invalid username or password");
+            throw new UnauthorizedException(messageResolver.resolve("auth.invalidCredentials"));
         }
 
         if (Boolean.FALSE.equals(user.isActive())) {
-            throw new UnauthorizedException("Account is inactive");
+            throw new UnauthorizedException(messageResolver.resolve("auth.accountInactive"));
         }
 
         String role = user.getRole().getValue();
@@ -72,15 +76,15 @@ public class AuthServiceImpl implements AuthService {
 
         String typ = claims.get(JwtService.CLAIM_TYPE, String.class);
         if (!JwtService.TYPE_REFRESH.equals(typ)) {
-            throw new UnauthorizedException("Invalid refresh token");
+            throw new UnauthorizedException(messageResolver.resolve("auth.invalidRefreshToken"));
         }
 
         UUID userId = UUID.fromString(claims.getSubject());
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("Invalid refresh token"));
+                .orElseThrow(() -> new UnauthorizedException(messageResolver.resolve("auth.invalidRefreshToken")));
 
         if (Boolean.FALSE.equals(user.isActive())) {
-            throw new UnauthorizedException("Account is inactive");
+            throw new UnauthorizedException(messageResolver.resolve("auth.accountInactive"));
         }
 
         String role = user.getRole().getValue();
@@ -110,22 +114,22 @@ public class AuthServiceImpl implements AuthService {
         try {
             jws = jwtService.parseAndValidate(token);
         } catch (JwtException e) {
-            throw new ValidationException("Невалиден или изтекъл линк за нулиране на парола.");
+            throw new ValidationException(messageResolver.resolve("auth.invalidResetLink"));
         }
 
         Claims claims = jws.getPayload();
         String typ = claims.get(JwtService.CLAIM_TYPE, String.class);
         if (!JwtService.TYPE_PASSWORD_RESET.equals(typ)) {
-            throw new ValidationException("Невалиден или изтекъл линк за нулиране на парола.");
+            throw new ValidationException(messageResolver.resolve("auth.invalidResetLink"));
         }
 
         if (!PASSWORD_PATTERN.matcher(newPassword).matches()) {
-            throw new ValidationException("Паролата трябва да съдържа поне 8 символа, главна буква, малка буква, цифра и специален символ (!@#$%^&*).");
+            throw new ValidationException(messageResolver.resolve("auth.passwordRequirements"));
         }
 
         UUID userId = UUID.fromString(claims.getSubject());
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new ValidationException("Невалиден или изтекъл линк за нулиране на парола."));
+                .orElseThrow(() -> new ValidationException(messageResolver.resolve("auth.invalidResetLink")));
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);

@@ -16,7 +16,7 @@ public class LocaleConfig {
     @Bean
     public LocaleResolver localeResolver() {
         AcceptHeaderLocaleResolver resolver = new AcceptHeaderLocaleResolver();
-        resolver.setDefaultLocale(Locale.ENGLISH);
+        resolver.setDefaultLocale(new Locale("bg"));
         return resolver;
     }
 
@@ -25,7 +25,7 @@ public class LocaleConfig {
         ResourceBundleMessageSource messageSource = new ResourceBundleMessageSource();
         messageSource.setBasenames("i18n");
         messageSource.setDefaultEncoding("UTF-8");
-        messageSource.setDefaultLocale(Locale.ENGLISH);
+        messageSource.setDefaultLocale(new Locale("bg"));
         return messageSource;
     }
 

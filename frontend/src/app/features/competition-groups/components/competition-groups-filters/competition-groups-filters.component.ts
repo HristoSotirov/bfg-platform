@@ -8,6 +8,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { CompetitionGroupFilters, FilterConfig } from '../../competition-groups.component';
 import {
   MultiSelectDropdownComponent,
@@ -22,6 +23,7 @@ import { FilterToggleButtonComponent } from '../../../../shared/components/filte
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     MultiSelectDropdownComponent,
     SearchBarComponent,
     FilterToggleButtonComponent,
@@ -43,13 +45,16 @@ export class CompetitionGroupsFiltersComponent implements OnInit {
   searchValue = '';
   filtersExpanded = false;
 
-  readonly statusOptions: DropdownOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
-  ];
+  statusOptions: DropdownOption[] = [];
+
+  constructor(private translate: TranslateService) {}
 
   ngOnInit(): void {
     this.searchValue = this.filters.search || '';
+    this.statusOptions = [
+      { value: 'true', label: this.translate.instant('common.status.active') },
+      { value: 'false', label: this.translate.instant('common.status.inactive') },
+    ];
   }
 
   isFilterVisible(filterId: string): boolean {

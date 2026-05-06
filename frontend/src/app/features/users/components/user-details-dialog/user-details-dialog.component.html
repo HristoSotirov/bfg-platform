@@ -17,36 +17,36 @@
           <div>
             <div class="space-y-1">
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Име:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.name' | translate }}</span>
                 <span class="text-sm font-medium">
                   {{ fullName }}
                 </span>
               </div>
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Потребителско име:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.username' | translate }}</span>
                 <span class="text-sm font-medium">
                   {{ userData.username || '-' }}
                 </span>
               </div>
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Имейл:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.email' | translate }}</span>
                 <span class="text-sm font-medium">
                   {{ userData.email || '-' }}
                 </span>
               </div>
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Роля:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.role' | translate }}</span>
                 <span class="text-sm font-medium">
                   {{ getRoleLabel(userData.role) }}
                 </span>
               </div>
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Статус:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.status' | translate }}</span>
                 <span
                   class="text-sm font-medium"
                   [ngClass]="userData.isActive ? 'text-green-600' : 'text-red-600'"
                 >
-                  {{ userData.isActive ? 'Активен' : 'Неактивен' }}
+                  {{ userData.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
                 </span>
               </div>
             </div>
@@ -56,7 +56,7 @@
           <div class="pt-2 border-t border-gray-200">
             <div class="space-y-1">
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Дата на раждане:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.dateOfBirth' | translate }}</span>
                 <span class="text-sm font-medium">
                   {{ formatDate(userData.dateOfBirth) }}
                 </span>
@@ -69,7 +69,7 @@
             <div class="pt-2 border-t border-gray-200">
               <div class="space-y-1">
                 <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-36 flex-shrink-0">Клуб:</span>
+                  <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.club' | translate }}</span>
                   <span class="text-sm font-medium">
                     {{ clubData?.shortName || '-' }}
                   </span>
@@ -82,13 +82,13 @@
           <div class="pt-2 border-t border-gray-200">
             <div class="space-y-1">
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Създаден на:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.createdAt' | translate }}</span>
                 <span class="text-sm font-medium">
                   {{ formatDateTime(userData.createdAt) }}
                 </span>
               </div>
               <div class="flex items-baseline">
-                <span class="text-xs text-gray-500 w-36 flex-shrink-0">Променен на:</span>
+                <span class="text-xs text-gray-500 w-36 flex-shrink-0">{{ 'users.details.labels.updatedAt' | translate }}</span>
                 <span class="text-sm font-medium">
                   {{ formatDateTime(userData.updatedAt) }}
                 </span>
@@ -102,7 +102,7 @@
           <div class="space-y-4">
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">
-                Име <span class="text-red-500">*</span>
+                {{ 'users.details.edit.firstNameLabel' | translate }} <span class="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -116,7 +116,7 @@
 
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">
-                Фамилия <span class="text-red-500">*</span>
+                {{ 'users.details.edit.lastNameLabel' | translate }} <span class="text-red-500">*</span>
               </label>
               <input
                 type="text"
@@ -130,11 +130,11 @@
 
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">
-                Дата на раждане
+                {{ 'users.details.edit.dateOfBirthLabel' | translate }}
               </label>
               <app-date-picker
                 label=""
-                placeholder="Изберете дата на раждане"
+                [placeholder]="'users.details.edit.dateOfBirthPlaceholder' | translate"
                 [(ngModel)]="editData.dateOfBirth"
                 [disabled]="saving"
               ></app-date-picker>
@@ -142,7 +142,7 @@
 
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">
-                Потребителско име
+                {{ 'users.details.edit.usernameLabel' | translate }}
               </label>
               <input
                 type="text"
@@ -154,13 +154,13 @@
 
             <div>
               <label class="block text-xs font-medium text-gray-700 mb-1">
-                Статус
+                {{ 'users.details.edit.statusLabel' | translate }}
               </label>
               <app-searchable-select-dropdown
                 [options]="statusOptions"
                 [ngModel]="editData.isActive ? 'true' : 'false'"
                 (ngModelChange)="onStatusChange($event)"
-                [placeholder]="'Изберете статус'"
+                [placeholder]="'users.details.edit.statusPlaceholder' | translate"
                 [disabled]="saving"
               >
               </app-searchable-select-dropdown>
@@ -189,7 +189,7 @@
               <app-button
                 variant="outline"
                 size="md"
-                text="Редактиране"
+                [text]="'common.edit' | translate"
                 (click)="startEditing()"
               >
               </app-button>
@@ -197,7 +197,7 @@
             <app-button
               variant="primary"
               size="md"
-              text="Затвори"
+              [text]="'common.close' | translate"
               (click)="close()"
             >
             </app-button>
@@ -205,7 +205,7 @@
             <app-button
               variant="outline"
               size="md"
-              text="Отказ"
+              [text]="'common.cancel' | translate"
               [disabled]="saving"
               (click)="cancelEditing()"
             >
@@ -213,7 +213,7 @@
             <app-button
               variant="primary"
               size="md"
-              text="Запази"
+              [text]="'common.save' | translate"
               [disabled]="saving || !isEditFormValid"
               (click)="save()"
             >
@@ -228,24 +228,22 @@
 
   <app-dialog
     [isOpen]="showEditingWarningDialog"
-    title="Незапазени промени"
+    [title]="'common.unsavedChanges.title' | translate"
     (closed)="showEditingWarningDialog = false"
   >
     <div class="py-4">
       <p class="text-gray-700 mb-6">
-        Имате незапазени промени. Моля, използвайте бутоните
-        <span class="font-medium">„Запазване“</span> или
-        <span class="font-medium">„Отказ“</span>, за да излезете от редакция.
+        {{ 'common.unsavedChanges.message' | translate }}
+        <span class="font-medium">{{ 'common.unsavedChanges.saveButton' | translate }}</span> {{ 'common.unsavedChanges.messageSuffix' | translate }}
       </p>
       <div class="flex justify-center">
         <app-button
           variant="primary"
           size="md"
-          text="Разбрах"
+          [text]="'common.unsavedChanges.confirmButton' | translate"
           (click)="showEditingWarningDialog = false"
         >
         </app-button>
       </div>
     </div>
   </app-dialog>
-

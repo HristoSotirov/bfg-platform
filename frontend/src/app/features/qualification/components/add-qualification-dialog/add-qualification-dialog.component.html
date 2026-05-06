@@ -1,13 +1,13 @@
-<app-dialog [isOpen]="isOpen" title="Добавяне на квалификационна схема" (closed)="close()">
+<app-dialog [isOpen]="isOpen" [title]="'qualification.form.title' | translate" (closed)="close()">
   <div class="flex flex-col h-full min-h-0">
   <div class="space-y-4 flex-1 min-h-0 overflow-y-auto">
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Име <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'qualification.form.nameLabel' | translate }} <span class="text-red-500">*</span>:</label>
       <input
         type="text"
         [(ngModel)]="formData.name"
-        placeholder="Въведете име"
+        [placeholder]="'qualification.form.namePlaceholder' | translate"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
         [class.border-red-500]="touched['name'] && !formData.name.trim()"
         (blur)="touched['name'] = true"
@@ -15,12 +15,12 @@
     </div>
 
     <div>
-      <label class="block text-sm font-medium text-gray-700 mb-1">Брой коридори <span class="text-red-500">*</span>:</label>
+      <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'qualification.form.laneCountLabel' | translate }} <span class="text-red-500">*</span>:</label>
       <input
         type="number"
         [(ngModel)]="formData.laneCount"
         min="1"
-        placeholder="Въведете брой коридори"
+        [placeholder]="'qualification.form.laneCountPlaceholder' | translate"
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
         [class.border-red-500]="touched['laneCount'] && !formData.laneCount && formData.laneCount !== 0"
         (blur)="touched['laneCount'] = true"
@@ -43,7 +43,7 @@
         <app-button
           variant="outline"
           size="md"
-          text="Затвори"
+          [text]="'common.close' | translate"
           [disabled]="saving"
           (click)="close()"
         >
@@ -51,7 +51,7 @@
         <app-button
           variant="primary"
           size="md"
-          text="Запази"
+          [text]="'common.save' | translate"
           [disabled]="!isFormValid || saving"
           (click)="save()"
         >

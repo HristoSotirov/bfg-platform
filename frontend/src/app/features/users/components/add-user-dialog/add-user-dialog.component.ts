@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import {
@@ -30,6 +31,7 @@ import { takeUntil, Subject, catchError, of } from 'rxjs';
   imports: [
     CommonModule,
     FormsModule,
+    TranslateModule,
     DialogComponent,
     ButtonComponent,
     SearchableSelectDropdownComponent,
@@ -63,17 +65,10 @@ export class AddUserDialogComponent implements OnChanges {
 
   roleOptions: SearchableSelectOption[] = [];
 
-  private roleLabels: Record<SystemRole, string> = {
-    [SystemRole.AppAdmin]: 'Администратор',
-    [SystemRole.FederationAdmin]: 'Администратор на федерацията',
-    [SystemRole.ClubAdmin]: 'Администратор на клуб',
-    [SystemRole.Coach]: 'Треньор',
-    [SystemRole.Umpire]: 'Съдия',
-  };
-
   constructor(
     private usersService: UsersService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -116,6 +111,14 @@ export class AddUserDialogComponent implements OnChanges {
       return;
     }
 
+    const roleKeys: Record<SystemRole, string> = {
+      [SystemRole.AppAdmin]: 'common.roles.APP_ADMIN',
+      [SystemRole.FederationAdmin]: 'common.roles.FEDERATION_ADMIN',
+      [SystemRole.ClubAdmin]: 'common.roles.CLUB_ADMIN',
+      [SystemRole.Coach]: 'common.roles.COACH',
+      [SystemRole.Umpire]: 'common.roles.UMPIRE',
+    };
+
     let availableRoles: SystemRole[] = [];
 
     if (this.userRole === SystemRole.AppAdmin) {
@@ -128,7 +131,7 @@ export class AddUserDialogComponent implements OnChanges {
 
     this.roleOptions = availableRoles.map((role) => ({
       value: role,
-      label: this.roleLabels[role],
+      label: this.translateService.instant(roleKeys[role]),
     }));
   }
 
@@ -167,7 +170,7 @@ export class AddUserDialogComponent implements OnChanges {
     this.touched['role'] = true;
 
     if (!this.isFormValid()) {
-      this.error = 'Моля, попълнете всички задължителни полета';
+      this.error = this.translateService.instant('users.form.requiredFields');
       this.cdr.markForCheck();
       return;
     }
@@ -190,7 +193,7 @@ export class AddUserDialogComponent implements OnChanges {
       .pipe(
         catchError((err) => {
           this.error =
-            err?.error?.message || 'Грешка при създаване на потребителя';
+            err?.error?.message || this.translateService.instant('users.form.createError');
           this.saving = false;
           return of(null);
         }),

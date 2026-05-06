@@ -12,11 +12,12 @@ import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { ColumnConfig, FilterConfig } from '../../accreditations.component';
+import { TranslateModule } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-accreditation-settings-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, TranslateModule],
   templateUrl: './accreditation-settings-dialog.component.html',
   styleUrl: './accreditation-settings-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

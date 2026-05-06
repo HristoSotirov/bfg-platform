@@ -19,6 +19,7 @@ import { DatePickerComponent } from '../../../../shared/components/date-picker/d
 import { AccreditationsService, ClubDto } from '../../../../core/services/api';
 import { Gender } from '../../../../core/services/api/model/gender';
 import { catchError } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-add-athlete-dialog',
@@ -30,6 +31,7 @@ import { catchError } from 'rxjs';
     ButtonComponent,
     SearchableSelectDropdownComponent,
     DatePickerComponent,
+    TranslateModule,
   ],
   templateUrl: './add-athlete-dialog.component.html',
   styleUrl: './add-athlete-dialog.component.scss',
@@ -57,14 +59,15 @@ export class AddAthleteDialogComponent {
   isConfirmDialogOpen = false;
 
   genderOptions: SearchableSelectOption[] = [
-    { value: Gender.MALE, label: 'Мъж' },
-    { value: Gender.FEMALE, label: 'Жена' },
+    { value: Gender.MALE, label: this.translateService.instant('accreditations.gender.male') },
+    { value: Gender.FEMALE, label: this.translateService.instant('accreditations.gender.female') },
   ];
 
   constructor(
     private accreditationsService: AccreditationsService,
     private httpClient: HttpClient,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   close(): void {
@@ -89,27 +92,27 @@ export class AddAthleteDialogComponent {
     this.touched['dateOfBirth'] = true;
     this.cdr.markForCheck();
     if (!this.formData.firstName?.trim()) {
-      this.error = 'Името е задължително';
+      this.error = this.translateService.instant('accreditations.addAthleteDialog.validation.firstNameRequired');
       this.cdr.markForCheck();
       return;
     }
     if (!this.formData.middleName?.trim()) {
-      this.error = 'Презимето е задължително';
+      this.error = this.translateService.instant('accreditations.addAthleteDialog.validation.middleNameRequired');
       this.cdr.markForCheck();
       return;
     }
     if (!this.formData.lastName?.trim()) {
-      this.error = 'Фамилията е задължителна';
+      this.error = this.translateService.instant('accreditations.addAthleteDialog.validation.lastNameRequired');
       this.cdr.markForCheck();
       return;
     }
     if (!this.formData.dateOfBirth) {
-      this.error = 'Датата на раждане е задължителна';
+      this.error = this.translateService.instant('accreditations.addAthleteDialog.validation.dateOfBirthRequired');
       this.cdr.markForCheck();
       return;
     }
     if (!this.formData.gender) {
-      this.error = 'Полът е задължителен';
+      this.error = this.translateService.instant('accreditations.addAthleteDialog.validation.genderRequired');
       this.cdr.markForCheck();
       return;
     }
@@ -152,7 +155,7 @@ export class AddAthleteDialogComponent {
           this.error =
             err?.error?.message ||
             err?.message ||
-            'Грешка при създаване на състезател';
+            this.translateService.instant('accreditations.addAthleteDialog.errors.createFailed');
           this.cdr.markForCheck();
           return [];
         }),
@@ -169,7 +172,7 @@ export class AddAthleteDialogComponent {
           this.error =
             err?.error?.message ||
             err?.message ||
-            'Грешка при създаване на състезател';
+            this.translateService.instant('accreditations.addAthleteDialog.errors.createFailed');
           this.cdr.markForCheck();
         },
       });

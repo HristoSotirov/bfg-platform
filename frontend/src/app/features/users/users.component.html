@@ -21,7 +21,7 @@
           ></path>
         </svg>
       </a>
-      <h1 class="text-2xl font-bold text-gray-900">Потребители</h1>
+      <h1 class="text-2xl font-bold text-gray-900">{{ 'users.title' | translate }}</h1>
     </div>
 
     <app-users-filters
@@ -34,7 +34,7 @@
 
     <div class="flex items-center justify-between gap-4 mb-4">
       <div class="text-sm text-gray-600 flex-shrink-0">
-        Брой потребители: <span class="font-semibold">{{ totalElements }}</span>
+        {{ 'users.count' | translate }} <span class="font-semibold">{{ totalElements }}</span>
       </div>
 
       <div class="flex items-center gap-2 ml-auto">
@@ -43,14 +43,14 @@
             <app-button
               variant="white"
               size="md"
-              text="Добавяне на потребител"
+              [text]="'users.addButton' | translate"
               (click)="openAddDialog()"
             >
             </app-button>
             <app-button
               variant="white"
               size="md"
-              text="Мигриране"
+              [text]="'common.migration' | translate"
               (click)="openMigrationDialog()"
             >
             </app-button>
@@ -60,7 +60,7 @@
             variant="white"
             size="md"
             [disabled]="exporting || totalElements === 0"
-            text="Експорт в Excel"
+            [text]="'common.exportExcel' | translate"
             (click)="exportToExcel()"
           >
           </app-button>
@@ -102,7 +102,7 @@
           <div
             class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-1.5 bg-white text-gray-900 text-xs rounded-full whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 shadow-lg border border-gray-200"
           >
-            Настройки на таблицата
+            {{ 'common.settings' | translate }}
             <div
               class="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1"
             >
@@ -118,7 +118,7 @@
     >
       @if (loading && users.length === 0) {
         <div class="flex items-center justify-center h-full">
-          <div class="text-gray-500">Зареждане...</div>
+          <div class="text-gray-500">{{ 'common.loading' | translate }}</div>
         </div>
       } @else if (error) {
         <div class="flex items-center justify-center h-full">

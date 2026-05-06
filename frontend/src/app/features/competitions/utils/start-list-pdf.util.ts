@@ -22,6 +22,9 @@ export interface StartListPdfOptions {
   location: string;
   dayLabel: string;
   events: StartListPdfEvent[];
+  labels?: {
+    tableHeaders: [string, string, string]; // e.g. ['Кор.', 'Клуб', 'Екипаж']
+  };
 }
 
 // ===== RESULTS =====
@@ -41,6 +44,11 @@ export interface ResultsPdfOptions {
   competitionName: string;
   location: string;
   disciplines: ResultsPdfDiscipline[];
+  labels?: {
+    subtitle: string; // e.g. 'Резултати'
+    tableHeaders: [string, string, string, string, string]; // e.g. ['Място', 'Клуб', 'Екипаж', 'Време', 'Точки']
+    filenameSuffix: string; // e.g. 'Резултати'
+  };
 }
 
 // ===== WEIGH-IN =====
@@ -71,6 +79,12 @@ export interface WeighInPdfOptions {
   location: string;
   dayLabel: string;
   events: WeighInPdfEvent[];
+  labels?: {
+    subtitle: string; // e.g. 'Кантар'
+    tableHeaders: [string, string, string, string, string, string]; // e.g. ['Атлет', 'Карта', 'Роля', 'Лимит', 'Тегло', 'Коментар']
+    weightUnit: string; // e.g. 'кг'
+    filenameSuffix: string; // e.g. 'Кантар'
+  };
 }
 
 // ===== SHARED =====
@@ -210,7 +224,8 @@ function safeName(text: string): string {
 // ===== START LIST PDF =====
 
 export async function generateStartListPdf(options: StartListPdfOptions): Promise<void> {
-  const { competitionName, location, dayLabel, events } = options;
+  const { competitionName, location, dayLabel, events, labels } = options;
+  const headers = labels?.tableHeaders ?? ['Кор.', 'Клуб', 'Екипаж'];
   const ctx = await createDoc(competitionName, `${location}  |  ${dayLabel}`);
   const { doc, pageHeight, marginLeft, marginRight, contentWidth, marginBottom } = ctx;
   let { y } = ctx;
@@ -245,7 +260,7 @@ export async function generateStartListPdf(options: StartListPdfOptions): Promis
       startY: y,
       margin: { left: marginLeft, right: marginRight },
       tableWidth: contentWidth,
-      head: [['Кор.', 'Клуб', 'Екипаж']],
+      head: [headers],
       body: rows,
       ...tableStyles([0]),
       columnStyles: {
@@ -264,8 +279,11 @@ export async function generateStartListPdf(options: StartListPdfOptions): Promis
 // ===== RESULTS PDF =====
 
 export async function generateResultsPdf(options: ResultsPdfOptions): Promise<void> {
-  const { competitionName, location, disciplines } = options;
-  const ctx = await createDoc(competitionName, `${location}  |  Резултати`);
+  const { competitionName, location, disciplines, labels } = options;
+  const subtitle = labels?.subtitle ?? 'Резултати';
+  const headers = labels?.tableHeaders ?? ['Място', 'Клуб', 'Екипаж', 'Време', 'Точки'];
+  const filenameSuffix = labels?.filenameSuffix ?? 'Резултати';
+  const ctx = await createDoc(competitionName, `${location}  |  ${subtitle}`);
   const { doc, pageHeight, marginLeft, marginRight, contentWidth, marginBottom } = ctx;
   let { y } = ctx;
 
@@ -302,7 +320,7 @@ export async function generateResultsPdf(options: ResultsPdfOptions): Promise<vo
       startY: y,
       margin: { left: marginLeft, right: marginRight },
       tableWidth: contentWidth,
-      head: [['Място', 'Клуб', 'Екипаж', 'Време', 'Точки']],
+      head: [headers],
       body: rows,
       ...tableStyles([0, 3, 4]),
       columnStyles: {
@@ -317,14 +335,18 @@ export async function generateResultsPdf(options: ResultsPdfOptions): Promise<vo
     y = (doc as any).lastAutoTable.finalY + 8;
   }
 
-  doc.save(`${safeName(competitionName)}_Резултати.pdf`);
+  doc.save(`${safeName(competitionName)}_${safeName(filenameSuffix)}.pdf`);
 }
 
 // ===== WEIGH-IN PDF =====
 
 export async function generateWeighInPdf(options: WeighInPdfOptions): Promise<void> {
-  const { competitionName, location, dayLabel, events } = options;
-  const ctx = await createDoc(competitionName, `${location}  |  Кантар  |  ${dayLabel}`);
+  const { competitionName, location, dayLabel, events, labels } = options;
+  const subtitle = labels?.subtitle ?? 'Кантар';
+  const headers = labels?.tableHeaders ?? ['Атлет', 'Карта', 'Роля', 'Лимит', 'Тегло', 'Коментар'];
+  const weightUnit = labels?.weightUnit ?? 'кг';
+  const filenameSuffix = labels?.filenameSuffix ?? 'Кантар';
+  const ctx = await createDoc(competitionName, `${location}  |  ${subtitle}  |  ${dayLabel}`);
   const { doc, pageHeight, marginLeft, marginRight, contentWidth, marginBottom } = ctx;
   let { y } = ctx;
 
@@ -341,8 +363,8 @@ export async function generateWeighInPdf(options: WeighInPdfOptions): Promise<vo
           `${a.seat} - ${a.name}`,
           a.cardNumber,
           a.roleLabel,
-          a.weightLimit != null ? `${a.weightLimit} кг` : '–',
-          a.weightKg != null ? `${a.weightKg} кг` : '–',
+          a.weightLimit != null ? `${a.weightLimit} ${weightUnit}` : '–',
+          a.weightKg != null ? `${a.weightKg} ${weightUnit}` : '–',
           a.comment || '',
         ]);
       }
@@ -359,8 +381,8 @@ export async function generateWeighInPdf(options: WeighInPdfOptions): Promise<vo
           `${a.seat} - ${a.name}`,
           a.cardNumber,
           a.roleLabel,
-          a.weightLimit != null ? `${a.weightLimit} кг` : '–',
-          a.weightKg != null ? `${a.weightKg} кг` : '–',
+          a.weightLimit != null ? `${a.weightLimit} ${weightUnit}` : '–',
+          a.weightKg != null ? `${a.weightKg} ${weightUnit}` : '–',
           a.comment || '',
         ]);
       }
@@ -382,7 +404,7 @@ export async function generateWeighInPdf(options: WeighInPdfOptions): Promise<vo
       startY: y,
       margin: { left: marginLeft, right: marginRight },
       tableWidth: contentWidth,
-      head: [['Атлет', 'Карта', 'Роля', 'Лимит', 'Тегло', 'Коментар']],
+      head: [headers],
       body: groupedRows,
       ...tableStyles([3, 4]),
       columnStyles: {
@@ -398,5 +420,5 @@ export async function generateWeighInPdf(options: WeighInPdfOptions): Promise<vo
     y = (doc as any).lastAutoTable.finalY + 8;
   }
 
-  doc.save(`${safeName(competitionName)}_Кантар_${safeName(dayLabel)}.pdf`);
+  doc.save(`${safeName(competitionName)}_${safeName(filenameSuffix)}_${safeName(dayLabel)}.pdf`);
 }

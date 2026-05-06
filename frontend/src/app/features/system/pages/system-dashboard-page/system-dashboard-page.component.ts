@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
+import { TranslateModule } from '@ngx-translate/core';
 import { HeaderComponent } from '../../../../layout/header/header.component';
 import { HealthCardComponent } from '../../components/health-card/health-card.component';
 import { MetricsCardComponent } from '../../components/metrics-card/metrics-card.component';
@@ -21,6 +22,7 @@ import { ActuatorService, InfoResponse } from '../../services/actuator.service';
   imports: [
     CommonModule,
     RouterModule,
+    TranslateModule,
     HeaderComponent,
     HealthCardComponent,
     MetricsCardComponent,

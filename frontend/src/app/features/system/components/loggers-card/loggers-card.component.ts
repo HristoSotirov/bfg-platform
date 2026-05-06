@@ -8,6 +8,7 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActuatorService, LoggersResponse } from '../../services/actuator.service';
 import {
   SearchableSelectDropdownComponent,
@@ -24,7 +25,7 @@ interface LoggerDisplay {
 @Component({
   selector: 'app-loggers-card',
   standalone: true,
-  imports: [CommonModule, FormsModule, SearchableSelectDropdownComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, SearchableSelectDropdownComponent],
   templateUrl: './loggers-card.component.html',
   styleUrl: './loggers-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -58,6 +59,7 @@ export class LoggersCardComponent implements OnInit, OnDestroy {
   constructor(
     private actuatorService: ActuatorService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -74,7 +76,7 @@ export class LoggersCardComponent implements OnInit, OnDestroy {
       .getLoggers()
       .pipe(
         catchError(() => {
-          this.error = 'Грешка при зареждане на логерите';
+          this.error = this.translateService.instant('system.loggersCard.errorLoading');
           this.loading = false;
           this.cdr.markForCheck();
           return of(null);
@@ -128,7 +130,7 @@ export class LoggersCardComponent implements OnInit, OnDestroy {
       .setLoggerLevel(logger.name, newLevel)
       .pipe(
         catchError(() => {
-          this.error = `Грешка при промяна на нивото за ${logger.label}`;
+          this.error = this.translateService.instant('system.loggersCard.levelChangeError', { logger: logger.label });
           this.cdr.markForCheck();
           return of(null);
         }),
@@ -138,7 +140,7 @@ export class LoggersCardComponent implements OnInit, OnDestroy {
         if (result !== null || result === undefined) {
           logger.configuredLevel = newLevel;
           logger.effectiveLevel = newLevel;
-          this.successMessage = `Нивото на ${logger.label} е променено на ${newLevel}`;
+          this.successMessage = this.translateService.instant('system.loggersCard.levelChanged', { logger: logger.label, level: newLevel });
           this.error = null;
 
           setTimeout(() => {

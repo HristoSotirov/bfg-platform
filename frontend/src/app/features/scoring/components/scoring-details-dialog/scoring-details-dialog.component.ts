@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -38,7 +39,7 @@ import { getBoatClassLabel } from '../../../../shared/utils/boat-class.util';
   selector: 'app-scoring-details-dialog',
   standalone: true,
   imports: [
-    CommonModule,
+    CommonModule, TranslateModule,
     FormsModule,
     RouterModule,
     DialogComponent,
@@ -86,8 +87,8 @@ export class ScoringDetailsDialogComponent implements OnChanges {
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   isAddRuleDialogOpen = false;
@@ -148,6 +149,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
     private scoringRulesService: ScoringRulesService,
     private scoringSchemeBoatCoefficientsService: ScoringSchemeBoatCoefficientsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -534,7 +536,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
       .pipe(
         catchError((err) => {
           const errorMessage =
-            err?.error?.message || 'Грешка при запазване';
+            err?.error?.message || this.translate.instant('common.errorSaving');
           return throwError(() => ({ message: errorMessage }));
         }),
         takeUntil(this.destroy$),
@@ -552,7 +554,7 @@ export class ScoringDetailsDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.saving = false;
-          this.error = err?.message || 'Грешка при запазване';
+          this.error = err?.message || this.translate.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });

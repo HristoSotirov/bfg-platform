@@ -6,6 +6,7 @@ import {
   ChangeDetectorRef,
 } from '@angular/core';
 import { CommonModule, Location } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil, catchError, of, Observable, map, throwError, take } from 'rxjs';
@@ -35,6 +36,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
   standalone: true,
   imports: [
     CommonModule,
+    TranslateModule,
     FormsModule,
     RouterModule,
     HeaderComponent,
@@ -100,19 +102,19 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
   ];
 
   readonly genderOptions: SearchableSelectOption[] = [
-    { value: DisciplineGender.Male, label: 'Мъже' },
-    { value: DisciplineGender.Female, label: 'Жени' },
-    { value: DisciplineGender.Mixed, label: 'Смесени' },
+    { value: DisciplineGender.Male, label: this.translate.instant('common.gender.male') },
+    { value: DisciplineGender.Female, label: this.translate.instant('common.gender.female') },
+    { value: DisciplineGender.Mixed, label: this.translate.instant('common.gender.mixed') },
   ];
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   readonly booleanOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Да' },
-    { value: 'false', label: 'Не' },
+    { value: 'true', label: this.translate.instant('common.yes') },
+    { value: 'false', label: this.translate.instant('common.no') },
   ];
 
   // Group preview dialog
@@ -127,6 +129,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private authService: AuthService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -164,7 +167,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
       .subscribe((discipline) => {
         this.discipline = discipline;
         this.loading = false;
-        if (!discipline) this.error = 'Дисциплината не е намерена.';
+        if (!discipline) this.error = this.translate.instant('common.errorNotFound');
         this.cdr.markForCheck();
       });
   }
@@ -299,7 +302,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
       .updateDisciplineDefinitionByUuid(this.discipline.uuid, request)
       .pipe(
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при запазване';
+          let errorMessage = this.translate.instant('common.errorSaving');
           if (err.status === 409) errorMessage = err?.error?.message || 'Конфликт при запазване.';
           else if (err?.error?.message) errorMessage = err.error.message;
           return throwError(() => ({ message: errorMessage }));
@@ -316,7 +319,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.saving = false;
-          this.saveError = err?.message || 'Грешка при запазване';
+          this.saveError = err?.message || this.translate.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });
@@ -343,7 +346,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
       .deleteDisciplineDefinitionByUuid(this.discipline.uuid)
       .pipe(
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при изтриване';
+          let errorMessage = this.translate.instant('common.errorDeleting');
           if (err?.error?.message) errorMessage = err.error.message;
           return throwError(() => ({ message: errorMessage }));
         }),
@@ -353,7 +356,7 @@ export class DisciplineDetailPageComponent implements OnInit, OnDestroy {
         next: () => { this.location.back(); },
         error: (err) => {
           this.deleting = false;
-          this.deleteError = err?.message || 'Грешка при изтриване';
+          this.deleteError = err?.message || this.translate.instant('common.errorDeleting');
           this.cdr.markForCheck();
         },
       });

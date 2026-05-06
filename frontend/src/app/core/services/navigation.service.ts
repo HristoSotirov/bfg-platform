@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
 import { NavigationItem } from '../models/navigation.model';
 import { SystemRole } from '../models/navigation.model';
 
@@ -9,47 +10,73 @@ export class NavigationService {
   private navigationItems: NavigationItem[] = [
     {
       id: 'accreditations',
-      label: 'Картотеки',
+      label: '',
       route: '/accreditations',
       requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE'],
     },
     {
       id: 'clubs',
-      label: 'Клубове',
+      label: '',
       route: '/clubs',
       requiredRoles: [], // visible to all
     },
     {
       id: 'users',
-      label: 'Потребители',
+      label: '',
       route: '/users',
       requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'UMPIRE'],
     },
     {
       id: 'rules',
-      label: 'Правилник',
+      label: '',
       route: '/regulations',
       requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE'],
     },
     {
       id: 'competitions',
-      label: 'Състезания',
+      label: '',
       route: '/competitions',
       requiredRoles: ['APP_ADMIN', 'FEDERATION_ADMIN', 'CLUB_ADMIN', 'COACH', 'UMPIRE'],
     },
     {
       id: 'results',
-      label: 'Резултати',
+      label: '',
       route: '/results',
       requiredRoles: [], // visible to all
     },
     {
       id: 'system',
-      label: 'Система',
+      label: '',
       route: '/system',
       requiredRoles: ['APP_ADMIN'],
     },
   ];
+
+  constructor(private translateService: TranslateService) {
+    this.updateLabels();
+    this.translateService.onLangChange.subscribe(() => {
+      this.updateLabels();
+    });
+  }
+
+  private updateLabels(): void {
+    const labelKeys: Record<string, string> = {
+      accreditations: 'nav.accreditations',
+      clubs: 'nav.clubs',
+      users: 'nav.users',
+      rules: 'nav.rules',
+      competitions: 'nav.competitions',
+      results: 'nav.results',
+      system: 'nav.system',
+    };
+
+    this.navigationItems.forEach((item) => {
+      const key = labelKeys[item.id];
+      if (key) {
+        item.label = this.translateService.instant(key);
+      }
+    });
+  }
 
   getVisibleItems(userRoles: SystemRole[]): NavigationItem[] {
     return this.navigationItems.filter((item) =>

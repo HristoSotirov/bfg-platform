@@ -9,6 +9,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil, catchError, of, forkJoin } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -70,6 +71,7 @@ interface AccreditationHistoryItem {
     PhotoCropDialogComponent,
     AthletePhotoViewDialogComponent,
     DeleteConfirmDialogComponent,
+    TranslateModule,
   ],
   templateUrl: './accreditation-detail-page.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -121,21 +123,21 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   statusChanges: Map<string, AccreditationStatus> = new Map();
 
   private statusLabels: Record<string, string> = {
-    [AccreditationStatus.Active]: 'Активна',
-    [AccreditationStatus.PendingValidation]: 'Заявена',
-    [AccreditationStatus.PendingPhotoValidation]: 'Чакаща снимка',
-    [AccreditationStatus.NewPhotoRequired]: 'Нова снимка',
-    [AccreditationStatus.Expired]: 'Изтекла',
-    [AccreditationStatus.Suspended]: 'Спряна',
+    [AccreditationStatus.Active]: this.translateService.instant('accreditations.status.active'),
+    [AccreditationStatus.PendingValidation]: this.translateService.instant('accreditations.status.requested'),
+    [AccreditationStatus.PendingPhotoValidation]: this.translateService.instant('accreditations.status.pendingPhoto'),
+    [AccreditationStatus.NewPhotoRequired]: this.translateService.instant('accreditations.status.newPhoto'),
+    [AccreditationStatus.Expired]: this.translateService.instant('accreditations.status.expired'),
+    [AccreditationStatus.Suspended]: this.translateService.instant('accreditations.status.suspended'),
   };
 
   readonly statusOptions: { value: AccreditationStatus; label: string }[] = [
-    { value: AccreditationStatus.Active, label: 'Активна' },
-    { value: AccreditationStatus.PendingValidation, label: 'Заявена' },
-    { value: AccreditationStatus.PendingPhotoValidation, label: 'Чакаща снимка' },
-    { value: AccreditationStatus.NewPhotoRequired, label: 'Нова снимка' },
-    { value: AccreditationStatus.Expired, label: 'Изтекла' },
-    { value: AccreditationStatus.Suspended, label: 'Спряна' },
+    { value: AccreditationStatus.Active, label: this.translateService.instant('accreditations.status.active') },
+    { value: AccreditationStatus.PendingValidation, label: this.translateService.instant('accreditations.status.requested') },
+    { value: AccreditationStatus.PendingPhotoValidation, label: this.translateService.instant('accreditations.status.pendingPhoto') },
+    { value: AccreditationStatus.NewPhotoRequired, label: this.translateService.instant('accreditations.status.newPhoto') },
+    { value: AccreditationStatus.Expired, label: this.translateService.instant('accreditations.status.expired') },
+    { value: AccreditationStatus.Suspended, label: this.translateService.instant('accreditations.status.suspended') },
   ];
 
   get statusSelectOptions(): SearchableSelectOption[] {
@@ -143,8 +145,8 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   readonly genderOptions = [
-    { value: Gender.MALE, label: 'Мъж' },
-    { value: Gender.FEMALE, label: 'Жена' },
+    { value: Gender.MALE, label: this.translateService.instant('accreditations.gender.male') },
+    { value: Gender.FEMALE, label: this.translateService.instant('accreditations.gender.female') },
   ];
 
   get genderSelectOptions(): SearchableSelectOption[] {
@@ -165,6 +167,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
     private authService: AuthService,
     private scopeVisibility: ScopeVisibilityService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -216,10 +219,10 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   }
 
   get fullName(): string {
-    if (!this.athlete) return 'Състезател';
+    if (!this.athlete) return this.translateService.instant('accreditations.detailPage.defaultName');
     const name = [this.athlete.firstName, this.athlete.middleName, this.athlete.lastName]
       .filter(Boolean).join(' ');
-    return name || 'Състезател';
+    return name || this.translateService.instant('accreditations.detailPage.defaultName');
   }
 
   get displayPhotoUrl(): string | null {
@@ -272,11 +275,11 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
       middleName: this.athlete.middleName ?? '',
       lastName: this.athlete.lastName ?? '',
       dateOfBirth: this.formatDate(this.athlete.dateOfBirth),
-      raceGroup: this.getRaceGroup(),
       lastAccreditationClub: lastAcc?.club?.shortName ?? '-',
       lastAccreditationYear: lastAcc?.year ?? 0,
       lastAccreditationNumber: lastAcc?.accreditationNumber ?? '-',
       lastAccreditationStatus: this.getStatusLabel(lastAcc?.status),
+      lastAccreditationStatusClass: this.getStatusClass(lastAcc?.status),
     };
   }
 
@@ -331,7 +334,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
       .getAccreditationByUuid(uuid, ['athlete', 'club'])
       .pipe(
         catchError((err) => {
-          this.error = err?.error?.message || 'Грешка при зареждане на акредитацията';
+          this.error = err?.error?.message || this.translateService.instant('accreditations.detailPage.errors.loadFailed');
           this.loading = false;
           this.cdr.markForCheck();
           return of(null);
@@ -343,7 +346,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
           this.accreditation = accreditation;
           this.loading = false;
           if (!accreditation) {
-            this.error = this.error || 'Акредитацията не е намерена.';
+            this.error = this.error || this.translateService.instant('accreditations.detailPage.errors.notFound');
             this.cdr.markForCheck();
           } else {
             this.loadAccreditationHistory();
@@ -565,7 +568,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
       },
       error: (err: any) => {
         this.saving = false;
-        this.error = err?.error?.message || 'Грешка при запазване';
+        this.error = err?.error?.message || this.translateService.instant('accreditations.athleteDetailsDialog.errors.saveFailed');
         this.cdr.markForCheck();
       },
     });
@@ -600,12 +603,12 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
     const file = input?.files?.[0];
     if (!file) return;
     if (!this.allowedPhotoTypes.includes(file.type)) {
-      this.photoError = 'Разрешени са само JPEG и PNG файлове.';
+      this.photoError = this.translateService.instant('accreditations.athleteDetailsDialog.photoErrors.onlyJpegPng');
       this.cdr.markForCheck();
       return;
     }
     if (file.size > this.maxPhotoSizeBytes) {
-      this.photoError = 'Файлът не трябва да надвишава 10 MB.';
+      this.photoError = this.translateService.instant('accreditations.athleteDetailsDialog.photoErrors.maxFileSize');
       this.cdr.markForCheck();
       return;
     }
@@ -642,12 +645,12 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
   uploadPhoto(file: File): void {
     const athleteId = this.athlete?.uuid;
     if (!athleteId) {
-      this.photoError = 'Липсва данни за състезател.';
+      this.photoError = this.translateService.instant('accreditations.athleteDetailsDialog.photoErrors.noAthleteData');
       this.cdr.markForCheck();
       return;
     }
     if (!this.canUploadPhoto) {
-      this.photoError = 'Качването не е позволено: състезателят трябва да има акредитация за тази година със статус "Нова снимка изискана" за вашия клуб.';
+      this.photoError = this.translateService.instant('accreditations.detailPage.errors.uploadNotAllowed');
       this.cdr.markForCheck();
       return;
     }
@@ -663,7 +666,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.uploadingPhoto = false;
-        this.photoError = err?.error?.message || err?.message || 'Грешка при качване на снимката.';
+        this.photoError = err?.error?.message || err?.message || this.translateService.instant('accreditations.athleteDetailsDialog.errors.uploadFailed');
         this.cdr.markForCheck();
       },
     });
@@ -716,12 +719,12 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
 
   getGenderLabel(gender: string | undefined): string {
     if (!gender) return '-';
-    return gender === Gender.MALE ? 'Мъж' : gender === Gender.FEMALE ? 'Жена' : gender;
+    return gender === Gender.MALE ? this.translateService.instant('accreditations.gender.male') : gender === Gender.FEMALE ? this.translateService.instant('accreditations.gender.female') : gender;
   }
 
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
-    const labels: Record<string, string> = { [ScopeType.Internal]: 'Вътрешен', [ScopeType.External]: 'Външен', [ScopeType.National]: 'Национален' };
+    const labels: Record<string, string> = { [ScopeType.Internal]: this.translateService.instant('accreditations.scopeType.internal'), [ScopeType.External]: this.translateService.instant('accreditations.scopeType.external'), [ScopeType.National]: this.translateService.instant('accreditations.scopeType.national') };
     return labels[scopeType] ?? scopeType;
   }
 
@@ -773,7 +776,7 @@ export class AccreditationDetailPageComponent implements OnInit, OnDestroy {
         },
         error: (err) => {
           this.deletingMain = false;
-          this.deleteMainError = err?.error?.message || 'Грешка при изтриване на картотека';
+          this.deleteMainError = err?.error?.message || this.translateService.instant('accreditations.detailPage.errors.deleteFailed');
           this.cdr.markForCheck();
         },
       });

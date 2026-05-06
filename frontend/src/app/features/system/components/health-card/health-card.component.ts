@@ -7,12 +7,13 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, takeUntil, catchError, of } from 'rxjs';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { ActuatorService, HealthResponse } from '../../services/actuator.service';
 
 @Component({
   selector: 'app-health-card',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, TranslateModule],
   templateUrl: './health-card.component.html',
   styleUrl: './health-card.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -27,6 +28,7 @@ export class HealthCardComponent implements OnInit, OnDestroy {
   constructor(
     private actuatorService: ActuatorService,
     private cdr: ChangeDetectorRef,
+    private translateService: TranslateService,
   ) {}
 
   ngOnInit(): void {
@@ -48,7 +50,7 @@ export class HealthCardComponent implements OnInit, OnDestroy {
   private loadHealth(): void {
     this.actuatorService.getHealth().pipe(
       catchError(() => {
-        this.error = 'Грешка при зареждане на здравния статус';
+        this.error = this.translateService.instant('system.healthCard.errorLoading');
         this.loading = false;
         this.cdr.markForCheck();
         return of(null);
@@ -86,15 +88,8 @@ export class HealthCardComponent implements OnInit, OnDestroy {
   }
 
   getComponentLabel(name: string): string {
-    const labels: { [key: string]: string } = {
-      db: 'База данни',
-      diskSpace: 'Дисково пространство',
-      brevo: 'Brevo (имейл)',
-      minio: 'MinIO (файлове)',
-      ping: 'Ping',
-      livenessState: 'Liveness',
-      readinessState: 'Readiness',
-    };
-    return labels[name] || name;
+    const key = `system.healthCard.components.${name}`;
+    const translated = this.translateService.instant(key);
+    return translated !== key ? translated : name;
   }
 }

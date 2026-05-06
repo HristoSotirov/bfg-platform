@@ -1,6 +1,6 @@
 <app-dialog
   [isOpen]="isOpen"
-  title="Настройки на таблицата"
+  [title]="'competitions.settingsDialog.title' | translate"
   size="md"
   (closed)="close()"
 >
@@ -15,7 +15,7 @@
         [class.text-gray-500]="activeTab !== 'columns'"
         (click)="activeTab = 'columns'"
       >
-        Колони
+        {{ 'competitions.settingsDialog.tabs.columns' | translate }}
       </button>
       <button
         type="button"
@@ -26,7 +26,7 @@
         [class.text-gray-500]="activeTab !== 'filters'"
         (click)="activeTab = 'filters'"
       >
-        Филтри
+        {{ 'competitions.settingsDialog.tabs.filters' | translate }}
       </button>
     </div>
 
@@ -34,7 +34,7 @@
       @if (activeTab === "columns") {
         <div class="space-y-3">
           <p class="text-sm text-gray-600">
-            Изберете кои колони да се показват в таблицата.
+            {{ 'competitions.settingsDialog.columnsDescription' | translate }}
           </p>
 
           <div class="flex gap-2 mb-2">
@@ -43,7 +43,7 @@
               class="text-xs text-bfg-blue hover:underline"
               (click)="selectAllColumns()"
             >
-              Избери всички
+              {{ 'competitions.settingsDialog.selectAll' | translate }}
             </button>
             <span class="text-gray-300">|</span>
             <button
@@ -51,7 +51,7 @@
               class="text-xs text-bfg-blue hover:underline"
               (click)="deselectAllColumns()"
             >
-              Премахни всички
+              {{ 'competitions.settingsDialog.deselectAll' | translate }}
             </button>
           </div>
 
@@ -76,8 +76,7 @@
       @if (activeTab === "filters") {
         <div class="space-y-3">
           <p class="text-sm text-gray-600">
-            Изберете кои филтри да се показват. При скриване на филтър
-            стойността му се изчиства.
+            {{ 'competitions.settingsDialog.filtersDescription' | translate }}
           </p>
 
           <div class="flex gap-2 mb-2">
@@ -86,7 +85,7 @@
               class="text-xs text-bfg-blue hover:underline"
               (click)="selectAllFilters()"
             >
-              Избери всички
+              {{ 'competitions.settingsDialog.selectAll' | translate }}
             </button>
             <span class="text-gray-300">|</span>
             <button
@@ -94,7 +93,7 @@
               class="text-xs text-bfg-blue hover:underline"
               (click)="deselectAllFilters()"
             >
-              Премахни всички
+              {{ 'competitions.settingsDialog.deselectAll' | translate }}
             </button>
           </div>
 
@@ -118,9 +117,9 @@
     </div>
 
     <div class="flex justify-center gap-3 pt-4 border-t">
-      <app-button variant="outline" size="md" text="Отказ" (click)="close()">
+      <app-button variant="outline" size="md" [text]="'common.cancel' | translate" (click)="close()">
       </app-button>
-      <app-button variant="primary" size="md" text="Запази" (click)="save()">
+      <app-button variant="primary" size="md" [text]="'common.save' | translate" (click)="save()">
       </app-button>
     </div>
   </div>

@@ -1,4 +1,4 @@
-<app-dialog [isOpen]="isOpen" title="Миграция на състезатели" size="2xl" (closed)="close()">
+<app-dialog [isOpen]="isOpen" [title]="'accreditations.migrationDialog.title' | translate" size="2xl" (closed)="close()">
   <div class="space-y-4">
     @if (step === 'upload') {
       <div class="text-center py-8">
@@ -11,7 +11,7 @@
           <label
             for="athlete-file-upload"
             class="cursor-pointer inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-            Избери Excel файл
+            {{ 'accreditations.migrationDialog.uploadButton' | translate }}
             <input
               id="athlete-file-upload"
               type="file"
@@ -38,8 +38,8 @@
 
     @if (step === 'mapping') {
       <div class="space-y-4">
-        <h4 class="font-medium text-gray-900">Съпоставка на колони</h4>
-        <p class="text-sm text-gray-500">Изберете от коя колона на файла да се вземе всяко поле.</p>
+        <h4 class="font-medium text-gray-900">{{ 'accreditations.migrationDialog.mapping.title' | translate }}</h4>
+        <p class="text-sm text-gray-500">{{ 'accreditations.migrationDialog.mapping.instruction' | translate }}</p>
 
         <div class="space-y-2 max-h-60 overflow-y-auto scrollbar-hover">
           @for (field of fieldMappings; track field.dataField) {
@@ -51,7 +51,7 @@
               <div class="w-1/2">
                 <app-searchable-select-dropdown
                   [options]="getExcelOptionsForField(field)"
-                  [placeholder]="'Не импортирай'"
+                  [placeholder]="'accreditations.migrationDialog.mapping.placeholder' | translate"
                   [ngModel]="field.excelColumn || null"
                   (ngModelChange)="onFieldExcelColumnChange(field, $event)">
                 </app-searchable-select-dropdown>
@@ -61,7 +61,7 @@
         </div>
 
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Година за картотекиране:</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'accreditations.migrationDialog.mapping.yearLabel' | translate }}</label>
           <input
             type="number"
             [(ngModel)]="migrationYear"
@@ -70,16 +70,16 @@
             [class.border-red-500]="migrationYear > maxYear"
             class="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue">
           @if (migrationYear > maxYear) {
-            <p class="text-xs text-red-500 mt-1">Не може да се картотекира за бъдеща година</p>
+            <p class="text-xs text-red-500 mt-1">{{ 'accreditations.migrationDialog.mapping.yearError' | translate }}</p>
           }
         </div>
 
         <div class="flex justify-center gap-2 pt-4 border-t">
-          <app-button variant="outline" size="sm" text="Назад" (click)="step = 'upload'"></app-button>
+          <app-button variant="outline" size="sm" [text]="'accreditations.migrationDialog.buttons.back' | translate" (click)="step = 'upload'"></app-button>
           <app-button
             variant="primary"
             size="sm"
-            text="Преглед"
+            [text]="'accreditations.migrationDialog.buttons.preview' | translate"
             [disabled]="!hasRequiredMappings || migrationYear > maxYear"
             (click)="goToPreview()">
           </app-button>
@@ -89,19 +89,19 @@
 
     @if (step === 'preview') {
       <div class="space-y-4">
-        <h4 class="font-medium text-gray-900">Преглед на данните</h4>
-        <p class="text-sm text-gray-500">Записи с валиден картотечен номер (4–6 цифри): {{ parsedAthletes.length }}</p>
+        <h4 class="font-medium text-gray-900">{{ 'accreditations.migrationDialog.preview.title' | translate }}</h4>
+        <p class="text-sm text-gray-500">{{ 'accreditations.migrationDialog.preview.validRecords' | translate }} {{ parsedAthletes.length }}</p>
 
         <div class="overflow-auto scrollbar-hover border rounded-lg max-h-60">
           <table class="min-w-full divide-y divide-gray-200 text-sm">
             <thead class="bg-gray-50 sticky top-0">
               <tr>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Картотека</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Име</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Презиме</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Фамилия</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Пол</th>
-                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Дата раждане</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.preview.columns.cardNumber' | translate }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.preview.columns.firstName' | translate }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.preview.columns.middleName' | translate }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.preview.columns.lastName' | translate }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.preview.columns.gender' | translate }}</th>
+                <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.preview.columns.dateOfBirth' | translate }}</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-gray-200">
@@ -138,11 +138,11 @@
         }
 
         <div class="flex justify-center gap-2 pt-4 border-t">
-          <app-button variant="outline" size="sm" text="Назад" [disabled]="migrating" (click)="goBackToMapping()"></app-button>
+          <app-button variant="outline" size="sm" [text]="'accreditations.migrationDialog.buttons.back' | translate" [disabled]="migrating" (click)="goBackToMapping()"></app-button>
           <app-button
             variant="primary"
             size="sm"
-            [text]="migrating ? 'Мигриране...' : 'Мигрирай'"
+            [text]="migrating ? ('accreditations.migrationDialog.buttons.migrating' | translate) : ('accreditations.migrationDialog.buttons.migrate' | translate)"
             [disabled]="migrating || migrationYear > maxYear"
             (click)="migrate()">
           </app-button>
@@ -152,19 +152,19 @@
 
     @if (step === 'results' && migrationResult) {
       <div class="space-y-4">
-        <h4 class="font-medium text-gray-900">Резултат от миграцията</h4>
+        <h4 class="font-medium text-gray-900">{{ 'accreditations.migrationDialog.results.title' | translate }}</h4>
         <div class="space-y-2 text-sm">
-          <p class="text-green-600">Мигрирани: {{ migrationResult.totalMigrated }}</p>
-          <p class="text-amber-600">Пропуснати: {{ migrationResult.totalSkipped }}</p>
+          <p class="text-green-600">{{ 'accreditations.migrationDialog.results.migrated' | translate }} {{ migrationResult.totalMigrated }}</p>
+          <p class="text-amber-600">{{ 'accreditations.migrationDialog.results.skipped' | translate }} {{ migrationResult.totalSkipped }}</p>
           @if (migrationResult.failedChunkCount > 0) {
-            <p class="text-red-600">{{ migrationResult.failedChunkCount }} от {{ migrationResult.totalChunkCount }} заявки не успяха.</p>
+            <p class="text-red-600">{{ migrationResult.failedChunkCount }} {{ 'accreditations.migrationDialog.results.failedChunks' | translate:{ failed: migrationResult.failedChunkCount, total: migrationResult.totalChunkCount } }}</p>
             <div class="mt-2">
               <div class="overflow-auto border border-red-200 rounded-lg max-h-40">
                 <table class="min-w-full divide-y divide-red-200 text-sm">
                   <thead class="bg-red-50 sticky top-0">
                     <tr>
-                      <th class="px-3 py-2 text-left text-xs font-medium text-red-700">Заявка</th>
-                      <th class="px-3 py-2 text-left text-xs font-medium text-red-700">Причина</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-red-700">{{ 'accreditations.migrationDialog.results.failedColumns.chunk' | translate }}</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-red-700">{{ 'accreditations.migrationDialog.results.failedColumns.reason' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-red-100 bg-white">
@@ -181,15 +181,15 @@
           }
           @if (migrationResult.skippedItems.length > 0) {
             <div class="mt-2">
-              <p class="text-gray-600 mb-1">Пропуснати записи:</p>
+              <p class="text-gray-600 mb-1">{{ 'accreditations.migrationDialog.results.skippedTitle' | translate }}</p>
               <div class="overflow-auto border border-gray-200 rounded-lg max-h-40">
                 <table class="min-w-full divide-y divide-gray-200 text-sm">
                   <thead class="bg-gray-50 sticky top-0">
                     <tr>
-                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Картотека</th>
-                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Име</th>
-                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Фамилия</th>
-                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">Причина</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.results.skippedColumns.cardNumber' | translate }}</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.results.skippedColumns.name' | translate }}</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.results.skippedColumns.lastName' | translate }}</th>
+                      <th class="px-3 py-2 text-left text-xs font-medium text-gray-500">{{ 'accreditations.migrationDialog.results.skippedColumns.reason' | translate }}</th>
                     </tr>
                   </thead>
                   <tbody class="divide-y divide-gray-200 bg-white">
@@ -208,7 +208,7 @@
           }
         </div>
         <div class="flex justify-center pt-4 border-t">
-          <app-button variant="primary" size="sm" text="Готово" (click)="finishResults()"></app-button>
+          <app-button variant="primary" size="sm" [text]="'accreditations.migrationDialog.buttons.done' | translate" (click)="finishResults()"></app-button>
         </div>
       </div>
     }

@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
@@ -39,7 +40,7 @@ interface TierWithProgressions {
   selector: 'app-qualification-details-dialog',
   standalone: true,
   imports: [
-    CommonModule,
+    CommonModule, TranslateModule,
     FormsModule,
     RouterModule,
     DialogComponent,
@@ -147,8 +148,8 @@ export class QualificationDetailsDialogComponent implements OnChanges {
   };
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   constructor(
@@ -156,6 +157,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
     private tiersService: QualificationTiersService,
     private progressionsService: QualificationProgressionsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -362,7 +364,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
     this.schemesService
       .updateQualificationSchemeByUuid(this.scheme.uuid, request)
       .pipe(
-        catchError((err) => throwError(() => ({ message: err?.error?.message || 'Грешка при запазване' }))),
+        catchError((err) => throwError(() => ({ message: err?.error?.message || this.translate.instant('common.errorSaving') }))),
         takeUntil(this.destroy$),
       )
       .subscribe({
@@ -376,7 +378,7 @@ export class QualificationDetailsDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.saving = false;
-          this.error = err?.message || 'Грешка при запазване';
+          this.error = err?.message || this.translate.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });

@@ -9,6 +9,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -24,7 +25,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-add-competition-group-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent],
   templateUrl: './add-competition-group-dialog.component.html',
   styleUrl: './add-competition-group-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -78,8 +79,8 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
     ]));
 
   readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
+    { value: 'true', label: this.translate.instant('common.status.active') },
+    { value: 'false', label: this.translate.instant('common.status.inactive') },
   ];
 
   readonly roundingOptions: SearchableSelectOption[] = [
@@ -92,6 +93,7 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
   constructor(
     private competitionGroupDefinitionsService: CompetitionGroupDefinitionsService,
     private cdr: ChangeDetectorRef,
+    private translate: TranslateService,
   ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -197,7 +199,7 @@ export class AddCompetitionGroupDialogComponent implements OnChanges {
         error: (err) => {
           this.saving = false;
           this.error =
-            err?.error?.message || 'Грешка при създаване на състезателна група';
+            err?.error?.message || this.translate.instant('competitionGroups.form.createError');
           this.cdr.markForCheck();
         },
       });

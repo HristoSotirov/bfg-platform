@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
@@ -47,7 +48,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-club-details-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, PhotoCropDialogComponent, ClubLogoViewDialogComponent],
+  imports: [CommonModule, FormsModule, TranslateModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, PhotoCropDialogComponent, ClubLogoViewDialogComponent],
   templateUrl: './club-details-dialog.component.html',
   styleUrl: './club-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -108,10 +109,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
       }),
     );
 
-  readonly statusOptions: SearchableSelectOption[] = [
-    { value: 'true', label: 'Активен' },
-    { value: 'false', label: 'Неактивен' },
-  ];
+  readonly statusOptions: SearchableSelectOption[] = [];
 
   showAddCoachForm = false;
   availableCoaches: UserDto[] = [];
@@ -158,7 +156,13 @@ export class ClubDetailsDialogComponent implements OnChanges {
     private clubCoachesService: ClubCoachesService,
     private usersService: UsersService,
     private cdr: ChangeDetectorRef,
-  ) {}
+    private translateService: TranslateService,
+  ) {
+    (this.statusOptions as SearchableSelectOption[]) = [
+      { value: 'true', label: this.translateService.instant('common.active') },
+      { value: 'false', label: this.translateService.instant('common.inactive') },
+    ];
+  }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['isOpen'] && this.isOpen && this.club) {
@@ -197,9 +201,9 @@ export class ClubDetailsDialogComponent implements OnChanges {
   getScopeTypeLabel(scopeType: string | undefined): string {
     if (!scopeType) return '-';
     const labels: Record<string, string> = {
-      [ScopeType.Internal]: 'Вътрешен',
-      [ScopeType.External]: 'Външен',
-      [ScopeType.National]: 'Национален',
+      [ScopeType.Internal]: this.translateService.instant('clubs.scopeTypes.internal'),
+      [ScopeType.External]: this.translateService.instant('clubs.scopeTypes.external'),
+      [ScopeType.National]: this.translateService.instant('clubs.scopeTypes.national'),
     };
     return labels[scopeType] ?? scopeType;
   }
@@ -255,13 +259,12 @@ export class ClubDetailsDialogComponent implements OnChanges {
         ),
         catchError((error: HttpErrorResponse) => {
           if (error.status === 401) {
-            this.error = 'Сесията ви е изтекла. Моля, опитайте отново.';
+            this.error = this.translateService.instant('common.errorSessionExpired');
           } else if (error.status === 403) {
-            this.error = 'Нямате права за достъп до тази информация.';
+            this.error = this.translateService.instant('common.errorNoPermission');
           } else if (error.status === 404) {
           } else {
-            this.error =
-              'Грешка при зареждане на треньорите. Моля, опитайте отново.';
+            this.error = this.translateService.instant('clubs.details.coaches.addError');
           }
           return of({ content: [] });
         }),
@@ -296,7 +299,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
   }
 
   getCoachStatus(coach: ClubCoachDto): string {
-    return coach.coach?.isActive ? 'Активен' : 'Неактивен';
+    return coach.coach?.isActive ? this.translateService.instant('common.active') : this.translateService.instant('common.inactive');
   }
 
   getCoachStatusClass(coach: ClubCoachDto): string {
@@ -356,14 +359,14 @@ export class ClubDetailsDialogComponent implements OnChanges {
           ),
         ),
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при добавяне на треньор';
+          let errorMessage = this.translateService.instant('clubs.details.coaches.addError');
           if (err.status === 401) {
-            errorMessage = 'Сесията ви е изтекла. Моля, опитайте отново.';
+            errorMessage = this.translateService.instant('common.errorSessionExpired');
           } else if (err.status === 403) {
-            errorMessage = 'Нямате права за тази операция.';
+            errorMessage = this.translateService.instant('common.errorNoPermission');
           } else if (err.status === 409) {
             errorMessage =
-              err?.error?.message || 'Треньорът вече е добавен към клуба.';
+              err?.error?.message || this.translateService.instant('clubs.details.coaches.alreadyAssigned');
           } else if (err?.error?.message) {
             errorMessage = err.error.message;
           }
@@ -380,7 +383,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.addingCoach = false;
-          this.error = err?.message || 'Грешка при добавяне на треньор';
+          this.error = err?.message || this.translateService.instant('clubs.details.coaches.addError');
           this.cdr.markForCheck();
         },
       });
@@ -427,13 +430,13 @@ export class ClubDetailsDialogComponent implements OnChanges {
           ),
         ),
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при премахване на треньор';
+          let errorMessage = this.translateService.instant('clubs.details.coaches.removeError');
           if (err.status === 401) {
-            errorMessage = 'Сесията ви е изтекла. Моля, опитайте отново.';
+            errorMessage = this.translateService.instant('common.errorSessionExpired');
           } else if (err.status === 403) {
-            errorMessage = 'Нямате права за тази операция.';
+            errorMessage = this.translateService.instant('common.errorNoPermission');
           } else if (err.status === 404) {
-            errorMessage = 'Треньорът не е намерен.';
+            errorMessage = this.translateService.instant('common.errorNotFound');
           } else if (err?.error?.message) {
             errorMessage = err.error.message;
           }
@@ -448,7 +451,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
           this.loadCoaches();
         },
         error: (err) => {
-          this.error = err?.message || 'Грешка при премахване на треньор';
+          this.error = err?.message || this.translateService.instant('clubs.details.coaches.removeError');
           this.coachToRemove = null;
           this.cdr.markForCheck();
         },
@@ -533,17 +536,17 @@ export class ClubDetailsDialogComponent implements OnChanges {
           ),
         ),
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при запазване';
+          let errorMessage = this.translateService.instant('common.errorSaving');
           if (err.status === 401) {
-            errorMessage = 'Сесията ви е изтекла. Моля, опитайте отново.';
+            errorMessage = this.translateService.instant('common.errorSessionExpired');
           } else if (err.status === 403) {
-            errorMessage = 'Нямате права за тази операция.';
+            errorMessage = this.translateService.instant('common.errorNoPermission');
           } else if (err.status === 404) {
-            errorMessage = 'Клубът не е намерен.';
+            errorMessage = this.translateService.instant('common.errorNotFound');
           } else if (err.status === 409) {
             errorMessage =
               err?.error?.message ||
-              'Конфликт при запазване. Моля, опитайте отново.';
+              this.translateService.instant('common.errorConflict');
           } else if (err?.error?.message) {
             errorMessage = err.error.message;
           }
@@ -563,7 +566,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.saving = false;
-          this.error = err?.message || 'Грешка при запазване';
+          this.error = err?.message || this.translateService.instant('common.errorSaving');
           this.cdr.markForCheck();
         },
       });
@@ -575,13 +578,13 @@ export class ClubDetailsDialogComponent implements OnChanges {
     if (!file) return;
 
     if (!this.allowedLogoTypes.includes(file.type)) {
-      this.logoError = 'Разрешени са само JPEG и PNG файлове.';
+      this.logoError = this.translateService.instant('clubs.details.logo.onlyJpegPng');
       this.cdr.markForCheck();
       return;
     }
 
     if (file.size > this.maxLogoSizeBytes) {
-      this.logoError = 'Файлът не трябва да надвишава 10 MB.';
+      this.logoError = this.translateService.instant('clubs.details.logo.maxSize');
       this.cdr.markForCheck();
       return;
     }
@@ -611,7 +614,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
 
     if (!this.canUploadLogo) {
       this.logoError =
-        'Качването на лого е позволено само за администратори на федерацията и на приложението.';
+        this.translateService.instant('clubs.details.logo.adminOnly');
       this.cdr.markForCheck();
       return;
     }
@@ -642,11 +645,11 @@ export class ClubDetailsDialogComponent implements OnChanges {
           ),
         ),
         catchError((err: HttpErrorResponse) => {
-          let errorMessage = 'Грешка при качване на логото';
+          let errorMessage = this.translateService.instant('clubs.details.logo.uploadError');
           if (err.status === 401) {
-            errorMessage = 'Сесията ви е изтекла. Моля, опитайте отново.';
+            errorMessage = this.translateService.instant('common.errorSessionExpired');
           } else if (err.status === 403) {
-            errorMessage = 'Нямате права за тази операция.';
+            errorMessage = this.translateService.instant('common.errorNoPermission');
           } else if (err?.error?.message) {
             errorMessage = err.error.message;
           }
@@ -666,7 +669,7 @@ export class ClubDetailsDialogComponent implements OnChanges {
         },
         error: (err) => {
           this.uploadingLogo = false;
-          this.logoError = err?.message || 'Грешка при качване на логото.';
+          this.logoError = err?.message || this.translateService.instant('clubs.details.logo.uploadError');
           this.cdr.markForCheck();
         },
       });

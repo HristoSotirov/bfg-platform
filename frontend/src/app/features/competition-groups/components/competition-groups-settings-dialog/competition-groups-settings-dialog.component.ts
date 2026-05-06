@@ -8,6 +8,7 @@ import {
   SimpleChanges,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { TranslateModule } from '@ngx-translate/core';
 import { FormsModule } from '@angular/forms';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
@@ -16,7 +17,7 @@ import { ColumnConfig, FilterConfig } from '../../competition-groups.component';
 @Component({
   selector: 'app-competition-groups-settings-dialog',
   standalone: true,
-  imports: [CommonModule, FormsModule, DialogComponent, ButtonComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, DialogComponent, ButtonComponent],
   templateUrl: './competition-groups-settings-dialog.component.html',
   styleUrl: './competition-groups-settings-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

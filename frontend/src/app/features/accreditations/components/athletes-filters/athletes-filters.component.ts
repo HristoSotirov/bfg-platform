@@ -18,6 +18,7 @@ import {
 } from '../../../../shared/components/multi-select-dropdown/multi-select-dropdown.component';
 import { SearchBarComponent } from '../../../../shared/components/search-bar/search-bar.component';
 import { FilterToggleButtonComponent } from '../../../../shared/components/filter-toggle-button/filter-toggle-button.component';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 
 @Component({
   selector: 'app-athletes-filters',
@@ -28,6 +29,7 @@ import { FilterToggleButtonComponent } from '../../../../shared/components/filte
     MultiSelectDropdownComponent,
     SearchBarComponent,
     FilterToggleButtonComponent,
+    TranslateModule,
   ],
   templateUrl: './athletes-filters.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -48,10 +50,12 @@ export class AthletesFiltersComponent implements OnInit, OnChanges {
   filtersExpanded = false;
   selectedBirthYearsCache: string[] = [];
 
-  readonly genderOptions: DropdownOption[] = [
-    { value: Gender.MALE, label: 'Мъж' },
-    { value: Gender.FEMALE, label: 'Жена' },
+  genderOptions: DropdownOption[] = [
+    { value: Gender.MALE, label: this.translateService.instant('accreditations.gender.male') },
+    { value: Gender.FEMALE, label: this.translateService.instant('accreditations.gender.female') },
   ];
+
+  constructor(private translateService: TranslateService) {}
 
   get birthYearOptions(): DropdownOption[] {
     return this.availableBirthYears.map((y) => ({ value: String(y), label: String(y) }));

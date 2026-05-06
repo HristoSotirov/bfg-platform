@@ -42,7 +42,7 @@
       } @empty {
         <tr>
           <td [attr.colspan]="visibleColumns.length" class="px-4 py-8 text-center text-gray-500">
-            Няма намерени състезания
+            {{ 'competitions.table.empty' | translate }}
           </td>
         </tr>
       }
@@ -50,6 +50,6 @@
   </table>
 
   @if (loading && competitions.length > 0) {
-    <div class="py-4 text-center text-gray-500 border-t">Зареждане...</div>
+    <div class="py-4 text-center text-gray-500 border-t">{{ 'competitions.table.loading' | translate }}</div>
   }
 </div>
