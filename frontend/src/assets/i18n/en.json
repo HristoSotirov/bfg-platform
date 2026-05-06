@@ -12,6 +12,8 @@
     "done": "Done",
     "back": "Back",
     "search": "Search...",
+    "searching": "Searching...",
+    "noOptions": "No options",
     "loading": "Loading...",
     "filters": "Filters",
     "exportExcel": "Export to Excel",
@@ -302,6 +304,12 @@
     "title": "Users",
     "count": "Number of users:",
     "addButton": "Add user",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "status": "Status",
+      "assigned": "Assigned to club"
+    },
     "table": {
       "empty": "No users found",
       "columns": {
@@ -1576,6 +1584,11 @@
     "title": "Competition Groups",
     "count": "Number of groups:",
     "addButton": "Add group",
+    "columns": {
+      "shortName": "Short name",
+      "name": "Name",
+      "ageRange": "Age range"
+    },
     "table": {
       "empty": "No competition groups found",
       "columns": {
@@ -1699,6 +1712,11 @@
     "title": "Disciplines",
     "count": "Number of disciplines:",
     "addButton": "Add discipline",
+    "columns": {
+      "shortName": "Short name",
+      "name": "Name",
+      "group": "Competition group"
+    },
     "table": {
       "empty": "No disciplines found",
       "columns": {

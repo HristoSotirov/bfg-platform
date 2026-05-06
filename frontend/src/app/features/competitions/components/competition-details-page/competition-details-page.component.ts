@@ -5,7 +5,7 @@ import {
   ChangeDetectorRef,
   ChangeDetectionStrategy,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, Location } from '@angular/common';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, takeUntil, catchError, of, forkJoin, Observable, map } from 'rxjs';
@@ -24,6 +24,7 @@ import {
   SearchableSelectDropdownComponent,
   SearchableSelectOption,
 } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { ValueHelpColumn } from '../../../../shared/components/value-help-dialog/value-help-dialog.component';
 import { DatePickerComponent } from '../../../../shared/components/date-picker/date-picker.component';
 import { DateTimePickerComponent } from '../../../../shared/components/datetime-picker/datetime-picker.component';
 import { DisciplineDetailsDialogComponent } from '../../../disciplines/components/discipline-details-dialog/discipline-details-dialog.component';
@@ -37,6 +38,7 @@ import {
   ChronoResult,
 } from '../race-chronometer/race-chronometer.component';
 import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
+import { MaskedNumericInputComponent } from '../../../../shared/components/masked-numeric-input/masked-numeric-input.component';
 import { AuthService } from '../../../../core/services/auth.service';
 import {
   CompetitionsService,
@@ -202,7 +204,7 @@ interface ResultEditRow {
   clubName: string;
   lane: number;
   finishStatus: string;
-  timeInput: string;
+  finishTimeMs: number | null;
 }
 
 @Component({
@@ -228,6 +230,7 @@ interface ResultEditRow {
     SubmitEntriesDialogComponent,
     RaceChronometerComponent,
     DeleteConfirmDialogComponent,
+    MaskedNumericInputComponent,
   ],
   templateUrl: './competition-details-page.component.html',
   styleUrl: './competition-details-page.component.scss',
@@ -462,6 +465,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     private clubRankingsService: ClubRankingsService,
     private cdr: ChangeDetectorRef,
     private translate: TranslateService,
+    private location: Location,
   ) {}
 
   ngOnInit(): void {
@@ -613,7 +617,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   }
 
   goBack(): void {
-    this.router.navigate(['/competitions']);
+    this.location.back();
   }
 
   // ===== LOAD =====
@@ -1813,7 +1817,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
   weighInRecording = false;
   weighInError: string | null = null;
   weighInEditAthleteId: string | null = null;
-  weighInEditWeight = '';
+  weighInEditWeight: number | null = null;
   weighInEditRole: WeightMeasurementRole = WeightMeasurementRole.Rower;
   weighInEditName = '';
   weighInEditCardNumber = '';
@@ -1984,14 +1988,14 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     this.weighInEditDisciplineLabel = disciplineLabel;
     this.weighInError = null;
     const existing = this.weightMeasurements.find(m => m.athleteId === athleteId);
-    this.weighInEditWeight = existing?.weightKg != null ? String(existing.weightKg) : '';
+    this.weighInEditWeight = existing?.weightKg ?? null;
     this.loadWeighInPhoto(athleteId);
     this.cdr.markForCheck();
   }
 
   closeWeighInEdit(): void {
     this.weighInEditAthleteId = null;
-    this.weighInEditWeight = '';
+    this.weighInEditWeight = null;
     this.weighInEditPhotoUrl = null;
     this.weighInEditPhotoLoading = false;
     this.weighInEditScheduledAt = null;
@@ -2045,8 +2049,8 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
 
   saveWeighIn(): void {
     if (!this.competition?.uuid || !this.weighInEditAthleteId || !this.weighInEditWeight) return;
-    const weight = parseFloat(this.weighInEditWeight);
-    if (isNaN(weight) || weight <= 0) return;
+    const weight = this.weighInEditWeight;
+    if (weight <= 0) return;
 
     this.weighInRecording = true;
     this.weighInError = null;
@@ -2408,7 +2412,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
               clubName,
               lane: p.lane ?? 0,
               finishStatus: p.participationStatus ?? ParticipationStatus.Registered,
-              timeInput: p.finishTimeMs ? this.formatTimeMs(p.finishTimeMs) : '',
+              finishTimeMs: p.finishTimeMs ?? null,
             };
           });
 
@@ -2442,7 +2446,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     const results = this.resultEdits.map(r => ({
       participationId: r.participationId,
       finishStatus: r.finishStatus as ParticipationStatus,
-      finishTimeMs: r.finishStatus === ParticipationStatus.Finished ? this.parseTimeInput(r.timeInput) : undefined,
+      finishTimeMs: r.finishStatus === ParticipationStatus.Finished ? (r.finishTimeMs ?? undefined) : undefined,
     }));
 
     // Validate that FINISHED rows have valid time
@@ -2485,18 +2489,6 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
     const wholeSec = Math.floor(seconds);
     const centiseconds = Math.round((seconds - wholeSec) * 100);
     return `${minutes.toString().padStart(2, '0')}:${wholeSec.toString().padStart(2, '0')}.${centiseconds.toString().padStart(2, '0')}`;
-  }
-
-  parseTimeInput(input: string): number | undefined {
-    if (!input || !input.trim()) return undefined;
-    const trimmed = input.trim();
-    // Match mm:ss.cc or mm:ss or m:ss.cc
-    const match = trimmed.match(/^(\d{1,2}):(\d{2})(?:\.(\d{1,2}))?$/);
-    if (!match) return undefined;
-    const minutes = parseInt(match[1], 10);
-    const seconds = parseInt(match[2], 10);
-    const centiseconds = match[3] ? parseInt(match[3].padEnd(2, '0'), 10) : 0;
-    return (minutes * 60 + seconds) * 1000 + centiseconds * 10;
   }
 
   getProgressionStatusClass(status: string): string {
@@ -3207,7 +3199,7 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       const row = this.resultEdits.find(r => r.lane === lr.lane);
       if (row) {
         row.finishStatus = ParticipationStatus.Finished;
-        row.timeInput = this.formatTimeMs(lr.finishTimeMs);
+        row.finishTimeMs = lr.finishTimeMs;
       }
     }
     this.chronoDialogOpen = false;
@@ -3408,6 +3400,26 @@ export class CompetitionDetailsPageComponent implements OnInit, OnDestroy {
       disabled: !d.isActive,
     }))));
 
+  disciplineValueHelpColumns: ValueHelpColumn[] = [
+    { key: 'shortName', label: this.translate.instant('disciplines.columns.shortName') },
+    { key: 'name', label: this.translate.instant('disciplines.columns.name') },
+    { key: 'groupName', label: this.translate.instant('disciplines.columns.group') },
+  ];
+
+  disciplineValueHelpSearch = (query: string): Observable<any[]> =>
+    fetchAllPages((skip, top) =>
+      this.disciplineDefinitionsService.getAllDisciplineDefinitions(
+        undefined, query || undefined, ['shortName_asc'] as any, top, skip, ['competitionGroup'] as any
+      ) as any
+    ).pipe(map((items: any[]) => items.map((d: any) => ({
+      uuid: d.uuid || '',
+      shortName: d.shortName || '-',
+      name: d.name || '-',
+      groupName: d.competitionGroup?.shortName || d.competitionGroup?.name || '-',
+      isInactive: !d.isActive,
+    }))));
+
+  isDisciplineDisabled = (row: any): boolean => row.isInactive;
   openAddTimetableEvent(): void {
     const defaultDate = this.competition?.startDate ?? '';
     this.newEventScheduledAt = defaultDate ? defaultDate + 'T09:00:00Z' : '';

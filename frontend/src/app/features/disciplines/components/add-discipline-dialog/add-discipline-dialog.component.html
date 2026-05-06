@@ -42,6 +42,12 @@
       } @else {
         <app-searchable-select-dropdown
           [staticSearch]="groupSearch"
+          [valueHelpTitle]="'disciplines.labels.competitionGroup' | translate"
+          [valueHelpColumns]="groupValueHelpColumns"
+          [valueHelpSearchFn]="groupValueHelpSearch"
+          [valueHelpValueKey]="'uuid'"
+          [valueHelpLabelKey]="'shortName'"
+          [valueHelpDisabledFn]="isGroupDisabled"
           [placeholder]="'disciplines.placeholders.selectGroup' | translate"
           [ngModel]="formData.competitionGroupId"
           (ngModelChange)="onCompetitionGroupChange($event)"

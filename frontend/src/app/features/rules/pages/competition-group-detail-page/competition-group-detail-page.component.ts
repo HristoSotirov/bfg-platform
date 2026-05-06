@@ -15,6 +15,7 @@ import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { MaskedNumericInputComponent } from '../../../../shared/components/masked-numeric-input/masked-numeric-input.component';
 import { CompetitionGroupDetailsDialogComponent } from '../../../competition-groups/components/competition-group-details-dialog/competition-group-details-dialog.component';
 import { DisciplinesTableComponent } from '../../../disciplines/components/disciplines-table/disciplines-table.component';
 import { DisciplineDetailsDialogComponent } from '../../../disciplines/components/discipline-details-dialog/discipline-details-dialog.component';
@@ -48,6 +49,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
     ButtonComponent,
     DialogComponent,
     SearchableSelectDropdownComponent,
+    MaskedNumericInputComponent,
     CompetitionGroupDetailsDialogComponent,
     DisciplinesTableComponent,
     DisciplineDetailsDialogComponent,

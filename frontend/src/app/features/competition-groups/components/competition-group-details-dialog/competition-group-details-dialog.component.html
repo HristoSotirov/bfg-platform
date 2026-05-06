@@ -20,170 +20,180 @@
   }
   @if (group) {
     <div class="flex flex-col max-h-[calc(90vh-120px)]">
-      <div class="flex-1 overflow-y-auto space-y-2">
+      <div class="flex-1 overflow-y-auto">
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-
-        <!-- Left column -->
-        <div class="space-y-2">
-          @if (!isEditing) {
-            <!-- View mode -->
-            <div class="space-y-4">
-              <!-- Basic info -->
-              <div class="space-y-1">
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.name' | translate }}</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ group.name || "-" }}</span>
-                </div>
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.shortName' | translate }}</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ group.shortName || "-" }}</span>
-                </div>
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.minAgeLabel' | translate }}:</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ group.minAge != null ? group.minAge : "-" }}</span>
-                </div>
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.maxAgeLabel' | translate }}:</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
-                </div>
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.coxMinAgeLabel' | translate }}:</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinAge != null ? group.coxMinAge : "-" }}</span>
-                </div>
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.form.coxMaxAgeLabel' | translate }}:</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ group.coxMaxAge != null ? group.coxMaxAge : "-" }}</span>
-                </div>
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maxDisciplines' | translate }}</span>
-                  <span class="text-sm font-medium break-all min-w-0">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
-                </div>
-                <div class="flex items-baseline">
-                  <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.status' | translate }}</span>
-                  <span
-                    class="text-sm font-medium break-all min-w-0"
-                    [class]="group.isActive ? 'text-green-600' : 'text-red-600'"
-                  >
-                    {{ group.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
-                  </span>
-                </div>
+      @if (!isEditing) {
+        <!-- View mode: 4 boxes in 2x2 grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Box 1: Basic info -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Основна информация</h3>
+            <div class="space-y-2">
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.name' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.name || "-" }}</span>
               </div>
-
-              <!-- Weight info -->
-              <div class="pt-2 border-t border-gray-200">
-                <div class="space-y-1">
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamLightMaxWeight' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamLightMaxWeightKg != null ? group.maleTeamLightMaxWeightKg : "-" }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamCoxMinWeight' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxMinWeightKg != null ? group.maleTeamCoxMinWeightKg : "-" }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamCoxRequiredWeight' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxRequiredWeightKg != null ? group.maleTeamCoxRequiredWeightKg : "-" }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamLightMaxWeight' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamLightMaxWeightKg != null ? group.femaleTeamLightMaxWeightKg : "-" }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamCoxMinWeight' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxMinWeightKg != null ? group.femaleTeamCoxMinWeightKg : "-" }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamCoxRequiredWeight' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxRequiredWeightKg != null ? group.femaleTeamCoxRequiredWeightKg : "-" }}</span>
-                  </div>
-                </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.shortName' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.shortName || "-" }}</span>
               </div>
-
-              <!-- Dates -->
-              <div class="pt-2 border-t border-gray-200">
-                <div class="space-y-1">
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.createdAt' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.createdAt) }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.modifiedAt' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.modifiedAt) }}</span>
-                  </div>
-                </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.form.minAgeLabel' | translate }}:</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.minAge != null ? group.minAge : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.form.maxAgeLabel' | translate }}:</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.maxAge != null ? group.maxAge : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.maxDisciplines' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.maxDisciplinesPerAthlete ?? "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.status' | translate }}</span>
+                <span class="text-sm font-medium" [class]="group.isActive ? 'text-green-600' : 'text-red-600'">
+                  {{ group.isActive ? ('common.status.active' | translate) : ('common.status.inactive' | translate) }}
+                </span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.createdAt' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.createdAt) }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.modifiedAt' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ formatDateTime(group.modifiedAt) }}</span>
               </div>
             </div>
-          } @else {
-            <!-- Edit mode -->
-            <div class="space-y-1.5">
+          </div>
+
+          <!-- Box 2: Прекачване -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Прекачване</h3>
+            <div class="space-y-2">
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.transferFromGroup' | translate }}</span>
+                @if (group.transferFromGroupId) {
+                  <button type="button" class="text-sm font-medium text-bfg-blue hover:underline cursor-pointer"
+                    (click)="openTransferGroupDialog()">
+                    {{ getGroupName(group.transferFromGroupId) }}
+                  </button>
+                } @else {
+                  <span class="text-sm font-medium break-all min-w-0">-</span>
+                }
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.minCrewForTransfer' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.minCrewForTransfer != null ? group.minCrewForTransfer : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.transferRatio' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.transferRatio != null ? group.transferRatio : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.transferRounding' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ getRoundingLabel(group.transferRounding) }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.transferredMaxDisciplines' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerAthlete != null ? group.transferredMaxDisciplinesPerAthlete : "-" }}</span>
+              </div>
+            </div>
+            @if (hasTransferData) {
+              <button type="button" class="mt-3 text-sm text-bfg-blue hover:underline"
+                (click)="showTransferSchemaDialog = true">
+                {{ 'competitionGroups.details.transferSchema.viewLink' | translate }}
+              </button>
+            }
+          </div>
+
+          <!-- Box 3: Лека категория -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Лека категория</h3>
+            <div class="space-y-2">
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamLightMaxWeight' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamLightMaxWeightKg != null ? group.maleTeamLightMaxWeightKg : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamLightMaxWeight' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamLightMaxWeightKg != null ? group.femaleTeamLightMaxWeightKg : "-" }}</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Box 4: Рулеви -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Рулеви</h3>
+            <div class="space-y-2">
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.form.coxMinAgeLabel' | translate }}:</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.coxMinAge != null ? group.coxMinAge : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.form.coxMaxAgeLabel' | translate }}:</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.coxMaxAge != null ? group.coxMaxAge : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamCoxMinWeight' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxMinWeightKg != null ? group.maleTeamCoxMinWeightKg : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.maleTeamCoxRequiredWeight' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.maleTeamCoxRequiredWeightKg != null ? group.maleTeamCoxRequiredWeightKg : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamCoxMinWeight' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxMinWeightKg != null ? group.femaleTeamCoxMinWeightKg : "-" }}</span>
+              </div>
+              <div class="flex items-baseline">
+                <span class="text-sm text-gray-500 w-44 flex-shrink-0">{{ 'competitionGroups.details.labels.femaleTeamCoxRequiredWeight' | translate }}</span>
+                <span class="text-sm font-medium break-all min-w-0">{{ group.femaleTeamCoxRequiredWeightKg != null ? group.femaleTeamCoxRequiredWeightKg : "-" }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Edit mode: 4 boxes in 2x2 grid -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Box 1: Basic info -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Основна информация</h3>
+            <div class="space-y-3">
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.nameLabel' | translate }} <span class="text-red-500">*</span>:</label>
-                <input
-                  type="text"
-                  [(ngModel)]="editData.name"
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.nameLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                <input type="text" [(ngModel)]="editData.name"
                   [class.border-red-500]="touched['name'] && !editData.name.trim()"
                   (blur)="touched['name'] = true"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.shortNameLabel' | translate }} <span class="text-red-500">*</span>:</label>
-                <input
-                  type="text"
-                  [(ngModel)]="editData.shortName"
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.shortNameLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                <input type="text" [(ngModel)]="editData.shortName"
                   [class.border-red-500]="touched['shortName'] && !editData.shortName.trim()"
                   (blur)="touched['shortName'] = true"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.minAgeLabel' | translate }} <span class="text-red-500">*</span>:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.minAge"
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.minAgeLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                <input type="number" [(ngModel)]="editData.minAge"
                   [class.border-red-500]="touched['minAge'] && editData.minAge == null"
                   (blur)="touched['minAge'] = true"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maxAgeLabel' | translate }} <span class="text-red-500">*</span>:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.maxAge"
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.maxAgeLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                <input type="number" [(ngModel)]="editData.maxAge"
                   [class.border-red-500]="touched['maxAge'] && editData.maxAge == null"
                   (blur)="touched['maxAge'] = true"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.coxMinAgeLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.coxMinAge"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.maxDisciplinesLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                <input type="number" [(ngModel)]="editData.maxDisciplinesPerAthlete" min="1"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.coxMaxAgeLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.coxMaxAge"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maxDisciplinesLabel' | translate }} <span class="text-red-500">*</span>:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.maxDisciplinesPerAthlete"
-                  min="1"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.statusLabel' | translate }} <span class="text-red-500">*</span>:</label>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.statusLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <app-searchable-select-dropdown
                   [options]="statusOptions"
                   [placeholder]="'competitionGroups.placeholders.selectStatus' | translate"
@@ -193,88 +203,38 @@
                 </app-searchable-select-dropdown>
               </div>
             </div>
-          }
-        </div>
+          </div>
 
-        <!-- Right column -->
-        <div class="space-y-2">
-          @if (!isEditing) {
-            <!-- Transfer info (view) -->
-            <div class="space-y-4">
+          <!-- Box 2: Прекачване -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Прекачване</h3>
+            <div class="space-y-3">
               <div>
-                <div class="space-y-1">
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferFromGroup' | translate }}</span>
-                    @if (group.transferFromGroupId) {
-                      <button
-                        type="button"
-                        class="text-sm font-medium text-bfg-blue hover:underline cursor-pointer"
-                        (click)="openTransferGroupDialog()"
-                      >
-                        {{ getGroupName(group.transferFromGroupId) }}
-                      </button>
-                    } @else {
-                      <span class="text-sm font-medium break-all min-w-0">-</span>
-                    }
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.minCrewForTransfer' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.minCrewForTransfer != null ? group.minCrewForTransfer : "-" }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferRatio' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferRatio != null ? group.transferRatio : "-" }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferRounding' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ getRoundingLabel(group.transferRounding) }}</span>
-                  </div>
-                  <div class="flex items-baseline">
-                    <span class="text-xs text-gray-500 w-32 flex-shrink-0">{{ 'competitionGroups.details.labels.transferredMaxDisciplines' | translate }}</span>
-                    <span class="text-sm font-medium break-all min-w-0">{{ group.transferredMaxDisciplinesPerAthlete != null ? group.transferredMaxDisciplinesPerAthlete : "-" }}</span>
-                  </div>
-                </div>
-              </div>
-              @if (hasTransferData) {
-                <button
-                  type="button"
-                  class="mt-2 text-xs text-bfg-blue hover:underline"
-                  (click)="showTransferSchemaDialog = true"
-                >
-                  {{ 'competitionGroups.details.transferSchema.viewLink' | translate }}
-                </button>
-              }
-            </div>
-          } @else {
-            <!-- Transfer info (edit) -->
-            <div class="space-y-1.5">
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferFromGroupLabel' | translate }}:</label>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferFromGroupLabel' | translate }}:</label>
                 <app-searchable-select-dropdown
                   [staticSearch]="groupSearch"
+                  [valueHelpTitle]="'competitionGroups.form.transferFromGroupLabel' | translate"
+                  [valueHelpColumns]="groupValueHelpColumns"
+                  [valueHelpSearchFn]="groupValueHelpSearch"
+                  [valueHelpValueKey]="'uuid'"
+                  [valueHelpLabelKey]="'shortName'"
+                  [valueHelpDisabledFn]="isGroupDisabled"
                   [(ngModel)]="editData.transferFromGroupId"
                   [placeholder]="'competitionGroups.placeholders.selectGroup' | translate"
                 ></app-searchable-select-dropdown>
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.minCrewForTransferLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.minCrewForTransfer"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.minCrewForTransferLabel' | translate }}:</label>
+                <input type="number" [(ngModel)]="editData.minCrewForTransfer"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferRatioLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  [(ngModel)]="editData.transferRatio"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferRatioLabel' | translate }}:</label>
+                <input type="number" step="0.01" [(ngModel)]="editData.transferRatio"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferRoundingLabel' | translate }}:</label>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferRoundingLabel' | translate }}:</label>
                 <app-searchable-select-dropdown
                   [options]="roundingOptions"
                   [placeholder]="'competitionGroups.placeholders.selectRounding' | translate"
@@ -284,73 +244,62 @@
                 </app-searchable-select-dropdown>
               </div>
               <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferredMaxDisciplinesLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  [(ngModel)]="editData.transferredMaxDisciplinesPerAthlete"
-                  min="1"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamLightMaxWeightLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  [(ngModel)]="editData.maleTeamLightMaxWeightKg"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamCoxMinWeightLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  [(ngModel)]="editData.maleTeamCoxMinWeightKg"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamCoxRequiredWeightLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  [(ngModel)]="editData.maleTeamCoxRequiredWeightKg"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamLightMaxWeightLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  [(ngModel)]="editData.femaleTeamLightMaxWeightKg"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamCoxMinWeightLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  [(ngModel)]="editData.femaleTeamCoxMinWeightKg"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
-              </div>
-              <div>
-                <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamCoxRequiredWeightLabel' | translate }}:</label>
-                <input
-                  type="number"
-                  step="0.1"
-                  [(ngModel)]="editData.femaleTeamCoxRequiredWeightKg"
-                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue"
-                />
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.transferredMaxDisciplinesLabel' | translate }}:</label>
+                <input type="number" [(ngModel)]="editData.transferredMaxDisciplinesPerAthlete" min="1"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
               </div>
             </div>
-          }
+          </div>
+
+          <!-- Box 3: Лека категория -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Лека категория</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamLightMaxWeightLabel' | translate }}:</label>
+                <app-masked-numeric-input mode="weight" [(ngModel)]="editData.maleTeamLightMaxWeightKg"></app-masked-numeric-input>
+              </div>
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamLightMaxWeightLabel' | translate }}:</label>
+                <app-masked-numeric-input mode="weight" [(ngModel)]="editData.femaleTeamLightMaxWeightKg"></app-masked-numeric-input>
+              </div>
+            </div>
+          </div>
+
+          <!-- Box 4: Рулеви -->
+          <div class="border border-gray-200 rounded-lg p-5">
+            <h3 class="text-base font-semibold text-gray-900 mb-4">Рулеви</h3>
+            <div class="space-y-3">
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.coxMinAgeLabel' | translate }}:</label>
+                <input type="number" [(ngModel)]="editData.coxMinAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+              </div>
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.coxMaxAgeLabel' | translate }}:</label>
+                <input type="number" [(ngModel)]="editData.coxMaxAge"
+                  class="w-full px-3 py-2 border border-gray-300 rounded text-sm focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue" />
+              </div>
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamCoxMinWeightLabel' | translate }}:</label>
+                <app-masked-numeric-input mode="weight" [(ngModel)]="editData.maleTeamCoxMinWeightKg"></app-masked-numeric-input>
+              </div>
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.maleTeamCoxRequiredWeightLabel' | translate }}:</label>
+                <app-masked-numeric-input mode="weight" [(ngModel)]="editData.maleTeamCoxRequiredWeightKg"></app-masked-numeric-input>
+              </div>
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamCoxMinWeightLabel' | translate }}:</label>
+                <app-masked-numeric-input mode="weight" [(ngModel)]="editData.femaleTeamCoxMinWeightKg"></app-masked-numeric-input>
+              </div>
+              <div>
+                <label class="block text-sm text-gray-500 mb-0.5">{{ 'competitionGroups.form.femaleTeamCoxRequiredWeightLabel' | translate }}:</label>
+                <app-masked-numeric-input mode="weight" [(ngModel)]="editData.femaleTeamCoxRequiredWeightKg"></app-masked-numeric-input>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      }
 
       </div>
       <!-- Footer -->

@@ -47,6 +47,12 @@
       <label class="block text-sm font-medium text-gray-700 mb-1">{{ 'clubs.form.adminLabel' | translate }} <span class="text-red-500">*</span>:</label>
       <app-searchable-select-dropdown
         [serverSearch]="adminSearch"
+        [valueHelpTitle]="'clubs.form.adminLabel' | translate"
+        [valueHelpColumns]="adminValueHelpColumns"
+        [valueHelpSearchFn]="adminValueHelpSearch"
+        [valueHelpValueKey]="'uuid'"
+        [valueHelpLabelKey]="'displayName'"
+        [valueHelpDisabledFn]="isAdminDisabled"
         [placeholder]="'clubs.form.adminPlaceholder' | translate"
         [ngModel]="formData.clubAdminId"
         (ngModelChange)="onAdminSelectionChange($event)"

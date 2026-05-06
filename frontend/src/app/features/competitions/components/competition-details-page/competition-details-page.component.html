@@ -400,6 +400,12 @@
                       <label class="block text-xs text-gray-500 mb-0.5">{{ 'competitions.detailsPage.timetable.labels.discipline' | translate }} <span class="text-red-500">*</span>:</label>
                       <app-searchable-select-dropdown
                         [staticSearch]="disciplineSearch"
+                        [valueHelpTitle]="'competitions.detailsPage.timetable.labels.discipline' | translate"
+                        [valueHelpColumns]="disciplineValueHelpColumns"
+                        [valueHelpSearchFn]="disciplineValueHelpSearch"
+                        [valueHelpValueKey]="'uuid'"
+                        [valueHelpLabelKey]="'shortName'"
+                        [valueHelpDisabledFn]="isDisciplineDisabled"
                         [(ngModel)]="newEvent.disciplineId"
                         [placeholder]="'competitions.detailsPage.timetable.placeholders.selectDiscipline' | translate"
                       ></app-searchable-select-dropdown>
@@ -468,6 +474,12 @@
                           <td class="px-4 py-2">
                             <app-searchable-select-dropdown
                               [staticSearch]="disciplineSearch"
+                              [valueHelpTitle]="'competitions.detailsPage.timetable.labels.discipline' | translate"
+                              [valueHelpColumns]="disciplineValueHelpColumns"
+                              [valueHelpSearchFn]="disciplineValueHelpSearch"
+                              [valueHelpValueKey]="'uuid'"
+                              [valueHelpLabelKey]="'shortName'"
+                              [valueHelpDisabledFn]="isDisciplineDisabled"
                               [(ngModel)]="editTimetableData.disciplineId"
                               [placeholder]="'competitions.detailsPage.timetable.placeholders.disciplinePlaceholder' | translate"
                             ></app-searchable-select-dropdown>
@@ -1437,9 +1449,8 @@
         </div>
       }
       <div class="flex items-center gap-3">
-        <input type="number" step="0.01" min="0"
-          class="flex-1 min-w-0 border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-          [(ngModel)]="weighInEditWeight" [placeholder]="'competitions.detailsPage.weighIn.editPlaceholder' | translate" />
+        <app-masked-numeric-input mode="weight" class="flex-1 min-w-0"
+          [(ngModel)]="weighInEditWeight"></app-masked-numeric-input>
         <button
           type="button"
           class="px-6 py-2.5 rounded-lg text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition-colors disabled:opacity-50"
@@ -2354,13 +2365,11 @@
                       ></app-searchable-select-dropdown>
                     </td>
                     <td class="px-3 py-2">
-                      <input
-                        type="text"
-                        [(ngModel)]="row.timeInput"
+                      <app-masked-numeric-input
+                        mode="time"
+                        [(ngModel)]="row.finishTimeMs"
                         [disabled]="row.finishStatus !== 'FINISHED' || savingResults"
-                        placeholder="00:00.00"
-                        class="w-full px-2 py-1.5 border border-gray-300 rounded text-sm text-center focus:ring-2 focus:ring-bfg-blue focus:border-bfg-blue disabled:bg-gray-100 disabled:text-gray-400"
-                      />
+                      ></app-masked-numeric-input>
                     </td>
                   </tr>
                 }

@@ -142,6 +142,10 @@ export class QualificationDetailPageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  goBack(): void {
+    this.location.back();
+  }
+
   get canEdit(): boolean {
     const user = this.authService.currentUser;
     if (!user) return false;

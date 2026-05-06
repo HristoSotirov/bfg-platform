@@ -83,9 +83,9 @@ class DropdownRegistry {
       <!-- Dropdown -->
       @if (isOpen && !disabled) {
         <div
-          class="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto"
-          [class.w-full]="!twoColumnLayout"
+          class="absolute z-50 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto min-w-full w-max max-w-[320px]"
           [class.w-[360px]]="twoColumnLayout"
+          [class.!min-w-[360px]]="twoColumnLayout"
           [class.left-0]="twoColumnLayout"
           (click)="$event.stopPropagation()"
         >
@@ -113,7 +113,7 @@ class DropdownRegistry {
                   <div class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-50">Мъже</div>
                   @for (option of menOptions; track option.value) {
                     <label
-                      class="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 cursor-pointer transition-colors"
+                      class="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 cursor-pointer transition-colors whitespace-nowrap"
                       [class.bg-bfg-blue]="isSelected(option.value)"
                       [class.bg-opacity-10]="isSelected(option.value)"
                       [class.text-bfg-blue]="isSelected(option.value)"
@@ -123,20 +123,20 @@ class DropdownRegistry {
                           type="checkbox"
                           [checked]="isSelected(option.value)"
                           (change)="toggleOption(option.value)"
-                          class="h-4 w-4 text-bfg-blue border-gray-300 rounded focus:ring-bfg-blue"
+                          class="h-4 w-4 flex-shrink-0 text-bfg-blue border-gray-300 rounded focus:ring-bfg-blue"
                         />
                       }
-                      <span class="truncate">{{ option.label }}</span>
+                      <span>{{ option.label }}</span>
                     </label>
                   }
                 </div>
-                
+
                 <!-- Women's Column -->
                 <div class="py-1">
                   <div class="px-2 py-1 text-xs font-semibold text-gray-600 bg-gray-50">Жени</div>
                   @for (option of womenOptions; track option.value) {
                     <label
-                      class="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 cursor-pointer transition-colors"
+                      class="flex items-center gap-2 px-2 py-1.5 text-sm hover:bg-gray-50 cursor-pointer transition-colors whitespace-nowrap"
                       [class.bg-bfg-blue]="isSelected(option.value)"
                       [class.bg-opacity-10]="isSelected(option.value)"
                       [class.text-bfg-blue]="isSelected(option.value)"
@@ -146,10 +146,10 @@ class DropdownRegistry {
                           type="checkbox"
                           [checked]="isSelected(option.value)"
                           (change)="toggleOption(option.value)"
-                          class="h-4 w-4 text-bfg-blue border-gray-300 rounded focus:ring-bfg-blue"
+                          class="h-4 w-4 flex-shrink-0 text-bfg-blue border-gray-300 rounded focus:ring-bfg-blue"
                         />
                       }
-                      <span class="truncate">{{ option.label }}</span>
+                      <span>{{ option.label }}</span>
                     </label>
                   }
                 </div>
@@ -158,7 +158,7 @@ class DropdownRegistry {
               <!-- Single Column Layout -->
               @for (option of options; track option.value) {
                 <label
-                  class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer transition-colors"
+                  class="flex items-center gap-2 px-3 py-2 text-sm hover:bg-gray-50 cursor-pointer transition-colors whitespace-nowrap"
                   [class.bg-bfg-blue]="isSelected(option.value)"
                   [class.bg-opacity-10]="isSelected(option.value)"
                   [class.text-bfg-blue]="isSelected(option.value)"
@@ -168,10 +168,10 @@ class DropdownRegistry {
                       type="checkbox"
                       [checked]="isSelected(option.value)"
                       (change)="toggleOption(option.value)"
-                      class="h-4 w-4 text-bfg-blue border-gray-300 rounded focus:ring-bfg-blue"
+                      class="h-4 w-4 flex-shrink-0 text-bfg-blue border-gray-300 rounded focus:ring-bfg-blue"
                     />
                   }
-                  <span class="truncate">{{ option.label }}</span>
+                  <span>{{ option.label }}</span>
                 </label>
               }
             }

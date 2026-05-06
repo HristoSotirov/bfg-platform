@@ -206,6 +206,12 @@
                 >
                 <app-searchable-select-dropdown
                   [serverSearch]="adminSearch"
+                  [valueHelpTitle]="'clubs.form.adminLabel' | translate"
+                  [valueHelpColumns]="adminValueHelpColumns"
+                  [valueHelpSearchFn]="adminValueHelpSearch"
+                  [valueHelpValueKey]="'uuid'"
+                  [valueHelpLabelKey]="'displayName'"
+                  [valueHelpDisabledFn]="isAdminDisabled"
                   [placeholder]="'clubs.form.adminPlaceholder' | translate"
                   [ngModel]="editData.clubAdminId"
                   (ngModelChange)="onAdminSelectionChange($event)"
@@ -315,6 +321,12 @@
                 </h5>
                 <app-searchable-select-dropdown
                   [serverSearch]="coachSearch"
+                  [valueHelpTitle]="'clubs.details.coaches.title' | translate"
+                  [valueHelpColumns]="coachValueHelpColumns"
+                  [valueHelpSearchFn]="coachValueHelpSearch"
+                  [valueHelpValueKey]="'uuid'"
+                  [valueHelpLabelKey]="'displayName'"
+                  [valueHelpDisabledFn]="isCoachDisabled"
                   [placeholder]="'clubs.details.coaches.selectPlaceholder' | translate"
                   [ngModel]="selectedCoachId"
                   (ngModelChange)="onCoachSelectionChange($event)"

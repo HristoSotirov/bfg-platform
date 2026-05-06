@@ -12,6 +12,8 @@
     "done": "Готово",
     "back": "Назад",
     "search": "Търсене...",
+    "searching": "Търсене...",
+    "noOptions": "Няма опции",
     "loading": "Зареждане...",
     "filters": "Филтри",
     "exportExcel": "Експорт в Excel",
@@ -283,6 +285,12 @@
     "title": "Потребители",
     "count": "Брой потребители:",
     "addButton": "Добавяне на потребител",
+    "columns": {
+      "name": "Име",
+      "email": "Имейл",
+      "status": "Статус",
+      "assigned": "Свързан с клуб"
+    },
     "table": {
       "empty": "Няма намерени потребители",
       "columns": {
@@ -1162,9 +1170,9 @@
         "femaleTeam": "Женски отбор",
         "athleteCountLabel": "спортисти",
         "inGroup": "в групата",
-        "transfer": "трансфер",
+        "transfer": "прекачване",
         "coxswain": "рулеви",
-        "viewTransferSchema": "Виж трансферна схема",
+        "viewTransferSchema": "Виж схема за прекачване",
         "columns": {
           "number": "№",
           "name": "Име",
@@ -1189,15 +1197,15 @@
         "noDisciplineEntries": "Няма заявки за тази дисциплина"
       },
       "transferSchema": {
-        "titlePrefix": "Схема за трансфер —",
-        "description": "Допуска се до <strong>{{ratio}}%</strong> от стартиралите състезатели да бъдат трансферирани.",
+        "titlePrefix": "Схема за прекачване —",
+        "description": "Допуска се до <strong>{{ratio}}%</strong> от стартиралите състезатели да бъдат прекачени.",
         "columns": {
           "totalCrew": "Общ брой на отбора",
-          "maxTransfer": "Макс. трансфер"
+          "maxTransfer": "Макс. прекачване"
         },
         "current": "(текущо)",
-        "overLimit": "Избрани {{count}} трансфер от {{total}} общо — надвишен лимит (макс. {{max}}).",
-        "withinLimit": "Избрани {{count}} трансфер от {{total}} общо — в рамките на лимита (макс. {{max}}).",
+        "overLimit": "Избрани {{count}} прекачване от {{total}} общо — надвишен лимит (макс. {{max}}).",
+        "withinLimit": "Избрани {{count}} прекачване от {{total}} общо — в рамките на лимита (макс. {{max}}).",
         "closeButton": "Затвори"
       },
       "errors": {
@@ -1268,12 +1276,12 @@
       "title": "Подаване на заявки",
       "loadingAthletes": "Зареждане на спортисти...",
       "eligible": "допустими",
-      "transferLabel": "трансфер (избрани {{count}})",
+      "transferLabel": "прекачване (избрани {{count}})",
       "maxDisciplinesPerAthlete": "макс. {{max}} дисц./спортист",
-      "maxDisciplinesPerTransfer": "макс. {{max}} дисц./трансфер",
+      "maxDisciplinesPerTransfer": "макс. {{max}} дисц./прекачване",
       "selectedAthletes": "Избрани спортисти:",
-      "transferInParens": "({{count}} трансфер)",
-      "transferLimitExceeded": "Превишен лимит за трансфер!",
+      "transferInParens": "({{count}} прекачване)",
+      "transferLimitExceeded": "Превишен лимит за прекачване!",
       "disciplines": "Дисциплини",
       "removeButton": "Премахни",
       "teamLabel": "Отбор {{number}}",
@@ -1290,7 +1298,7 @@
         "selectAthleteFirst": "Първо изберете спортисти",
         "selectAthlete": "Изберете спортист"
       },
-      "maxCrewFromTransfer": "макс. {{max}} трансфер/отбор",
+      "maxCrewFromTransfer": "макс. {{max}} прекачване/отбор",
       "buttons": {
         "cancel": "Отказ",
         "submit": "Подай заявки"
@@ -1302,25 +1310,25 @@
         "titlePrefix": "Избор на спортисти —",
         "searchPlaceholder": "Търси по име, година, картон...",
         "ownSection": "Собствени",
-        "transferSection": "Трансфер от {{group}}",
+        "transferSection": "Прекачване от {{group}}",
         "noResults": "Няма намерени спортисти",
         "footerAthletes": "спортисти",
         "transferExceeded": "Превишен лимит!",
         "schemaButton": "Схема",
         "doneButton": "Готово",
-        "transferSummary": "{{count}} трансфер",
-        "transferSummaryWithMax": "{{count}} трансфер / макс. {{max}}"
+        "transferSummary": "{{count}} прекачване",
+        "transferSummaryWithMax": "{{count}} прекачване / макс. {{max}}"
       },
       "transferSchema": {
-        "titlePrefix": "Схема за трансфер —",
+        "titlePrefix": "Схема за прекачване —",
         "description": "Допуска се до {{ratio}}% от стартиралите състезатели да бъдат от {{group}}.",
         "columns": {
           "totalCrew": "Общ брой на отбора",
-          "maxTransfer": "Макс. трансфер"
+          "maxTransfer": "Макс. прекачване"
         },
         "current": "(текущо)",
-        "overLimit": "Избрани {{count}} трансфер от {{total}} общо — надвишен лимит (макс. {{max}}).",
-        "withinLimit": "Избрани {{count}} трансфер от {{total}} общо — в рамките на лимита (макс. {{max}}).",
+        "overLimit": "Избрани {{count}} прекачване от {{total}} общо — надвишен лимит (макс. {{max}}).",
+        "withinLimit": "Избрани {{count}} прекачване от {{total}} общо — в рамките на лимита (макс. {{max}}).",
         "closeButton": "Затвори"
       },
       "genderLabels": {
@@ -1557,17 +1565,22 @@
     "title": "Състезателни групи",
     "count": "Брой групи:",
     "addButton": "Добавяне на група",
+    "columns": {
+      "shortName": "Кратко име",
+      "name": "Име",
+      "ageRange": "Възрастов диапазон"
+    },
     "table": {
       "empty": "Няма намерени състезателни групи",
       "columns": {
         "name": "Име",
         "shortName": "Кратко име",
-        "minAge": "Мін. възраст",
+        "minAge": "Мин. възраст",
         "maxAge": "Макс. възраст",
         "coxMinAge": "Мин. възраст рулеви",
         "coxMaxAge": "Макс. възраст рулеви",
         "maxDisciplinesPerAthlete": "Макс. дисциплини",
-        "transferFromGroupId": "Трансфер от група",
+        "transferFromGroupId": "Прекачване от група",
         "minCrewForTransfer": "Мин. екипаж",
         "transferRatio": "Съотношение",
         "transferRounding": "Закръгляне",
@@ -1599,16 +1612,16 @@
       "namePlaceholder": "Въведете име",
       "shortNameLabel": "Кратко име",
       "shortNamePlaceholder": "Въведете кратко име",
-      "minAgeLabel": "Мін. възраст",
+      "minAgeLabel": "Мин. възраст",
       "maxAgeLabel": "Макс. възраст",
       "coxMinAgeLabel": "Мин. възраст на рулевия",
       "coxMaxAgeLabel": "Макс. възраст на рулевия",
       "maxDisciplinesLabel": "Макс. дисциплини на атлет",
-      "transferFromGroupLabel": "Трансфер от група",
-      "minCrewForTransferLabel": "Мин. брой за трансфер",
-      "transferRatioLabel": "Процент за трансфер",
-      "transferRoundingLabel": "Закръгляне при трансфер",
-      "transferredMaxDisciplinesLabel": "Макс. дисциплини за трансфериран",
+      "transferFromGroupLabel": "Прекачване от група",
+      "minCrewForTransferLabel": "Мин. брой за прекачване",
+      "transferRatioLabel": "Процент за прекачване",
+      "transferRoundingLabel": "Закръгляне при прекачване",
+      "transferredMaxDisciplinesLabel": "Макс. дисциплини за прекачен",
       "statusLabel": "Статус",
       "maleTeamLightMaxWeightLabel": "Мъже — макс. тегло лека кат. (кг)",
       "maleTeamCoxMinWeightLabel": "Мъже — мин. тегло на рулевия (кг)",
@@ -1623,15 +1636,15 @@
       "labels": {
         "name": "Име:",
         "shortName": "Кратко име:",
-        "minAge": "Мін. възраст:",
+        "minAge": "Мин. възраст:",
         "maxAge": "Макс. възраст:",
         "coxMinAge": "Мин. възраст на рулевия:",
         "coxMaxAge": "Макс. възраст на рулевия:",
         "maxDisciplines": "Макс. дисциплини:",
-        "transferFromGroup": "Група за трансфер:",
-        "minCrewForTransfer": "Мин. брой за трансфер:",
-        "transferRatio": "Процент за трансфер:",
-        "transferRounding": "Закръгляне при трансфер:",
+        "transferFromGroup": "Група за прекачване:",
+        "minCrewForTransfer": "Мин. брой за прекачване:",
+        "transferRatio": "Процент за прекачване:",
+        "transferRounding": "Закръгляне при прекачване:",
         "transferredMaxDisciplines": "Макс. дисциплини (трансф.):",
         "status": "Статус:",
         "createdAt": "Създаден на:",
@@ -1644,10 +1657,10 @@
         "femaleTeamCoxRequiredWeight": "Жени — изискв. тегло рулеви (кг):"
       },
       "transferSchema": {
-        "title": "Схема за трансфер",
-        "viewLink": "Преглед на схема за трансфер",
+        "title": "Схема за прекачване",
+        "viewLink": "Преглед на схема за прекачване",
         "crewSize": "Брой гребци в екипажа",
-        "transferCount": "Допустими трансферирани"
+        "transferCount": "Допустими прекачени"
       },
       "tabDetails": "Детайли",
       "tabDisciplines": "Дисциплини",
@@ -1680,6 +1693,11 @@
     "title": "Дисциплини",
     "count": "Брой дисциплини:",
     "addButton": "Добавяне на дисциплина",
+    "columns": {
+      "shortName": "Кратко име",
+      "name": "Име",
+      "group": "Състезателна група"
+    },
     "table": {
       "empty": "Няма намерени дисциплини",
       "columns": {
@@ -1689,7 +1707,7 @@
         "competitionGroup": "Състезателна група",
         "boatClass": "Клас лодка",
         "crewSize": "Брой гребци",
-        "maxCrewFromTransfer": "Макс. трансферирани",
+        "maxCrewFromTransfer": "Макс. прекачванеирани",
         "hasCoxswain": "С рулеви",
         "isLightweight": "Лека категория",
         "distanceMeters": "Дистанция (м)",
@@ -1719,8 +1737,8 @@
       "competitionGroupPlaceholder": "Изберете състезателна група",
       "boatClassLabel": "Клас лодка",
       "boatClassPlaceholder": "Изберете клас лодка",
-      "maxCrewFromTransferLabel": "Макс. трансферирани",
-      "maxCrewFromTransferPlaceholder": "Въведете макс. брой трансферирани",
+      "maxCrewFromTransferLabel": "Макс. прекачванеирани",
+      "maxCrewFromTransferPlaceholder": "Въведете макс. брой прекачени",
       "isLightweightLabel": "Лека категория",
       "isLightweightPlaceholder": "Изберете",
       "distanceLabel": "Дистанция (м)",
@@ -1740,7 +1758,7 @@
         "competitionGroup": "Състезателна група:",
         "boatClass": "Клас лодка:",
         "crewSize": "Брой гребци:",
-        "maxCrewFromTransfer": "Макс. трансферирани:",
+        "maxCrewFromTransfer": "Макс. прекачванеирани:",
         "hasCoxswain": "С рулеви:",
         "isLightweight": "Лека категория:",
         "distance": "Дистанция (м):",

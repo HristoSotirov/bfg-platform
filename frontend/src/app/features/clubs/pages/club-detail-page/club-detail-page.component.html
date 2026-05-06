@@ -175,6 +175,12 @@
                     <label class="block text-xs text-gray-500 mb-0.5">{{ 'clubs.details.labels.admin' | translate }}</label>
                     <app-searchable-select-dropdown
                       [serverSearch]="adminSearch"
+                      [valueHelpTitle]="'clubs.form.adminLabel' | translate"
+                      [valueHelpColumns]="adminValueHelpColumns"
+                      [valueHelpSearchFn]="adminValueHelpSearch"
+                      [valueHelpValueKey]="'uuid'"
+                      [valueHelpLabelKey]="'displayName'"
+                      [valueHelpDisabledFn]="isAdminDisabled"
                       [placeholder]="'clubs.form.adminPlaceholder' | translate"
                       [ngModel]="editData.clubAdminId"
                       (ngModelChange)="onAdminSelectionChange($event)"
@@ -255,6 +261,12 @@
                     <h5 class="text-xs font-medium text-gray-700">{{ 'clubs.details.coaches.addTitle' | translate }}</h5>
                     <app-searchable-select-dropdown
                       [serverSearch]="coachSearch"
+                      [valueHelpTitle]="'clubs.details.coaches.title' | translate"
+                      [valueHelpColumns]="coachValueHelpColumns"
+                      [valueHelpSearchFn]="coachValueHelpSearch"
+                      [valueHelpValueKey]="'uuid'"
+                      [valueHelpLabelKey]="'displayName'"
+                      [valueHelpDisabledFn]="isCoachDisabled"
                       [placeholder]="'clubs.details.coaches.selectPlaceholder' | translate"
                       [ngModel]="selectedCoachId"
                       (ngModelChange)="onCoachSelectionChange($event)"

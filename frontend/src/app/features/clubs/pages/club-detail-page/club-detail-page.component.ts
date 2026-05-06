@@ -26,6 +26,7 @@ import { HeaderComponent } from '../../../../layout/header/header.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { ValueHelpColumn } from '../../../../shared/components/value-help-dialog/value-help-dialog.component';
 import { PhotoCropDialogComponent } from '../../../accreditations/components/photo-crop-dialog/photo-crop-dialog.component';
 import { ClubLogoViewDialogComponent, ClubLogoViewInfo } from '../../components/club-logo-view-dialog/club-logo-view-dialog.component';
 import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
@@ -124,6 +125,62 @@ export class ClubDetailPageComponent implements OnInit, OnDestroy {
         }));
       }),
     );
+
+  adminValueHelpColumns: ValueHelpColumn[] = [
+    { key: 'displayName', label: this.translateService.instant('users.columns.name') },
+    { key: 'email', label: this.translateService.instant('users.columns.email') },
+    { key: 'statusLabel', label: this.translateService.instant('users.columns.status') },
+    { key: 'assignedLabel', label: this.translateService.instant('users.columns.assigned') },
+  ];
+
+  adminValueHelpSearch = (query: string): Observable<any[]> =>
+    (this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", query || undefined, undefined, 100, 0) as any).pipe(
+      map((response: any) => {
+        const adminList: UserDto[] = response.content || [];
+        return adminList.map((admin: UserDto) => ({
+          uuid: admin.uuid || '',
+          displayName: this.getAdminDisplayName(admin),
+          email: admin.email || '-',
+          statusLabel: admin.isActive
+            ? this.translateService.instant('common.active')
+            : this.translateService.instant('common.inactive'),
+          assignedLabel: admin.assignedToClub
+            ? this.translateService.instant('common.yes')
+            : this.translateService.instant('common.no'),
+          isAssigned: !!(admin.uuid !== this.club?.clubAdminId && admin.assignedToClub),
+        }));
+      }),
+    );
+
+  isAdminDisabled = (row: any): boolean => row.isAssigned;
+
+  coachValueHelpColumns: ValueHelpColumn[] = [
+    { key: 'displayName', label: this.translateService.instant('users.columns.name') },
+    { key: 'email', label: this.translateService.instant('users.columns.email') },
+    { key: 'statusLabel', label: this.translateService.instant('users.columns.status') },
+    { key: 'assignedLabel', label: this.translateService.instant('users.columns.assigned') },
+  ];
+
+  coachValueHelpSearch = (query: string): Observable<any[]> =>
+    (this.usersService.getAllUsers("role eq 'COACH'", query || undefined, undefined, 100, 0) as any).pipe(
+      map((response: any) => {
+        const coachList: UserDto[] = response.content || [];
+        return coachList.map((coach: UserDto) => ({
+          uuid: coach.uuid || '',
+          displayName: this.getCoachDisplayName(coach),
+          email: coach.email || '-',
+          statusLabel: coach.isActive
+            ? this.translateService.instant('common.active')
+            : this.translateService.instant('common.inactive'),
+          assignedLabel: coach.assignedToClub
+            ? this.translateService.instant('common.yes')
+            : this.translateService.instant('common.no'),
+          isAssigned: !!coach.assignedToClub,
+        }));
+      }),
+    );
+
+  isCoachDisabled = (row: any): boolean => row.isAssigned;
 
   showRemoveCoachConfirm = false;
   coachToRemove: ClubCoachDto | null = null;

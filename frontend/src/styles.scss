@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+@import '@angular/cdk/overlay-prebuilt.css';
+
+/* CDK Overlay panel for searchable dropdown — let panel size to content */
+.cdk-overlay-pane.searchable-dropdown-panel {
+  max-width: 90vw;
+}
+
 /* Color constants as CSS custom properties */
 :root {
   --color-white: #FFFFFF;
@@ -72,5 +79,16 @@ html, body {
 
   &::-webkit-scrollbar {
     display: none;
+  }
+}
+
+/* Prevent scroll wheel from changing number input values */
+input[type="number"] {
+  -moz-appearance: textfield;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
   }
 }

@@ -15,6 +15,8 @@ import { RouterModule } from '@angular/router';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { ValueHelpColumn } from '../../../../shared/components/value-help-dialog/value-help-dialog.component';
+import { MaskedNumericInputComponent } from '../../../../shared/components/masked-numeric-input/masked-numeric-input.component';
 import { DeleteConfirmDialogComponent } from '../../../../shared/components/delete-confirm-dialog/delete-confirm-dialog.component';
 import {
   CompetitionGroupDefinitionDto,
@@ -29,7 +31,7 @@ import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
 @Component({
   selector: 'app-competition-group-details-dialog',
   standalone: true,
-  imports: [CommonModule, TranslateModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, DeleteConfirmDialogComponent],
+  imports: [CommonModule, TranslateModule, FormsModule, RouterModule, DialogComponent, ButtonComponent, SearchableSelectDropdownComponent, MaskedNumericInputComponent, DeleteConfirmDialogComponent],
   templateUrl: './competition-group-details-dialog.component.html',
   styleUrl: './competition-group-details-dialog.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -103,6 +105,25 @@ export class CompetitionGroupDetailsDialogComponent implements OnChanges {
       })),
     ]));
 
+  groupValueHelpColumns: ValueHelpColumn[] = [
+    { key: 'shortName', label: this.translate.instant('competitionGroups.columns.shortName') },
+    { key: 'name', label: this.translate.instant('competitionGroups.columns.name') },
+    { key: 'ageRange', label: this.translate.instant('competitionGroups.columns.ageRange') },
+  ];
+
+  groupValueHelpSearch = (query: string): Observable<any[]> =>
+    fetchAllPages((skip, top) =>
+      this.competitionGroupDefinitionsService
+        .getAllCompetitionGroupDefinitions(undefined, query || undefined, ['name_asc'] as any, top, skip) as any
+    ).pipe(map((groups: any[]) => groups.map((g: any) => ({
+      uuid: g.uuid || '',
+      shortName: g.shortName || '-',
+      name: g.name || '-',
+      ageRange: `${g.minAge ?? '-'} - ${g.maxAge ?? '∞'}`,
+      isInactive: !g.isActive,
+    }))));
+
+  isGroupDisabled = (row: any): boolean => row.isInactive;
   editData: {
     name: string;
     shortName: string;

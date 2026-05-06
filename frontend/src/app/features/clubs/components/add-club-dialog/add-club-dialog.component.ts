@@ -5,6 +5,7 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { DialogComponent } from '../../../../shared/components/dialog/dialog.component';
 import { ButtonComponent } from '../../../../shared/components/button/button.component';
 import { SearchableSelectDropdownComponent, SearchableSelectOption } from '../../../../shared/components/searchable-select-dropdown/searchable-select-dropdown.component';
+import { ValueHelpColumn } from '../../../../shared/components/value-help-dialog/value-help-dialog.component';
 import { ClubsService, UsersService, UserDto, ClubCreateRequest, ClubDto, ScopeType } from '../../../../core/services/api';
 import { takeUntil, Subject, Observable, forkJoin, map } from 'rxjs';
 import { fetchAllPages } from '../../../../core/utils/fetch-all-pages';
@@ -86,6 +87,34 @@ export class AddClubDialogComponent implements OnChanges {
         }));
       }),
     );
+
+  adminValueHelpColumns: ValueHelpColumn[] = [
+    { key: 'displayName', label: this.translateService.instant('users.columns.name') },
+    { key: 'email', label: this.translateService.instant('users.columns.email') },
+    { key: 'statusLabel', label: this.translateService.instant('users.columns.status') },
+    { key: 'assignedLabel', label: this.translateService.instant('users.columns.assigned') },
+  ];
+
+  adminValueHelpSearch = (query: string): Observable<any[]> =>
+    (this.usersService.getAllUsers("role eq 'CLUB_ADMIN'", query || undefined, undefined, 100, 0) as any).pipe(
+      map((response: any) => {
+        const adminList: UserDto[] = response.content || [];
+        return adminList.map((admin: UserDto) => ({
+          uuid: admin.uuid || '',
+          displayName: this.getAdminDisplayName(admin),
+          email: admin.email || '-',
+          statusLabel: admin.isActive
+            ? this.translateService.instant('common.active')
+            : this.translateService.instant('common.inactive'),
+          assignedLabel: admin.assignedToClub
+            ? this.translateService.instant('common.yes')
+            : this.translateService.instant('common.no'),
+          isAssigned: admin.uuid ? this.assignedAdminIds.has(admin.uuid) : false,
+        }));
+      }),
+    );
+
+  isAdminDisabled = (row: any): boolean => row.isAssigned;
 
   close(): void {
     this.closed.emit();

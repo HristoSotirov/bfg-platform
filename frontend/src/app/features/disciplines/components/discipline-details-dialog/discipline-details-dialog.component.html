@@ -104,6 +104,12 @@
                 <label class="block text-xs text-gray-500 mb-0.5">{{ 'disciplines.form.competitionGroupLabel' | translate }} <span class="text-red-500">*</span>:</label>
                 <app-searchable-select-dropdown
                   [staticSearch]="groupSearch"
+                  [valueHelpTitle]="'disciplines.form.competitionGroupLabel' | translate"
+                  [valueHelpColumns]="groupValueHelpColumns"
+                  [valueHelpSearchFn]="groupValueHelpSearch"
+                  [valueHelpValueKey]="'uuid'"
+                  [valueHelpLabelKey]="'shortName'"
+                  [valueHelpDisabledFn]="isGroupDisabled"
                   [placeholder]="'disciplines.placeholders.selectGroup' | translate"
                   [ngModel]="editData.competitionGroupId"
                   (ngModelChange)="onCompetitionGroupChange($event)"

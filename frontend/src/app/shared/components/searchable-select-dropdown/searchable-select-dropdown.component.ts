@@ -6,7 +6,6 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   ElementRef,
-  HostListener,
   forwardRef,
   OnDestroy,
   OnInit,
@@ -18,6 +17,8 @@ import {
   ControlValueAccessor,
   NG_VALUE_ACCESSOR,
 } from '@angular/forms';
+import { OverlayModule, Overlay, ScrollStrategy, ConnectedPosition } from '@angular/cdk/overlay';
+import { TranslateModule } from '@ngx-translate/core';
 import {
   Observable,
   Subject,
@@ -27,7 +28,7 @@ import {
   of,
   take,
 } from 'rxjs';
-import { fetchAllPages } from '../../../core/utils/fetch-all-pages';
+import { ValueHelpDialogComponent, ValueHelpColumn } from '../value-help-dialog/value-help-dialog.component';
 
 export interface SearchableSelectOption {
   value: string;
@@ -58,11 +59,13 @@ class SearchableDropdownRegistry {
 @Component({
   selector: 'app-searchable-select-dropdown',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, OverlayModule, TranslateModule, ValueHelpDialogComponent],
   template: `
-    <div class="relative w-full">
+    <div class="w-full">
       <!-- Trigger/Input Field -->
       <div
+        #trigger="cdkOverlayOrigin"
+        cdkOverlayOrigin
         class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm bg-white flex items-center transition-colors focus-within:ring-2 focus-within:ring-bfg-blue focus-within:border-bfg-blue min-h-[38px] box-border overflow-hidden"
         [class.bg-gray-100]="disabled"
         [class.cursor-not-allowed]="disabled"
@@ -82,48 +85,81 @@ class SearchableDropdownRegistry {
           [class.cursor-pointer]="!isOpen"
           [class.cursor-text]="isOpen"
         />
+        @if (hasValueHelp) {
+          <button
+            type="button"
+            (mousedown)="openValueHelp($event)"
+            class="flex-shrink-0 ml-1 p-0.5 text-gray-400 hover:text-bfg-blue transition-colors"
+            [class.cursor-not-allowed]="disabled"
+            [disabled]="disabled"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+            </svg>
+          </button>
+        }
       </div>
 
-      <!-- Dropdown -->
-      @if (isOpen && !disabled) {
+      <!-- CDK Overlay Dropdown -->
+      <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="trigger"
+        [cdkConnectedOverlayOpen]="isOpen && !disabled"
+        [cdkConnectedOverlayPositions]="overlayPositions"
+        [cdkConnectedOverlayPush]="true"
+        [cdkConnectedOverlayHasBackdrop]="false"
+        [cdkConnectedOverlayScrollStrategy]="scrollStrategy"
+        [cdkConnectedOverlayPanelClass]="'searchable-dropdown-panel'"
+        (overlayOutsideClick)="onOverlayOutsideClick($event)"
+        (detach)="close()"
+      >
         <div
-          class="absolute z-[100] mt-1 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden"
-          [class.w-full]="!dropdownWidth"
-          [style.width]="dropdownWidth"
+          class="bg-white border border-gray-200 rounded-lg shadow-lg w-max"
+          [style.min-width.px]="triggerWidth"
+          [style.max-width]="'90vw'"
           (mousedown)="onDropdownMouseDown($event)"
           (click)="$event.stopPropagation()"
         >
-          <!-- Options List - Scrollable Container -->
           <div
-            class="scrollbar-hover"
-            [class.max-h-[96px]]="!noScroll"
-            [class.overflow-y-auto]="!noScroll"
-            [class.overflow-y-visible]="noScroll">
+            class="overflow-y-auto scrollbar-hover"
+            [style.max-height.px]="panelMaxHeight">
             @if (searchLoading) {
-              <div class="px-3 py-2 text-sm text-gray-400 italic">Търсене...</div>
+              <div class="px-3 py-2 text-sm text-gray-400 italic">{{ 'common.searching' | translate }}</div>
             } @else if (filteredOptions.length === 0) {
-              <div class="px-3 py-2 text-sm text-gray-500">Няма опции</div>
+              <div class="px-3 py-2 text-sm text-gray-500">{{ 'common.noOptions' | translate }}</div>
             } @else {
               @for (option of filteredOptions; track option.value) {
                 <button
                   type="button"
                   (mousedown)="selectOption(option, $event)"
                   [disabled]="option.disabled"
-                  class="w-full px-3 py-2 text-sm text-left hover:bg-gray-50 cursor-pointer transition-colors rounded-md"
+                  class="block w-full px-3 py-2 text-sm text-left hover:bg-gray-50 cursor-pointer transition-colors whitespace-nowrap"
                   [class.bg-bfg-blue]="isSelected(option.value)"
                   [class.bg-opacity-10]="isSelected(option.value)"
                   [class.text-bfg-blue]="isSelected(option.value)"
                   [class.opacity-50]="option.disabled"
                   [class.cursor-not-allowed]="option.disabled"
-                  [class.hover:bg-gray-50]="!option.disabled"
-                  [class.hover:bg-opacity-20]="option.disabled"
                 >
-                  <span class="truncate">{{ option.label }}</span>
+                  {{ option.label }}
                 </button>
               }
             }
           </div>
         </div>
+      </ng-template>
+
+      @if (hasValueHelp) {
+        <app-value-help-dialog
+          [isOpen]="isValueHelpOpen"
+          [title]="valueHelpTitle || ''"
+          [columns]="valueHelpColumns!"
+          [searchFn]="valueHelpSearchFn!"
+          [valueKey]="valueHelpValueKey"
+          [labelKey]="valueHelpLabelKey"
+          [disabledFn]="valueHelpDisabledFn"
+          (closed)="onValueHelpClosed()"
+          (selected)="onValueHelpSelected($event)"
+        />
       }
     </div>
   `,
@@ -132,15 +168,6 @@ class SearchableDropdownRegistry {
       :host {
         display: block;
         width: 100%;
-        box-sizing: border-box;
-        max-width: 100%;
-      }
-      :host > div {
-        width: 100%;
-        box-sizing: border-box;
-        max-width: 100%;
-      }
-      :host > div > div:first-child {
         box-sizing: border-box;
         max-width: 100%;
       }
@@ -169,14 +196,22 @@ export class SearchableSelectDropdownComponent
   @Input() dropdownWidth?: string;
   @Input() noScroll = false;
   @Input() serverSearch?: (query: string) => Observable<SearchableSelectOption[]>;
-  /** Load all options once on open via fetchAllPages, then filter in-memory. */
   @Input() staticSearch?: () => Observable<SearchableSelectOption[]>;
+
+  @Input() valueHelpTitle?: string;
+  @Input() valueHelpColumns?: ValueHelpColumn[];
+  @Input() valueHelpSearchFn?: (query: string) => Observable<any[]>;
+  @Input() valueHelpValueKey = 'uuid';
+  @Input() valueHelpLabelKey = 'displayName';
+  @Input() valueHelpDisabledFn?: (item: any) => boolean;
 
   @Output() selectionChange = new EventEmitter<string>();
 
   @ViewChild('inputField') inputField?: ElementRef<HTMLInputElement>;
+  @ViewChild('trigger', { read: ElementRef }) triggerEl?: ElementRef<HTMLElement>;
 
   isOpen = false;
+  isValueHelpOpen = false;
   selectedValue: string | null = null;
   searchQuery = '';
   isTyping = false;
@@ -188,11 +223,22 @@ export class SearchableSelectDropdownComponent
   private onChange: (value: string | null) => void = () => {};
   private onTouched: () => void = () => {};
 
+  readonly overlayPositions: ConnectedPosition[] = [
+    { originX: 'start', originY: 'bottom', overlayX: 'start', overlayY: 'top', offsetY: 4 },
+    { originX: 'start', originY: 'top', overlayX: 'start', overlayY: 'bottom', offsetY: -4 },
+    { originX: 'end', originY: 'bottom', overlayX: 'end', overlayY: 'top', offsetY: 4 },
+    { originX: 'end', originY: 'top', overlayX: 'end', overlayY: 'bottom', offsetY: -4 },
+  ];
+
+  scrollStrategy: ScrollStrategy;
+
   constructor(
     private elementRef: ElementRef,
     private cdr: ChangeDetectorRef,
+    private overlay: Overlay,
   ) {
     SearchableDropdownRegistry.register(this);
+    this.scrollStrategy = this.overlay.scrollStrategies.reposition();
   }
 
   ngOnInit(): void {
@@ -216,12 +262,16 @@ export class SearchableSelectDropdownComponent
     this.searchSubject.complete();
   }
 
-  @HostListener('document:click', ['$event'])
-  onDocumentClick(event: MouseEvent): void {
-    const target = event.target as Node;
-    if (this.isOpen && !this.elementRef.nativeElement.contains(target)) {
-      this.close();
-    }
+  get triggerWidth(): number {
+    return this.triggerEl?.nativeElement?.getBoundingClientRect().width ?? 200;
+  }
+
+  get panelMaxHeight(): number {
+    if (this.noScroll) return 9999;
+    const itemHeight = 36;
+    const maxVisible = 10;
+    const visibleCount = Math.min(this.filteredOptions.length || 1, maxVisible);
+    return visibleCount * itemHeight;
   }
 
   get filteredOptions(): SearchableSelectOption[] {
@@ -329,6 +379,13 @@ export class SearchableSelectDropdownComponent
     event.preventDefault();
   }
 
+  onOverlayOutsideClick(event: MouseEvent): void {
+    if (this.elementRef.nativeElement.contains(event.target as Node)) {
+      return;
+    }
+    this.close();
+  }
+
   onSearchInput(): void {
     this.isTyping = true;
     if (!this.isOpen) {
@@ -379,7 +436,6 @@ export class SearchableSelectDropdownComponent
       if (option) {
         this.searchQuery = option.label;
       } else if (this.serverSearch || this.staticSearch) {
-        // Options not yet loaded — trigger initial load to resolve the label
         const loader = this.serverSearch ? this.serverSearch('') : this.staticSearch!();
         loader.pipe(take(1)).subscribe((results) => {
           this.options = results;
@@ -405,5 +461,37 @@ export class SearchableSelectDropdownComponent
 
   setDisabledState(isDisabled: boolean): void {
     this.disabled = isDisabled;
+  }
+
+  get hasValueHelp(): boolean {
+    return !!(this.valueHelpColumns && this.valueHelpSearchFn);
+  }
+
+  openValueHelp(event: MouseEvent): void {
+    event.preventDefault();
+    event.stopPropagation();
+    if (this.disabled) return;
+    this.close();
+    this.isValueHelpOpen = true;
+    this.cdr.markForCheck();
+  }
+
+  onValueHelpClosed(): void {
+    this.isValueHelpOpen = false;
+    this.cdr.markForCheck();
+  }
+
+  onValueHelpSelected(row: any): void {
+    const value = row[this.valueHelpValueKey];
+    const label = row[this.valueHelpLabelKey] || '';
+    this.selectedValue = value;
+    this.searchQuery = label;
+    this.isTyping = false;
+    this.isValueHelpOpen = false;
+    this.onChange(this.selectedValue);
+    if (this.selectedValue) {
+      this.selectionChange.emit(this.selectedValue);
+    }
+    this.cdr.markForCheck();
   }
 }
